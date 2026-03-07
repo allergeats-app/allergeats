@@ -143,7 +143,7 @@ export default function HomePage() {
             )}
           </div>
 
-          <AllergySelector selected={selected} onChange={setSelected} />
+          <AllergySelector selected={selected} onChange={setSelected} limit={5} />
 
           <button
             onClick={handleSave}

@@ -5,15 +5,15 @@ export type AllergenMeta = {
   label: string;
 };
 
-/** All supported allergens with display metadata */
+/** All supported allergens with display metadata — top 5 most common first */
 export const ALLERGEN_LIST: AllergenMeta[] = [
+  { id: "peanut",    label: "Peanut"    },
   { id: "dairy",     label: "Dairy"     },
   { id: "egg",       label: "Egg"       },
   { id: "wheat",     label: "Wheat"     },
+  { id: "tree-nut",  label: "Tree Nuts" },
   { id: "gluten",    label: "Gluten"    },
   { id: "soy",       label: "Soy"       },
-  { id: "peanut",    label: "Peanut"    },
-  { id: "tree-nut",  label: "Tree Nuts" },
   { id: "sesame",    label: "Sesame"    },
   { id: "fish",      label: "Fish"      },
   { id: "shellfish", label: "Shellfish" },
