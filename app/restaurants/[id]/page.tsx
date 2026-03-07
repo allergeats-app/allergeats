@@ -9,7 +9,7 @@ import { scoreRestaurant } from "@/lib/scoring";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { SourceBadge } from "@/components/SourceBadge";
 import { EmptyState } from "@/components/EmptyState";
-import type { ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
+import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
 
 type RiskFilter = "all" | Risk;
 
