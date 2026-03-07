@@ -23,7 +23,7 @@ export function sourceLabel(sourceType: SourceType): string {
     case "official":         return "Official";
     case "verified-dataset": return "Verified";
     case "aggregator":       return "Aggregator";
-    case "scraped":          return "Scraped";
+    case "scraped":          return "Unavailable";
     case "user-input":       return "User-entered";
   }
 }
