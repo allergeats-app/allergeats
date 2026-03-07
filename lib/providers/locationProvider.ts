@@ -1,48 +1,29 @@
 /**
- * Location provider interface + mock implementation.
+ * Location provider interface + implementations.
  *
- * Extension point: swap MockLocationProvider for a real implementation
- * backed by Google Places API, Foursquare, or Yelp Fusion.
+ * LiveLocationProvider (default):
+ *   - Gets real GPS via browser Geolocation API
+ *   - Queries Overpass API (OpenStreetMap) for real nearby restaurants
+ *   - Merges with MOCK_RESTAURANTS menu data when a known chain is nearby
  *
- * TODO (live integration):
- *   1. Create a GooglePlacesLocationProvider that implements LocationProvider
- *   2. Add NEXT_PUBLIC_GOOGLE_PLACES_KEY to .env.local
- *   3. Replace mockProvider in page components with the real one
+ * MockLocationProvider (fallback if Overpass fails):
+ *   - Same GPS, but only returns MOCK_RESTAURANTS
  */
 
-import type { Restaurant } from "@/lib/types";
+import type { Restaurant, SourceType } from "@/lib/types";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 
-export type Coordinates = {
-  lat: number;
-  lng: number;
-};
+export type Coordinates = { lat: number; lng: number };
 
 export interface LocationProvider {
-  /** Returns the user's current coordinates, or null if unavailable. */
   getUserLocation(): Promise<Coordinates | null>;
-
-  /**
-   * Returns restaurants near the given point, filtered and sorted.
-   * @param lat          - latitude
-   * @param lng          - longitude
-   * @param radiusMiles  - search radius
-   * @param query        - optional name/cuisine filter
-   */
-  searchRestaurants(
-    lat: number,
-    lng: number,
-    radiusMiles: number,
-    query?: string
-  ): Promise<Restaurant[]>;
+  searchRestaurants(lat: number, lng: number, radiusMiles: number, query?: string): Promise<Restaurant[]>;
 }
 
-/** Haversine formula — great-circle distance in miles */
-function haversineDistance(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number
-): number {
-  const R = 3958.8; // Earth radius in miles
+// ─── Haversine ────────────────────────────────────────────────────────────────
+
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3958.8;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =
@@ -53,59 +34,158 @@ function haversineDistance(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+type OverpassElement = {
+  id: number;
+  lat: number;
+  lng?: number;
+  lon?: number;
+  tags: Record<string, string>;
+};
+
+function buildAddress(tags: Record<string, string>): string {
+  const parts = [
+    tags["addr:housenumber"],
+    tags["addr:street"],
+    tags["addr:city"],
+    tags["addr:state"],
+  ].filter(Boolean);
+  return parts.join(", ") || tags["addr:full"] || "";
+}
+
+function formatCuisine(raw: string | undefined): string {
+  if (!raw) return "Restaurant";
+  // Overpass cuisine tags are lowercase_underscored, e.g. "american;burgers"
+  return raw
+    .split(/[;,]/)
+    .map((s) => s.trim().replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+    .join(" / ");
+}
+
 /**
- * Mock implementation backed by MOCK_RESTAURANTS seed data.
- * Distances are calculated via Haversine from the user's location.
- * Falls back to a San Francisco center point if geolocation is unavailable.
+ * Find a MOCK_RESTAURANT whose name appears in (or contains) the live restaurant name.
+ * e.g. "McDonald's #1234" → matches "McDonald's"
  */
-export class MockLocationProvider implements LocationProvider {
-  private readonly fallbackLocation: Coordinates = { lat: 37.7749, lng: -122.4194 };
+function findMockMatch(liveName: string): Restaurant | undefined {
+  const lower = liveName.toLowerCase();
+  return MOCK_RESTAURANTS.find((m) => {
+    const mockLower = m.name.toLowerCase();
+    return lower.includes(mockLower) || mockLower.includes(lower);
+  });
+}
 
+// ─── Geolocation (shared) ─────────────────────────────────────────────────────
+
+const FALLBACK: Coordinates = { lat: 37.7749, lng: -122.4194 };
+
+function getRealLocation(): Promise<Coordinates | null> {
+  if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(FALLBACK);
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(FALLBACK),
+      { timeout: 8000, enableHighAccuracy: false }
+    );
+  });
+}
+
+// ─── Live provider (Overpass API) ─────────────────────────────────────────────
+
+export class LiveLocationProvider implements LocationProvider {
   async getUserLocation(): Promise<Coordinates | null> {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      return this.fallbackLocation;
-    }
-
-    return new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => resolve(this.fallbackLocation),
-        { timeout: 5000 }
-      );
-    });
+    return getRealLocation();
   }
 
-  async searchRestaurants(
-    lat: number,
-    lng: number,
-    radiusMiles: number,
-    query?: string
-  ): Promise<Restaurant[]> {
-    const q = query?.toLowerCase().trim();
+  async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
+    const radiusMeters = Math.round(radiusMiles * 1609.34);
 
-    let results = MOCK_RESTAURANTS.map((r) => ({
+    const query = `[out:json][timeout:20];
+(
+  node["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
+  node["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
+  node["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
+);
+out body 40;`;
+
+    const res = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: query,
+    });
+
+    if (!res.ok) throw new Error("Overpass request failed");
+
+    const data = await res.json();
+    const elements: OverpassElement[] = data.elements ?? [];
+
+    const seen = new Set<string>();
+    const results: Restaurant[] = [];
+
+    for (const el of elements) {
+      const name = el.tags?.name;
+      if (!name) continue;
+
+      const elLat = el.lat;
+      const elLng = el.lng ?? el.lon ?? 0;
+      const distance = Math.round(haversineDistance(lat, lng, elLat, elLng) * 10) / 10;
+
+      // De-duplicate by name (keep nearest)
+      if (seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
+
+      const mock = findMockMatch(name);
+
+      if (mock) {
+        // Use our full menu data for known chains
+        results.push({
+          ...mock,
+          id: `live-${el.id}`,
+          address: buildAddress(el.tags) || mock.address,
+          lat: elLat,
+          lng: elLng,
+          distance,
+        });
+      } else {
+        // Unknown restaurant — show location, no menu data
+        results.push({
+          id: `osm-${el.id}`,
+          name,
+          cuisine: formatCuisine(el.tags.cuisine),
+          address: buildAddress(el.tags),
+          lat: elLat,
+          lng: elLng,
+          distance,
+          sourceType: "scraped" as SourceType,
+          menuItems: [],
+        });
+      }
+    }
+
+    return results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+  }
+}
+
+// ─── Mock provider (fallback) ─────────────────────────────────────────────────
+
+export class MockLocationProvider implements LocationProvider {
+  async getUserLocation(): Promise<Coordinates | null> {
+    return getRealLocation();
+  }
+
+  async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
+    return MOCK_RESTAURANTS.map((r) => ({
       ...r,
-      // Recompute distance from actual user location
       distance:
         r.lat != null && r.lng != null
           ? Math.round(haversineDistance(lat, lng, r.lat, r.lng) * 10) / 10
           : r.distance ?? 0,
-    }));
-
-    if (q) {
-      results = results.filter(
-        (r) =>
-          r.name.toLowerCase().includes(q) ||
-          r.cuisine.toLowerCase().includes(q) ||
-          r.address?.toLowerCase().includes(q)
-      );
-    }
-
-    return results
+    }))
       .filter((r) => (r.distance ?? 0) <= radiusMiles)
       .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
   }
 }
 
-/** Singleton — use this in page components. Replace with a real provider when ready. */
-export const locationProvider: LocationProvider = new MockLocationProvider();
+// ─── Default export ───────────────────────────────────────────────────────────
+
+export const locationProvider: LocationProvider = new LiveLocationProvider();

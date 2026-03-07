@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -11,18 +11,17 @@ export default function AuthPage() {
   const { signIn, signUp, user } = useAuth();
   const router = useRouter();
 
-  const [mode, setMode]       = useState<Mode>("signin");
-  const [email, setEmail]     = useState("");
+  const [mode, setMode]         = useState<Mode>("signin");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]     = useState<string | null>(null);
-  const [info, setInfo]       = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const [info, setInfo]         = useState<string | null>(null);
+  const [loading, setLoading]   = useState(false);
 
   // Already signed in — go to profile
-  if (user) {
-    router.replace("/profile");
-    return null;
-  }
+  useEffect(() => {
+    if (user) router.replace("/profile");
+  }, [user, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

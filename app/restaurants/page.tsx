@@ -5,19 +5,21 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loadProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant } from "@/lib/scoring";
-import { locationProvider } from "@/lib/providers/locationProvider";
+import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { FilterChips } from "@/components/FilterChips";
 import { EmptyState } from "@/components/EmptyState";
-import type { ScoredRestaurant } from "@/lib/types";
+import type { Restaurant, ScoredRestaurant } from "@/lib/types";
 
 type SortOption = "distance" | "most-safe" | "least-avoid";
 
 const SORT_CHIPS = [
-  { value: "distance"   as SortOption, label: "Nearest" },
-  { value: "most-safe"  as SortOption, label: "Most Safe" },
+  { value: "distance"    as SortOption, label: "Nearest" },
+  { value: "most-safe"   as SortOption, label: "Most Safe" },
   { value: "least-avoid" as SortOption, label: "Fewest Avoid" },
 ];
+
+const SESSION_KEY = "allegeats_live_restaurants";
 
 export default function RestaurantsPage() {
   return (
@@ -36,26 +38,41 @@ function RestaurantsContent() {
   const [restaurants, setRestaurants]     = useState<ScoredRestaurant[]>([]);
   const [loading, setLoading]             = useState(true);
   const [locationLabel, setLocationLabel] = useState("Locating…");
+  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       setLoading(true);
+      setUsingFallback(false);
+
       try {
         const coords = await locationProvider.getUserLocation();
         const lat = coords?.lat ?? 37.7749;
         const lng = coords?.lng ?? -122.4194;
 
-        if (!cancelled) setLocationLabel(`${lat.toFixed(2)}°, ${lng.toFixed(2)}°`);
+        if (!cancelled) setLocationLabel(`${lat.toFixed(3)}°, ${lng.toFixed(3)}°`);
 
-        const raw = await locationProvider.searchRestaurants(lat, lng, 10);
+        let raw: Restaurant[];
+        try {
+          raw = await locationProvider.searchRestaurants(lat, lng, 5);
+        } catch {
+          // Overpass failed — fall back to mock data
+          const fallback = new MockLocationProvider();
+          raw = await fallback.searchRestaurants(lat, lng, 9999);
+          if (!cancelled) setUsingFallback(true);
+        }
 
-        // Score all restaurants against the user's saved allergy profile
+        // Cache in sessionStorage so the detail page can look up live restaurants
+        try {
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw));
+        } catch { /* ignore */ }
+
         const profileAllergens = loadProfileAllergens();
         const userAllergens = profileToDetectorAllergens(profileAllergens);
-
         const scored = raw.map((r) => scoreRestaurant(r, userAllergens));
+
         if (!cancelled) setRestaurants(scored);
       } finally {
         if (!cancelled) setLoading(false);
@@ -83,7 +100,6 @@ function RestaurantsContent() {
         list = [...list].sort((a, b) => a.summary.avoid - b.summary.avoid);
         break;
     }
-
     return list;
   }, [restaurants, query, sort]);
 
@@ -96,9 +112,11 @@ function RestaurantsContent() {
             <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Back</Link>
             <span style={{ fontSize: 13, color: "#9ca3af" }}>·</span>
             <span style={{ fontSize: 12, color: "#9ca3af" }}>{locationLabel}</span>
+            {usingFallback && (
+              <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>· Demo data</span>
+            )}
           </div>
 
-          {/* Search bar */}
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -110,7 +128,6 @@ function RestaurantsContent() {
             }}
           />
 
-          {/* Sort chips */}
           <div style={{ marginTop: 10 }}>
             <FilterChips chips={SORT_CHIPS} active={sort} onChange={setSort} />
           </div>
@@ -120,15 +137,19 @@ function RestaurantsContent() {
       {/* Restaurant list */}
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0" }}>
         {loading ? (
-          <div style={{ padding: "48px 0", textAlign: "center", color: "#9ca3af", fontSize: 14 }}>Finding restaurants near you…</div>
+          <div style={{ padding: "64px 0", textAlign: "center" }}>
+            <div style={{ fontSize: 28, marginBottom: 12 }}>📍</div>
+            <div style={{ fontSize: 14, color: "#374151", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
+            <div style={{ fontSize: 12, color: "#9ca3af" }}>This may take a moment</div>
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon="🍽️"
             title="No restaurants found"
-            subtitle={query ? `No results for "${query}". Try a different search.` : "No restaurants in your area yet."}
+            subtitle={query ? `No results for "${query}". Try a different search.` : "No restaurants found near you. Try expanding your search or scan a menu manually."}
             action={
-              <Link href="/" style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-                Back to home
+              <Link href="/scan" style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+                Scan a Menu Manually
               </Link>
             }
           />

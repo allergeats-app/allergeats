@@ -9,11 +9,12 @@ import { scoreRestaurant } from "@/lib/scoring";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { SourceBadge } from "@/components/SourceBadge";
 import { EmptyState } from "@/components/EmptyState";
-import type { ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
+import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
 
 type RiskFilter = "all" | Risk;
 
 const RISK_ORDER: Risk[] = ["avoid", "ask", "unknown", "likely-safe"];
+const SESSION_KEY = "allegeats_live_restaurants";
 
 const SECTION_META: Record<Risk, { label: string; icon: string; bg: string; border: string }> = {
   "avoid":       { label: "Avoid",       icon: "❌", bg: "#fff1f0", border: "#f3c5c0" },
@@ -22,15 +23,34 @@ const SECTION_META: Record<Risk, { label: string; icon: string; bg: string; bord
   "likely-safe": { label: "Likely Safe", icon: "✅", bg: "#f0fdf4", border: "#bbf7d0" },
 };
 
+function findRestaurant(id: string): Restaurant | undefined {
+  // 1. Check sessionStorage for live Overpass results
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (raw) {
+      const list: Restaurant[] = JSON.parse(raw);
+      const found = list.find((r) => r.id === id);
+      if (found) return found;
+    }
+  } catch { /* ignore */ }
+
+  // 2. Fall back to mock data (works for mock IDs)
+  return MOCK_RESTAURANTS.find((r) => r.id === id);
+}
+
 export default function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [scored, setScored]       = useState<ScoredRestaurant | null>(null);
+  const [notFound, setNotFound]   = useState(false);
   const [filter, setFilter]       = useState<RiskFilter>("all");
   const [catFilter, setCatFilter] = useState<string>("all");
 
   useEffect(() => {
-    const restaurant = MOCK_RESTAURANTS.find((r) => r.id === id);
-    if (!restaurant) return;
+    const restaurant = findRestaurant(id);
+    if (!restaurant) {
+      setNotFound(true);
+      return;
+    }
 
     const profileAllergens = loadProfileAllergens();
     const userAllergens = profileToDetectorAllergens(profileAllergens);
@@ -52,22 +72,26 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     });
   }, [scored, filter, catFilter]);
 
-  // Group filtered items by risk in priority order
   const grouped = useMemo(() => {
     const groups: Record<Risk, ScoredMenuItem[]> = { avoid: [], ask: [], unknown: [], "likely-safe": [] };
     for (const item of filtered) groups[item.risk].push(item);
     return groups;
   }, [filtered]);
 
+  if (notFound) {
+    return (
+      <main style={{ minHeight: "100vh", background: "#f7f7f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <EmptyState
+          icon="🔍"
+          title="Restaurant not found"
+          subtitle="This restaurant isn't in our database."
+          action={<Link href="/restaurants" style={{ padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
+        />
+      </main>
+    );
+  }
+
   if (!scored) {
-    const exists = MOCK_RESTAURANTS.some((r) => r.id === id);
-    if (!exists) {
-      return (
-        <main style={{ minHeight: "100vh", background: "#f7f7f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <EmptyState icon="🔍" title="Restaurant not found" subtitle="This restaurant isn't in our database." action={<Link href="/restaurants" style={{ padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>} />
-        </main>
-      );
-    }
     return <main style={{ minHeight: "100vh", background: "#f7f7f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
   }
 
@@ -83,6 +107,8 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     { value: "likely-safe", label: `Safe (${summary.likelySafe})` },
     { value: "unknown",     label: `Unknown (${summary.unknown})` },
   ];
+
+  const hasNoMenu = scored.scoredItems.length === 0;
 
   return (
     <main style={{ minHeight: "100vh", background: "#f7f7f7", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 40 }}>
@@ -108,71 +134,93 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             <SourceBadge sourceType={scored.sourceType} />
           </div>
 
-          {/* Safety bar */}
-          <div style={{ marginTop: 16 }}>
-            <div style={{ height: 8, borderRadius: 999, background: "#f3f4f6", overflow: "hidden", display: "flex" }}>
-              <div style={{ width: `${safePercent}%`,  background: "#22c55e", transition: "width 0.5s" }} />
-              <div style={{ width: `${askPercent}%`,   background: "#f59e0b", transition: "width 0.5s" }} />
-              <div style={{ width: `${avoidPercent}%`, background: "#ef4444", transition: "width 0.5s" }} />
+          {/* No-menu state */}
+          {hasNoMenu ? (
+            <div style={{ marginTop: 16, padding: "16px", borderRadius: 14, background: "#f9fafb", border: "1px solid #e5e7eb" }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#374151", marginBottom: 6 }}>No menu data available</div>
+              <div style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.5, marginBottom: 12 }}>
+                We found this restaurant near you but don't have allergen information for it yet. You can scan the menu manually.
+              </div>
+              <Link
+                href="/scan"
+                style={{ display: "inline-block", padding: "10px 18px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 13, textDecoration: "none" }}
+              >
+                Scan Menu Manually →
+              </Link>
             </div>
-            <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
-              <SummaryPill count={summary.likelySafe} label="Likely Safe" color="#15803d" bg="#f0fdf4" />
-              <SummaryPill count={summary.ask}        label="Ask Staff"   color="#854d0e" bg="#fefce8" />
-              <SummaryPill count={summary.avoid}      label="Avoid"       color="#b91c1c" bg="#fff1f0" />
-              {summary.unknown > 0 && <SummaryPill count={summary.unknown} label="Unknown" color="#6b7280" bg="#f9fafb" />}
-            </div>
-          </div>
-
-          <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 12, lineHeight: 1.4 }}>
-            Scored against your saved allergy profile. Always confirm with staff before ordering.
-          </p>
-        </div>
-
-        {/* Filter chips */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2, marginBottom: 8 }}>
-            {RISK_CHIPS.map((c) => (
-              <button key={c.value} onClick={() => setFilter(c.value)} style={{ padding: "8px 14px", borderRadius: 999, border: `1.5px solid ${filter === c.value ? "#eb1700" : "#e5e7eb"}`, background: filter === c.value ? "#eb1700" : "#fff", color: filter === c.value ? "#fff" : "#374151", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>
-                {c.label}
-              </button>
-            ))}
-          </div>
-
-          {categories.length > 1 && (
-            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
-              <button onClick={() => setCatFilter("all")} style={{ padding: "6px 12px", borderRadius: 999, border: `1px solid ${catFilter === "all" ? "#374151" : "#e5e7eb"}`, background: catFilter === "all" ? "#111" : "#fff", color: catFilter === "all" ? "#fff" : "#374151", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>All categories</button>
-              {categories.map((cat) => (
-                <button key={cat} onClick={() => setCatFilter(cat)} style={{ padding: "6px 12px", borderRadius: 999, border: `1px solid ${catFilter === cat ? "#374151" : "#e5e7eb"}`, background: catFilter === cat ? "#111" : "#fff", color: catFilter === cat ? "#fff" : "#374151", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>{cat}</button>
-              ))}
-            </div>
+          ) : (
+            <>
+              {/* Safety bar */}
+              <div style={{ marginTop: 16 }}>
+                <div style={{ height: 8, borderRadius: 999, background: "#f3f4f6", overflow: "hidden", display: "flex" }}>
+                  <div style={{ width: `${safePercent}%`,  background: "#22c55e", transition: "width 0.5s" }} />
+                  <div style={{ width: `${askPercent}%`,   background: "#f59e0b", transition: "width 0.5s" }} />
+                  <div style={{ width: `${avoidPercent}%`, background: "#ef4444", transition: "width 0.5s" }} />
+                </div>
+                <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+                  <SummaryPill count={summary.likelySafe} label="Likely Safe" color="#15803d" bg="#f0fdf4" />
+                  <SummaryPill count={summary.ask}        label="Ask Staff"   color="#854d0e" bg="#fefce8" />
+                  <SummaryPill count={summary.avoid}      label="Avoid"       color="#b91c1c" bg="#fff1f0" />
+                  {summary.unknown > 0 && <SummaryPill count={summary.unknown} label="Unknown" color="#6b7280" bg="#f9fafb" />}
+                </div>
+              </div>
+              <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 12, lineHeight: 1.4 }}>
+                Scored against your saved allergy profile. Always confirm with staff before ordering.
+              </p>
+            </>
           )}
         </div>
 
-        {/* Menu items grouped by risk */}
-        {filtered.length === 0 ? (
-          <EmptyState icon="🍽️" title="No items match" subtitle="Try a different filter." />
-        ) : (
-          <div style={{ display: "grid", gap: 20 }}>
-            {RISK_ORDER.map((risk) => {
-              const items = grouped[risk];
-              if (!items.length) return null;
-              const meta = SECTION_META[risk];
-              return (
-                <div key={risk}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 15 }}>{meta.icon}</div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label}</div>
-                      <div style={{ fontSize: 12, color: "#6b7280" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: "grid", gap: 10 }}>
-                    {items.map((item) => <MenuItemCard key={item.id} item={item} />)}
-                  </div>
+        {/* Menu section — only when data exists */}
+        {!hasNoMenu && (
+          <>
+            {/* Filter chips */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2, marginBottom: 8 }}>
+                {RISK_CHIPS.map((c) => (
+                  <button key={c.value} onClick={() => setFilter(c.value)} style={{ padding: "8px 14px", borderRadius: 999, border: `1.5px solid ${filter === c.value ? "#eb1700" : "#e5e7eb"}`, background: filter === c.value ? "#eb1700" : "#fff", color: filter === c.value ? "#fff" : "#374151", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+
+              {categories.length > 1 && (
+                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+                  <button onClick={() => setCatFilter("all")} style={{ padding: "6px 12px", borderRadius: 999, border: `1px solid ${catFilter === "all" ? "#374151" : "#e5e7eb"}`, background: catFilter === "all" ? "#111" : "#fff", color: catFilter === "all" ? "#fff" : "#374151", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>All categories</button>
+                  {categories.map((cat) => (
+                    <button key={cat} onClick={() => setCatFilter(cat)} style={{ padding: "6px 12px", borderRadius: 999, border: `1px solid ${catFilter === cat ? "#374151" : "#e5e7eb"}`, background: catFilter === cat ? "#111" : "#fff", color: catFilter === cat ? "#fff" : "#374151", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>{cat}</button>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
+              )}
+            </div>
+
+            {/* Menu items grouped by risk */}
+            {filtered.length === 0 ? (
+              <EmptyState icon="🍽️" title="No items match" subtitle="Try a different filter." />
+            ) : (
+              <div style={{ display: "grid", gap: 20 }}>
+                {RISK_ORDER.map((risk) => {
+                  const items = grouped[risk];
+                  if (!items.length) return null;
+                  const meta = SECTION_META[risk];
+                  return (
+                    <div key={risk}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 15 }}>{meta.icon}</div>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label}</div>
+                          <div style={{ fontSize: 12, color: "#6b7280" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "grid", gap: 10 }}>
+                        {items.map((item) => <MenuItemCard key={item.id} item={item} />)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
