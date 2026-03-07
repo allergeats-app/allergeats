@@ -201,29 +201,6 @@ export default function HomePage() {
           Scan a Menu Manually
         </Link>
 
-        {/* Feature callouts */}
-        <div
-          style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-            gap: 12, marginTop: 32, width: "100%",
-          }}
-        >
-          {["Menu Scanning", "Staff Questions", "Learns Your Rules"].map((label) => (
-            <div
-              key={label}
-              style={{
-                background: "var(--c-card)", border: "1px solid var(--c-border)",
-                borderRadius: 16, padding: "14px 8px", textAlign: "center",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-sub)", lineHeight: 1.3 }}>
-                {label}
-              </div>
-            </div>
-          ))}
-        </div>
-
         <p
           style={{
             fontSize: 11, color: "var(--c-sub)", textAlign: "center",
