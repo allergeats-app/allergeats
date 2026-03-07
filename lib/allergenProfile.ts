@@ -30,18 +30,19 @@ export const ALLERGEN_LIST: AllergenMeta[] = [
 const PROFILE_TO_DETECTOR: Record<AllergenId, string[]> = {
   dairy:       ["dairy"],
   egg:         ["egg"],
-  wheat:       ["wheat"],
-  gluten:      ["wheat"],     // gluten detected via wheat terms
+  wheat:       ["wheat", "gluten"],
+  gluten:      ["wheat", "gluten"],
   soy:         ["soy"],
-  peanut:      ["nuts"],      // peanuts grouped under "nuts" in allergenDB
-  "tree-nut":  ["nuts"],
+  // "peanut" matches official allergen arrays; "nuts" matches text-detection in allergenDB
+  peanut:      ["peanut", "nuts"],
+  "tree-nut":  ["tree-nut", "nuts"],
   sesame:      ["sesame"],
   fish:        ["fish"],
   shellfish:   ["shellfish"],
   mustard:     ["mustard"],
   corn:        ["corn"],
-  legumes:     ["soy"],       // rough proxy; TODO: add legume-specific terms to allergenDB
-  oats:        [],            // TODO: add oats to TERM_RULES in allergenDB
+  legumes:     ["soy", "legumes"],
+  oats:        ["oats"],
 };
 
 /**

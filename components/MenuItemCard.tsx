@@ -5,6 +5,16 @@ import type { ScoredMenuItem } from "@/lib/types";
 import { RiskBadge } from "./RiskBadge";
 import { ConfidenceBadge } from "./ConfidenceBadge";
 
+const ALLERGEN_LABEL: Record<string, string> = {
+  dairy: "Dairy", egg: "Egg", wheat: "Wheat", gluten: "Gluten",
+  soy: "Soy", peanut: "Peanut", "tree-nut": "Tree Nuts", nuts: "Nuts",
+  sesame: "Sesame", fish: "Fish", shellfish: "Shellfish",
+  mustard: "Mustard", corn: "Corn", legumes: "Legumes", oats: "Oats",
+};
+function aLabel(id: string): string {
+  return ALLERGEN_LABEL[id] ?? id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
 const RISK_BG: Record<string, string> = {
   "avoid":       "#fff1f0",
   "ask":         "#fff7db",
@@ -67,7 +77,7 @@ export function MenuItemCard({ item }: Props) {
           <span style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af" }}>Contains:</span>
           {item.userAllergenHits.map((a) => (
             <span key={a} style={{ padding: "3px 9px", borderRadius: 999, background: "#fde8e8", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: 11, fontWeight: 800 }}>
-              {a}
+              {aLabel(a)}
             </span>
           ))}
         </div>
@@ -82,12 +92,12 @@ export function MenuItemCard({ item }: Props) {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
             {others.map((a) => (
               <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#f3f4f6", color: "#6b7280", fontSize: 11, fontWeight: 600 }}>
-                {a}
+                {aLabel(a)}
               </span>
             ))}
             {otherInferred.map((a) => (
               <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 11, fontWeight: 600 }}>
-                ~{a}
+                ~{aLabel(a)}
               </span>
             ))}
           </div>
