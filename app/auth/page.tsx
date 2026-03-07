@@ -184,7 +184,7 @@ export default function AuthPage() {
                 onChange={(e) => setStay(e.target.checked)}
                 style={{ width: 16, height: 16, accentColor: "#eb1700", cursor: "pointer" }}
               />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Stay signed in</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Remember me</span>
             </label>
           )}
 
