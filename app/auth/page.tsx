@@ -12,12 +12,14 @@ export default function AuthPage() {
   const { signIn, signUp, user } = useAuth();
   const router = useRouter();
 
-  const [mode, setMode]         = useState<Mode>("signin");
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError]       = useState<string | null>(null);
-  const [info, setInfo]         = useState<string | null>(null);
-  const [loading, setLoading]   = useState(false);
+  const [mode, setMode]             = useState<Mode>("signin");
+  const [email, setEmail]           = useState("");
+  const [password, setPassword]     = useState("");
+  const [usernameVal, setUsername]  = useState("");
+  const [staySignedIn, setStay]     = useState(true);
+  const [error, setError]           = useState<string | null>(null);
+  const [info, setInfo]             = useState<string | null>(null);
+  const [loading, setLoading]       = useState(false);
 
   // Already signed in — go to profile
   useEffect(() => {
@@ -31,8 +33,8 @@ export default function AuthPage() {
     setLoading(true);
 
     const err = mode === "signin"
-      ? await signIn(email, password)
-      : await signUp(email, password);
+      ? await signIn(email, password, staySignedIn)
+      : await signUp(email, password, usernameVal.trim() || undefined);
 
     setLoading(false);
 
@@ -151,6 +153,38 @@ export default function AuthPage() {
               }}
             />
           </div>
+
+          {mode === "signup" && (
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", display: "block", marginBottom: 6 }}>
+                Username <span style={{ fontWeight: 400, color: "#9ca3af" }}>(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={usernameVal}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. jonny123"
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  padding: "12px 14px", border: "1px solid #e5e7eb",
+                  borderRadius: 12, fontSize: 15, color: "#111",
+                  background: "#fafafa", outline: "none",
+                }}
+              />
+            </div>
+          )}
+
+          {mode === "signin" && (
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
+              <input
+                type="checkbox"
+                checked={staySignedIn}
+                onChange={(e) => setStay(e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: "#eb1700", cursor: "pointer" }}
+              />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Stay signed in</span>
+            </label>
+          )}
 
           {error && (
             <div

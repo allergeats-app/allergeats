@@ -9,12 +9,14 @@ import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import type { AllergenId } from "@/lib/types";
 
 export default function ProfilePage() {
-  const { user, loading, allergens, saveAllergens, signOut } = useAuth();
+  const { user, loading, allergens, username, saveAllergens, saveUsername, signOut } = useAuth();
   const router = useRouter();
 
-  const [selected, setSelected]   = useState<AllergenId[]>([]);
-  const [saved, setSaved]         = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
+  const [selected, setSelected]       = useState<AllergenId[]>([]);
+  const [saved, setSaved]             = useState(false);
+  const [signingOut, setSigningOut]   = useState(false);
+  const [usernameEdit, setUsernameEdit] = useState("");
+  const [usernameSaved, setUsernameSaved] = useState(false);
 
   // Redirect to auth if not signed in (after loading completes)
   useEffect(() => {
@@ -26,10 +28,21 @@ export default function ProfilePage() {
     if (allergens.length > 0) setSelected(allergens);
   }, [allergens]);
 
+  // Sync username from context
+  useEffect(() => {
+    setUsernameEdit(username);
+  }, [username]);
+
   async function handleSave() {
     await saveAllergens(selected);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function handleSaveUsername() {
+    await saveUsername(usernameEdit.trim());
+    setUsernameSaved(true);
+    setTimeout(() => setUsernameSaved(false), 2000);
   }
 
   async function handleSignOut() {
@@ -106,14 +119,41 @@ export default function ProfilePage() {
                 fontSize: 18, fontWeight: 900, flexShrink: 0,
               }}
             >
-              {user.email?.[0].toUpperCase() ?? "?"}
+              {(username?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{user.email}</div>
+              {username && <div style={{ fontWeight: 900, fontSize: 16, color: "#111" }}>{username}</div>}
+              <div style={{ fontWeight: username ? 500 : 800, fontSize: username ? 13 : 15, color: username ? "#6b7280" : "#111" }}>{user.email}</div>
               <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>
                 Member since {new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               </div>
             </div>
+          </div>
+
+          {/* Username edit */}
+          <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+            <input
+              type="text"
+              value={usernameEdit}
+              onChange={(e) => setUsernameEdit(e.target.value)}
+              placeholder="Add a username…"
+              style={{
+                flex: 1, padding: "10px 12px", border: "1px solid #e5e7eb",
+                borderRadius: 10, fontSize: 14, color: "#111",
+                background: "#fafafa", outline: "none", boxSizing: "border-box",
+              }}
+            />
+            <button
+              onClick={handleSaveUsername}
+              style={{
+                padding: "10px 16px", borderRadius: 10, border: "none",
+                background: usernameSaved ? "#22c55e" : "#111",
+                color: "#fff", fontSize: 13, fontWeight: 700,
+                cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
+              }}
+            >
+              {usernameSaved ? "Saved!" : "Save"}
+            </button>
           </div>
         </div>
 

@@ -6,16 +6,20 @@ import { getSupabaseClient } from "./supabaseClient";
 import type { AllergenId } from "./types";
 
 const PROFILE_KEY = "allegeats_profile_allergens";
+const SESSION_ONLY_KEY = "allegeats_session_only";
+const WAS_SESSION_ONLY_KEY = "allegeats_was_session_only";
 
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
+  username: string;
   loading: boolean;
   allergens: AllergenId[];
-  signIn: (email: string, password: string) => Promise<string | null>;
-  signUp: (email: string, password: string) => Promise<string | null>;
+  signIn: (email: string, password: string, staySignedIn: boolean) => Promise<string | null>;
+  signUp: (email: string, password: string, username?: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   saveAllergens: (allergens: AllergenId[]) => Promise<void>;
+  saveUsername: (name: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -24,18 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession]     = useState<Session | null>(null);
   const [loading, setLoading]     = useState(true);
   const [allergens, setAllergens] = useState<AllergenId[]>([]);
+  const [username, setUsername]   = useState<string>("");
 
   function hydrateAllergens(sess: Session | null) {
     const cloud = sess?.user?.user_metadata?.allergens as AllergenId[] | undefined;
     if (cloud?.length) {
       setAllergens(cloud);
       try { localStorage.setItem(PROFILE_KEY, JSON.stringify(cloud)); } catch { /* ignore */ }
-      return;
+    } else {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (raw) setAllergens(JSON.parse(raw) as AllergenId[]);
+      } catch { /* ignore */ }
     }
-    try {
-      const raw = localStorage.getItem(PROFILE_KEY);
-      if (raw) setAllergens(JSON.parse(raw) as AllergenId[]);
-    } catch { /* ignore */ }
+    const name = sess?.user?.user_metadata?.username as string | undefined;
+    if (name) setUsername(name);
   }
 
   useEffect(() => {
@@ -51,6 +58,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     sb.auth.getSession().then(({ data }) => {
+      // "Session only" mode: if the user chose not to stay signed in,
+      // sign them out when they open a new browser session (no sessionStorage flag).
+      if (data.session) {
+        try {
+          const wasSessionOnly = localStorage.getItem(WAS_SESSION_ONLY_KEY) === "1";
+          const hasSessionFlag = sessionStorage.getItem(SESSION_ONLY_KEY) === "1";
+          if (wasSessionOnly && !hasSessionFlag) {
+            sb.auth.signOut();
+            localStorage.removeItem(WAS_SESSION_ONLY_KEY);
+            setLoading(false);
+            return;
+          }
+        } catch { /* ignore */ }
+      }
       setSession(data.session);
       hydrateAllergens(data.session);
       setLoading(false);
@@ -65,18 +86,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function signIn(email: string, password: string): Promise<string | null> {
+  async function signIn(email: string, password: string, staySignedIn: boolean): Promise<string | null> {
     const sb = getSupabaseClient();
     if (!sb) return "Supabase is not configured.";
     const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (!error) {
+      try {
+        if (!staySignedIn) {
+          sessionStorage.setItem(SESSION_ONLY_KEY, "1");
+          localStorage.setItem(WAS_SESSION_ONLY_KEY, "1");
+        } else {
+          sessionStorage.removeItem(SESSION_ONLY_KEY);
+          localStorage.removeItem(WAS_SESSION_ONLY_KEY);
+        }
+      } catch { /* ignore */ }
+    }
     return error?.message ?? null;
   }
 
-  async function signUp(email: string, password: string): Promise<string | null> {
+  async function signUp(email: string, password: string, name?: string): Promise<string | null> {
     const sb = getSupabaseClient();
     if (!sb) return "Supabase is not configured.";
-    const { error } = await sb.auth.signUp({ email, password });
+    const { error } = await sb.auth.signUp({
+      email, password,
+      options: { data: { username: name ?? "" } },
+    });
     return error?.message ?? null;
+  }
+
+  async function saveUsername(name: string): Promise<void> {
+    setUsername(name);
+    const sb = getSupabaseClient();
+    if (sb && session) await sb.auth.updateUser({ data: { username: name } });
   }
 
   async function signOut(): Promise<void> {
@@ -84,6 +125,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (sb) await sb.auth.signOut();
     setSession(null);
     setAllergens([]);
+    setUsername("");
+    try {
+      sessionStorage.removeItem(SESSION_ONLY_KEY);
+      localStorage.removeItem(WAS_SESSION_ONLY_KEY);
+    } catch { /* ignore */ }
   }
 
   async function saveAllergens(list: AllergenId[]): Promise<void> {
@@ -97,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, loading, allergens, signIn, signUp, signOut, saveAllergens }}
+      value={{ session, user: session?.user ?? null, username, loading, allergens, signIn, signUp, signOut, saveAllergens, saveUsername }}
     >
       {children}
     </AuthContext.Provider>
