@@ -287,7 +287,7 @@ export default function ScanPage() {
             <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
               <div style={{ fontWeight: 800, fontSize: 15, color: "#111", marginBottom: 4 }}>Your Allergens</div>
               <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 14 }}>Synced from your profile.</div>
-              <AllergySelector selected={selectedAllergens} onChange={setSelectedAllergens} />
+              <AllergySelector selected={selectedAllergens} onChange={setSelectedAllergens} limit={4} />
             </div>
 
             {/* Load restaurant */}
