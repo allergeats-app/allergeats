@@ -3,25 +3,24 @@ import type { AllergenId } from "./types";
 export type AllergenMeta = {
   id: AllergenId;
   label: string;
-  emoji: string;
 };
 
 /** All supported allergens with display metadata */
 export const ALLERGEN_LIST: AllergenMeta[] = [
-  { id: "dairy",     label: "Dairy",      emoji: "🥛" },
-  { id: "egg",       label: "Egg",        emoji: "🥚" },
-  { id: "wheat",     label: "Wheat",      emoji: "🌾" },
-  { id: "gluten",    label: "Gluten",     emoji: "🌿" },
-  { id: "soy",       label: "Soy",        emoji: "🫘" },
-  { id: "peanut",    label: "Peanut",     emoji: "🥜" },
-  { id: "tree-nut",  label: "Tree Nuts",  emoji: "🌰" },
-  { id: "sesame",    label: "Sesame",     emoji: "✨" },
-  { id: "fish",      label: "Fish",       emoji: "🐟" },
-  { id: "shellfish", label: "Shellfish",  emoji: "🦐" },
-  { id: "mustard",   label: "Mustard",    emoji: "🌿" },
-  { id: "corn",      label: "Corn",       emoji: "🌽" },
-  { id: "legumes",   label: "Legumes",    emoji: "🫘" },
-  { id: "oats",      label: "Oats",       emoji: "🌾" },
+  { id: "dairy",     label: "Dairy"     },
+  { id: "egg",       label: "Egg"       },
+  { id: "wheat",     label: "Wheat"     },
+  { id: "gluten",    label: "Gluten"    },
+  { id: "soy",       label: "Soy"       },
+  { id: "peanut",    label: "Peanut"    },
+  { id: "tree-nut",  label: "Tree Nuts" },
+  { id: "sesame",    label: "Sesame"    },
+  { id: "fish",      label: "Fish"      },
+  { id: "shellfish", label: "Shellfish" },
+  { id: "mustard",   label: "Mustard"   },
+  { id: "corn",      label: "Corn"      },
+  { id: "legumes",   label: "Legumes"   },
+  { id: "oats",      label: "Oats"      },
 ];
 
 /**

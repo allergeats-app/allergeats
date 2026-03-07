@@ -1,11 +1,10 @@
 type Props = {
-  icon?: string;
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
 };
 
-export function EmptyState({ icon = "🍽️", title, subtitle, action }: Props) {
+export function EmptyState({ title, subtitle, action }: Props) {
   return (
     <div
       style={{
@@ -18,10 +17,9 @@ export function EmptyState({ icon = "🍽️", title, subtitle, action }: Props)
         gap: 12,
       }}
     >
-      <div style={{ fontSize: 40 }}>{icon}</div>
-      <div style={{ fontWeight: 800, fontSize: 17, color: "#111" }}>{title}</div>
+      <div style={{ fontWeight: 800, fontSize: 17, color: "var(--c-text)" }}>{title}</div>
       {subtitle && (
-        <div style={{ fontSize: 14, color: "#6b7280", maxWidth: 280, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 14, color: "var(--c-sub)", maxWidth: 280, lineHeight: 1.5 }}>
           {subtitle}
         </div>
       )}

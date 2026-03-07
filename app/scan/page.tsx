@@ -221,9 +221,9 @@ export default function ScanPage() {
   }
 
   const SECTION_META = {
-    safe:  { label: "Likely Safe",  icon: "✅", bg: "#f0fdf4", border: "#bbf7d0", textColor: "#15803d" },
-    ask:   { label: "Ask Staff",    icon: "⚠️", bg: "#fff7db", border: "#f4dd8d", textColor: "#854d0e" },
-    avoid: { label: "Avoid",        icon: "❌", bg: "#fff1f0", border: "#f3c5c0", textColor: "#b91c1c" },
+    safe:  { label: "Likely Safe", mark: "+", bg: "#f0fdf4", border: "#bbf7d0", textColor: "#15803d" },
+    ask:   { label: "Ask Staff",   mark: "?", bg: "#fff7db", border: "#f4dd8d", textColor: "#854d0e" },
+    avoid: { label: "Avoid",       mark: "!", bg: "#fff1f0", border: "#f3c5c0", textColor: "#b91c1c" },
   };
 
   function ResultSection({ tone, rows }: { tone: "safe" | "ask" | "avoid"; rows: Array<Row | AvoidRow> }) {
@@ -232,7 +232,7 @@ export default function ScanPage() {
     return (
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 15 }}>{meta.icon}</div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 13, fontWeight: 900, color: meta.textColor }}>{meta.mark}</div>
           <div>
             <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label}</div>
             <div style={{ fontSize: 12, color: "#6b7280" }}>{rows.length} item{rows.length === 1 ? "" : "s"}</div>
@@ -261,16 +261,16 @@ export default function ScanPage() {
     );
   }
 
-  const TAB_META: { id: ActiveTab; label: string; icon: string }[] = [
-    { id: "scan",    label: "Scan",    icon: "🔍" },
-    { id: "saved",   label: "Saved",   icon: "🧾" },
-    { id: "history", label: "History", icon: "📋" },
+  const TAB_META: { id: ActiveTab; label: string }[] = [
+    { id: "scan",    label: "Scan"    },
+    { id: "saved",   label: "Saved"   },
+    { id: "history", label: "History" },
   ];
 
   return (
-    <main style={{ minHeight: "100vh", background: "#f7f7f7", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
+    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
       {/* Sticky header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(247,247,247,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Home</Link>
           <span style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Manual Scan</span>
@@ -412,7 +412,7 @@ export default function ScanPage() {
                 <div key={s.id} style={{ border: "1px solid #e5e7eb", borderRadius: 16, padding: 14 }}>
                   <div style={{ fontWeight: 800, fontSize: 14, color: "#111" }}>{s.title}</div>
                   <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>{formatDate(s.createdAt)}</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>✅ {s.results.safe.length} · ⚠️ {s.results.ask.length} · ❌ {s.results.avoid.length}</div>
+                  <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 4 }}>Safe: {s.results.safe.length} · Ask: {s.results.ask.length} · Avoid: {s.results.avoid.length}</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
                     <button onClick={() => loadSaved(s)} style={{ padding: "11px 0", borderRadius: 12, border: "none", background: "#eb1700", color: "#fff", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Open</button>
                     <button onClick={() => deleteSaved(s.id)} style={{ padding: "11px 0", borderRadius: 12, border: "1px solid #e5e7eb", background: "#fff", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Delete</button>
@@ -433,7 +433,7 @@ export default function ScanPage() {
                 <div key={rule.id} style={{ border: "1px solid #e5e7eb", borderRadius: 14, padding: 14 }}>
                   <div style={{ fontWeight: 800, fontSize: 14, color: "#111" }}>{rule.item}</div>
                   <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
-                    {rule.outcome === "safe" ? "✅ Confirmed safe" : rule.outcome === "unsure" ? "⚠️ Marked unsure" : `❌ Contains ${rule.allergen ?? "allergen"}`}
+                    {rule.outcome === "safe" ? "Confirmed safe" : rule.outcome === "unsure" ? "Marked unsure" : `Contains ${rule.allergen ?? "allergen"}`}
                   </div>
                   <button onClick={() => persistLearned(learnedRules.filter((r) => r.id !== rule.id))} style={{ marginTop: 10, width: "100%", padding: "10px 0", borderRadius: 10, border: "1px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Remove</button>
                 </div>
@@ -445,10 +445,9 @@ export default function ScanPage() {
 
       {/* Bottom nav */}
       <div style={{ position: "fixed", left: 12, right: 12, bottom: 12, background: "rgba(255,255,255,0.96)", border: "1px solid #e5e7eb", backdropFilter: "blur(14px)", borderRadius: 22, padding: "6px 10px", display: "flex", zIndex: 100, maxWidth: 568, margin: "0 auto" }}>
-        {TAB_META.map(({ id, label, icon }) => (
-          <button key={id} onClick={() => setActiveTab(id)} style={{ flex: 1, border: "none", background: "transparent", color: activeTab === id ? "#eb1700" : "#9ca3af", padding: "8px 6px", fontWeight: 800, fontSize: 12, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-            <span style={{ fontSize: 18 }}>{icon}</span>
-            <span>{label}</span>
+        {TAB_META.map(({ id, label }) => (
+          <button key={id} onClick={() => setActiveTab(id)} style={{ flex: 1, border: "none", background: "transparent", color: activeTab === id ? "#eb1700" : "var(--c-sub)", padding: "10px 6px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
+            {label}
           </button>
         ))}
       </div>

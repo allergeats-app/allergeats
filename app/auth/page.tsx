@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/authContext";
+import { useTheme } from "@/lib/themeContext";
 
 type Mode = "signin" | "signup";
 
 export default function AuthPage() {
   const { signIn, signUp, user } = useAuth();
+  useTheme();
   const router = useRouter();
 
   const [mode, setMode]             = useState<Mode>("signin");
@@ -55,7 +57,7 @@ export default function AuthPage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(160deg, #fff7f6 0%, #f7f7f7 60%)",
+        background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
         display: "flex",
         flexDirection: "column",
@@ -72,8 +74,8 @@ export default function AuthPage() {
       {/* Card */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e5e7eb",
+          background: "var(--c-card)",
+          border: "1px solid var(--c-border)",
           borderRadius: 24,
           padding: 28,
           width: "100%",
@@ -116,7 +118,7 @@ export default function AuthPage() {
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", display: "block", marginBottom: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
               Email
             </label>
             <input
@@ -128,14 +130,14 @@ export default function AuthPage() {
               style={{
                 width: "100%", boxSizing: "border-box",
                 padding: "12px 14px", border: "1px solid #e5e7eb",
-                borderRadius: 12, fontSize: 15, color: "#111",
-                background: "#fafafa", outline: "none",
+                borderRadius: 12, fontSize: 15, color: "var(--c-text)",
+                background: "var(--c-input)", outline: "none",
               }}
             />
           </div>
 
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", display: "block", marginBottom: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
               Password
             </label>
             <input
@@ -148,15 +150,15 @@ export default function AuthPage() {
               style={{
                 width: "100%", boxSizing: "border-box",
                 padding: "12px 14px", border: "1px solid #e5e7eb",
-                borderRadius: 12, fontSize: 15, color: "#111",
-                background: "#fafafa", outline: "none",
+                borderRadius: 12, fontSize: 15, color: "var(--c-text)",
+                background: "var(--c-input)", outline: "none",
               }}
             />
           </div>
 
           {mode === "signup" && (
             <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", display: "block", marginBottom: 6 }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
                 Username <span style={{ fontWeight: 400, color: "#9ca3af" }}>(optional)</span>
               </label>
               <input
@@ -182,7 +184,7 @@ export default function AuthPage() {
                 onChange={(e) => setStay(e.target.checked)}
                 style={{ width: 16, height: 16, accentColor: "#eb1700", cursor: "pointer" }}
               />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Stay signed in</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Stay signed in</span>
             </label>
           )}
 
@@ -231,7 +233,7 @@ export default function AuthPage() {
         </form>
       </div>
 
-      <Link href="/" style={{ marginTop: 20, fontSize: 13, color: "#9ca3af", textDecoration: "none" }}>
+      <Link href="/" style={{ marginTop: 20, fontSize: 13, color: "var(--c-sub)", textDecoration: "none" }}>
         ← Back to home
       </Link>
     </main>

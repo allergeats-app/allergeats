@@ -4,11 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { AllergySelector } from "@/components/AllergySelector";
 import { useAuth } from "@/lib/authContext";
+import { useTheme } from "@/lib/themeContext";
 import type { AllergenId } from "@/lib/types";
 import { useState } from "react";
 
 export default function HomePage() {
   const { user, allergens, saveAllergens, loading } = useAuth();
+  useTheme(); // ensures re-render when theme changes
   const [selected, setSelected] = useState<AllergenId[]>(allergens);
   const [saved, setSaved] = useState(false);
 
@@ -28,7 +30,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(160deg, #fff7f6 0%, #f7f7f7 60%)",
+        background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
         display: "flex",
         flexDirection: "column",
@@ -45,7 +47,7 @@ export default function HomePage() {
       >
         <Link
           href="/scan"
-          style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}
+          style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}
         >
           Manual Scan
         </Link>
@@ -59,8 +61,8 @@ export default function HomePage() {
               gap: 8,
               padding: "7px 14px",
               borderRadius: 999,
-              background: "#fff",
-              border: "1px solid #e5e7eb",
+              background: "var(--c-card)",
+              border: "1px solid var(--c-border)",
               textDecoration: "none",
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
@@ -75,14 +77,14 @@ export default function HomePage() {
             >
               {user.email?.[0].toUpperCase()}
             </div>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>Account</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Account</span>
           </Link>
         ) : (
           <Link
             href="/auth"
             style={{
               padding: "7px 16px", borderRadius: 999,
-              background: "#111", color: "#fff",
+              background: "var(--c-text)", color: "var(--c-bg)",
               fontSize: 13, fontWeight: 700, textDecoration: "none",
             }}
           >
@@ -109,7 +111,7 @@ export default function HomePage() {
           <Image src="/logo.png" alt="AllergEats" width={320} height={80} style={{ width: "auto", height: 80, maxWidth: "90vw", display: "block", margin: "0 auto", transform: "translateX(-2px)" }} priority />
           <p
             style={{
-              fontSize: 15, color: "#6b7280", lineHeight: 1.5,
+              fontSize: 15, color: "var(--c-sub)", lineHeight: 1.5,
               maxWidth: 300, margin: "8px auto 0",
             }}
           >
@@ -131,7 +133,7 @@ export default function HomePage() {
               alignItems: "center", marginBottom: 14,
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 800, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Your Allergies
             </div>
             {user && (
@@ -148,7 +150,7 @@ export default function HomePage() {
             style={{
               marginTop: 20, width: "100%", padding: "14px 0",
               borderRadius: 14, border: "none",
-              background: saved ? "#22c55e" : "#111",
+              background: saved ? "#22c55e" : "var(--c-text)",
               color: "#fff", fontSize: 14, fontWeight: 800,
               cursor: "pointer", transition: "background 0.2s",
             }}
@@ -183,8 +185,8 @@ export default function HomePage() {
           href="/scan"
           style={{
             display: "block", width: "100%", padding: "14px 0",
-            borderRadius: 16, background: "#fff",
-            border: "1px solid #e5e7eb", color: "#374151",
+            borderRadius: 16, background: "var(--c-card)",
+            border: "1px solid var(--c-border)", color: "var(--c-text)",
             fontSize: 14, fontWeight: 700, textAlign: "center",
             textDecoration: "none",
           }}
@@ -199,21 +201,16 @@ export default function HomePage() {
             gap: 12, marginTop: 32, width: "100%",
           }}
         >
-          {[
-            { icon: "🔍", label: "Menu Scanning" },
-            { icon: "⚠️", label: "Staff Questions" },
-            { icon: "📚", label: "Learns Your Rules" },
-          ].map(({ icon, label }) => (
+          {["Menu Scanning", "Staff Questions", "Learns Your Rules"].map((label) => (
             <div
               key={label}
               style={{
-                background: "#fff", border: "1px solid #e5e7eb",
+                background: "var(--c-card)", border: "1px solid var(--c-border)",
                 borderRadius: 16, padding: "14px 8px", textAlign: "center",
                 boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}
             >
-              <div style={{ fontSize: 22, marginBottom: 6 }}>{icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", lineHeight: 1.3 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-sub)", lineHeight: 1.3 }}>
                 {label}
               </div>
             </div>
@@ -222,7 +219,7 @@ export default function HomePage() {
 
         <p
           style={{
-            fontSize: 11, color: "#9ca3af", textAlign: "center",
+            fontSize: 11, color: "var(--c-sub)", textAlign: "center",
             marginTop: 28, lineHeight: 1.6, maxWidth: 320,
           }}
         >
