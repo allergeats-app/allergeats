@@ -201,14 +201,7 @@ export default function HomePage() {
           Scan a Menu Manually
         </Link>
 
-        <p
-          style={{
-            fontSize: 11, color: "var(--c-sub)", textAlign: "center",
-            marginTop: 28, lineHeight: 1.6, maxWidth: 320,
-          }}
-        >
-          Always confirm with staff before ordering. AllergEats is a decision-support tool, not medical advice.
-        </p>
+
       </div>
     </main>
   );

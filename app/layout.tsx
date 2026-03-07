@@ -30,6 +30,15 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             {children}
+            <footer style={{
+              textAlign: "center",
+              padding: "16px 20px 24px",
+              fontSize: 11,
+              color: "var(--c-sub)",
+              lineHeight: 1.6,
+            }}>
+              Always confirm with staff before ordering. AllergEats is a decision-support tool, not medical advice.
+            </footer>
           </AuthProvider>
         </ThemeProvider>
       </body>
