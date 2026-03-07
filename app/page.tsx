@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { AllergySelector } from "@/components/AllergySelector";
 import { useAuth } from "@/lib/authContext";
 import type { AllergenId } from "@/lib/types";
@@ -105,8 +106,7 @@ export default function HomePage() {
       >
         {/* Brand */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="AllergEats" style={{ height: 52, width: "auto" }} />
+          <Image src="/logo.png" alt="AllergEats" width={220} height={52} style={{ width: "auto", height: 52 }} priority />
           <p
             style={{
               fontSize: 15, color: "#6b7280", lineHeight: 1.5,

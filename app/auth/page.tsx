@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/authContext";
 
 type Mode = "signin" | "signup";
@@ -63,8 +64,7 @@ export default function AuthPage() {
     >
       {/* Logo */}
       <Link href="/" style={{ textDecoration: "none", marginBottom: 28, display: "block", textAlign: "center" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="AllergEats" style={{ height: 44, width: "auto" }} />
+        <Image src="/logo.png" alt="AllergEats" width={180} height={44} style={{ width: "auto", height: 44 }} priority />
       </Link>
 
       {/* Card */}
