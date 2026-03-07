@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
+import { useTheme } from "@/lib/themeContext";
 import { AllergySelector } from "@/components/AllergySelector";
 import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import type { AllergenId } from "@/lib/types";
 
 export default function ProfilePage() {
   const { user, loading, allergens, username, saveAllergens, saveUsername, signOut } = useAuth();
+  const { isDark, toggle: toggleTheme } = useTheme();
   const router = useRouter();
 
   const [selected, setSelected]       = useState<AllergenId[]>([]);
@@ -53,7 +55,7 @@ export default function ProfilePage() {
 
   if (loading || !user) {
     return (
-      <main style={{ minHeight: "100vh", background: "#f7f7f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
+      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
         Loading…
       </main>
     );
@@ -67,7 +69,7 @@ export default function ProfilePage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#f7f7f7",
+        background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
         paddingBottom: 48,
       }}
@@ -76,13 +78,13 @@ export default function ProfilePage() {
       <div
         style={{
           position: "sticky", top: 0, zIndex: 50,
-          background: "rgba(247,247,247,0.95)", backdropFilter: "blur(12px)",
-          borderBottom: "1px solid #e5e7eb", padding: "12px 16px",
+          background: "var(--c-hdr)", backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--c-border)", padding: "12px 16px",
         }}
       >
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Home</Link>
-          <span style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>My Account</span>
+          <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}>← Home</Link>
+          <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>My Account</span>
           <button
             onClick={handleSignOut}
             disabled={signingOut}
@@ -101,12 +103,12 @@ export default function ProfilePage() {
         {/* Account card */}
         <div
           style={{
-            background: "#fff", border: "1px solid #e5e7eb",
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
             borderRadius: 20, padding: 20,
             boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
           }}
         >
-          <div style={{ fontSize: 11, fontWeight: 800, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
             Account
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -122,37 +124,75 @@ export default function ProfilePage() {
               {(username?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
             </div>
             <div>
-              {username && <div style={{ fontWeight: 900, fontSize: 16, color: "#111" }}>{username}</div>}
-              <div style={{ fontWeight: username ? 500 : 800, fontSize: username ? 13 : 15, color: username ? "#6b7280" : "#111" }}>{user.email}</div>
-              <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>
+              {username && <div style={{ fontWeight: 900, fontSize: 16, color: "var(--c-text)" }}>{username}</div>}
+              <div style={{ fontWeight: username ? 500 : 800, fontSize: username ? 13 : 15, color: username ? "var(--c-sub)" : "var(--c-text)" }}>{user.email}</div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>
                 Member since {new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Username edit */}
-          <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
-            <input
-              type="text"
-              value={usernameEdit}
-              onChange={(e) => setUsernameEdit(e.target.value)}
-              placeholder="Add a username…"
-              style={{
-                flex: 1, padding: "10px 12px", border: "1px solid #e5e7eb",
-                borderRadius: 10, fontSize: 14, color: "#111",
-                background: "#fafafa", outline: "none", boxSizing: "border-box",
-              }}
-            />
+        {/* Settings card */}
+        <div
+          style={{
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
+            borderRadius: 20, padding: 20,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 16 }}>
+            Settings
+          </div>
+
+          {/* Username */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 8 }}>Username</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                type="text"
+                value={usernameEdit}
+                onChange={(e) => setUsernameEdit(e.target.value)}
+                placeholder="Add a username…"
+                style={{
+                  flex: 1, padding: "10px 12px", border: "1px solid var(--c-border)",
+                  borderRadius: 10, fontSize: 14, color: "var(--c-text)",
+                  background: "var(--c-input)", outline: "none", boxSizing: "border-box",
+                }}
+              />
+              <button
+                onClick={handleSaveUsername}
+                style={{
+                  padding: "10px 16px", borderRadius: 10, border: "none",
+                  background: usernameSaved ? "#22c55e" : "var(--c-text)",
+                  color: "var(--c-bg)", fontSize: 13, fontWeight: 700,
+                  cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
+                }}
+              >
+                {usernameSaved ? "Saved!" : "Save"}
+              </button>
+            </div>
+          </div>
+
+          {/* Dark mode toggle */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Dark Mode</div>
             <button
-              onClick={handleSaveUsername}
+              onClick={toggleTheme}
               style={{
-                padding: "10px 16px", borderRadius: 10, border: "none",
-                background: usernameSaved ? "#22c55e" : "#111",
-                color: "#fff", fontSize: 13, fontWeight: 700,
-                cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
+                width: 52, height: 28, borderRadius: 999, border: "none",
+                background: isDark ? "#eb1700" : "#e5e7eb",
+                cursor: "pointer", position: "relative", transition: "background 0.2s",
+                flexShrink: 0,
               }}
             >
-              {usernameSaved ? "Saved!" : "Save"}
+              <div
+                style={{
+                  position: "absolute", top: 3, left: isDark ? 27 : 3,
+                  width: 22, height: 22, borderRadius: "50%", background: "#fff",
+                  transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                }}
+              />
             </button>
           </div>
         </div>
@@ -160,15 +200,15 @@ export default function ProfilePage() {
         {/* Allergy profile card */}
         <div
           style={{
-            background: "#fff", border: "1px solid #e5e7eb",
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
             borderRadius: 20, padding: 20,
             boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
           }}
         >
-          <div style={{ fontSize: 11, fontWeight: 800, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
             Allergy Profile
           </div>
-          <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>
             Saved to your account and synced across devices.
           </div>
 
@@ -179,8 +219,8 @@ export default function ProfilePage() {
             style={{
               marginTop: 20, width: "100%", padding: "14px 0",
               borderRadius: 14, border: "none",
-              background: saved ? "#22c55e" : "#111",
-              color: "#fff", fontSize: 14, fontWeight: 800,
+              background: saved ? "#22c55e" : "var(--c-text)",
+              color: "var(--c-bg)", fontSize: 14, fontWeight: 800,
               cursor: "pointer", transition: "background 0.2s",
             }}
           >
@@ -192,12 +232,12 @@ export default function ProfilePage() {
         {allergenLabels.length > 0 && (
           <div
             style={{
-              background: "#fff", border: "1px solid #e5e7eb",
+              background: "var(--c-card)", border: "1px solid var(--c-border)",
               borderRadius: 20, padding: 20,
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            <div style={{ fontSize: 11, fontWeight: 800, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
               Active Restrictions ({allergenLabels.length})
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -205,12 +245,10 @@ export default function ProfilePage() {
                 <div
                   key={a!.id}
                   style={{
-                    display: "flex", alignItems: "center", gap: 6,
                     padding: "7px 12px", borderRadius: 999,
                     background: "#fff1f0", border: "1px solid #f3c5c0",
                   }}
                 >
-                  <span style={{ fontSize: 16 }}>{a!.emoji}</span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "#b91c1c" }}>{a!.label}</span>
                 </div>
               ))}
@@ -221,9 +259,9 @@ export default function ProfilePage() {
         {allergenLabels.length === 0 && (
           <div
             style={{
-              padding: "20px", borderRadius: 20, background: "#fff",
-              border: "1px solid #e5e7eb", textAlign: "center",
-              fontSize: 14, color: "#9ca3af",
+              padding: "20px", borderRadius: 20, background: "var(--c-card)",
+              border: "1px solid var(--c-border)", textAlign: "center",
+              fontSize: 14, color: "var(--c-sub)",
             }}
           >
             No allergens selected yet. Choose from the list above.
@@ -246,8 +284,8 @@ export default function ProfilePage() {
             href="/scan"
             style={{
               display: "block", padding: "14px 18px", borderRadius: 14,
-              background: "#fff", border: "1px solid #e5e7eb",
-              color: "#374151", textDecoration: "none",
+              background: "var(--c-card)", border: "1px solid var(--c-border)",
+              color: "var(--c-text)", textDecoration: "none",
               fontSize: 14, fontWeight: 700, textAlign: "center",
             }}
           >
