@@ -12,18 +12,23 @@ export default function HomePage() {
   const { user, allergens, saveAllergens, loading } = useAuth();
   useTheme(); // ensures re-render when theme changes
   const [selected, setSelected] = useState<AllergenId[]>(allergens);
+  const [savedSelection, setSavedSelection] = useState<AllergenId[]>(allergens);
   const [saved, setSaved] = useState(false);
 
   // Keep local selection in sync when auth loads allergens
   // (runs once after context hydrates)
   if (!loading && allergens.length > 0 && selected.length === 0) {
     setSelected(allergens);
+    setSavedSelection(allergens);
   }
+
+  const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join();
 
   async function handleSave() {
     await saveAllergens(selected);
+    setSavedSelection([...selected]);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 1500);
   }
 
   return (
@@ -145,18 +150,20 @@ export default function HomePage() {
 
           <AllergySelector selected={selected} onChange={setSelected} limit={4} />
 
-          <button
-            onClick={handleSave}
-            style={{
-              marginTop: 20, width: "100%", padding: "14px 0",
-              borderRadius: 14, border: "none",
-              background: saved ? "#22c55e" : "var(--c-text)",
-              color: "#fff", fontSize: 14, fontWeight: 800,
-              cursor: "pointer", transition: "background 0.2s",
-            }}
-          >
-            {saved ? "Saved!" : user ? "Save to Account" : "Save Profile"}
-          </button>
+          {(isDirty || saved) && (
+            <button
+              onClick={handleSave}
+              style={{
+                marginTop: 20, width: "100%", padding: "14px 0",
+                borderRadius: 14, border: "none",
+                background: saved ? "#22c55e" : "var(--c-text)",
+                color: "#fff", fontSize: 14, fontWeight: 800,
+                cursor: "pointer", transition: "background 0.2s",
+              }}
+            >
+              {saved ? "Saved!" : user ? "Save to Account" : "Save Profile"}
+            </button>
+          )}
 
           {!user && (
             <p style={{ textAlign: "center", fontSize: 12, color: "#9ca3af", marginTop: 10 }}>
