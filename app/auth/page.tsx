@@ -14,11 +14,14 @@ export default function AuthPage() {
   useTheme();
   const router = useRouter();
 
+  const REMEMBER_KEY = "allegeats_remembered_email";
+
   const [mode, setMode]             = useState<Mode>("signin");
   const [email, setEmail]           = useState("");
   const [password, setPassword]     = useState("");
   const [usernameVal, setUsername]  = useState("");
   const [staySignedIn, setStay]     = useState(true);
+  const [rememberEmail, setRemember] = useState(false);
   const [error, setError]           = useState<string | null>(null);
   const [info, setInfo]             = useState<string | null>(null);
   const [loading, setLoading]       = useState(false);
@@ -27,6 +30,12 @@ export default function AuthPage() {
   useEffect(() => {
     if (user) router.replace("/profile");
   }, [user, router]);
+
+  // Pre-fill email if remembered
+  useEffect(() => {
+    const saved = localStorage.getItem(REMEMBER_KEY);
+    if (saved) { setEmail(saved); setRemember(true); }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,11 +54,13 @@ export default function AuthPage() {
       return;
     }
 
-    if (mode === "signup") {
+    if (mode === "signin") {
+      if (rememberEmail) localStorage.setItem(REMEMBER_KEY, email);
+      else localStorage.removeItem(REMEMBER_KEY);
+      router.push("/profile");
+    } else {
       setInfo("Check your email to confirm your account, then sign in.");
       setMode("signin");
-    } else {
-      router.push("/profile");
     }
   }
 
@@ -177,15 +188,26 @@ export default function AuthPage() {
           )}
 
           {mode === "signin" && (
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
-              <input
-                type="checkbox"
-                checked={staySignedIn}
-                onChange={(e) => setStay(e.target.checked)}
-                style={{ width: 16, height: 16, accentColor: "#eb1700", cursor: "pointer" }}
-              />
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Remember me</span>
-            </label>
+            <div style={{ display: "flex", gap: 20 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", userSelect: "none" }}>
+                <input
+                  type="checkbox"
+                  checked={rememberEmail}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: "#eb1700", cursor: "pointer" }}
+                />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Remember me</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", userSelect: "none" }}>
+                <input
+                  type="checkbox"
+                  checked={staySignedIn}
+                  onChange={(e) => setStay(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: "#eb1700", cursor: "pointer" }}
+                />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Keep me signed in</span>
+              </label>
+            </div>
           )}
 
           {error && (
