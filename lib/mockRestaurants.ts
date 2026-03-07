@@ -20,7 +20,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "mcdonalds",
     name: "McDonald's",
-    cuisine: "Fast Food",
+    cuisine: "Fast Food · Burgers",
     address: "123 Market St, San Francisco, CA",
     lat: 37.7749,
     lng: -122.4194,
