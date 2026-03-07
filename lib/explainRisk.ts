@@ -19,10 +19,9 @@ export function explainRisk(params: {
 
   switch (risk) {
     case "avoid": {
-      const listed = detectedAllergens.length
-        ? `Contains ${detectedAllergens.join(", ")}, which matches your allergy profile.`
-        : "Allergen detected that matches your profile.";
-      return `${listed} Source: ${src} (${confidence} confidence).`;
+      return detectedAllergens.length
+        ? `Contains ${detectedAllergens.join(", ")}.`
+        : "Contains an allergen that matches your profile.";
     }
 
     case "ask": {
@@ -39,20 +38,19 @@ export function explainRisk(params: {
       if (!parts.length) {
         parts.push("Allergen information is incomplete or ambiguous.");
       }
-      parts.push(`Source: ${src} (${confidence} confidence). Confirm with staff.`);
+      parts.push("Confirm with staff.");
       return parts.join(" ");
     }
 
     case "likely-safe": {
       const noAllergens = detectedAllergens.length === 0 && inferredAllergens.length === 0;
-      const base = noAllergens
-        ? "No allergens matching your profile were detected."
+      return noAllergens
+        ? "No allergens matching your profile detected."
         : "No allergens matching your profile found in detected ingredients.";
-      return `${base} Source: ${src} (${confidence} confidence). Always confirm with staff.`;
     }
 
     case "unknown": {
-      return `Not enough verified ingredient data to assess this item. Source: ${src} (${confidence} confidence). Ask staff before ordering.`;
+      return "Not enough verified ingredient data to assess this item. Ask staff before ordering.";
     }
   }
 }
