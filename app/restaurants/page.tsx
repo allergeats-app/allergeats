@@ -12,12 +12,29 @@ import { EmptyState } from "@/components/EmptyState";
 import type { Restaurant, ScoredRestaurant } from "@/lib/types";
 
 type SortOption = "distance" | "most-safe" | "least-avoid";
+type TypeFilter = "all" | "restaurant" | "fast-food" | "cafe";
 
 const SORT_CHIPS = [
   { value: "distance"    as SortOption, label: "Nearest" },
   { value: "most-safe"   as SortOption, label: "Most Safe" },
   { value: "least-avoid" as SortOption, label: "Fewest Avoid" },
 ];
+
+const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
+  { value: "all",        label: "All" },
+  { value: "restaurant", label: "Restaurants" },
+  { value: "fast-food",  label: "Fast Food" },
+  { value: "cafe",       label: "Café" },
+];
+
+function matchesType(cuisine: string, type: TypeFilter): boolean {
+  if (type === "all") return true;
+  const c = cuisine.toLowerCase();
+  if (type === "fast-food") return c.includes("fast food") || c.includes("fast_food") || c.includes("burger") || c.includes("fried chicken");
+  if (type === "cafe")      return c.includes("café") || c.includes("cafe") || c.includes("coffee") || c.includes("bakery") || c.includes("donut");
+  // "restaurant" = anything that isn't fast food or café
+  return !c.includes("fast food") && !c.includes("fast_food") && !c.includes("burger") && !c.includes("café") && !c.includes("cafe") && !c.includes("coffee");
+}
 
 const SESSION_KEY = "allegeats_live_restaurants";
 
@@ -35,6 +52,7 @@ function RestaurantsContent() {
 
   const [query, setQuery]                 = useState(queryParam);
   const [sort, setSort]                   = useState<SortOption>("distance");
+  const [typeFilter, setTypeFilter]       = useState<TypeFilter>("all");
   const [restaurants, setRestaurants]     = useState<ScoredRestaurant[]>([]);
   const [loading, setLoading]             = useState(true);
   const [locationLabel, setLocationLabel] = useState("Locating…");
@@ -103,9 +121,8 @@ function RestaurantsContent() {
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    let list = q
-      ? restaurants.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q))
-      : restaurants;
+    let list = restaurants.filter((r) => matchesType(r.cuisine, typeFilter));
+    if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
     switch (sort) {
       case "distance":
@@ -146,8 +163,25 @@ function RestaurantsContent() {
             }}
           />
 
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
             <FilterChips chips={SORT_CHIPS} active={sort} onChange={setSort} />
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+              {TYPE_CHIPS.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setTypeFilter(c.value)}
+                  style={{
+                    padding: "6px 13px", borderRadius: 999, flexShrink: 0,
+                    border: `1.5px solid ${typeFilter === c.value ? "#111" : "var(--c-border)"}`,
+                    background: typeFilter === c.value ? "var(--c-text)" : "var(--c-card)",
+                    color: typeFilter === c.value ? "var(--c-bg)" : "var(--c-sub)",
+                    fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  }}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
