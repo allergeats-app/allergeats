@@ -16,11 +16,11 @@ type RiskFilter = "all" | Risk;
 const RISK_ORDER: Risk[] = ["avoid", "ask", "unknown", "likely-safe"];
 const SESSION_KEY = "allegeats_live_restaurants";
 
-const SECTION_META: Record<Risk, { label: string; icon: string; bg: string; border: string }> = {
-  "avoid":       { label: "Avoid",       icon: "❌", bg: "#fff1f0", border: "#f3c5c0" },
-  "ask":         { label: "Ask Staff",   icon: "⚠️", bg: "#fff7db", border: "#f4dd8d" },
-  "unknown":     { label: "Unknown",     icon: "❓", bg: "#f9fafb", border: "#e5e7eb" },
-  "likely-safe": { label: "Likely Safe", icon: "✅", bg: "#f0fdf4", border: "#bbf7d0" },
+const SECTION_META: Record<Risk, { label: string; mark: string; bg: string; border: string; markColor: string }> = {
+  "avoid":       { label: "Avoid",       mark: "!",  bg: "#fff1f0", border: "#f3c5c0", markColor: "#b91c1c" },
+  "ask":         { label: "Ask Staff",   mark: "?",  bg: "#fff7db", border: "#f4dd8d", markColor: "#854d0e" },
+  "unknown":     { label: "Unknown",     mark: "–",  bg: "#f9fafb", border: "#e5e7eb", markColor: "#6b7280" },
+  "likely-safe": { label: "Likely Safe", mark: "+",  bg: "#f0fdf4", border: "#bbf7d0", markColor: "#15803d" },
 };
 
 function findRestaurant(id: string): Restaurant | undefined {
@@ -80,10 +80,9 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
   if (notFound) {
     return (
-      <main style={{ minHeight: "100vh", background: "#f7f7f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <EmptyState
-          icon="🔍"
-          title="Restaurant not found"
+                    title="Restaurant not found"
           subtitle="This restaurant isn't in our database."
           action={<Link href="/restaurants" style={{ padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
         />
@@ -92,7 +91,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   }
 
   if (!scored) {
-    return <main style={{ minHeight: "100vh", background: "#f7f7f7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
+    return <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
   }
 
   const { summary } = scored;
@@ -111,9 +110,9 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   const hasNoMenu = scored.scoredItems.length === 0;
 
   return (
-    <main style={{ minHeight: "100vh", background: "#f7f7f7", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 40 }}>
+    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 40 }}>
       {/* Sticky header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(247,247,247,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/restaurants" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Restaurants</Link>
           {scored?.sourceType === "official" && (
@@ -199,7 +198,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
             {/* Menu items grouped by risk */}
             {filtered.length === 0 ? (
-              <EmptyState icon="🍽️" title="No items match" subtitle="Try a different filter." />
+              <EmptyState  title="No items match" subtitle="Try a different filter." />
             ) : (
               <div style={{ display: "grid", gap: 20 }}>
                 {RISK_ORDER.map((risk) => {
@@ -209,7 +208,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                   return (
                     <div key={risk}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 15 }}>{meta.icon}</div>
+                        <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 13, fontWeight: 900, color: meta.markColor }}>{meta.mark}</div>
                         <div>
                           <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label}</div>
                           <div style={{ fontSize: 12, color: "#6b7280" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
