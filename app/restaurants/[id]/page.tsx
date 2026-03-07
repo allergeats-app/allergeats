@@ -9,7 +9,7 @@ import { scoreRestaurant } from "@/lib/scoring";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { SourceBadge } from "@/components/SourceBadge";
 import { EmptyState } from "@/components/EmptyState";
-import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
+import type { ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
 
 type RiskFilter = "all" | Risk;
 
@@ -114,8 +114,11 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     <main style={{ minHeight: "100vh", background: "#f7f7f7", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 40 }}>
       {/* Sticky header */}
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(247,247,247,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/restaurants" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Restaurants</Link>
+          {scored?.sourceType === "official" && (
+            <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>Official allergen data</span>
+          )}
         </div>
       </div>
 

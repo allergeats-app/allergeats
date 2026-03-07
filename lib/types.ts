@@ -39,6 +39,12 @@ export type RawMenuItem = {
   category?: string;
   // Optional per-item source override; falls back to restaurant sourceType
   sourceType?: SourceType;
+  /**
+   * Official allergen flags from a trusted source (e.g. Nutritionix).
+   * When present, these are merged with text-detected allergens and the item
+   * is scored with high confidence rather than relying solely on description parsing.
+   */
+  allergens?: string[];
 };
 
 // ─── Scored menu item (after running through the scoring pipeline) ──────────

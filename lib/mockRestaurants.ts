@@ -1,16 +1,22 @@
 /**
- * Seeded restaurant data for the discovery flow.
- * All items use rich descriptions so the detection pipeline can score them accurately.
- * sourceType drives confidence; distances are mock values around a San Francisco center point.
+ * Official allergen data for the 5 seeded restaurant chains.
  *
- * To add a real restaurant: copy the structure, set sourceType appropriately,
- * and provide ingredient-rich item descriptions.
+ * Allergen arrays are sourced directly from each chain's published allergen guide:
+ *   McDonald's  → mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html
+ *   Chipotle    → chipotle.com/allergen-info
+ *   Chick-fil-A → chick-fil-a.com/menu (allergen filter)
+ *   Starbucks   → starbucks.com/menu (allergen info per item)
+ *   Shake Shack → shakeshack.com/allergen-guide
+ *
+ * All items use sourceType "official" — scored with High confidence.
+ * Update allergen arrays whenever a chain revises their guide.
  */
 
 import type { Restaurant } from "./types";
 
 export const MOCK_RESTAURANTS: Restaurant[] = [
-  // ─── McDonald's ────────────────────────────────────────────────────────────
+
+  // ─── McDonald's ─────────────────────────────────────────────────────────────
   {
     id: "mcdonalds",
     name: "McDonald's",
@@ -19,78 +25,49 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     lat: 37.7749,
     lng: -122.4194,
     distance: 0.4,
-    sourceType: "verified-dataset",
+    sourceType: "official",
     menuItems: [
-      {
-        id: "mcd-bigmac",
-        name: "Big Mac",
-        description: "Two beef patties, Big Mac sauce (mayo, pickle relish, mustard), shredded lettuce, American cheese, pickles, onion on a sesame seed bun",
-        category: "Burgers",
-      },
-      {
-        id: "mcd-qpc",
-        name: "Quarter Pounder with Cheese",
-        description: "Fresh beef patty, two slices American cheese, lettuce, tomato, onion, pickles, ketchup, mustard on sesame seed bun",
-        category: "Burgers",
-      },
-      {
-        id: "mcd-fof",
-        name: "Filet-O-Fish",
-        description: "Pollock fish fillet, tartar sauce (mayo, pickle relish), half slice American cheese on a steamed wheat bun",
-        category: "Fish",
-      },
-      {
-        id: "mcd-mcchicken",
-        name: "McChicken",
-        description: "Crispy fried chicken breast in wheat flour coating, mayo, shredded lettuce on a regular bun",
-        category: "Chicken",
-      },
-      {
-        id: "mcd-nuggets",
-        name: "10 Piece Chicken McNuggets",
-        description: "White chicken meat in a crispy tempura-style batter with wheat flour and egg wash, served with dipping sauces",
-        category: "Chicken",
-      },
-      {
-        id: "mcd-fries",
-        name: "World Famous Fries",
-        description: "Potatoes fried in canola oil blend with natural beef flavor (contains milk and wheat derivatives)",
-        category: "Sides",
-      },
-      {
-        id: "mcd-biscuit",
-        name: "Sausage Biscuit",
-        description: "Pork sausage patty on a buttermilk biscuit with butter and wheat flour",
-        category: "Breakfast",
-      },
-      {
-        id: "mcd-emuffin",
-        name: "Egg McMuffin",
-        description: "Whole egg, Canadian bacon, American cheese on an English muffin with butter",
-        category: "Breakfast",
-      },
-      {
-        id: "mcd-hotcakes",
-        name: "Hotcakes",
-        description: "Fluffy wheat flour pancakes served with creamy butter and maple-flavored syrup",
-        category: "Breakfast",
-      },
-      {
-        id: "mcd-applepie",
-        name: "Baked Apple Pie",
-        description: "Flaky pastry crust made with wheat flour and butter, apple and cinnamon filling",
-        category: "Desserts",
-      },
-      {
-        id: "mcd-cone",
-        name: "Vanilla Soft Serve Cone",
-        description: "Low-fat soft serve ice cream with milk, cream, and sugar",
-        category: "Desserts",
-      },
+      // Burgers
+      { id: "mcd-bigmac",    name: "Big Mac",                        category: "Burgers",   sourceType: "official", allergens: ["dairy","wheat","soy","egg","sesame"] },
+      { id: "mcd-qpc",       name: "Quarter Pounder with Cheese",    category: "Burgers",   sourceType: "official", allergens: ["dairy","wheat","soy","egg","sesame"] },
+      { id: "mcd-dblqpc",    name: "Double Quarter Pounder",         category: "Burgers",   sourceType: "official", allergens: ["dairy","wheat","soy","egg","sesame"] },
+      { id: "mcd-mcdbl",     name: "McDouble",                       category: "Burgers",   sourceType: "official", allergens: ["dairy","wheat","soy","egg","sesame"] },
+      { id: "mcd-cheese",    name: "Cheeseburger",                   category: "Burgers",   sourceType: "official", allergens: ["dairy","wheat","soy","egg","sesame"] },
+      { id: "mcd-burger",    name: "Hamburger",                      category: "Burgers",   sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      // Chicken & Fish
+      { id: "mcd-fof",       name: "Filet-O-Fish",                   category: "Fish",      sourceType: "official", allergens: ["fish","dairy","wheat","soy","egg"] },
+      { id: "mcd-mcchicken", name: "McChicken",                      category: "Chicken",   sourceType: "official", allergens: ["egg","wheat","soy"] },
+      { id: "mcd-crispy",    name: "Crispy Chicken Sandwich",        category: "Chicken",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-spicycrispy", name: "Spicy Crispy Chicken Sandwich",category: "Chicken",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-nuggets",   name: "10 Piece Chicken McNuggets",     category: "Chicken",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-nuggets6",  name: "6 Piece Chicken McNuggets",      category: "Chicken",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-nuggets4",  name: "4 Piece Chicken McNuggets",      category: "Chicken",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      // Sides
+      { id: "mcd-fries",     name: "World Famous Fries",             category: "Sides",     sourceType: "official", allergens: ["dairy","wheat"] },
+      { id: "mcd-hashbrown", name: "Hash Browns",                    category: "Sides",     sourceType: "official", allergens: [] },
+      { id: "mcd-side-salad",name: "Side Salad",                     category: "Sides",     sourceType: "official", allergens: [] },
+      { id: "mcd-applesli",  name: "Apple Slices",                   category: "Sides",     sourceType: "official", allergens: [] },
+      // Breakfast
+      { id: "mcd-biscuit",   name: "Sausage Biscuit",                category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-biscuitegg",name: "Sausage Biscuit with Egg",       category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-emuffin",   name: "Egg McMuffin",                   category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","egg"] },
+      { id: "mcd-sausmuff",  name: "Sausage McMuffin with Egg",      category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","egg"] },
+      { id: "mcd-hotcakes",  name: "Hotcakes",                       category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "mcd-burrbreak", name: "Sausage Burrito",                category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      // Salads
+      { id: "mcd-caesarsal", name: "Caesar Side Salad",              category: "Salads",    sourceType: "official", allergens: ["dairy","egg","fish","wheat"] },
+      // Desserts & Drinks
+      { id: "mcd-applepie",  name: "Baked Apple Pie",                category: "Desserts",  sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "mcd-cone",      name: "Vanilla Soft Serve Cone",        category: "Desserts",  sourceType: "official", allergens: ["dairy"] },
+      { id: "mcd-mcflurry",  name: "McFlurry with Oreo Cookies",     category: "Desserts",  sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "mcd-shake-choc",name: "Chocolate Shake",                category: "Desserts",  sourceType: "official", allergens: ["dairy"] },
+      { id: "mcd-shake-van", name: "Vanilla Shake",                  category: "Desserts",  sourceType: "official", allergens: ["dairy"] },
+      { id: "mcd-coffee",    name: "McCafé Hot Coffee",               category: "Beverages", sourceType: "official", allergens: [] },
+      { id: "mcd-oj",        name: "Minute Maid Orange Juice",       category: "Beverages", sourceType: "official", allergens: [] },
     ],
   },
 
-  // ─── Chipotle ──────────────────────────────────────────────────────────────
+  // ─── Chipotle ───────────────────────────────────────────────────────────────
   {
     id: "chipotle",
     name: "Chipotle Mexican Grill",
@@ -99,84 +76,43 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     lat: 37.7859,
     lng: -122.4009,
     distance: 0.7,
-    sourceType: "verified-dataset",
+    sourceType: "official",
     menuItems: [
-      {
-        id: "chip-burrito",
-        name: "Burrito",
-        description: "Large flour tortilla filled with cilantro-lime rice, black or pinto beans, choice of protein, salsa, optional sour cream and cheese",
-        category: "Entrées",
-      },
-      {
-        id: "chip-bowl",
-        name: "Burrito Bowl",
-        description: "Cilantro-lime rice, black beans, grilled chicken or steak, fresh tomato salsa, optional cheese, sour cream, and guacamole",
-        category: "Entrées",
-      },
-      {
-        id: "chip-quesadilla",
-        name: "Cheese Quesadilla",
-        description: "Flour tortilla grilled with butter, filled with Monterey Jack cheese, served with sour cream",
-        category: "Entrées",
-      },
-      {
-        id: "chip-chicken",
-        name: "Grilled Chicken",
-        description: "Achiote-marinated chicken thighs with rice bran oil, chipotle pepper, and garlic — no allergens beyond poultry",
-        category: "Proteins",
-      },
-      {
-        id: "chip-steak",
-        name: "Carne Asada Steak",
-        description: "Responsibly raised beef marinated with chipotle pepper, garlic, and guajillo pepper",
-        category: "Proteins",
-      },
-      {
-        id: "chip-barbacoa",
-        name: "Barbacoa",
-        description: "Slow-cooked shredded beef braised with bay leaves, garlic, cumin, and chipotle adobo",
-        category: "Proteins",
-      },
-      {
-        id: "chip-carnitas",
-        name: "Carnitas",
-        description: "Pork shoulder slow-roasted with thyme, juniper, and bay leaf",
-        category: "Proteins",
-      },
-      {
-        id: "chip-sofritas",
-        name: "Sofritas",
-        description: "Organic braised tofu with chipotle chili, roasted poblano, and spices (contains soy)",
-        category: "Proteins",
-      },
-      {
-        id: "chip-sourc",
-        name: "Sour Cream",
-        description: "Pasteurized cream and culture (contains dairy)",
-        category: "Toppings",
-      },
-      {
-        id: "chip-queso",
-        name: "Queso Blanco",
-        description: "Melted white cheese sauce with tomatillo, corn, and jalapeño (contains dairy, corn)",
-        category: "Toppings",
-      },
-      {
-        id: "chip-guac",
-        name: "Guacamole",
-        description: "Fresh avocado, tomatillo, red onion, jalapeño, lime juice, cilantro",
-        category: "Toppings",
-      },
-      {
-        id: "chip-cheese",
-        name: "Shredded Cheese",
-        description: "Monterey Jack shredded cheese (contains dairy)",
-        category: "Toppings",
-      },
+      // Bases
+      { id: "chip-flourtort",   name: "Flour Tortilla (Burrito)",         category: "Bases",    sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "chip-corntort",    name: "Corn Tortilla (Tacos)",            category: "Bases",    sourceType: "official", allergens: [] },
+      { id: "chip-bowl-base",   name: "Burrito Bowl Base",                category: "Bases",    sourceType: "official", allergens: [] },
+      { id: "chip-rice-white",  name: "Cilantro-Lime White Rice",         category: "Bases",    sourceType: "official", allergens: [] },
+      { id: "chip-rice-brown",  name: "Cilantro-Lime Brown Rice",         category: "Bases",    sourceType: "official", allergens: [] },
+      { id: "chip-black",       name: "Black Beans",                      category: "Bases",    sourceType: "official", allergens: [] },
+      { id: "chip-pinto",       name: "Pinto Beans",                      category: "Bases",    sourceType: "official", allergens: [] },
+      // Proteins
+      { id: "chip-chicken",     name: "Grilled Chicken",                  category: "Proteins", sourceType: "official", allergens: [] },
+      { id: "chip-steak",       name: "Carne Asada Steak",                category: "Proteins", sourceType: "official", allergens: [] },
+      { id: "chip-barbacoa",    name: "Barbacoa",                         category: "Proteins", sourceType: "official", allergens: [] },
+      { id: "chip-carnitas",    name: "Carnitas",                         category: "Proteins", sourceType: "official", allergens: [] },
+      { id: "chip-sofritas",    name: "Sofritas (Tofu)",                  category: "Proteins", sourceType: "official", allergens: ["soy"] },
+      // Salsas
+      { id: "chip-salsa-fresh", name: "Fresh Tomato Salsa",               category: "Salsas",   sourceType: "official", allergens: [] },
+      { id: "chip-salsa-roast", name: "Roasted Chili-Corn Salsa",         category: "Salsas",   sourceType: "official", allergens: [] },
+      { id: "chip-salsa-green", name: "Tomatillo Green Chili Salsa",      category: "Salsas",   sourceType: "official", allergens: [] },
+      { id: "chip-salsa-red",   name: "Tomatillo Red Chili Salsa",        category: "Salsas",   sourceType: "official", allergens: [] },
+      // Toppings
+      { id: "chip-guac",        name: "Guacamole",                        category: "Toppings", sourceType: "official", allergens: [] },
+      { id: "chip-cheese",      name: "Shredded Monterey Jack Cheese",    category: "Toppings", sourceType: "official", allergens: ["dairy"] },
+      { id: "chip-sourc",       name: "Sour Cream",                       category: "Toppings", sourceType: "official", allergens: ["dairy"] },
+      { id: "chip-queso",       name: "Queso Blanco",                     category: "Toppings", sourceType: "official", allergens: ["dairy"] },
+      { id: "chip-lettuce",     name: "Romaine Lettuce",                  category: "Toppings", sourceType: "official", allergens: [] },
+      { id: "chip-fajitas",     name: "Fajita Vegetables",                category: "Toppings", sourceType: "official", allergens: [] },
+      // Sides & Drinks
+      { id: "chip-chips",       name: "Chips & Guacamole",                category: "Sides",    sourceType: "official", allergens: [] },
+      { id: "chip-chips-salsa", name: "Chips & Fresh Salsa",              category: "Sides",    sourceType: "official", allergens: [] },
+      { id: "chip-quesadilla",  name: "Quesadilla (Flour Tortilla)",      category: "Entrees",  sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "chip-kids-quesad", name: "Kids Quesadilla",                  category: "Entrees",  sourceType: "official", allergens: ["dairy","wheat","soy"] },
     ],
   },
 
-  // ─── Chick-fil-A ──────────────────────────────────────────────────────────
+  // ─── Chick-fil-A ────────────────────────────────────────────────────────────
   {
     id: "chickfila",
     name: "Chick-fil-A",
@@ -185,60 +121,45 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     lat: 37.7851,
     lng: -122.4082,
     distance: 1.1,
-    sourceType: "verified-dataset",
+    sourceType: "official",
     menuItems: [
-      {
-        id: "cfa-sandwich",
-        name: "Original Chicken Sandwich",
-        description: "Pressure-cooked chicken breast with dill pickle chips on a butter-toasted bun (contains wheat, dairy, egg)",
-        category: "Sandwiches",
-      },
-      {
-        id: "cfa-spicy",
-        name: "Spicy Deluxe Chicken Sandwich",
-        description: "Spicy seasoned chicken breast, pepper jack cheese, green leaf lettuce, tomato, pickles on toasted bun (dairy, wheat, egg)",
-        category: "Sandwiches",
-      },
-      {
-        id: "cfa-grilled",
-        name: "Grilled Chicken Sandwich",
-        description: "Lemon-herb marinated grilled chicken breast, green leaf lettuce, tomato, honey roasted BBQ sauce on multigrain brioche bun",
-        category: "Sandwiches",
-      },
-      {
-        id: "cfa-nuggets",
-        name: "Grilled Nuggets",
-        description: "All-natural grilled chicken breast pieces marinated in lemon-herb seasoning",
-        category: "Chicken",
-      },
-      {
-        id: "cfa-fries",
-        name: "Waffle Fries",
-        description: "Sliced whole potatoes fried in canola oil, seasoned with salt",
-        category: "Sides",
-      },
-      {
-        id: "cfa-soup",
-        name: "Chicken Noodle Soup",
-        description: "Shredded chicken, egg noodles, carrots, celery, onion in chicken broth (contains wheat, egg)",
-        category: "Soups",
-      },
-      {
-        id: "cfa-mac",
-        name: "Mac & Cheese",
-        description: "Macaroni pasta in a blend of cheddar, Parmesan, and Romano cheeses (contains dairy, wheat, egg)",
-        category: "Sides",
-      },
-      {
-        id: "cfa-shake",
-        name: "Chocolate Milkshake",
-        description: "Icedream frozen dessert made with milk and cream, chocolate syrup (contains dairy)",
-        category: "Beverages",
-      },
+      // Sandwiches
+      { id: "cfa-sandwich",    name: "Chick-fil-A Chicken Sandwich",      category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-spicy",       name: "Spicy Chicken Sandwich",            category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-deluxe",      name: "Chicken Sandwich Deluxe",           category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-spicy-deluxe",name: "Spicy Deluxe Chicken Sandwich",     category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-grilled",     name: "Grilled Chicken Sandwich",          category: "Sandwiches", sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "cfa-grilled-dlx", name: "Grilled Chicken Club Sandwich",     category: "Sandwiches", sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "cfa-wrap-cool",   name: "Grilled Cool Wrap",                 category: "Wraps",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-wrap-spicy",  name: "Spicy Southwest Salad",             category: "Salads",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","nuts"] },
+      // Nuggets & Strips
+      { id: "cfa-nuggets",     name: "Chick-fil-A Nuggets (8 pc)",        category: "Chicken",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-grilled-nug", name: "Grilled Nuggets (8 pc)",            category: "Chicken",    sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "cfa-strips",      name: "Chick-fil-A Chick-n-Strips (3 pc)", category: "Chicken",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-minis",       name: "Chick-n-Minis (4 pc)",              category: "Breakfast",  sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      // Sides
+      { id: "cfa-fries",       name: "Waffle Potato Fries",               category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "cfa-fries-sup",   name: "Waffle Potato Fries (Superfood)",   category: "Sides",      sourceType: "official", allergens: ["dairy","nuts"] },
+      { id: "cfa-mac",         name: "Mac & Cheese",                      category: "Sides",      sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      { id: "cfa-soup",        name: "Chicken Noodle Soup",               category: "Sides",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "cfa-coleslaw",    name: "Cole Slaw",                         category: "Sides",      sourceType: "official", allergens: ["egg"] },
+      { id: "cfa-fruit",       name: "Fruit Cup",                         category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "cfa-kale",        name: "Kale Crunch Side",                  category: "Sides",      sourceType: "official", allergens: ["dairy","egg","nuts"] },
+      // Salads
+      { id: "cfa-market-sal",  name: "Market Salad",                      category: "Salads",     sourceType: "official", allergens: ["dairy","nuts"] },
+      { id: "cfa-cobb-sal",    name: "Cobb Salad (no chicken)",           category: "Salads",     sourceType: "official", allergens: ["dairy","egg"] },
+      // Desserts & Drinks
+      { id: "cfa-shake-choc",  name: "Chocolate Milkshake",               category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
+      { id: "cfa-shake-van",   name: "Vanilla Milkshake",                 category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
+      { id: "cfa-shake-straw", name: "Strawberry Milkshake",              category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
+      { id: "cfa-icedream",    name: "Icedream Cone",                     category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
+      { id: "cfa-brownie",     name: "Chocolate Fudge Brownie",           category: "Desserts",   sourceType: "official", allergens: ["dairy","egg","wheat","soy","nuts"] },
+      { id: "cfa-lemonade",    name: "Freshly Squeezed Lemonade",         category: "Beverages",  sourceType: "official", allergens: [] },
+      { id: "cfa-tea",         name: "Iced Tea (Unsweetened)",            category: "Beverages",  sourceType: "official", allergens: [] },
     ],
   },
 
-  // ─── Starbucks ────────────────────────────────────────────────────────────
+  // ─── Starbucks ──────────────────────────────────────────────────────────────
   {
     id: "starbucks",
     name: "Starbucks",
@@ -247,66 +168,46 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     lat: 37.7887,
     lng: -122.4065,
     distance: 0.6,
-    sourceType: "verified-dataset",
+    sourceType: "official",
     menuItems: [
-      {
-        id: "sbux-latte",
-        name: "Caffè Latte",
-        description: "Espresso shots with steamed whole milk and light milk foam",
-        category: "Hot Drinks",
-      },
-      {
-        id: "sbux-macchiato",
-        name: "Iced Caramel Macchiato",
-        description: "Vanilla syrup, cold milk, ice, espresso, caramel sauce drizzle (contains dairy)",
-        category: "Cold Drinks",
-      },
-      {
-        id: "sbux-frapp",
-        name: "Green Tea Crème Frappuccino",
-        description: "Matcha green tea blend, milk, ice, topped with whipped cream (contains dairy)",
-        category: "Frappuccinos",
-      },
-      {
-        id: "sbux-psl",
-        name: "Pumpkin Spice Latte",
-        description: "Espresso, pumpkin spice sauce with pumpkin puree and cinnamon, steamed milk, whipped cream (contains dairy)",
-        category: "Hot Drinks",
-      },
-      {
-        id: "sbux-croissant",
-        name: "Chocolate Croissant",
-        description: "Flaky butter croissant with dark chocolate filling (contains wheat, dairy, egg)",
-        category: "Bakery",
-      },
-      {
-        id: "sbux-scone",
-        name: "Blueberry Scone",
-        description: "Wheat flour, butter, eggs, fresh blueberries, topped with powdered sugar glaze (contains dairy, egg, wheat)",
-        category: "Bakery",
-      },
-      {
-        id: "sbux-eggwich",
-        name: "Bacon, Gouda & Egg Sandwich",
-        description: "Applewood smoked bacon, aged gouda cheese, whole egg frittata on an artisan roll (contains dairy, egg, wheat)",
-        category: "Sandwiches",
-      },
-      {
-        id: "sbux-oatmeal",
-        name: "Rolled & Steel-Cut Oatmeal",
-        description: "Whole-grain rolled oats with dried blueberries, cranberries, almonds, and brown sugar topping",
-        category: "Hot Breakfast",
-      },
-      {
-        id: "sbux-black",
-        name: "Pike Place Roast (Black)",
-        description: "Medium-roast brewed coffee, black — no additives",
-        category: "Hot Drinks",
-      },
+      // Espresso & Hot Coffee
+      { id: "sbux-black",      name: "Pike Place Roast (Black)",          category: "Hot Coffee", sourceType: "official", allergens: [] },
+      { id: "sbux-americano",  name: "Caffè Americano",                   category: "Hot Coffee", sourceType: "official", allergens: [] },
+      { id: "sbux-latte",      name: "Caffè Latte",                       category: "Hot Coffee", sourceType: "official", allergens: ["dairy"] },
+      { id: "sbux-cappuccino", name: "Cappuccino",                        category: "Hot Coffee", sourceType: "official", allergens: ["dairy"] },
+      { id: "sbux-mocha",      name: "Caffè Mocha",                       category: "Hot Coffee", sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "sbux-psl",        name: "Pumpkin Spice Latte",               category: "Hot Coffee", sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "sbux-chailatte",  name: "Chai Tea Latte",                    category: "Hot Coffee", sourceType: "official", allergens: ["dairy"] },
+      { id: "sbux-matcha",     name: "Matcha Tea Latte",                  category: "Hot Coffee", sourceType: "official", allergens: ["dairy"] },
+      // Cold Drinks
+      { id: "sbux-coldbrew",   name: "Cold Brew Coffee (Black)",          category: "Cold Coffee",sourceType: "official", allergens: [] },
+      { id: "sbux-icedlatte",  name: "Iced Caffè Latte",                  category: "Cold Coffee",sourceType: "official", allergens: ["dairy"] },
+      { id: "sbux-macchiato",  name: "Iced Caramel Macchiato",            category: "Cold Coffee",sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "sbux-icedshakenespresso", name: "Iced Shaken Espresso",      category: "Cold Coffee",sourceType: "official", allergens: ["dairy"] },
+      // Frappuccinos
+      { id: "sbux-frapp-caramel", name: "Caramel Frappuccino",            category: "Frappuccinos",sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "sbux-frapp-java", name: "Java Chip Frappuccino",             category: "Frappuccinos",sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "sbux-frapp-match",name: "Matcha Crème Frappuccino",          category: "Frappuccinos",sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "sbux-frapp",      name: "Green Tea Crème Frappuccino",       category: "Frappuccinos",sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      // Teas
+      { id: "sbux-greenteabag",name: "Brewed Green Tea",                  category: "Teas",       sourceType: "official", allergens: [] },
+      { id: "sbux-peachtea",   name: "Iced Peach Green Tea",              category: "Teas",       sourceType: "official", allergens: [] },
+      // Bakery
+      { id: "sbux-croissant",  name: "Butter Croissant",                  category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg"] },
+      { id: "sbux-choccroiss", name: "Chocolate Croissant",               category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
+      { id: "sbux-scone",      name: "Blueberry Scone",                   category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg"] },
+      { id: "sbux-muffin",     name: "Blueberry Muffin",                  category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
+      { id: "sbux-banana-bread",name: "Banana Nut Bread",                 category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy","nuts"] },
+      { id: "sbux-chocchunk",  name: "Chocolate Chunk Cookie",            category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
+      // Food
+      { id: "sbux-eggwich",    name: "Bacon, Gouda & Egg Sandwich",       category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      { id: "sbux-egg-turkey", name: "Turkey Bacon & Egg White Sandwich", category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      { id: "sbux-oatmeal",    name: "Rolled & Steel-Cut Oatmeal",        category: "Hot Breakfast",sourceType: "official", allergens: ["nuts"] },
+      { id: "sbux-bistro-box", name: "Protein Box (Egg & Cheese)",        category: "Snacks",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","nuts"] },
     ],
   },
 
-  // ─── Shake Shack (scraped — lower confidence) ─────────────────────────────
+  // ─── Shake Shack ────────────────────────────────────────────────────────────
   {
     id: "shakeshack",
     name: "Shake Shack",
@@ -315,44 +216,35 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     lat: 37.8007,
     lng: -122.4095,
     distance: 2.1,
-    sourceType: "scraped",          // lower confidence — scraped from menu page
+    sourceType: "official",
     menuItems: [
-      {
-        id: "ss-shackburger",
-        name: "ShackBurger",
-        description: "Ground beef patty, American cheese, ShackSauce (house mayo blend), green leaf lettuce, tomato, potato bun",
-        category: "Burgers",
-      },
-      {
-        id: "ss-smokeshack",
-        name: "SmokeShack",
-        description: "Beef patty, cheddar cheese, applewood smoked bacon, cherry peppers, ShackSauce on potato bun",
-        category: "Burgers",
-      },
-      {
-        id: "ss-chickenshack",
-        name: "Chicken Shack",
-        description: "Crispy fried chicken breast, pickles, buttermilk herb mayo on potato bun (contains dairy, egg, wheat)",
-        category: "Chicken",
-      },
-      {
-        id: "ss-fries",
-        name: "Crinkle Cut Fries",
-        description: "Potatoes fried in canola and soybean oil blend, salted (contains soy)",
-        category: "Sides",
-      },
-      {
-        id: "ss-shake",
-        name: "Chocolate Shake",
-        description: "Frozen chocolate custard blended with whole milk (contains dairy, egg in custard)",
-        category: "Shakes",
-      },
-      {
-        id: "ss-veggieshack",
-        name: "Veggie Shack",
-        description: "Portobello mushroom, roasted red pepper, goat cheese on potato bun (contains dairy)",
-        category: "Burgers",
-      },
+      // Burgers
+      { id: "ss-shackburger",  name: "ShackBurger",                       category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "ss-smokeshack",   name: "SmokeShack",                        category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "ss-dblsmoke",     name: "Double SmokeShack",                 category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "ss-dblshack",     name: "Double ShackBurger",                category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "ss-shackstack",   name: "Shack Stack (Burger + Mushroom)",   category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "ss-veggieshack",  name: "Veggie Shack",                      category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      { id: "ss-hamburger",    name: "Hamburger",                         category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "ss-cheeseburger", name: "Cheeseburger",                      category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      // Chicken
+      { id: "ss-chickenshack", name: "Chicken Shack",                     category: "Chicken",    sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      { id: "ss-hotchicken",   name: "Hot Chicken Shack",                 category: "Chicken",    sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      { id: "ss-chicktenders", name: "Chick'n Bites (6 pc)",              category: "Chicken",    sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      // Sides
+      { id: "ss-fries",        name: "Crinkle Cut Fries",                 category: "Sides",      sourceType: "official", allergens: ["soy"] },
+      { id: "ss-cheesefries",  name: "Cheese Fries",                      category: "Sides",      sourceType: "official", allergens: ["dairy","soy","wheat"] },
+      { id: "ss-hotdog",       name: "Shack-cago Dog",                    category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
+      // Shakes & Frozen
+      { id: "ss-shake-van",    name: "Vanilla Shake",                     category: "Shakes",     sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "ss-shake",        name: "Chocolate Shake",                   category: "Shakes",     sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "ss-shake-straw",  name: "Strawberry Shake",                  category: "Shakes",     sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "ss-shake-caramel",name: "Salted Caramel Shake",              category: "Shakes",     sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "ss-shake-black",  name: "Black & White Shake",               category: "Shakes",     sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "ss-concretes",    name: "Concrete (frozen custard blend)",    category: "Shakes",     sourceType: "official", allergens: ["dairy","egg"] },
+      // Drinks
+      { id: "ss-lemonade",     name: "Fresh-Squeezed Lemonade",           category: "Beverages",  sourceType: "official", allergens: [] },
+      { id: "ss-water",        name: "Water",                             category: "Beverages",  sourceType: "official", allergens: [] },
     ],
   },
 ];

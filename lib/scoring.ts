@@ -45,7 +45,12 @@ export function scoreMenuItem(
   const text = [item.name, item.description].filter(Boolean).join(" ");
 
   // 1. Term matching (explicit detection)
-  const { allergens: detected, hits } = detectAllergensFromLine(text);
+  const { allergens: textDetected, hits } = detectAllergensFromLine(text);
+  // Merge official allergen flags (from Nutritionix / authoritative source) if present.
+  // These are treated as ground-truth and override any gaps in text detection.
+  const detected: string[] = item.allergens
+    ? [...new Set([...(textDetected as string[]), ...item.allergens])]
+    : (textDetected as string[]);
 
   // 2. Dish-name inference
   const guesses = inferFromDishName(item.name);
