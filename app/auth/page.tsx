@@ -62,9 +62,9 @@ export default function AuthPage() {
       }}
     >
       {/* Logo */}
-      <Link href="/" style={{ textDecoration: "none", marginBottom: 28, textAlign: "center" }}>
-        <div style={{ fontSize: 36 }}>🍽️</div>
-        <div style={{ fontWeight: 900, fontSize: 22, color: "#111", letterSpacing: "-0.5px" }}>AllergEats</div>
+      <Link href="/" style={{ textDecoration: "none", marginBottom: 28, display: "block", textAlign: "center" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="AllergEats" style={{ height: 44, width: "auto" }} />
       </Link>
 
       {/* Card */}

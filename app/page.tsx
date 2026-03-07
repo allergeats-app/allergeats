@@ -105,15 +105,8 @@ export default function HomePage() {
       >
         {/* Brand */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ fontSize: 44, marginBottom: 8 }}>🍽️</div>
-          <h1
-            style={{
-              fontSize: 34, fontWeight: 900, color: "#111",
-              margin: 0, letterSpacing: "-0.5px",
-            }}
-          >
-            AllergEats
-          </h1>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="AllergEats" style={{ height: 52, width: "auto" }} />
           <p
             style={{
               fontSize: 15, color: "#6b7280", lineHeight: 1.5,
