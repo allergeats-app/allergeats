@@ -64,7 +64,7 @@ export default function AuthPage() {
     >
       {/* Logo */}
       <Link href="/" style={{ textDecoration: "none", marginBottom: 28, display: "block", textAlign: "center" }}>
-        <Image src="/logo.png" alt="AllergEats" width={700} height={160} style={{ width: "auto", height: 160, maxWidth: "90vw", display: "block", margin: "0 auto" }} priority />
+        <Image src="/logo.png" alt="AllergEats" width={350} height={80} style={{ width: "auto", height: 80, maxWidth: "90vw", display: "block", margin: "0 auto" }} priority />
       </Link>
 
       {/* Card */}

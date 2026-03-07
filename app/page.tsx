@@ -106,7 +106,7 @@ export default function HomePage() {
       >
         {/* Brand */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <Image src="/logo.png" alt="AllergEats" width={800} height={200} style={{ width: "auto", height: 200, maxWidth: "90vw", display: "block", margin: "0 auto" }} priority />
+          <Image src="/logo.png" alt="AllergEats" width={400} height={100} style={{ width: "auto", height: 100, maxWidth: "90vw", display: "block", margin: "0 auto" }} priority />
           <p
             style={{
               fontSize: 15, color: "#6b7280", lineHeight: 1.5,
