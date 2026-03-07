@@ -156,7 +156,9 @@ export default function ProfilePage() {
 
           {/* Username */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 8 }}>Username</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 8 }}>
+              {username ? "Change username" : "Username"}
+            </div>
             <div style={{ display: "flex", gap: 8 }}>
               <input
                 type="text"
@@ -169,17 +171,19 @@ export default function ProfilePage() {
                   background: "var(--c-input)", outline: "none", boxSizing: "border-box",
                 }}
               />
-              <button
-                onClick={handleSaveUsername}
-                style={{
-                  padding: "10px 16px", borderRadius: 10, border: "none",
-                  background: usernameSaved ? "#22c55e" : "var(--c-text)",
-                  color: "var(--c-bg)", fontSize: 13, fontWeight: 700,
-                  cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
-                }}
-              >
-                {usernameSaved ? "Saved!" : "Save"}
-              </button>
+              {(usernameEdit.trim() !== username || usernameSaved) && (
+                <button
+                  onClick={handleSaveUsername}
+                  style={{
+                    padding: "10px 16px", borderRadius: 10, border: "none",
+                    background: usernameSaved ? "#22c55e" : "var(--c-text)",
+                    color: "var(--c-bg)", fontSize: 13, fontWeight: 700,
+                    cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
+                  }}
+                >
+                  {usernameSaved ? "Saved!" : "Save"}
+                </button>
+              )}
             </div>
           </div>
 
