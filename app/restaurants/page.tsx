@@ -141,7 +141,7 @@ function RestaurantsContent() {
         break;
     }
     return list;
-  }, [restaurants, query, sort]);
+  }, [restaurants, query, sort, typeFilter]);
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
