@@ -4,27 +4,32 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { detectAllergensFromLine } from "@/lib/detectAllergens";
 import { inferFromDishName } from "@/lib/inferFromDish";
-import { TEXT_MENUS } from "@/data/textMenus";
+import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { buildScanInput } from "@/lib/buildScanInput";
 import { inferAllergensFromKeywords } from "@/lib/allergenDictionary";
 import { scoreRisk } from "@/lib/scoreRisk";
 import { useAuth } from "@/lib/authContext";
 import { AllergySelector } from "@/components/AllergySelector";
-import type { Confidence, Row, AvoidRow, Results, SavedScan, LearnedRule, SourceType } from "@/lib/types";
+import type { Confidence, Row, AvoidRow, Results, LearnedRule, SourceType, MenuSource } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
+
+// Auto-derived from MOCK_RESTAURANTS — updates automatically when new restaurants are added
+const ALL_MENUS: MenuSource[] = MOCK_RESTAURANTS.map((r) => ({
+  id: r.id,
+  restaurant: r.name,
+  category: r.cuisine,
+  items: r.menuItems.map((item) => item.name),
+}));
 
 function normalize(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
 }
 
-type ActiveTab = "scan" | "saved" | "history";
 type MenuSourceKey = "preloaded" | "url" | "manual";
 
-const STORAGE_SAVED   = "allegeats_saved_scans";
 const STORAGE_LEARNED = "allegeats_learned_rules";
 const VAGUE_WORDS = ["sauce","seasoning","blend","secret","marinade","glaze","dressing","rub","may contain"];
 
-function formatDate(ts: number) { return new Date(ts).toLocaleString(); }
 function makeId() { return Math.random().toString(36).slice(2) + "_" + Date.now().toString(36); }
 function toSourceType(s: MenuSourceKey): SourceType {
   return s === "preloaded" ? "verified-dataset" : s === "url" ? "scraped" : "user-input";
@@ -33,19 +38,17 @@ function toSourceType(s: MenuSourceKey): SourceType {
 export default function ScanPage() {
   const { allergens: profileAllergens } = useAuth();
 
-  const [activeTab, setActiveTab]               = useState<ActiveTab>("scan");
   const [activeInput, setActiveInput]           = useState<"preloaded" | "url" | "manual" | null>(null);
+  const [loadedRestaurant, setLoadedRestaurant] = useState<string | null>(null);
   const [selectedAllergens, setSelectedAllergens] = useState<AllergenId[]>([]);
-  const [menu, setMenu]                         = useState("Grilled Chicken Sandwich - brioche bun, aioli\nGarden Salad - mixed greens, vinaigrette\nTempura Shrimp Taco - battered shrimp, spicy mayo\nHouse Sauce Wings\nMac & Cheese - cheddar, milk, butter");
-  const [selectedMenuId, setSelectedMenuId]     = useState(TEXT_MENUS[0]?.id ?? "");
+  const [menu, setMenu]                         = useState("");
+  const [selectedMenuId, setSelectedMenuId]     = useState(ALL_MENUS[0]?.id ?? "");
   const [restaurantSearch, setRestaurantSearch] = useState("");
   const [analyzed, setAnalyzed]                 = useState(false);
   const [menuUrl, setMenuUrl]                   = useState("");
   const [menuSource, setMenuSource]             = useState<MenuSourceKey>("manual");
   const [isFetching, setIsFetching]             = useState(false);
   const [fetchError, setFetchError]             = useState<string | null>(null);
-  const [savedScans, setSavedScans]             = useState<SavedScan[]>([]);
-  const [saveTitle, setSaveTitle]               = useState("");
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
 
   // Load from auth profile, then localStorage fallback
@@ -56,19 +59,10 @@ export default function ScanPage() {
   }, [profileAllergens]);
 
   useEffect(() => {
-    try { const r = localStorage.getItem(STORAGE_SAVED);   if (r) setSavedScans(JSON.parse(r)); } catch { /* */ }
     try { const r = localStorage.getItem(STORAGE_LEARNED); if (r) setLearnedRules(JSON.parse(r)); } catch { /* */ }
   }, []);
 
-  function persistSaved(next: SavedScan[]) { setSavedScans(next); localStorage.setItem(STORAGE_SAVED, JSON.stringify(next)); }
   function persistLearned(next: LearnedRule[]) { setLearnedRules(next); localStorage.setItem(STORAGE_LEARNED, JSON.stringify(next)); }
-  function deleteSaved(id: string) { persistSaved(savedScans.filter((s) => s.id !== id)); }
-
-  function loadSaved(scan: SavedScan) {
-    setMenuUrl(scan.menuUrl); setMenu(scan.menu);
-    setMenuSource(scan.menuUrl ? "url" : "manual");
-    setAnalyzed(true); setActiveTab("scan"); setSaveTitle(scan.title);
-  }
 
   function upsertLearnedRule(outcome: "safe" | "avoid" | "unsure", item: string, allergen?: string) {
     const n = normalize(item);
@@ -81,7 +75,7 @@ export default function ScanPage() {
 
   const filteredMenus = useMemo(() => {
     const q = normalize(restaurantSearch);
-    return q ? TEXT_MENUS.filter((m) => normalize(`${m.restaurant} ${m.category} ${m.items.join(" ")}`).includes(q)) : TEXT_MENUS;
+    return q ? ALL_MENUS.filter((m) => normalize(`${m.restaurant} ${m.category}`).includes(q)) : ALL_MENUS;
   }, [restaurantSearch]);
 
   useEffect(() => {
@@ -89,7 +83,7 @@ export default function ScanPage() {
   }, [filteredMenus, selectedMenuId]);
 
   const selectedMenu = useMemo(() =>
-    filteredMenus.find((m) => m.id === selectedMenuId) ?? TEXT_MENUS.find((m) => m.id === selectedMenuId) ?? null,
+    filteredMenus.find((m) => m.id === selectedMenuId) ?? ALL_MENUS.find((m) => m.id === selectedMenuId) ?? null,
     [filteredMenus, selectedMenuId]
   );
 
@@ -104,7 +98,7 @@ export default function ScanPage() {
       if (!res.ok) { setFetchError(data?.error ?? "Fetch failed"); return; }
       const lines: string[] = data.menuLines ?? [];
       if (!lines.length) { setFetchError("Couldn't detect menu lines on that page."); return; }
-      setMenu(lines.join("\n")); setMenuSource("url"); setAnalyzed(false); setSaveTitle("Menu from URL");
+      setMenu(lines.join("\n")); setMenuSource("url"); setAnalyzed(false);
     } catch (err: unknown) { setFetchError(err instanceof Error ? err.message : "Network error"); }
     finally { setIsFetching(false); }
   }
@@ -112,16 +106,10 @@ export default function ScanPage() {
   function loadSelectedRestaurant() {
     if (!selectedMenu) return;
     setMenu(buildScanInput(selectedMenu)); setMenuSource("preloaded");
-    setMenuUrl(selectedMenu.url ?? ""); setAnalyzed(false); setFetchError(null); setSaveTitle(selectedMenu.restaurant);
+    setMenuUrl(selectedMenu.url ?? ""); setAnalyzed(false); setFetchError(null);
+    setLoadedRestaurant(selectedMenu.restaurant);
   }
-  function quickLoad(id: string) {
-    const t = TEXT_MENUS.find((m) => m.id === id);
-    if (!t) return;
-    setSelectedMenuId(t.id); setRestaurantSearch(t.restaurant);
-    setMenu(buildScanInput(t)); setMenuSource("preloaded");
-    setMenuUrl(t.url ?? ""); setAnalyzed(false); setFetchError(null); setSaveTitle(t.restaurant);
-  }
-  function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); }
+  function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); setLoadedRestaurant(null); }
 
   function buildStaffQs(hitAllergens: string[], inferredHits: string[], triggers: string[], vague: boolean) {
     const list = [...new Set([...hitAllergens, ...inferredHits])].length ? [...new Set([...hitAllergens, ...inferredHits])] : avoidAllergens;
@@ -182,14 +170,6 @@ export default function ScanPage() {
     return { safe, ask, avoid };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuItems, avoidAllergens, learnedRules, menuSource]);
-
-  function saveCurrentScan() {
-    if (!analyzed) return;
-    const allergiesStr = selectedAllergens.join(", ");
-    const title = saveTitle.trim() || selectedMenu?.restaurant || (menuUrl.trim() ? "Menu from URL" : "Saved scan");
-    persistSaved([{ id: makeId(), createdAt: Date.now(), title, allergies: allergiesStr, menuUrl, menu, results }, ...savedScans].slice(0, 50));
-    setActiveTab("saved");
-  }
 
   function confBadge(c: Confidence) {
     const styles: Record<Confidence, { bg: string; color: string; border: string }> = {
@@ -262,14 +242,8 @@ export default function ScanPage() {
     );
   }
 
-  const TAB_META: { id: ActiveTab; label: string }[] = [
-    { id: "scan",    label: "Scan"    },
-    { id: "saved",   label: "Saved"   },
-    { id: "history", label: "History" },
-  ];
-
   return (
-    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
+    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 32 }}>
       {/* Sticky header */}
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -281,8 +255,7 @@ export default function ScanPage() {
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0" }}>
 
-        {activeTab === "scan" && (
-          <div style={{ display: "grid", gap: 14 }}>
+            <div style={{ display: "grid", gap: 14 }}>
 
             {/* Allergy profile */}
             <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
@@ -369,7 +342,7 @@ export default function ScanPage() {
                 <div style={{ padding: 16 }}>
                   <textarea
                     value={menu}
-                    onChange={(e) => { setMenu(e.target.value); setMenuSource("manual"); }}
+                    onChange={(e) => { setMenu(e.target.value); setMenuSource("manual"); setLoadedRestaurant(null); }}
                     placeholder="Paste menu items, one per line…"
                     style={{ width: "100%", boxSizing: "border-box", minHeight: 160, resize: "vertical", border: "1px solid var(--c-border)", background: "var(--c-input)", color: "var(--c-text)", borderRadius: 10, padding: 12, fontSize: 14, lineHeight: 1.6, outline: "none" }}
                   />
@@ -378,22 +351,30 @@ export default function ScanPage() {
               )}
             </div>
 
+            {/* Loaded restaurant confirmation */}
+            {loadedRestaurant && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: "#15803d" }}>✓</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#15803d" }}>{loadedRestaurant}</span>
+                  <span style={{ fontSize: 12, color: "#6b7280" }}>loaded — {menuItems.length} items</span>
+                </div>
+                <button
+                  onClick={clearMenu}
+                  style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+
             {/* Analyze */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
-              <button
-                onClick={() => setAnalyzed(true)}
-                style={{ padding: "14px 0", borderRadius: 14, border: "none", background: "#eb1700", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
-              >
-                Analyze Menu
-              </button>
-              <button
-                onClick={saveCurrentScan}
-                disabled={!analyzed}
-                style={{ padding: "14px 18px", borderRadius: 14, border: "1px solid var(--c-border)", background: analyzed ? "var(--c-text)" : "var(--c-card)", color: analyzed ? "var(--c-bg)" : "var(--c-sub)", fontSize: 14, fontWeight: 700, cursor: analyzed ? "pointer" : "not-allowed" }}
-              >
-                Save
-              </button>
-            </div>
+            <button
+              onClick={() => setAnalyzed(true)}
+              style={{ padding: "14px 0", borderRadius: 14, border: "none", background: "#eb1700", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+            >
+              Analyze Menu
+            </button>
 
             {/* Results */}
             {analyzed && (
@@ -418,56 +399,6 @@ export default function ScanPage() {
               </>
             )}
           </div>
-        )}
-
-        {activeTab === "saved" && (
-          <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-            <div style={{ fontWeight: 900, fontSize: 18, color: "#111", marginBottom: 4 }}>Saved Scans</div>
-            <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>Quick access to menus you already checked.</div>
-            <div style={{ display: "grid", gap: 10 }}>
-              {savedScans.length === 0 && <div style={{ fontSize: 13, color: "#9ca3af" }}>No saved scans yet.</div>}
-              {savedScans.map((s) => (
-                <div key={s.id} style={{ border: "1px solid #e5e7eb", borderRadius: 16, padding: 14 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: "#111" }}>{s.title}</div>
-                  <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>{formatDate(s.createdAt)}</div>
-                  <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 4 }}>Safe: {s.results.safe.length} · Ask: {s.results.ask.length} · Avoid: {s.results.avoid.length}</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
-                    <button onClick={() => loadSaved(s)} style={{ padding: "11px 0", borderRadius: 12, border: "none", background: "#eb1700", color: "#fff", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>Open</button>
-                    <button onClick={() => deleteSaved(s.id)} style={{ padding: "11px 0", borderRadius: 12, border: "1px solid #e5e7eb", background: "#fff", color: "#374151", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Delete</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "history" && (
-          <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-            <div style={{ fontWeight: 900, fontSize: 18, color: "#111", marginBottom: 4 }}>Learned History</div>
-            <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>Dishes you've confirmed safe, unsafe, or unsure.</div>
-            <div style={{ display: "grid", gap: 10 }}>
-              {learnedRules.length === 0 && <div style={{ fontSize: 13, color: "#9ca3af" }}>No history yet. Mark items after analyzing a menu.</div>}
-              {learnedRules.map((rule) => (
-                <div key={rule.id} style={{ border: "1px solid #e5e7eb", borderRadius: 14, padding: 14 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: "#111" }}>{rule.item}</div>
-                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
-                    {rule.outcome === "safe" ? "Confirmed safe" : rule.outcome === "unsure" ? "Marked unsure" : `Contains ${rule.allergen ?? "allergen"}`}
-                  </div>
-                  <button onClick={() => persistLearned(learnedRules.filter((r) => r.id !== rule.id))} style={{ marginTop: 10, width: "100%", padding: "10px 0", borderRadius: 10, border: "1px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Remove</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom nav */}
-      <div style={{ position: "fixed", left: 12, right: 12, bottom: 12, background: "rgba(255,255,255,0.96)", border: "1px solid #e5e7eb", backdropFilter: "blur(14px)", borderRadius: 22, padding: "6px 10px", display: "flex", zIndex: 100, maxWidth: 568, margin: "0 auto" }}>
-        {TAB_META.map(({ id, label }) => (
-          <button key={id} onClick={() => setActiveTab(id)} style={{ flex: 1, border: "none", background: "transparent", color: activeTab === id ? "#eb1700" : "var(--c-sub)", padding: "10px 6px", fontWeight: 800, fontSize: 13, cursor: "pointer" }}>
-            {label}
-          </button>
-        ))}
       </div>
     </main>
   );
