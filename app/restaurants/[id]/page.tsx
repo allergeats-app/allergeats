@@ -13,7 +13,7 @@ import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/t
 
 type RiskFilter = "all" | Risk;
 
-const RISK_ORDER: Risk[] = ["avoid", "ask", "unknown", "likely-safe"];
+const RISK_ORDER: Risk[] = ["likely-safe", "avoid", "ask", "unknown"];
 const SESSION_KEY = "allegeats_live_restaurants";
 
 const SECTION_META: Record<Risk, { label: string; mark: string; bg: string; border: string; markColor: string }> = {

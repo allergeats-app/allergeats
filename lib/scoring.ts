@@ -97,6 +97,14 @@ export function scoreMenuItem(
         })
       : [];
 
+  // Which of the user's allergens are actually present in this item
+  const userAllergenHits = [
+    ...new Set([
+      ...detected.filter((a) => userAllergens.includes(a)),
+      ...inferredAllergens.filter((a) => userAllergens.includes(a)),
+    ]),
+  ];
+
   return {
     id: item.id,
     name: item.name,
@@ -111,6 +119,7 @@ export function scoreMenuItem(
     triggerTerms: hits,
     explanation,
     staffQuestions,
+    userAllergenHits,
   };
 }
 

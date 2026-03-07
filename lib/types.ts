@@ -62,6 +62,8 @@ export type ScoredMenuItem = {
   triggerTerms: string[];
   explanation: string;
   staffQuestions: string[];
+  /** Allergens from this item that match the user's own allergy profile */
+  userAllergenHits: string[];
 };
 
 // ─── Restaurant safety summary (derived from scored items, never hardcoded) ──

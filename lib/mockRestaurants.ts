@@ -247,4 +247,237 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "ss-water",        name: "Water",                             category: "Beverages",  sourceType: "official", allergens: [] },
     ],
   },
+
+  // ─── Subway ──────────────────────────────────────────────────────────────────
+  // Source: subway.com/en-US/MenuNutrition/Nutrition/AllergenInformation
+  {
+    id: "subway",
+    name: "Subway",
+    cuisine: "Fast Casual · Sandwiches",
+    address: "500 Market St, San Francisco, CA",
+    lat: 37.7905,
+    lng: -122.3998,
+    distance: 0.5,
+    sourceType: "official",
+    menuItems: [
+      // Breads
+      { id: "sub-italian",       name: "Italian White Bread",                category: "Breads",     sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-multigrain",    name: "Hearty Multigrain Bread",            category: "Breads",     sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "sub-honey-oat",     name: "9-Grain Honey Oat Bread",            category: "Breads",     sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-wrap",          name: "Spinach Wrap",                       category: "Breads",     sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-flatbread",     name: "Flatbread",                          category: "Breads",     sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      // Subs
+      { id: "sub-bmt",           name: "Italian B.M.T.",                     category: "Subs",       sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "sub-turkey",        name: "Turkey Breast",                      category: "Subs",       sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-tuna",          name: "Tuna",                               category: "Subs",       sourceType: "official", allergens: ["wheat","soy","fish","egg"] },
+      { id: "sub-meatball",      name: "Meatball Marinara",                  category: "Subs",       sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      { id: "sub-veggie",        name: "Veggie Delite",                      category: "Subs",       sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-chicken",       name: "Rotisserie-Style Chicken",           category: "Subs",       sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-steak",         name: "Steak & Cheese",                     category: "Subs",       sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "sub-spicy-italian", name: "Spicy Italian",                      category: "Subs",       sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "sub-black-forest",  name: "Black Forest Ham",                   category: "Subs",       sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-roast-beef",    name: "Roast Beef",                         category: "Subs",       sourceType: "official", allergens: ["wheat","soy"] },
+      // Breakfast
+      { id: "sub-egg-cheese",    name: "Egg & Cheese Sandwich",              category: "Breakfast",  sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      { id: "sub-steak-egg",     name: "Steak, Egg & Cheese",                category: "Breakfast",  sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      // Sides & Extras
+      { id: "sub-cookie-choc",   name: "Chocolate Chip Cookie",              category: "Cookies",    sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      { id: "sub-cookie-oat",    name: "Oatmeal Raisin Cookie",              category: "Cookies",    sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      { id: "sub-chips",         name: "Lay's Classic Chips",                category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "sub-apple",         name: "Apple Slices",                       category: "Sides",      sourceType: "official", allergens: [] },
+    ],
+  },
+
+  // ─── Taco Bell ───────────────────────────────────────────────────────────────
+  // Source: tacobell.com/allergens
+  {
+    id: "tacobell",
+    name: "Taco Bell",
+    cuisine: "Fast Food · Mexican",
+    address: "600 Mission St, San Francisco, CA",
+    lat: 37.7875,
+    lng: -122.4016,
+    distance: 0.8,
+    sourceType: "official",
+    menuItems: [
+      // Tacos
+      { id: "tb-crunchy-taco",   name: "Crunchy Taco",                       category: "Tacos",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "tb-soft-taco",      name: "Soft Taco",                          category: "Tacos",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "tb-supreme-taco",   name: "Crunchy Taco Supreme",               category: "Tacos",      sourceType: "official", allergens: ["dairy","soy","egg"] },
+      { id: "tb-doritos-locos",  name: "Doritos Locos Taco (Nacho Cheese)",  category: "Tacos",      sourceType: "official", allergens: ["dairy","soy","wheat"] },
+      // Burritos
+      { id: "tb-bean-burrito",   name: "Bean Burrito",                       category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "tb-beefy-5",        name: "Beefy 5-Layer Burrito",              category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-supreme-burrito",name: "Burrito Supreme",                    category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-fiesta-veg",     name: "Fiesta Veggie Burrito",              category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // Specialties
+      { id: "tb-crunchwrap",     name: "Crunchwrap Supreme",                 category: "Specialties",sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-chalupa",        name: "Chalupa Supreme",                    category: "Specialties",sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-gordita",        name: "Cheesy Gordita Crunch",              category: "Specialties",sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-mexican-pizza",  name: "Mexican Pizza",                      category: "Specialties",sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-quesadilla",     name: "Quesadilla (Chicken)",               category: "Specialties",sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "tb-power-bowl",     name: "Power Menu Bowl (Chicken)",          category: "Bowls",      sourceType: "official", allergens: ["dairy","soy"] },
+      // Sides
+      { id: "tb-nachos",         name: "Nachos BellGrande",                  category: "Sides",      sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "tb-chips-cheese",   name: "Chips & Nacho Cheese Sauce",         category: "Sides",      sourceType: "official", allergens: ["dairy"] },
+      { id: "tb-cinnabon",       name: "Cinnabon Delights (2 pk)",           category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "tb-cinnamon-twists",name: "Cinnamon Twists",                    category: "Desserts",   sourceType: "official", allergens: ["wheat","soy"] },
+    ],
+  },
+
+  // ─── Burger King ─────────────────────────────────────────────────────────────
+  // Source: bk.com/allergen-information
+  {
+    id: "burgerking",
+    name: "Burger King",
+    cuisine: "Fast Food · Burgers",
+    address: "700 Market St, San Francisco, CA",
+    lat: 37.7892,
+    lng: -122.4056,
+    distance: 0.9,
+    sourceType: "official",
+    menuItems: [
+      // Burgers
+      { id: "bk-whopper",        name: "Whopper",                            category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      { id: "bk-whopper-cheese", name: "Whopper with Cheese",               category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
+      { id: "bk-double-whopper", name: "Double Whopper",                     category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      { id: "bk-bacon-king",     name: "Bacon King",                         category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
+      { id: "bk-cheeseburger",   name: "Cheeseburger",                       category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
+      { id: "bk-hamburger",      name: "Hamburger",                          category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      { id: "bk-rodeo",          name: "Rodeo Burger",                       category: "Burgers",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
+      // Chicken & Fish
+      { id: "bk-crispy-ch",      name: "Crispy Chicken Sandwich",            category: "Chicken",    sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
+      { id: "bk-spicy-crispy",   name: "Spicy Crispy Chicken Sandwich",      category: "Chicken",    sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
+      { id: "bk-orig-chicken",   name: "Original Chicken Sandwich",          category: "Chicken",    sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
+      { id: "bk-nuggets",        name: "Chicken Nuggets (8 pc)",             category: "Chicken",    sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "bk-fish",           name: "Big Fish Sandwich",                  category: "Fish",       sourceType: "official", allergens: ["fish","wheat","soy","egg"] },
+      // Sides
+      { id: "bk-fries",          name: "French Fries",                       category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "bk-onion-rings",    name: "Onion Rings",                        category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "bk-apple-slices",   name: "Apple Slices",                       category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "bk-garden-salad",   name: "Garden Side Salad",                  category: "Sides",      sourceType: "official", allergens: [] },
+      // Breakfast
+      { id: "bk-croissan-wich",  name: "Sausage, Egg & Cheese Croissan'wich",category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "bk-hash-browns",    name: "Hash Browns",                        category: "Breakfast",  sourceType: "official", allergens: ["wheat","soy"] },
+      // Desserts & Drinks
+      { id: "bk-shake-van",      name: "Vanilla Milkshake",                  category: "Shakes",     sourceType: "official", allergens: ["dairy","soy","wheat"] },
+      { id: "bk-shake-choc",     name: "Chocolate Milkshake",                category: "Shakes",     sourceType: "official", allergens: ["dairy","soy","wheat"] },
+    ],
+  },
+
+  // ─── Wendy's ─────────────────────────────────────────────────────────────────
+  // Source: wendys.com/allergens
+  {
+    id: "wendys",
+    name: "Wendy's",
+    cuisine: "Fast Food · Burgers",
+    address: "800 Kearny St, San Francisco, CA",
+    lat: 37.7961,
+    lng: -122.4059,
+    distance: 1.3,
+    sourceType: "official",
+    menuItems: [
+      // Burgers
+      { id: "wen-dave-single",   name: "Dave's Single",                      category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-dave-double",   name: "Dave's Double",                      category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-dave-triple",   name: "Dave's Triple",                      category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-baconator",     name: "Baconator",                          category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-jr-cheese",     name: "Jr. Cheeseburger",                   category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "wen-pub-burger",    name: "Pretzel Bacon Pub Burger",           category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      // Chicken
+      { id: "wen-crispy-ch",     name: "Classic Chicken Sandwich",           category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-spicy-ch",      name: "Spicy Chicken Sandwich",             category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-grilled-ch",    name: "Grilled Chicken Sandwich",           category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "wen-nuggets",       name: "Chicken Nuggets (4 pc)",             category: "Chicken",    sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
+      { id: "wen-spicy-nug",     name: "Spicy Chicken Nuggets (4 pc)",       category: "Chicken",    sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
+      // Sides
+      { id: "wen-fries",         name: "Natural Cut Fries",                  category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "wen-chili",         name: "Small Chili",                        category: "Sides",      sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "wen-baked-potato",  name: "Plain Baked Potato",                 category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "wen-salad",         name: "Garden Side Salad",                  category: "Sides",      sourceType: "official", allergens: [] },
+      // Desserts
+      { id: "wen-frosty-van",    name: "Vanilla Frosty",                     category: "Desserts",   sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "wen-frosty-choc",   name: "Chocolate Frosty",                   category: "Desserts",   sourceType: "official", allergens: ["dairy","soy"] },
+    ],
+  },
+
+  // ─── Panera Bread ────────────────────────────────────────────────────────────
+  // Source: panerabread.com/en-us/menu/nutrition-allergen-information.html
+  {
+    id: "panera",
+    name: "Panera Bread",
+    cuisine: "Fast Casual · Bakery · Café",
+    address: "900 Market St, San Francisco, CA",
+    lat: 37.7834,
+    lng: -122.4076,
+    distance: 1.0,
+    sourceType: "official",
+    menuItems: [
+      // Soups
+      { id: "pan-broc-chedd",    name: "Broccoli Cheddar Soup",              category: "Soups",      sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
+      { id: "pan-chicken-nood",  name: "Chicken Noodle Soup",                category: "Soups",      sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "pan-french-onion",  name: "French Onion Soup",                  category: "Soups",      sourceType: "official", allergens: ["wheat","dairy"] },
+      { id: "pan-tomato",        name: "Creamy Tomato Soup",                  category: "Soups",      sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      // Sandwiches & Paninis
+      { id: "pan-turkey",        name: "Turkey Sandwich",                    category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "pan-blt",           name: "BLT Sandwich",                       category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "pan-frontega",      name: "Frontega Chicken Panini",            category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "pan-grilled-cheese",name: "Grilled Cheese",                     category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "pan-tuna",          name: "Tuna Salad Sandwich",                category: "Sandwiches", sourceType: "official", allergens: ["wheat","fish","egg","dairy"] },
+      // Salads
+      { id: "pan-caesar",        name: "Caesar Salad",                       category: "Salads",     sourceType: "official", allergens: ["dairy","egg","fish","wheat"] },
+      { id: "pan-goddess-cobb",  name: "Green Goddess Cobb Salad",           category: "Salads",     sourceType: "official", allergens: ["dairy","egg"] },
+      { id: "pan-fuji-apple",    name: "Fuji Apple Salad",                   category: "Salads",     sourceType: "official", allergens: ["nuts","dairy","egg","wheat"] },
+      { id: "pan-greek",         name: "Greek Salad",                        category: "Salads",     sourceType: "official", allergens: ["dairy"] },
+      // Breads & Bagels
+      { id: "pan-sourdough",     name: "Sourdough Bread (slice)",            category: "Bakery",     sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "pan-bagel-plain",   name: "Plain Bagel",                        category: "Bakery",     sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "pan-bagel-cinn",    name: "Cinnamon Crunch Bagel",              category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "pan-bagel-asiago",  name: "Asiago Cheese Bagel",                category: "Bakery",     sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "pan-croissant",     name: "Butter Croissant",                   category: "Bakery",     sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "pan-muffin-blueberry", name: "Blueberry Muffin",               category: "Bakery",     sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      // Drinks
+      { id: "pan-lemonade",      name: "Charged Lemonade",                   category: "Beverages",  sourceType: "official", allergens: [] },
+      { id: "pan-coffee",        name: "Hot Coffee (Black)",                  category: "Beverages",  sourceType: "official", allergens: [] },
+      { id: "pan-smoothie",      name: "Mango Smoothie",                     category: "Beverages",  sourceType: "official", allergens: ["dairy"] },
+    ],
+  },
+
+  // ─── Dunkin' ─────────────────────────────────────────────────────────────────
+  // Source: dunkindonuts.com/en/nutrition/allergen-info
+  {
+    id: "dunkin",
+    name: "Dunkin'",
+    cuisine: "Café · Donuts · Coffee",
+    address: "150 New Montgomery St, San Francisco, CA",
+    lat: 37.7872,
+    lng: -122.3998,
+    distance: 0.7,
+    sourceType: "official",
+    menuItems: [
+      // Donuts
+      { id: "dunk-glazed",       name: "Glazed Donut",                       category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dunk-choc-frosted", name: "Chocolate Frosted Donut",            category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dunk-boston-kreme", name: "Boston Kreme Donut",                 category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dunk-glazed-munchkin", name: "Glazed Munchkin Donut Holes",     category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dunk-old-fashioned",name: "Old Fashioned Donut",                category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      // Bagels & Muffins
+      { id: "dunk-bagel-plain",  name: "Plain Bagel",                        category: "Bakery",     sourceType: "official", allergens: ["wheat"] },
+      { id: "dunk-bagel-cream",  name: "Bagel with Cream Cheese",            category: "Bakery",     sourceType: "official", allergens: ["wheat","dairy"] },
+      { id: "dunk-muffin-blue",  name: "Blueberry Muffin",                   category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dunk-croissant",    name: "Croissant",                          category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy"] },
+      // Breakfast Sandwiches
+      { id: "dunk-egg-cheese",   name: "Bacon, Egg & Cheese Sandwich",       category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dunk-sausage",      name: "Sausage, Egg & Cheese Sandwich",     category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dunk-wake-wrap",    name: "Wake-Up Wrap (Egg & Cheese)",        category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dunk-hash-browns",  name: "Hash Browns",                        category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
+      // Coffee & Drinks
+      { id: "dunk-coffee-black", name: "Hot Coffee (Black)",                  category: "Coffee",     sourceType: "official", allergens: [] },
+      { id: "dunk-iced-coffee",  name: "Iced Coffee (Black)",                 category: "Coffee",     sourceType: "official", allergens: [] },
+      { id: "dunk-latte",        name: "Latte",                              category: "Coffee",     sourceType: "official", allergens: ["dairy"] },
+      { id: "dunk-iced-latte",   name: "Iced Latte",                         category: "Coffee",     sourceType: "official", allergens: ["dairy"] },
+      { id: "dunk-macchiato",    name: "Caramel Macchiato",                   category: "Coffee",     sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "dunk-coolatta-van", name: "Vanilla Bean Coolatta",               category: "Frozen",     sourceType: "official", allergens: ["dairy","soy"] },
+    ],
+  },
 ];

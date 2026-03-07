@@ -61,21 +61,38 @@ export function MenuItemCard({ item }: Props) {
       {/* Explanation */}
       <div style={{ fontSize: 12, color: "#374151", lineHeight: 1.5 }}>{item.explanation}</div>
 
-      {/* Detected / Inferred chips */}
-      {(item.detectedAllergens.length > 0 || item.inferredAllergens.length > 0) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-          {item.detectedAllergens.map((a) => (
-            <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#fde8e8", color: "#b91c1c", fontSize: 11, fontWeight: 700 }}>
+      {/* User's allergens — shown prominently */}
+      {item.userAllergenHits.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 5 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af" }}>Contains:</span>
+          {item.userAllergenHits.map((a) => (
+            <span key={a} style={{ padding: "3px 9px", borderRadius: 999, background: "#fde8e8", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: 11, fontWeight: 800 }}>
               {a}
-            </span>
-          ))}
-          {item.inferredAllergens.map((a) => (
-            <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 11, fontWeight: 600 }}>
-              ~{a}
             </span>
           ))}
         </div>
       )}
+
+      {/* Other allergens not in user's profile */}
+      {(() => {
+        const others = item.detectedAllergens.filter((a) => !item.userAllergenHits.includes(a));
+        const otherInferred = item.inferredAllergens.filter((a) => !item.userAllergenHits.includes(a));
+        if (!others.length && !otherInferred.length) return null;
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {others.map((a) => (
+              <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#f3f4f6", color: "#6b7280", fontSize: 11, fontWeight: 600 }}>
+                {a}
+              </span>
+            ))}
+            {otherInferred.map((a) => (
+              <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 11, fontWeight: 600 }}>
+                ~{a}
+              </span>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Confidence + expand toggle */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
