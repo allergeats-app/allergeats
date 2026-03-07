@@ -58,6 +58,7 @@ function RestaurantsContent() {
   const [query, setQuery]                 = useState(queryParam);
   const [sort, setSort]                   = useState<SortOption>("distance");
   const [typeFilter, setTypeFilter]       = useState<TypeFilter>("all");
+  const [onlyWithMenu, setOnlyWithMenu]   = useState(false);
   const [restaurants, setRestaurants]     = useState<ScoredRestaurant[]>([]);
   const [loading, setLoading]             = useState(true);
   const [locationLabel, setLocationLabel] = useState("Locating…");
@@ -127,6 +128,7 @@ function RestaurantsContent() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     let list = restaurants.filter((r) => matchesType(r.cuisine, r.name, typeFilter));
+    if (onlyWithMenu) list = list.filter((r) => r.scoredItems.length > 0);
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
     switch (sort) {
@@ -141,7 +143,7 @@ function RestaurantsContent() {
         break;
     }
     return list;
-  }, [restaurants, query, sort, typeFilter]);
+  }, [restaurants, query, sort, typeFilter, onlyWithMenu]);
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
@@ -187,6 +189,15 @@ function RestaurantsContent() {
                 </button>
               ))}
             </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", width: "fit-content" }}>
+              <input
+                type="checkbox"
+                checked={onlyWithMenu}
+                onChange={(e) => setOnlyWithMenu(e.target.checked)}
+                style={{ width: 15, height: 15, accentColor: "#eb1700", cursor: "pointer" }}
+              />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-sub)" }}>Only show restaurants with menu data</span>
+            </label>
           </div>
         </div>
       </div>
