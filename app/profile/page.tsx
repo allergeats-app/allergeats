@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -14,29 +14,38 @@ export default function ProfilePage() {
   const { isDark, toggle: toggleTheme } = useTheme();
   const router = useRouter();
 
-  const [selected, setSelected]       = useState<AllergenId[]>([]);
-  const [saved, setSaved]             = useState(false);
-  const [signingOut, setSigningOut]   = useState(false);
-  const [usernameEdit, setUsernameEdit] = useState("");
+  const [selected, setSelected]           = useState<AllergenId[]>([]);
+  const [savedSelection, setSavedSelection] = useState<AllergenId[]>([]);
+  const [saved, setSaved]                 = useState(false);
+  const [signingOut, setSigningOut]       = useState(false);
+  const [usernameEdit, setUsernameEdit]   = useState("");
   const [usernameSaved, setUsernameSaved] = useState(false);
+  const syncedRef = useRef(false);
 
   // Redirect to auth if not signed in (after loading completes)
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
   }, [loading, user, router]);
 
-  // Sync allergens from context once loaded
+  // Sync from context ONCE on initial load only
   useEffect(() => {
-    if (allergens.length > 0) setSelected(allergens);
-  }, [allergens]);
+    if (!syncedRef.current && !loading) {
+      syncedRef.current = true;
+      setSelected(allergens);
+      setSavedSelection(allergens);
+    }
+  }, [allergens, loading]);
 
   // Sync username from context
   useEffect(() => {
     setUsernameEdit(username);
   }, [username]);
 
+  const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join();
+
   async function handleSave() {
     await saveAllergens(selected);
+    setSavedSelection([...selected]);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -212,20 +221,22 @@ export default function ProfilePage() {
             Saved to your account and synced across devices.
           </div>
 
-          <AllergySelector selected={selected} onChange={setSelected} />
+          <AllergySelector selected={selected} onChange={setSelected} limit={4} />
 
-          <button
-            onClick={handleSave}
-            style={{
-              marginTop: 20, width: "100%", padding: "14px 0",
-              borderRadius: 14, border: "none",
-              background: saved ? "#22c55e" : "var(--c-text)",
-              color: "var(--c-bg)", fontSize: 14, fontWeight: 800,
-              cursor: "pointer", transition: "background 0.2s",
-            }}
-          >
-            {saved ? "Saved!" : "Save Allergy Profile"}
-          </button>
+          {(isDirty || saved) && (
+            <button
+              onClick={handleSave}
+              style={{
+                marginTop: 20, width: "100%", padding: "14px 0",
+                borderRadius: 14, border: "none",
+                background: saved ? "#22c55e" : "var(--c-text)",
+                color: "var(--c-bg)", fontSize: 14, fontWeight: 800,
+                cursor: "pointer", transition: "background 0.2s",
+              }}
+            >
+              {saved ? "Saved!" : "Save Allergy Profile"}
+            </button>
+          )}
         </div>
 
         {/* Current profile summary */}
