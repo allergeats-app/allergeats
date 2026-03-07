@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # AllergEats
 
 A web app that helps people with food allergies safely navigate restaurant menus. Paste or load a menu, enter your allergies, and get an instant breakdown of what to avoid, what to ask about, and what looks safe — along with ready-to-use questions to ask restaurant staff.
@@ -141,10 +140,6 @@ Confidence scale: `5` = certain, `4` = very likely, `3` = probable, `2` = possib
 
 - No automated tests
 - `app/page.tsx` is large (~1300 lines) — component decomposition would improve maintainability
-- TypeScript types for `Row`, `Results`, `SavedScan`, `LearnedRule` are defined inline in `page.tsx` rather than in `lib/types.ts`
 - Pre-loaded restaurant database is limited (3 restaurants)
 - URL menu fetching is best-effort HTML scraping with no retry logic
 - No CI/CD pipeline
-=======
-# allergeats
->>>>>>> d1c0f2f1264a238b35fec2996c190b02f6eb7d04
