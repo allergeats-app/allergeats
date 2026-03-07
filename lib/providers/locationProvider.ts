@@ -75,19 +75,64 @@ function findMockMatch(liveName: string): Restaurant | undefined {
   });
 }
 
+// ─── Overpass mirrors (tried in order until one succeeds) ─────────────────────
+
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.fr/api/interpreter",
+];
+
+async function fetchOverpass(query: string): Promise<{ elements: OverpassElement[] }> {
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: query,
+        signal: AbortSignal.timeout(20000),
+      });
+      if (res.ok) return await res.json();
+    } catch { /* try next mirror */ }
+  }
+  throw new Error("All Overpass endpoints failed");
+}
+
 // ─── Geolocation (shared) ─────────────────────────────────────────────────────
 
 const FALLBACK: Coordinates = { lat: 37.7749, lng: -122.4194 };
 
 function getRealLocation(): Promise<Coordinates | null> {
   if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(FALLBACK);
+
   return new Promise((resolve) => {
+    let resolved = false;
+    function done(c: Coordinates) { if (!resolved) { resolved = true; resolve(c); } }
+
+    // Try high-accuracy (GPS) with a 6s window
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => resolve(FALLBACK),
-      { timeout: 8000, enableHighAccuracy: false }
+      (pos) => done({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {
+        // High-accuracy failed — fall back to network/IP location
+        navigator.geolocation.getCurrentPosition(
+          (pos) => done({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => done(FALLBACK),
+          { timeout: 10000, enableHighAccuracy: false }
+        );
+      },
+      { timeout: 6000, enableHighAccuracy: true }
     );
   });
+}
+
+/** Strip store numbers and normalise for deduplication: "McDonald's #4521" → "mcdonalds" */
+function dedupKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/#\s*\d+/g, "")
+    .replace(/\s+\d+$/, "")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
 }
 
 // ─── Live provider (Overpass API) ─────────────────────────────────────────────
@@ -100,23 +145,19 @@ export class LiveLocationProvider implements LocationProvider {
   async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
     const radiusMeters = Math.round(radiusMiles * 1609.34);
 
-    const query = `[out:json][timeout:20];
+    // Query both nodes AND ways (restaurants mapped as areas) with center coords for ways
+    const query = `[out:json][timeout:30];
 (
   node["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
   node["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
   node["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
+  way["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
+  way["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
+  way["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
 );
-out body 40;`;
+out body center 100;`;
 
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: query,
-    });
-
-    if (!res.ok) throw new Error("Overpass request failed");
-
-    const data = await res.json();
+    const data = await fetchOverpass(query);
     const elements: OverpassElement[] = data.elements ?? [];
 
     const seen = new Set<string>();
@@ -126,18 +167,21 @@ out body 40;`;
       const name = el.tags?.name;
       if (!name) continue;
 
-      const elLat = el.lat;
-      const elLng = el.lng ?? el.lon ?? 0;
+      // Ways return lat/lng under `center`; nodes have them directly
+      const elLat = (el as any).center?.lat ?? el.lat;
+      const elLng = (el as any).center?.lon ?? el.lng ?? el.lon ?? 0;
+      if (!elLat) continue;
+
       const distance = Math.round(haversineDistance(lat, lng, elLat, elLng) * 10) / 10;
 
-      // De-duplicate by name (keep nearest)
-      if (seen.has(name.toLowerCase())) continue;
-      seen.add(name.toLowerCase());
+      // Deduplicate by normalised name (strips store numbers)
+      const key = dedupKey(name);
+      if (seen.has(key)) continue;
+      seen.add(key);
 
       const mock = findMockMatch(name);
 
       if (mock) {
-        // Use our full menu data for known chains
         results.push({
           ...mock,
           id: `live-${el.id}`,
@@ -147,7 +191,6 @@ out body 40;`;
           distance,
         });
       } else {
-        // Unknown restaurant — show location, no menu data
         results.push({
           id: `osm-${el.id}`,
           name,
