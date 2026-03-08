@@ -2,16 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { detectAllergensFromLine } from "@/lib/detectAllergens";
-import { inferFromDishName } from "@/lib/inferFromDish";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { buildScanInput } from "@/lib/buildScanInput";
-import { inferAllergensFromKeywords } from "@/lib/allergenDictionary";
-import { scoreRisk } from "@/lib/scoreRisk";
 import { useAuth } from "@/lib/authContext";
+import { analyzeMenu } from "@/lib/engine/analyzerPipeline";
 import { AllergySelector } from "@/components/AllergySelector";
 import type { Confidence, Row, AvoidRow, Results, LearnedRule, SourceType, MenuSource, RawMenuItem } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
+import type { AnalyzedItem } from "@/lib/engine/types";
 
 type EnrichedMenuSource = MenuSource & { fullItems: RawMenuItem[] };
 
@@ -31,7 +29,6 @@ function normalize(text: string) {
 type MenuSourceKey = "preloaded" | "url" | "manual";
 
 const STORAGE_LEARNED = "allegeats_learned_rules";
-const VAGUE_WORDS = ["sauce","seasoning","blend","secret","marinade","glaze","dressing","rub","may contain"];
 
 function makeId() { return Math.random().toString(36).slice(2) + "_" + Date.now().toString(36); }
 function toSourceType(s: MenuSourceKey): SourceType {
@@ -152,71 +149,87 @@ export default function ScanPage() {
   }
   function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); setLoadedRestaurant(null); setPhotoPreview(null); setStep(2); }
 
-  function buildStaffQs(hitAllergens: string[], inferredHits: string[], triggers: string[], vague: boolean) {
-    const list = [...new Set([...hitAllergens, ...inferredHits])].length ? [...new Set([...hitAllergens, ...inferredHits])] : avoidAllergens;
-    const qs = [`Can you confirm if this contains any of: ${list.join(", ")}?`];
-    if (triggers.length) qs.push(`The menu mentions: ${triggers.join(", ")} — can you confirm ingredients?`);
-    if (vague) qs.push("It has a sauce/seasoning listed — can the kitchen check what's in it?");
-    qs.push("Is there risk of cross-contact (shared fryer/grill, shared utensils)?");
-    qs.push("If unsure, could the kitchen check the ingredient list or recipe card?");
-    return qs;
-  }
-
-  function confFor(p: { hasExplicit: boolean; hasTrigger: boolean; hasInferred: boolean; isVague: boolean }): Confidence {
-    if (p.hasExplicit || p.hasTrigger) return "High";
-    if (p.hasInferred) return "Medium";
-    return "Low";
-  }
-
   async function copyText(text: string) { try { await navigator.clipboard.writeText(text); } catch { /* */ } }
   function questionsText(item: string, qs: string[]) { return `Hi! I have food allergies (${avoidAllergens.join(", ") || "none"}).\n\nItem: "${item}"\n\n${qs.map((q) => `• ${q}`).join("\n")}`; }
 
+  /** Map engine confidence to legacy Confidence type */
+  function toConfidence(c: AnalyzedItem["confidence"]): Confidence {
+    if (c === "high") return "High";
+    if (c === "medium") return "Medium";
+    return "Low";
+  }
+
   const results: Results = useMemo(() => {
     const safe: Row[] = [], ask: Row[] = [], avoid: AvoidRow[] = [];
+    const cuisineContext = selectedMenu?.category ?? "";
     const srcType = toSourceType(menuSource);
-    for (const item of menuItems) {
-      const { allergens: textDetected, hits } = detectAllergensFromLine(item);
-      // For preloaded restaurants, merge the official allergen arrays so accurate data
-      // isn't lost when item names alone don't contain allergen keywords (e.g. "Big Mac").
-      const officialAllergens =
-        menuSource === "preloaded"
-          ? (selectedMenu as EnrichedMenuSource | null)?.fullItems.find((fi) => fi.name === item)?.allergens ?? []
-          : [];
-      const detected = [...new Set([...(textDetected as string[]), ...officialAllergens])];
-      const guesses = inferFromDishName(item);
-      const keywordAllergens = inferAllergensFromKeywords(item);
-      const inferredAllergens = [...new Set([...guesses.flatMap((g) => g.inferredAllergens), ...keywordAllergens])];
-      const inferredReasons = guesses.map((g) => g.reason);
-      const hitsAllergens = avoidAllergens.filter((a) => detected.includes(a));
-      const inferredHits = avoidAllergens.filter((a) => inferredAllergens.includes(a));
-      const vague = VAGUE_WORDS.some((v) => normalize(item).includes(v));
-      const learned = findLearnedRule(item);
 
+    // For preloaded restaurants, build a map of official allergen data
+    const officialMap = new Map<string, string[]>();
+    if (menuSource === "preloaded" && selectedMenu) {
+      for (const fi of (selectedMenu as EnrichedMenuSource).fullItems) {
+        if (fi.allergens?.length) officialMap.set(fi.name, fi.allergens);
+      }
+    }
+
+    // Run the new engine on all items at once
+    const engineResult = analyzeMenu(menuItems, selectedAllergens, cuisineContext, srcType);
+
+    for (const analyzed of engineResult.items) {
+      const item = analyzed.raw;
+
+      // Merge official allergen data for preloaded restaurants
+      const officialAllergens = officialMap.get(analyzed.name) ?? [];
+      const allDetected = [...new Set([...(analyzed.allDetectedAllergens as string[]), ...officialAllergens])];
+
+      // Signals → legacy hit/inferred terms
+      const hits = [...new Set(analyzed.signals.map((s) => s.trigger))];
+      const inferredAllergens = analyzed.signals
+        .filter((s) => ["dish", "sauce", "cuisine", "prep"].includes(s.source))
+        .map((s) => s.allergen as string);
+      const inferredReasons = [...new Set(
+        analyzed.signals
+          .filter((s) => s.source !== "direct" && s.source !== "synonym")
+          .map((s) => s.reason)
+      )];
+
+      // Learned rule overrides engine output
+      const learned = findLearnedRule(item);
       if (learned) {
-        const learnedReason = learned.outcome === "safe" ? "Previously confirmed safe by you" : learned.outcome === "unsure" ? "Previously marked unsure" : `Previously confirmed to contain ${learned.allergen ?? "an allergen"}`;
+        const learnedReason =
+          learned.outcome === "safe"   ? "Previously confirmed safe by you"
+          : learned.outcome === "unsure" ? "Previously marked unsure"
+          : `Previously confirmed to contain ${learned.allergen ?? "an allergen"}`;
         const lc: Confidence = learned.outcome === "safe" ? "Medium" : "High";
-        if (learned.outcome === "safe") { safe.push({ item, detected, hits, inferredAllergens, inferredReasons: [learnedReason], confidence: lc, staffQuestions: [], learned: true }); continue; }
-        if (learned.outcome === "unsure") { ask.push({ item, detected, hits, inferredAllergens, inferredReasons: [learnedReason], confidence: lc, staffQuestions: buildStaffQs([], [], hits, true), learned: true }); continue; }
-        avoid.push({ item, detected, hits, hitsAllergens: learned.allergen ? [learned.allergen] : ["avoid"], inferredAllergens, inferredReasons: [learnedReason], confidence: lc, staffQuestions: buildStaffQs(learned.allergen ? [learned.allergen] : [], [], hits, vague), learned: true });
+        if (learned.outcome === "safe") {
+          safe.push({ item, detected: allDetected, hits, inferredAllergens, inferredReasons: [learnedReason], confidence: lc, staffQuestions: [], learned: true });
+          continue;
+        }
+        if (learned.outcome === "unsure") {
+          ask.push({ item, detected: allDetected, hits, inferredAllergens, inferredReasons: [learnedReason], confidence: lc, staffQuestions: analyzed.staffQuestions, learned: true });
+          continue;
+        }
+        avoid.push({ item, detected: allDetected, hits, hitsAllergens: learned.allergen ? [learned.allergen] : ["avoid"], inferredAllergens, inferredReasons: [learnedReason], confidence: lc, staffQuestions: analyzed.staffQuestions, learned: true });
         continue;
       }
 
-      const conf = confFor({ hasExplicit: hitsAllergens.length > 0, hasTrigger: hits.length > 0, hasInferred: inferredHits.length > 0, isVague: vague });
-      const staffQs = buildStaffQs(hitsAllergens, inferredHits, hits, vague);
+      // Check if official allergens (not in engine output) hit user profile
+      const officialHits = officialAllergens.filter((a) => avoidAllergens.includes(a));
+      const conf = toConfidence(analyzed.confidence);
 
-      if (hitsAllergens.length) {
-        avoid.push({ item, detected, hits, hitsAllergens, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: staffQs });
-      } else if (vague || inferredHits.length) {
-        ask.push({ item, detected, hits, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: staffQs });
+      if (analyzed.risk === "avoid" || officialHits.length > 0) {
+        const hitsAllergens = officialHits.length > 0
+          ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
+          : analyzed.matchedAllergens as string[];
+        avoid.push({ item, detected: allDetected, hits, hitsAllergens, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: analyzed.staffQuestions });
+      } else if (analyzed.risk === "ask") {
+        ask.push({ item, detected: allDetected, hits, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: analyzed.staffQuestions });
       } else {
-        const risk = scoreRisk(detected, avoidAllergens, srcType, false);
-        if (risk === "unknown") ask.push({ item, detected, hits, inferredAllergens, inferredReasons: ["Unverified source — no official ingredient data", ...inferredReasons], confidence: "Low", staffQuestions: staffQs });
-        else if (risk === "ask") ask.push({ item, detected, hits, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: staffQs });
-        else safe.push({ item, detected, hits, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: [] });
+        safe.push({ item, detected: allDetected, hits, inferredAllergens, inferredReasons, confidence: conf, staffQuestions: [] });
       }
     }
     return { safe, ask, avoid };
-  }, [menuItems, avoidAllergens, learnedRules, menuSource, selectedMenu]);
+  }, [menuItems, avoidAllergens, selectedAllergens, learnedRules, menuSource, selectedMenu]);
 
   function confBadge(c: Confidence) {
     const styles: Record<Confidence, { bg: string; color: string; border: string }> = {
