@@ -150,7 +150,7 @@ export default function HomePage() {
 
           <AllergySelector selected={selected} onChange={setSelected} limit={4} />
 
-          {(isDirty || saved) && (
+          {user && (isDirty || saved) && (
             <button
               onClick={handleSave}
               style={{
@@ -161,15 +161,17 @@ export default function HomePage() {
                 cursor: "pointer", transition: "background 0.2s",
               }}
             >
-              {saved ? "Saved!" : user ? "Save to Account" : "Save Profile"}
+              {saved ? "Saved!" : "Save to Account"}
             </button>
           )}
 
           {!user && (
-            <p style={{ textAlign: "center", fontSize: 12, color: "#9ca3af", marginTop: 10 }}>
-              <Link href="/auth" style={{ color: "#eb1700", fontWeight: 700, textDecoration: "none" }}>Sign in</Link>
-              {" "}to sync your profile across devices.
-            </p>
+            <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 12, background: "#fafaf8", border: "1px solid var(--c-border)", textAlign: "center" }}>
+              <span style={{ fontSize: 13, color: "var(--c-sub)" }}>
+                <Link href="/auth" style={{ color: "#eb1700", fontWeight: 700, textDecoration: "none" }}>Sign in</Link>
+                {" "}to save your allergy profile across devices.
+              </span>
+            </div>
           )}
         </div>
 
