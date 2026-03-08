@@ -232,7 +232,7 @@ export default function HomePage() {
             cursor: cameraScanning ? "default" : "pointer",
           }}
         >
-          {cameraScanning ? "Reading menu…" : "📷 Scan a Menu"}
+          {cameraScanning ? "Reading menu…" : "Scan a Menu"}
         </button>
         {cameraError && (
           <div style={{ fontSize: 12, color: "#b91c1c", textAlign: "center", marginTop: -8 }}>{cameraError}</div>

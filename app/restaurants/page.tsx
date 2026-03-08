@@ -283,7 +283,7 @@ function RestaurantsContent() {
                   </button>
                 )}
                 <Link href="/scan" style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-                  📷 Scan a Menu
+                  Scan a Menu
                 </Link>
               </div>
             }
