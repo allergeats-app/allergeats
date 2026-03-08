@@ -201,6 +201,62 @@ export default function HomePage() {
           Scan a Menu Manually
         </Link>
 
+        {/* How it works */}
+        <div style={{ width: "100%", marginTop: 40 }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>How It Works</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Safe eating in 3 steps</div>
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            {[
+              { n: "1", title: "Set your allergy profile", desc: "Choose your allergens once. They sync to your account across all devices." },
+              { n: "2", title: "Scan any menu", desc: "Paste menu text, drop in a link, or pick from our restaurant database." },
+              { n: "3", title: "Get instant safety results", desc: "Every item is labeled Safe, Ask Staff, or Avoid — with reasons and staff questions ready to copy." },
+            ].map(({ n, title, desc }) => (
+              <div key={n} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px" }}>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "#eb1700", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", marginBottom: 3 }}>{title}</div>
+                  <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Example results */}
+        <div style={{ width: "100%", marginTop: 36 }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Example</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Results look like this</div>
+            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 6 }}>Scanning a pasta menu for dairy + wheat allergies</div>
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            <div style={{ background: "#fff1f0", border: "1px solid #f3c5c0", borderRadius: 16, padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Chicken Alfredo</div>
+                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff1f0", color: "#b91c1c", border: "1px solid #f3c5c0", whiteSpace: "nowrap" }}>High</span>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", marginBottom: 4 }}>❌ Avoid</div>
+              <div style={{ fontSize: 12, color: "#b91c1c" }}>Contains: dairy, wheat</div>
+            </div>
+            <div style={{ background: "#fff7db", border: "1px solid #f4dd8d", borderRadius: 16, padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Caesar Salad</div>
+                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff7db", color: "#854d0e", border: "1px solid #f4dd8d", whiteSpace: "nowrap" }}>Medium</span>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#854d0e", marginBottom: 4 }}>⚠ Ask Staff</div>
+              <div style={{ fontSize: 12, color: "#854d0e" }}>Why: Caesar dressing may contain egg, dairy, or anchovies</div>
+            </div>
+            <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Grilled Salmon</div>
+                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#f9fafb", color: "#6b7280", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}>Low</span>
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#15803d" }}>✓ Likely Safe</div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </main>
