@@ -86,6 +86,10 @@ export type Restaurant = {
   distance?: number; // miles from user, computed by provider
   sourceType: SourceType;
   menuItems: RawMenuItem[];
+  /** Image URL from enrichment system (website / Google Places / Yelp) */
+  imageUrl?: string | null;
+  phone?: string;
+  website?: string;
 };
 
 // ─── Restaurant with scoring applied ────────────────────────────────────────
