@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { loadProfileAllergens, saveProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
+import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { useAuth } from "@/lib/authContext";
 import { scoreRestaurant } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
@@ -150,8 +150,7 @@ function RestaurantsContent() {
   }, [radiusMiles]);
 
   const restaurants = useMemo(() => {
-    const userAllergens = profileToDetectorAllergens(localAllergens);
-    return rawRestaurants.map((r) => scoreRestaurant(r, userAllergens));
+    return rawRestaurants.map((r) => scoreRestaurant(r, localAllergens));
   }, [rawRestaurants, localAllergens]);
 
   function handleAllergenChange(next: AllergenId[]) {

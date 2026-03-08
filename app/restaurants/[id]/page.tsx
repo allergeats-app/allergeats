@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { use } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
-import { loadProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
+import { loadProfileAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant } from "@/lib/scoring";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -54,8 +54,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     }
 
     const profileAllergens = loadProfileAllergens();
-    const userAllergens = profileToDetectorAllergens(profileAllergens);
-    setScored(scoreRestaurant(restaurant, userAllergens));
+    setScored(scoreRestaurant(restaurant, profileAllergens));
   }, [id]);
 
   const categories = useMemo(() => {
