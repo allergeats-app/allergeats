@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import type { ScoredRestaurant } from "@/lib/types";
 
@@ -40,6 +43,12 @@ export function RestaurantCard({ restaurant: r }: Props) {
   const cover = coverForRestaurant(r.cuisine, r.name);
   const badge = safetyBadge(safePercent, summary.total > 0);
 
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const photoSrc =
+    !photoFailed && r.lat != null && r.lng != null
+      ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
+      : null;
+
   return (
     <Link href={`/restaurants/${r.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
       <div style={{
@@ -52,8 +61,17 @@ export function RestaurantCard({ restaurant: r }: Props) {
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
         {/* Cover image area */}
-        <div style={{ height: 110, background: cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-          <span style={{ fontSize: 48, lineHeight: 1 }}>{cover.emoji}</span>
+        <div style={{ height: 110, background: photoSrc ? "#e5e7eb" : cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+          {photoSrc ? (
+            <img
+              src={photoSrc}
+              alt={r.name}
+              onError={() => setPhotoFailed(true)}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <span style={{ fontSize: 48, lineHeight: 1 }}>{cover.emoji}</span>
+          )}
           {badge && (
             <div style={{
               position: "absolute", top: 10, right: 10,
