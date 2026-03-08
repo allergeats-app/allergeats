@@ -73,7 +73,7 @@ export default function HomePage() {
       <nav
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
           alignItems: "center",
           padding: "14px 20px",
         }}
