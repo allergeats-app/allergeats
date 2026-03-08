@@ -169,7 +169,7 @@ export default function HomePage() {
             <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 12, background: "#fafaf8", border: "1px solid var(--c-border)", textAlign: "center" }}>
               <span style={{ fontSize: 13, color: "var(--c-sub)" }}>
                 <Link href="/auth" style={{ color: "#eb1700", fontWeight: 700, textDecoration: "none" }}>Sign in</Link>
-                {" "}to save your allergy profile across devices.
+                {" "}to Save your Allergy Profile
               </span>
             </div>
           )}
