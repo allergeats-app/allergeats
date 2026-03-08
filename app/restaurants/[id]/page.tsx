@@ -7,6 +7,7 @@ import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { loadProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant } from "@/lib/scoring";
 import { MenuItemCard } from "@/components/MenuItemCard";
+import { CameraScanButton } from "@/components/CameraScanButton";
 import { SourceBadge } from "@/components/SourceBadge";
 import { EmptyState } from "@/components/EmptyState";
 import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/types";
@@ -143,12 +144,11 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               <div style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.5, marginBottom: 12 }}>
                 We found this restaurant near you but don't have allergen information for it yet. You can scan the menu manually.
               </div>
-              <Link
-                href="/scan"
-                style={{ display: "inline-block", padding: "10px 18px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 13, textDecoration: "none" }}
+              <CameraScanButton
+                style={{ display: "inline-block", padding: "10px 18px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer" }}
               >
-                Scan Menu Manually →
-              </Link>
+                Scan Menu →
+              </CameraScanButton>
             </div>
           ) : (
             <>

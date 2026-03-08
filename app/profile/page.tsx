@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import { AllergySelector } from "@/components/AllergySelector";
+import { CameraScanButton } from "@/components/CameraScanButton";
 import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import type { AllergenId } from "@/lib/types";
 
@@ -292,17 +293,16 @@ export default function ProfilePage() {
           >
             Find Restaurants →
           </Link>
-          <Link
-            href="/scan"
+          <CameraScanButton
             style={{
-              display: "block", padding: "14px 18px", borderRadius: 14,
+              display: "block", width: "100%", padding: "14px 18px", borderRadius: 14,
               background: "var(--c-card)", border: "1px solid var(--c-border)",
-              color: "var(--c-text)", textDecoration: "none",
-              fontSize: 14, fontWeight: 700, textAlign: "center",
+              color: "var(--c-text)", fontSize: 14, fontWeight: 700,
+              textAlign: "center", cursor: "pointer",
             }}
           >
-            Manual Menu Scan
-          </Link>
+            Scan a Menu
+          </CameraScanButton>
         </div>
       </div>
     </main>

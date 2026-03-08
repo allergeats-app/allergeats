@@ -11,6 +11,7 @@ import { RestaurantCard } from "@/components/RestaurantCard";
 import { FilterChips } from "@/components/FilterChips";
 import { EmptyState } from "@/components/EmptyState";
 import { AllergySelector } from "@/components/AllergySelector";
+import { CameraScanButton } from "@/components/CameraScanButton";
 import type { Restaurant, ScoredRestaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 
@@ -282,9 +283,9 @@ function RestaurantsContent() {
                     Search {radiusMiles + 10} miles
                   </button>
                 )}
-                <Link href="/scan" style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+                <CameraScanButton style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
                   Scan a Menu
-                </Link>
+                </CameraScanButton>
               </div>
             }
           />
