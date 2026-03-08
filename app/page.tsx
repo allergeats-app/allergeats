@@ -2,18 +2,45 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { AllergySelector } from "@/components/AllergySelector";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import type { AllergenId } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+const CAMERA_SESSION_KEY = "allegeats_camera_scan";
 
 export default function HomePage() {
   const { user, allergens, saveAllergens, loading } = useAuth();
   useTheme(); // ensures re-render when theme changes
+  const router = useRouter();
   const [selected, setSelected] = useState<AllergenId[]>(allergens);
   const [savedSelection, setSavedSelection] = useState<AllergenId[]>(allergens);
   const [saved, setSaved] = useState(false);
+  const [cameraScanning, setCameraScanning] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleCameraPhoto(file: File) {
+    setCameraScanning(true);
+    setCameraError(null);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch("/api/scan-photo", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { setCameraError(data?.error ?? "Scan failed"); return; }
+      const lines: string[] = data.menuLines ?? [];
+      if (!lines.length) { setCameraError("Couldn't read menu items from that photo."); return; }
+      sessionStorage.setItem(CAMERA_SESSION_KEY, JSON.stringify(lines));
+      router.push("/scan");
+    } catch (err: unknown) {
+      setCameraError(err instanceof Error ? err.message : "Network error");
+    } finally {
+      setCameraScanning(false);
+    }
+  }
 
   // Keep local selection in sync when auth loads allergens
   useEffect(() => {
@@ -190,19 +217,33 @@ export default function HomePage() {
           Find Restaurants Near Me →
         </Link>
 
-        {/* Secondary CTA */}
-        <Link
-          href="/scan"
+        {/* Secondary CTA — opens camera directly */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          disabled={cameraScanning}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCameraPhoto(f); e.target.value = ""; }}
+          style={{ display: "none" }}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={cameraScanning}
           style={{
             display: "block", width: "100%", padding: "14px 0",
             borderRadius: 16, background: "var(--c-card)",
-            border: "1px solid var(--c-border)", color: "var(--c-text)",
+            border: `1px solid ${cameraError ? "#f3c5c0" : "var(--c-border)"}`,
+            color: cameraScanning ? "#9ca3af" : "var(--c-text)",
             fontSize: 14, fontWeight: 700, textAlign: "center",
-            textDecoration: "none",
+            cursor: cameraScanning ? "default" : "pointer",
           }}
         >
-          📷 Scan a Menu
-        </Link>
+          {cameraScanning ? "Reading menu…" : "📷 Scan a Menu"}
+        </button>
+        {cameraError && (
+          <div style={{ fontSize: 12, color: "#b91c1c", textAlign: "center", marginTop: -8 }}>{cameraError}</div>
+        )}
 
         {/* How it works */}
         <div style={{ width: "100%", marginTop: 40 }}>

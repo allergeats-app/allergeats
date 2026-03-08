@@ -68,6 +68,23 @@ export default function ScanPage() {
     try { const r = localStorage.getItem(STORAGE_LEARNED); if (r) setLearnedRules(JSON.parse(r)); } catch { /* */ }
   }, []);
 
+  // Pick up camera scan result passed from home page via sessionStorage
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("allegeats_camera_scan");
+      if (raw) {
+        sessionStorage.removeItem("allegeats_camera_scan");
+        const lines: string[] = JSON.parse(raw);
+        if (lines.length > 0) {
+          setMenu(lines.join("\n"));
+          setMenuSource("manual");
+          setAnalyzed(true);
+          setStep(3);
+        }
+      }
+    } catch { /* */ }
+  }, []);
+
   function persistLearned(next: LearnedRule[]) { setLearnedRules(next); localStorage.setItem(STORAGE_LEARNED, JSON.stringify(next)); }
 
   function upsertLearnedRule(outcome: "safe" | "avoid" | "unsure", item: string, allergen?: string) {
