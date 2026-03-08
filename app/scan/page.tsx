@@ -10,15 +10,18 @@ import { inferAllergensFromKeywords } from "@/lib/allergenDictionary";
 import { scoreRisk } from "@/lib/scoreRisk";
 import { useAuth } from "@/lib/authContext";
 import { AllergySelector } from "@/components/AllergySelector";
-import type { Confidence, Row, AvoidRow, Results, LearnedRule, SourceType, MenuSource } from "@/lib/types";
+import type { Confidence, Row, AvoidRow, Results, LearnedRule, SourceType, MenuSource, RawMenuItem } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 
+type EnrichedMenuSource = MenuSource & { fullItems: RawMenuItem[] };
+
 // Auto-derived from MOCK_RESTAURANTS — updates automatically when new restaurants are added
-const ALL_MENUS: MenuSource[] = MOCK_RESTAURANTS.map((r) => ({
+const ALL_MENUS: EnrichedMenuSource[] = MOCK_RESTAURANTS.map((r) => ({
   id: r.id,
   restaurant: r.name,
   category: r.cuisine,
   items: r.menuItems.map((item) => item.name),
+  fullItems: r.menuItems,
 }));
 
 function normalize(text: string) {
@@ -136,12 +139,19 @@ export default function ScanPage() {
     const safe: Row[] = [], ask: Row[] = [], avoid: AvoidRow[] = [];
     const srcType = toSourceType(menuSource);
     for (const item of menuItems) {
-      const { allergens: detected, hits } = detectAllergensFromLine(item);
+      const { allergens: textDetected, hits } = detectAllergensFromLine(item);
+      // For preloaded restaurants, merge the official allergen arrays so accurate data
+      // isn't lost when item names alone don't contain allergen keywords (e.g. "Big Mac").
+      const officialAllergens =
+        menuSource === "preloaded"
+          ? (selectedMenu as EnrichedMenuSource | null)?.fullItems.find((fi) => fi.name === item)?.allergens ?? []
+          : [];
+      const detected = [...new Set([...(textDetected as string[]), ...officialAllergens])];
       const guesses = inferFromDishName(item);
       const keywordAllergens = inferAllergensFromKeywords(item);
       const inferredAllergens = [...new Set([...guesses.flatMap((g) => g.inferredAllergens), ...keywordAllergens])];
       const inferredReasons = guesses.map((g) => g.reason);
-      const hitsAllergens = avoidAllergens.filter((a) => (detected as string[]).includes(a));
+      const hitsAllergens = avoidAllergens.filter((a) => detected.includes(a));
       const inferredHits = avoidAllergens.filter((a) => inferredAllergens.includes(a));
       const vague = VAGUE_WORDS.some((v) => normalize(item).includes(v));
       const learned = findLearnedRule(item);
@@ -170,8 +180,7 @@ export default function ScanPage() {
       }
     }
     return { safe, ask, avoid };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menuItems, avoidAllergens, learnedRules, menuSource]);
+  }, [menuItems, avoidAllergens, learnedRules, menuSource, selectedMenu]);
 
   function confBadge(c: Confidence) {
     const styles: Record<Confidence, { bg: string; color: string; border: string }> = {
