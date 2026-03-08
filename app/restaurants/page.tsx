@@ -70,7 +70,14 @@ function RestaurantsContent() {
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>(() => loadProfileAllergens());
   const [showAllergyPanel, setShowAllergyPanel] = useState(false);
   const [layout, setLayout] = useState<"list" | "grid">("list");
+  const [windowWidth, setWindowWidth] = useState(() => typeof window !== "undefined" ? window.innerWidth : 768);
   const { allergens: authAllergens, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    function onResize() { setWindowWidth(window.innerWidth); }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // Sync from auth context once it hydrates (takes priority over localStorage)
   useEffect(() => {
@@ -255,7 +262,7 @@ function RestaurantsContent() {
       </div>
 
       {/* Restaurant list */}
-      <div style={{ maxWidth: layout === "grid" ? 960 : 600, margin: "0 auto", padding: "16px 16px 0" }}>
+      <div style={{ maxWidth: layout === "grid" ? (windowWidth < 640 ? 600 : 960) : 600, margin: "0 auto", padding: "16px 16px 0" }}>
         {loading ? (
           <div style={{ padding: "64px 0", textAlign: "center" }}>
             <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
@@ -327,10 +334,14 @@ function RestaurantsContent() {
             <div style={{
               display: "grid",
               gap: 12,
-              gridTemplateColumns: layout === "grid" ? "repeat(3, 1fr)" : "1fr",
+              gridTemplateColumns: layout === "grid"
+                ? windowWidth < 480 ? "repeat(2, 1fr)"
+                : windowWidth < 768 ? "repeat(2, 1fr)"
+                : "repeat(3, 1fr)"
+                : "1fr",
             }}>
               {filtered.map((r) => (
-                <RestaurantCard key={r.id} restaurant={r} />
+                <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
               ))}
             </div>
           </div>

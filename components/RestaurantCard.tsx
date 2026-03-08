@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ScoredRestaurant } from "@/lib/types";
 
-type Props = { restaurant: ScoredRestaurant };
+type Props = { restaurant: ScoredRestaurant; compact?: boolean };
 
 function coverForRestaurant(cuisine: string, name: string): { bg: string; emoji: string } {
   const c = cuisine.toLowerCase();
@@ -35,7 +35,7 @@ function safetyBadge(safePercent: number, hasData: boolean): { label: string; bg
   return { label: `${Math.round(safePercent)}% Safe`, bg: "#fee2e2", color: "#b91c1c" };
 }
 
-export function RestaurantCard({ restaurant: r }: Props) {
+export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const { summary } = r;
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
   const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
@@ -61,7 +61,7 @@ export function RestaurantCard({ restaurant: r }: Props) {
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
         {/* Cover image area */}
-        <div style={{ height: 110, background: photoSrc ? "#e5e7eb" : cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{ height: compact ? 80 : 110, background: photoSrc ? "#e5e7eb" : cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
           {photoSrc ? (
             <img
               src={photoSrc}
@@ -95,30 +95,38 @@ export function RestaurantCard({ restaurant: r }: Props) {
         </div>
 
         {/* Card body */}
-        <div style={{ padding: "14px 16px 16px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-            <div>
-              <div style={{ fontWeight: 900, fontSize: 17, color: "var(--c-text)", lineHeight: 1.2 }}>{r.name}</div>
-              <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3 }}>{r.cuisine}</div>
+        <div style={{ padding: compact ? "10px 12px 12px" : "14px 16px 16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: compact ? 7 : 10 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 900, fontSize: compact ? 13 : 17, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+              <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>View →</div>
+            {!compact && <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>View →</div>}
           </div>
 
           {summary.total > 0 ? (
             <div>
-              <div style={{ height: 6, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex" }}>
+              <div style={{ height: 5, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex" }}>
                 <div style={{ width: `${safePercent}%`, background: "#22c55e" }} />
                 <div style={{ width: `${askPercent}%`, background: "#f59e0b" }} />
                 <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />
               </div>
-              <div style={{ display: "flex", gap: 14, marginTop: 8 }}>
-                <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
-                <Stat count={summary.ask}        label="Ask"   color="#d97706" />
-                <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
-              </div>
+              {!compact && (
+                <div style={{ display: "flex", gap: 14, marginTop: 8 }}>
+                  <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
+                  <Stat count={summary.ask}        label="Ask"   color="#d97706" />
+                  <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+                </div>
+              )}
+              {compact && (
+                <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                  <Stat count={summary.likelySafe} label="✓" color="#16a34a" />
+                  <Stat count={summary.avoid}      label="✗" color="#dc2626" />
+                </div>
+              )}
             </div>
           ) : (
-            <div style={{ fontSize: 12, color: "var(--c-sub)" }}>No menu data yet — tap to explore</div>
+            <div style={{ fontSize: 11, color: "var(--c-sub)" }}>No data yet</div>
           )}
         </div>
       </div>
