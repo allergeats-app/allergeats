@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -20,21 +20,18 @@ export default function ProfilePage() {
   const [signingOut, setSigningOut]       = useState(false);
   const [usernameEdit, setUsernameEdit]   = useState("");
   const [usernameSaved, setUsernameSaved] = useState(false);
-  const syncedRef = useRef(false);
-
   // Redirect to auth if not signed in (after loading completes)
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
   }, [loading, user, router]);
 
-  // Sync from context ONCE on initial load only
+  // Sync from context whenever allergens arrive (handles late hydration)
   useEffect(() => {
-    if (!syncedRef.current && !loading) {
-      syncedRef.current = true;
+    if (!loading && allergens.length > 0 && selected.length === 0) {
       setSelected(allergens);
       setSavedSelection(allergens);
     }
-  }, [allergens, loading]);
+  }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync username from context
   useEffect(() => {

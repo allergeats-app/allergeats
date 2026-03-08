@@ -69,6 +69,7 @@ function RestaurantsContent() {
   const [radiusMiles, setRadiusMiles]     = useState(10);
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>(() => loadProfileAllergens());
   const [showAllergyPanel, setShowAllergyPanel] = useState(false);
+  const [layout, setLayout] = useState<"list" | "grid">("list");
   const { allergens: authAllergens, loading: authLoading } = useAuth();
 
   // Sync from auth context once it hydrates (takes priority over localStorage)
@@ -254,7 +255,7 @@ function RestaurantsContent() {
       </div>
 
       {/* Restaurant list */}
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0" }}>
+      <div style={{ maxWidth: layout === "grid" ? 960 : 600, margin: "0 auto", padding: "16px 16px 0" }}>
         {loading ? (
           <div style={{ padding: "64px 0", textAlign: "center" }}>
             <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
@@ -286,16 +287,52 @@ function RestaurantsContent() {
               <div style={{ fontSize: 13, color: "#6b7280" }}>
                 {filtered.length} restaurant{filtered.length === 1 ? "" : "s"} within {radiusMiles} mi
               </div>
-              <button
-                onClick={() => setRadiusMiles((r) => r + 10)}
-                style={{ fontSize: 12, fontWeight: 700, color: "#eb1700", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-              >
-                Search wider →
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  onClick={() => setRadiusMiles((r) => r + 10)}
+                  style={{ fontSize: 12, fontWeight: 700, color: "#eb1700", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  Search wider →
+                </button>
+                <div style={{ display: "flex", gap: 4, marginLeft: 8 }}>
+                  <button
+                    onClick={() => setLayout("list")}
+                    title="List view"
+                    style={{
+                      width: 30, height: 30, borderRadius: 8, border: "1.5px solid",
+                      borderColor: layout === "list" ? "#eb1700" : "var(--c-border)",
+                      background: layout === "list" ? "#eb1700" : "var(--c-card)",
+                      color: layout === "list" ? "#fff" : "var(--c-sub)",
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
+                    }}
+                  >
+                    ☰
+                  </button>
+                  <button
+                    onClick={() => setLayout("grid")}
+                    title="Grid view"
+                    style={{
+                      width: 30, height: 30, borderRadius: 8, border: "1.5px solid",
+                      borderColor: layout === "grid" ? "#eb1700" : "var(--c-border)",
+                      background: layout === "grid" ? "#eb1700" : "var(--c-card)",
+                      color: layout === "grid" ? "#fff" : "var(--c-sub)",
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
+                    }}
+                  >
+                    ⊞
+                  </button>
+                </div>
+              </div>
             </div>
-            {filtered.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} />
-            ))}
+            <div style={{
+              display: "grid",
+              gap: 12,
+              gridTemplateColumns: layout === "grid" ? "repeat(3, 1fr)" : "1fr",
+            }}>
+              {filtered.map((r) => (
+                <RestaurantCard key={r.id} restaurant={r} />
+              ))}
+            </div>
           </div>
         )}
       </div>

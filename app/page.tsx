@@ -6,7 +6,7 @@ import { AllergySelector } from "@/components/AllergySelector";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import type { AllergenId } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
   const { user, allergens, saveAllergens, loading } = useAuth();
@@ -16,11 +16,12 @@ export default function HomePage() {
   const [saved, setSaved] = useState(false);
 
   // Keep local selection in sync when auth loads allergens
-  // (runs once after context hydrates)
-  if (!loading && allergens.length > 0 && selected.length === 0) {
-    setSelected(allergens);
-    setSavedSelection(allergens);
-  }
+  useEffect(() => {
+    if (!loading && allergens.length > 0 && selected.length === 0) {
+      setSelected(allergens);
+      setSavedSelection(allergens);
+    }
+  }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join();
 

@@ -43,7 +43,70 @@ export const ALLERGEN_KEYWORDS: Record<string, string[]> = {
   shellfish: [
     "shrimp",
     "crab",
-    "lobster"
+    "lobster",
+    "clam",
+    "oyster",
+    "scallop",
+    "mussel",
+    "calamari",
+    "squid"
+  ],
+
+  peanut: [
+    "peanut",
+    "peanut butter",
+    "satay",
+    "pad thai"
+  ],
+
+  "tree-nut": [
+    "almond",
+    "walnut",
+    "cashew",
+    "pecan",
+    "pistachio",
+    "hazelnut",
+    "macadamia",
+    "pine nut",
+    "pesto"
+  ],
+
+  sesame: [
+    "sesame",
+    "tahini",
+    "hummus"
+  ],
+
+  corn: [
+    "corn",
+    "cornstarch",
+    "masa",
+    "polenta"
+  ],
+
+  mustard: [
+    "mustard"
+  ],
+
+  legumes: [
+    "chickpea",
+    "chickpeas",
+    "lentil",
+    "lentils",
+    "black bean",
+    "kidney bean",
+    "pinto bean",
+    "fava bean",
+    "lupin",
+    "lupine"
+  ],
+
+  oats: [
+    "oat",
+    "oats",
+    "oatmeal",
+    "granola",
+    "muesli"
   ]
 };
 
