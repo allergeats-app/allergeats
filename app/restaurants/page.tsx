@@ -3,13 +3,15 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { loadProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
+import { loadProfileAllergens, saveProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { FilterChips } from "@/components/FilterChips";
 import { EmptyState } from "@/components/EmptyState";
+import { AllergySelector } from "@/components/AllergySelector";
 import type { Restaurant, ScoredRestaurant } from "@/lib/types";
+import type { AllergenId } from "@/lib/types";
 
 type SortOption = "distance" | "most-safe" | "least-avoid";
 type TypeFilter = "all" | "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches";
@@ -59,11 +61,13 @@ function RestaurantsContent() {
   const [sort, setSort]                   = useState<SortOption>("distance");
   const [typeFilter, setTypeFilter]       = useState<TypeFilter>("all");
   const [onlyWithMenu, setOnlyWithMenu]   = useState(false);
-  const [restaurants, setRestaurants]     = useState<ScoredRestaurant[]>([]);
+  const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading]             = useState(true);
   const [locationLabel, setLocationLabel] = useState("Locating…");
   const [usingFallback, setUsingFallback] = useState(false);
   const [radiusMiles, setRadiusMiles]     = useState(10);
+  const [localAllergens, setLocalAllergens] = useState<AllergenId[]>(() => loadProfileAllergens());
+  const [showAllergyPanel, setShowAllergyPanel] = useState(false);
 
   // Reverse-geocode coords → city/neighbourhood name
   async function reverseGeocode(lat: number, lng: number): Promise<string> {
@@ -111,11 +115,7 @@ function RestaurantsContent() {
           sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw));
         } catch { /* ignore */ }
 
-        const profileAllergens = loadProfileAllergens();
-        const userAllergens = profileToDetectorAllergens(profileAllergens);
-        const scored = raw.map((r) => scoreRestaurant(r, userAllergens));
-
-        if (!cancelled) setRestaurants(scored);
+        if (!cancelled) setRawRestaurants(raw);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -124,6 +124,16 @@ function RestaurantsContent() {
     load();
     return () => { cancelled = true; };
   }, [radiusMiles]);
+
+  const restaurants = useMemo(() => {
+    const userAllergens = profileToDetectorAllergens(localAllergens);
+    return rawRestaurants.map((r) => scoreRestaurant(r, userAllergens));
+  }, [rawRestaurants, localAllergens]);
+
+  function handleAllergenChange(next: AllergenId[]) {
+    setLocalAllergens(next);
+    saveProfileAllergens(next);
+  }
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -157,7 +167,33 @@ function RestaurantsContent() {
             {usingFallback && (
               <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>· Demo data</span>
             )}
+            <button
+              onClick={() => setShowAllergyPanel((v) => !v)}
+              style={{
+                marginLeft: "auto", display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px", borderRadius: 999,
+                background: showAllergyPanel ? "#eb1700" : "var(--c-card)",
+                border: `1.5px solid ${showAllergyPanel ? "#eb1700" : "var(--c-border)"}`,
+                color: showAllergyPanel ? "#fff" : "var(--c-text)",
+                fontSize: 12, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              🚫 Allergies{localAllergens.length > 0 ? ` (${localAllergens.length})` : ""}
+            </button>
           </div>
+
+          {showAllergyPanel && (
+            <div style={{
+              marginBottom: 10, padding: "14px 16px",
+              background: "var(--c-card)", border: "1px solid var(--c-border)",
+              borderRadius: 16,
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                Filter by your allergies
+              </div>
+              <AllergySelector selected={localAllergens} onChange={handleAllergenChange} />
+            </div>
+          )}
 
           <input
             value={query}
