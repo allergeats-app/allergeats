@@ -53,6 +53,8 @@ export default function ScanPage() {
   const [menuSource, setMenuSource]             = useState<MenuSourceKey>("manual");
   const [isFetching, setIsFetching]             = useState(false);
   const [fetchError, setFetchError]             = useState<string | null>(null);
+  const [isScanning, setIsScanning]             = useState(false);
+  const [photoPreview, setPhotoPreview]         = useState<string | null>(null);
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
 
   // Load from auth profile, then localStorage fallback
@@ -107,6 +109,23 @@ export default function ScanPage() {
     finally { setIsFetching(false); }
   }
 
+  async function handlePhotoScan(file: File) {
+    setIsScanning(true);
+    setFetchError(null);
+    setPhotoPreview(URL.createObjectURL(file));
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch("/api/scan-photo", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { setFetchError(data?.error ?? "Scan failed"); setPhotoPreview(null); return; }
+      const lines: string[] = data.menuLines ?? [];
+      if (!lines.length) { setFetchError("Couldn't read any menu items from that photo."); setPhotoPreview(null); return; }
+      setMenu(lines.join("\n")); setMenuSource("manual"); setAnalyzed(false); setActiveInput(null);
+    } catch (err: unknown) { setFetchError(err instanceof Error ? err.message : "Network error"); setPhotoPreview(null); }
+    finally { setIsScanning(false); }
+  }
+
   function loadSelectedRestaurant() {
     if (!selectedMenu) return;
     setMenu(buildScanInput(selectedMenu)); setMenuSource("preloaded");
@@ -114,7 +133,7 @@ export default function ScanPage() {
     setLoadedRestaurant(selectedMenu.restaurant);
     setActiveInput(null);
   }
-  function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); setLoadedRestaurant(null); setStep(2); }
+  function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); setLoadedRestaurant(null); setPhotoPreview(null); setStep(2); }
 
   function buildStaffQs(hitAllergens: string[], inferredHits: string[], triggers: string[], vague: boolean) {
     const list = [...new Set([...hitAllergens, ...inferredHits])].length ? [...new Set([...hitAllergens, ...inferredHits])] : avoidAllergens;
@@ -341,6 +360,36 @@ export default function ScanPage() {
               <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                 <div style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>How do you want to scan?</div>
                 <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>Choose a restaurant, paste a link, or type the menu yourself.</div>
+
+                {/* Option: Take a Photo */}
+                <label style={{ display: "block", border: `1.5px solid ${isScanning ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", cursor: isScanning ? "default" : "pointer", transition: "border-color 0.15s" }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    disabled={isScanning}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoScan(f); e.target.value = ""; }}
+                    style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: isScanning ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>
+                      {isScanning ? "⏳" : "📷"}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>{isScanning ? "Reading menu…" : "Scan with Camera"}</div>
+                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{isScanning ? "Claude is extracting menu items" : "Take a photo of any menu"}</div>
+                    </div>
+                    {!isScanning && <div style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#eb1700" }}>Tap →</div>}
+                  </div>
+                  {photoPreview && isScanning && (
+                    <div style={{ padding: "0 16px 16px" }}>
+                      <img src={photoPreview} alt="Menu preview" style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 10 }} />
+                    </div>
+                  )}
+                  {fetchError && !isScanning && (
+                    <div style={{ margin: "0 16px 12px", padding: "10px 12px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{fetchError}</div>
+                  )}
+                </label>
 
                 {/* Option: Load a Restaurant */}
                 <div style={{ border: `1.5px solid ${activeInput === "preloaded" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", transition: "border-color 0.15s" }}>
