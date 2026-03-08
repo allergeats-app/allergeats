@@ -2,7 +2,7 @@
 
 /* Theme CSS variables — defaults (light mode). Overridden by ThemeProvider via JS. */
 :root {
-  --c-bg:     #f7f7f7;
+  --c-bg:     #f9f8f6;
   --c-card:   #ffffff;
   --c-border: #e5e7eb;
   --c-text:   #111111;
