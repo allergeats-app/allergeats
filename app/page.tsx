@@ -78,13 +78,6 @@ export default function HomePage() {
           padding: "14px 20px",
         }}
       >
-        <Link
-          href="/scan"
-          style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}
-        >
-          Manual Scan
-        </Link>
-
         {user ? (
           <Link
             href="/profile"
