@@ -38,6 +38,7 @@ function toSourceType(s: MenuSourceKey): SourceType {
 export default function ScanPage() {
   const { allergens: profileAllergens } = useAuth();
 
+  const [step, setStep]                         = useState<1 | 2 | 3>(1);
   const [activeInput, setActiveInput]           = useState<"preloaded" | "url" | "manual" | null>(null);
   const [loadedRestaurant, setLoadedRestaurant] = useState<string | null>(null);
   const [selectedAllergens, setSelectedAllergens] = useState<AllergenId[]>([]);
@@ -98,7 +99,7 @@ export default function ScanPage() {
       if (!res.ok) { setFetchError(data?.error ?? "Fetch failed"); return; }
       const lines: string[] = data.menuLines ?? [];
       if (!lines.length) { setFetchError("Couldn't detect menu lines on that page."); return; }
-      setMenu(lines.join("\n")); setMenuSource("url"); setAnalyzed(false);
+      setMenu(lines.join("\n")); setMenuSource("url"); setAnalyzed(false); setActiveInput(null);
     } catch (err: unknown) { setFetchError(err instanceof Error ? err.message : "Network error"); }
     finally { setIsFetching(false); }
   }
@@ -108,8 +109,9 @@ export default function ScanPage() {
     setMenu(buildScanInput(selectedMenu)); setMenuSource("preloaded");
     setMenuUrl(selectedMenu.url ?? ""); setAnalyzed(false); setFetchError(null);
     setLoadedRestaurant(selectedMenu.restaurant);
+    setActiveInput(null);
   }
-  function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); setLoadedRestaurant(null); }
+  function clearMenu() { setMenu(""); setMenuUrl(""); setMenuSource("manual"); setAnalyzed(false); setFetchError(null); setLoadedRestaurant(null); setStep(2); }
 
   function buildStaffQs(hitAllergens: string[], inferredHits: string[], triggers: string[], vague: boolean) {
     const list = [...new Set([...hitAllergens, ...inferredHits])].length ? [...new Set([...hitAllergens, ...inferredHits])] : avoidAllergens;
@@ -242,163 +244,263 @@ export default function ScanPage() {
     );
   }
 
+  const menuReady = menuItems.length > 0;
+
+  // Step labels for the indicator
+  const STEPS = ["Your Allergies", "Load Menu", "Results"];
+
   return (
-    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 32 }}>
+    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 40 }}>
       {/* Sticky header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--c-border)", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Home</Link>
-          <span style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Manual Scan</span>
-          <span style={{ fontSize: 13, color: "#9ca3af" }}>{menuItems.length} items</span>
+          {step > 1 ? (
+            <button onClick={() => { if (step === 3) { clearMenu(); } else { setStep((s) => (s - 1) as 1 | 2 | 3); } }} style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>← Back</button>
+          ) : (
+            <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}>← Home</Link>
+          )}
+          <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Menu Scan</span>
+          <span style={{ fontSize: 13, color: "var(--c-sub)" }}>Step {step} of 3</span>
         </div>
       </div>
 
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0" }}>
-
-            <div style={{ display: "grid", gap: 14 }}>
-
-            {/* Allergy profile */}
-            <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Your Allergens</div>
-              <AllergySelector selected={selectedAllergens} onChange={setSelectedAllergens} limit={4} />
+      {/* Step indicator */}
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0", display: "flex", alignItems: "center", gap: 0 }}>
+        {STEPS.map((label, i) => {
+          const n = i + 1;
+          const done = step > n;
+          const active = step === n;
+          return (
+            <div key={n} style={{ display: "flex", alignItems: "center", flex: i < 2 ? 1 : "none" }}>
+              <button
+                onClick={() => { if (done) setStep(n as 1 | 2 | 3); }}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                  background: "none", border: "none", cursor: done ? "pointer" : "default", padding: 0,
+                }}
+              >
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 12, fontWeight: 900,
+                  background: done ? "#22c55e" : active ? "#eb1700" : "var(--c-muted)",
+                  color: done || active ? "#fff" : "var(--c-sub)",
+                  transition: "background 0.2s",
+                }}>
+                  {done ? "✓" : n}
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: active ? "var(--c-text)" : "var(--c-sub)", whiteSpace: "nowrap" }}>{label}</div>
+              </button>
+              {i < 2 && (
+                <div style={{ flex: 1, height: 2, background: done ? "#22c55e" : "var(--c-border)", margin: "0 6px 16px", transition: "background 0.2s" }} />
+              )}
             </div>
+          );
+        })}
+      </div>
 
-            {/* Input source toggle + panels */}
-            <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-              {/* Toggle buttons */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: activeInput ? "1px solid var(--c-border)" : "none" }}>
-                {(["preloaded", "url", "manual"] as const).map((panel, idx) => {
-                  const labels = ["Load a Restaurant", "Fetch From URL", "Menu Text"];
-                  const active = activeInput === panel;
-                  return (
-                    <button
-                      key={panel}
-                      onClick={() => setActiveInput(v => v === panel ? null : panel)}
-                      style={{
-                        padding: "13px 6px", border: "none",
-                        borderRight: idx < 2 ? "1px solid var(--c-border)" : "none",
-                        background: active ? "#eb1700" : "var(--c-card)",
-                        color: active ? "#fff" : "var(--c-sub)",
-                        fontSize: 12, fontWeight: 700, cursor: "pointer",
-                        transition: "background 0.15s, color 0.15s",
-                      }}
-                    >
-                      {labels[idx]}
-                    </button>
-                  );
-                })}
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px 16px 0" }}>
+        <div style={{ display: "grid", gap: 14 }}>
+
+          {/* ── Step 1: Choose allergens ── */}
+          {step === 1 && (
+            <>
+              <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>What are you allergic to?</div>
+                <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>We'll flag anything that could be a problem for you.</div>
+                <AllergySelector selected={selectedAllergens} onChange={setSelectedAllergens} limit={4} />
               </div>
-
-              {/* Preloaded panel */}
-              {activeInput === "preloaded" && (
-                <div style={{ padding: 16 }}>
-                  <input
-                    value={restaurantSearch}
-                    onChange={(e) => setRestaurantSearch(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && selectedMenu) loadSelectedRestaurant(); }}
-                    placeholder="Search restaurants…"
-                    style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
-                  />
-                  <select
-                    value={selectedMenuId}
-                    onChange={(e) => setSelectedMenuId(e.target.value)}
-                    disabled={!filteredMenus.length}
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
-                  >
-                    {filteredMenus.length ? filteredMenus.map((m) => <option key={m.id} value={m.id}>{m.restaurant} — {m.category}</option>) : <option value="">No restaurants found</option>}
-                  </select>
-                  <button
-                    onClick={() => { loadSelectedRestaurant(); setActiveInput(null); }}
-                    disabled={!selectedMenu}
-                    style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: selectedMenu ? "#eb1700" : "#e5e7eb", color: selectedMenu ? "#fff" : "#9ca3af", fontWeight: 800, fontSize: 14, cursor: selectedMenu ? "pointer" : "not-allowed" }}
-                  >
-                    Load Menu
-                  </button>
-                </div>
-              )}
-
-              {/* URL panel */}
-              {activeInput === "url" && (
-                <div style={{ padding: 16 }}>
-                  <input
-                    value={menuUrl}
-                    onChange={(e) => setMenuUrl(e.target.value)}
-                    placeholder="https://restaurant.com/menu"
-                    style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
-                  />
-                  <button
-                    onClick={() => { fetchMenuFromUrl(); setActiveInput(null); }}
-                    disabled={isFetching}
-                    style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: isFetching ? "#9ca3af" : "#eb1700", color: "#fff", fontWeight: 800, fontSize: 14, cursor: isFetching ? "not-allowed" : "pointer" }}
-                  >
-                    {isFetching ? "Fetching…" : "Fetch Menu"}
-                  </button>
-                  {fetchError && <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{fetchError}</div>}
-                </div>
-              )}
-
-              {/* Manual text panel */}
-              {activeInput === "manual" && (
-                <div style={{ padding: 16 }}>
-                  <textarea
-                    value={menu}
-                    onChange={(e) => { setMenu(e.target.value); setMenuSource("manual"); setLoadedRestaurant(null); }}
-                    placeholder="Paste menu items, one per line…"
-                    style={{ width: "100%", boxSizing: "border-box", minHeight: 160, resize: "vertical", border: "1px solid var(--c-border)", background: "var(--c-input)", color: "var(--c-text)", borderRadius: 10, padding: 12, fontSize: 14, lineHeight: 1.6, outline: "none" }}
-                  />
-                  <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 6, textAlign: "right" }}>{menuItems.length} items</div>
-                </div>
-              )}
-            </div>
-
-            {/* Loaded restaurant confirmation */}
-            {loadedRestaurant && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: "#15803d" }}>✓</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#15803d" }}>{loadedRestaurant}</span>
-                  <span style={{ fontSize: 12, color: "#6b7280" }}>loaded — {menuItems.length} items</span>
-                </div>
+              <button
+                onClick={() => setStep(2)}
+                style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#eb1700", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+              >
+                Continue →
+              </button>
+              {selectedAllergens.length === 0 && (
                 <button
-                  onClick={clearMenu}
-                  style={{ fontSize: 12, fontWeight: 700, color: "#6b7280", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  onClick={() => setStep(2)}
+                  style={{ padding: "12px 0", borderRadius: 14, border: "none", background: "none", color: "var(--c-sub)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
                 >
-                  Clear
+                  Skip — I just want to browse
                 </button>
-              </div>
-            )}
+              )}
+            </>
+          )}
 
-            {/* Analyze */}
-            <button
-              onClick={() => setAnalyzed(true)}
-              style={{ padding: "14px 0", borderRadius: 14, border: "none", background: "#eb1700", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
-            >
-              Analyze Menu
-            </button>
+          {/* ── Step 2: Load menu ── */}
+          {step === 2 && (
+            <>
+              <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>How do you want to scan?</div>
+                <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>Choose a restaurant, paste a link, or type the menu yourself.</div>
 
-            {/* Results */}
-            {analyzed && (
-              <>
-                {/* Summary bar */}
-                <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-                  <div style={{ height: 8, borderRadius: 999, background: "#f3f4f6", overflow: "hidden", display: "flex" }}>
-                    <div style={{ width: `${menuItems.length ? (results.safe.length / menuItems.length) * 100 : 0}%`,  background: "#22c55e", transition: "width 0.5s" }} />
-                    <div style={{ width: `${menuItems.length ? (results.ask.length  / menuItems.length) * 100 : 0}%`,  background: "#f59e0b", transition: "width 0.5s" }} />
-                    <div style={{ width: `${menuItems.length ? (results.avoid.length / menuItems.length) * 100 : 0}%`, background: "#ef4444", transition: "width 0.5s" }} />
-                  </div>
-                  <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
-                    <SummaryPill count={results.safe.length}  label="Likely Safe" color="#15803d" bg="#f0fdf4" />
-                    <SummaryPill count={results.ask.length}   label="Ask Staff"   color="#854d0e" bg="#fefce8" />
-                    <SummaryPill count={results.avoid.length} label="Avoid"       color="#b91c1c" bg="#fff1f0" />
-                  </div>
+                {/* Option: Load a Restaurant */}
+                <div style={{ border: `1.5px solid ${activeInput === "preloaded" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", transition: "border-color 0.15s" }}>
+                  <button
+                    onClick={() => setActiveInput(v => v === "preloaded" ? null : "preloaded")}
+                    style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "preloaded" ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>🏪</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Load a Restaurant</div>
+                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>Pick from our database</div>
+                    </div>
+                    <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--c-sub)" }}>{activeInput === "preloaded" ? "▲" : "▼"}</div>
+                  </button>
+                  {activeInput === "preloaded" && (
+                    <div style={{ padding: "0 16px 16px" }}>
+                      <input
+                        value={restaurantSearch}
+                        onChange={(e) => setRestaurantSearch(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && selectedMenu) loadSelectedRestaurant(); }}
+                        placeholder="Search restaurants…"
+                        style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
+                      />
+                      <select
+                        value={selectedMenuId}
+                        onChange={(e) => setSelectedMenuId(e.target.value)}
+                        disabled={!filteredMenus.length}
+                        style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
+                      >
+                        {filteredMenus.length ? filteredMenus.map((m) => <option key={m.id} value={m.id}>{m.restaurant} — {m.category}</option>) : <option value="">No restaurants found</option>}
+                      </select>
+                      <button
+                        onClick={loadSelectedRestaurant}
+                        disabled={!selectedMenu}
+                        style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: selectedMenu ? "#eb1700" : "#e5e7eb", color: selectedMenu ? "#fff" : "#9ca3af", fontWeight: 800, fontSize: 14, cursor: selectedMenu ? "pointer" : "not-allowed" }}
+                      >
+                        Load Menu
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <ResultSection tone="avoid" rows={results.avoid} />
-                <ResultSection tone="ask"   rows={results.ask} />
-                <ResultSection tone="safe"  rows={results.safe} />
-              </>
-            )}
-          </div>
+                {/* Option: Fetch From URL */}
+                <div style={{ border: `1.5px solid ${activeInput === "url" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", transition: "border-color 0.15s" }}>
+                  <button
+                    onClick={() => setActiveInput(v => v === "url" ? null : "url")}
+                    style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "url" ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>🔗</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Fetch From URL</div>
+                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>Paste a restaurant menu link</div>
+                    </div>
+                    <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--c-sub)" }}>{activeInput === "url" ? "▲" : "▼"}</div>
+                  </button>
+                  {activeInput === "url" && (
+                    <div style={{ padding: "0 16px 16px" }}>
+                      <input
+                        value={menuUrl}
+                        onChange={(e) => setMenuUrl(e.target.value)}
+                        placeholder="https://restaurant.com/menu"
+                        style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
+                      />
+                      <button
+                        onClick={fetchMenuFromUrl}
+                        disabled={isFetching}
+                        style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: isFetching ? "#9ca3af" : "#eb1700", color: "#fff", fontWeight: 800, fontSize: 14, cursor: isFetching ? "not-allowed" : "pointer" }}
+                      >
+                        {isFetching ? "Fetching…" : "Fetch Menu"}
+                      </button>
+                      {fetchError && <div style={{ marginTop: 8, padding: "10px 12px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{fetchError}</div>}
+                    </div>
+                  )}
+                </div>
+
+                {/* Option: Paste Menu Text */}
+                <div style={{ border: `1.5px solid ${activeInput === "manual" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, overflow: "hidden", transition: "border-color 0.15s" }}>
+                  <button
+                    onClick={() => setActiveInput(v => v === "manual" ? null : "manual")}
+                    style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "manual" ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>📋</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Paste Menu Text</div>
+                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>Type or paste items manually</div>
+                    </div>
+                    <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--c-sub)" }}>{activeInput === "manual" ? "▲" : "▼"}</div>
+                  </button>
+                  {activeInput === "manual" && (
+                    <div style={{ padding: "0 16px 16px" }}>
+                      <textarea
+                        value={menu}
+                        onChange={(e) => { setMenu(e.target.value); setMenuSource("manual"); setLoadedRestaurant(null); }}
+                        placeholder="Paste menu items, one per line…"
+                        style={{ width: "100%", boxSizing: "border-box", minHeight: 140, resize: "vertical", border: "1px solid var(--c-border)", background: "var(--c-input)", color: "var(--c-text)", borderRadius: 10, padding: 12, fontSize: 14, lineHeight: 1.6, outline: "none" }}
+                      />
+                      <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 4, textAlign: "right" }}>{menuItems.length} items</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Ready to analyze */}
+              {menuReady && (
+                <>
+                  {loadedRestaurant && (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: "#15803d" }}>✓</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#15803d" }}>{loadedRestaurant}</span>
+                        <span style={{ fontSize: 12, color: "var(--c-sub)" }}>— {menuItems.length} items</span>
+                      </div>
+                      <button onClick={clearMenu} style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Clear</button>
+                    </div>
+                  )}
+                  {!loadedRestaurant && (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 12, background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: "#15803d" }}>✓</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#15803d" }}>{menuItems.length} items ready</span>
+                      </div>
+                      <button onClick={clearMenu} style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Clear</button>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { setAnalyzed(true); setStep(3); }}
+                    style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#eb1700", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+                  >
+                    Analyze Menu →
+                  </button>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ── Step 3: Results ── */}
+          {step === 3 && analyzed && (
+            <>
+              {/* Summary bar */}
+              <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", marginBottom: 12 }}>
+                  {loadedRestaurant ? loadedRestaurant : "Scan Results"} — {menuItems.length} items
+                </div>
+                <div style={{ height: 8, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex" }}>
+                  <div style={{ width: `${menuItems.length ? (results.safe.length / menuItems.length) * 100 : 0}%`, background: "#22c55e", transition: "width 0.5s" }} />
+                  <div style={{ width: `${menuItems.length ? (results.ask.length  / menuItems.length) * 100 : 0}%`, background: "#f59e0b", transition: "width 0.5s" }} />
+                  <div style={{ width: `${menuItems.length ? (results.avoid.length / menuItems.length) * 100 : 0}%`, background: "#ef4444", transition: "width 0.5s" }} />
+                </div>
+                <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+                  <SummaryPill count={results.safe.length}  label="Likely Safe" color="#15803d" bg="#f0fdf4" />
+                  <SummaryPill count={results.ask.length}   label="Ask Staff"   color="#854d0e" bg="#fefce8" />
+                  <SummaryPill count={results.avoid.length} label="Avoid"       color="#b91c1c" bg="#fff1f0" />
+                </div>
+              </div>
+
+              <ResultSection tone="avoid" rows={results.avoid} />
+              <ResultSection tone="ask"   rows={results.ask} />
+              <ResultSection tone="safe"  rows={results.safe} />
+
+              <button
+                onClick={clearMenu}
+                style={{ padding: "14px 0", borderRadius: 14, border: "1px solid var(--c-border)", background: "var(--c-card)", color: "var(--c-text)", fontSize: 14, fontWeight: 800, cursor: "pointer" }}
+              >
+                ← Scan Another Menu
+              </button>
+            </>
+          )}
+
+        </div>
       </div>
     </main>
   );
