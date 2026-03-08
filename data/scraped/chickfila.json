@@ -1,0 +1,44 @@
+{
+  "chain": "Chick-fil-A",
+  "cuisine": "Fast Food · Chicken",
+  "sourceType": "official",
+  "scrapedAt": "2026-03-07T21:20:34.616Z",
+  "items": [
+    {
+      "id": "chickfila-egift-cards",
+      "name": "eGift cards",
+      "allergens": []
+    },
+    {
+      "id": "chickfila-egift-cards",
+      "name": "eGift cards",
+      "allergens": []
+    },
+    {
+      "id": "chickfila-entrées",
+      "name": "Entrées",
+      "description": "Price and availability may vary by location.",
+      "allergens": []
+    },
+    {
+      "id": "chickfila-chick-fil-a®-chicken-sandwich",
+      "name": "Chick-fil-A® Chicken Sandwich",
+      "allergens": []
+    },
+    {
+      "id": "chickfila-chick-fil-a®-nuggets",
+      "name": "Chick-fil-A® Nuggets",
+      "allergens": []
+    },
+    {
+      "id": "chickfila-chick-fil-a-chick-n-minis®",
+      "name": "Chick-fil-A Chick-n-Minis®",
+      "allergens": []
+    },
+    {
+      "id": "chickfila-spicy-chicken-biscuit",
+      "name": "Spicy Chicken Biscuit",
+      "allergens": []
+    }
+  ]
+}

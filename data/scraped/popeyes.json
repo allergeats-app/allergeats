@@ -1,0 +1,18 @@
+{
+  "chain": "Popeyes",
+  "cuisine": "Fast Food · Chicken",
+  "sourceType": "official",
+  "scrapedAt": "2026-03-07T21:21:58.464Z",
+  "items": [
+    {
+      "id": "popeyes-selling,-sharing,-targeted-advertising",
+      "name": "Selling, Sharing, Targeted Advertising",
+      "allergens": []
+    },
+    {
+      "id": "popeyes-cookie-list",
+      "name": "Cookie List",
+      "allergens": []
+    }
+  ]
+}

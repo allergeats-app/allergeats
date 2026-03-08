@@ -103,11 +103,11 @@ async function fetchOverpass(query: string): Promise<{ elements: OverpassElement
 const FALLBACK: Coordinates = { lat: 37.7749, lng: -122.4194 };
 
 function getRealLocation(): Promise<Coordinates | null> {
-  if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(FALLBACK);
+  if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(null);
 
   return new Promise((resolve) => {
     let resolved = false;
-    function done(c: Coordinates) { if (!resolved) { resolved = true; resolve(c); } }
+    function done(c: Coordinates | null) { if (!resolved) { resolved = true; resolve(c); } }
 
     // Try high-accuracy (GPS) with a 6s window
     navigator.geolocation.getCurrentPosition(
@@ -116,7 +116,7 @@ function getRealLocation(): Promise<Coordinates | null> {
         // High-accuracy failed — fall back to network/IP location
         navigator.geolocation.getCurrentPosition(
           (pos) => done({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-          () => done(FALLBACK),
+          () => done(null),
           { timeout: 10000, enableHighAccuracy: false }
         );
       },

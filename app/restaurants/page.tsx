@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loadProfileAllergens, saveProfileAllergens, profileToDetectorAllergens } from "@/lib/allergenProfile";
+import { useAuth } from "@/lib/authContext";
 import { scoreRestaurant } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
@@ -68,6 +69,14 @@ function RestaurantsContent() {
   const [radiusMiles, setRadiusMiles]     = useState(10);
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>(() => loadProfileAllergens());
   const [showAllergyPanel, setShowAllergyPanel] = useState(false);
+  const { allergens: authAllergens, loading: authLoading } = useAuth();
+
+  // Sync from auth context once it hydrates (takes priority over localStorage)
+  useEffect(() => {
+    if (!authLoading && authAllergens.length > 0) {
+      setLocalAllergens(authAllergens);
+    }
+  }, [authLoading, authAllergens]);
 
   // Reverse-geocode coords → city/neighbourhood name
   async function reverseGeocode(lat: number, lng: number): Promise<string> {
@@ -94,13 +103,19 @@ function RestaurantsContent() {
 
       try {
         const position = await locationProvider.getUserLocation();
+        const usingDemoLocation = !position;
         const lat = position?.lat ?? 37.7749;
         const lng = position?.lng ?? -122.4194;
 
-        // Reverse-geocode in parallel with restaurant search
-        reverseGeocode(lat, lng).then((label) => {
-          if (!cancelled) setLocationLabel(label);
-        });
+        if (usingDemoLocation && !cancelled) {
+          setUsingFallback(true);
+          setLocationLabel("Demo location");
+        } else {
+          // Reverse-geocode in parallel with restaurant search
+          reverseGeocode(lat, lng).then((label) => {
+            if (!cancelled) setLocationLabel(label);
+          });
+        }
 
         let raw: Restaurant[];
         try {

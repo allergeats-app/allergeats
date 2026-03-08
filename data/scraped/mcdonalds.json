@@ -1,0 +1,53 @@
+{
+  "chain": "McDonald's",
+  "cuisine": "Fast Food · Burgers",
+  "sourceType": "official",
+  "scrapedAt": "2026-03-07T21:19:47.215Z",
+  "items": [
+    {
+      "id": "mcdonalds-about-us",
+      "name": "About Us",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-services",
+      "name": "Services",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-community",
+      "name": "Community",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-contact-us",
+      "name": "Contact Us",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-your-privacy",
+      "name": "Your Privacy",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-strictly-necessary-cookies",
+      "name": "Strictly Necessary Cookies",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-performance-cookies",
+      "name": "Performance Cookies",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-functional-cookies",
+      "name": "Functional Cookies",
+      "allergens": []
+    },
+    {
+      "id": "mcdonalds-targeting-cookies",
+      "name": "Targeting Cookies",
+      "allergens": []
+    }
+  ]
+}

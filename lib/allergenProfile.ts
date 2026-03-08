@@ -41,7 +41,7 @@ const PROFILE_TO_DETECTOR: Record<AllergenId, string[]> = {
   shellfish:   ["shellfish"],
   mustard:     ["mustard"],
   corn:        ["corn"],
-  legumes:     ["soy", "legumes"],
+  legumes:     ["legumes"],
   oats:        ["oats"],
 };
 
