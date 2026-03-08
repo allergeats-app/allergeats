@@ -199,14 +199,14 @@ export default function HomePage() {
         {/* How it works */}
         <div style={{ width: "100%", marginTop: 40 }}>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>How It Works</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Safe eating in 3 steps</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>How AllergEats Protects You When Eating Out</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Finally Eat Out Without Guessing What's Safe</div>
           </div>
           <div style={{ display: "grid", gap: 10 }}>
             {[
-              { n: "1", title: "Set your allergy profile", desc: "Choose your allergens once. They sync to your account across all devices." },
-              { n: "2", title: "Scan any menu", desc: "Paste menu text, drop in a link, or pick from our restaurant database." },
-              { n: "3", title: "Get instant safety results", desc: "Every item is labeled Safe, Ask Staff, or Avoid — with reasons and staff questions ready to copy." },
+              { n: "1", title: "Set Your Allergies", desc: "Select the foods you need to avoid so AllergEats can analyze menus based on your specific allergies." },
+              { n: "2", title: "Scan Any Menu", desc: "Take a picture of the restaurant menu and AllergEats will instantly scan the dishes and look for possible allergens." },
+              { n: "3", title: "See What's Safe — and What's Not", desc: "AllergEats highlights which dishes are safe, which require caution, and which should be avoided." },
             ].map(({ n, title, desc }) => (
               <div key={n} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 10, background: "#eb1700", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>
