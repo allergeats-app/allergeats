@@ -201,7 +201,7 @@ export default function HomePage() {
             textDecoration: "none",
           }}
         >
-          Scan a Menu Manually
+          📷 Scan a Menu
         </Link>
 
         {/* How it works */}
