@@ -26,20 +26,23 @@ export function scoreRisk(
   // Ambiguous item (vague words, inferred allergens matching user's list) → ask
   if (isAmbiguous) return "ask";
 
-  // No hit, no ambiguity → judge by source trust
-  const confidence = confidenceFromSource(sourceType);
-
-  if (confidence === "High") {
-    // Trustworthy source says nothing detected → likely safe
-    return "likely-safe";
-  }
-
+  // No detected allergens means we have no ingredient data at all —
+  // the item name didn't match any known allergen terms.
+  // We cannot confirm it's safe regardless of source trust.
   if (detectedAllergens.length === 0) {
-    // Low/medium confidence + no data = genuinely unknown
     return "unknown";
   }
 
-  // Allergens detected in the item but none match user's list.
-  // Still worth flagging due to cross-contact risk or profile gaps.
+  // Allergens WERE detected in the item but none match the user's list.
+  // Judge safety by how trustworthy the data source is.
+  const confidence = confidenceFromSource(sourceType);
+
+  if (confidence === "High") {
+    // Verified source identified ingredients, none are the user's allergens → safe
+    return "likely-safe";
+  }
+
+  // Lower-confidence source with allergens detected but no user match —
+  // still worth asking due to data quality uncertainty.
   return "ask";
 }
