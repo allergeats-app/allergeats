@@ -34,7 +34,7 @@ export default function AuthPage() {
   // Pre-fill email if remembered
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY);
-    if (saved) { setEmail(saved); setRemember(true); }
+    if (saved) { setEmail(saved); setRemember(true); } // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {

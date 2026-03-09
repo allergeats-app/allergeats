@@ -13,7 +13,7 @@ import { FilterChips } from "@/components/FilterChips";
 import { EmptyState } from "@/components/EmptyState";
 import { AllergySelector } from "@/components/AllergySelector";
 import { CameraScanButton } from "@/components/CameraScanButton";
-import type { Restaurant, ScoredRestaurant } from "@/lib/types";
+import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 
 type SortOption = "distance" | "most-safe" | "least-avoid";

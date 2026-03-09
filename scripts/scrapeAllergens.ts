@@ -359,8 +359,9 @@ async function main() {
         console.log(`✓  ${items.length} items`);
         succeeded++;
       }
-    } catch (err: any) {
-      console.log(`✗  ${err?.message?.split("\n")[0] ?? "Error"}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message.split("\n")[0] : "Error";
+      console.log(`✗  ${msg}`);
       failed++;
     } finally {
       await page.close();

@@ -248,17 +248,7 @@ export default function ScanPage() {
     return { safe, ask, avoid };
   }, [menuItems, avoidAllergens, selectedAllergens, learnedRules, menuSource, selectedMenu]);
 
-  function confBadge(c: Confidence) {
-    const styles: Record<Confidence, { bg: string; color: string; border: string }> = {
-      High:   { bg: "#fff1f0", color: "#b91c1c", border: "#f3c5c0" },
-      Medium: { bg: "#fff7db", color: "#854d0e", border: "#f4dd8d" },
-      Low:    { bg: "#f9fafb", color: "#6b7280", border: "#e5e7eb" },
-    };
-    const s = styles[c];
-    return <span style={{ whiteSpace: "nowrap", fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{c}</span>;
-  }
-
-  function StaffBlock({ row }: { row: Row }) {
+function StaffBlock({ row }: { row: Row }) {
     return (
       <div style={{ marginTop: 12 }}>
         <div style={{ fontSize: 12, fontWeight: 800, color: "#6b7280", marginBottom: 6 }}>Ask staff</div>
@@ -490,7 +480,7 @@ export default function ScanPage() {
             <>
               <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                 <div style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>What are you allergic to?</div>
-                <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>We'll flag anything that could be a problem for you.</div>
+                <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>We&apos;ll flag anything that could be a problem for you.</div>
                 <AllergySelector selected={selectedAllergens} onChange={setSelectedAllergens} limit={4} />
               </div>
               <button

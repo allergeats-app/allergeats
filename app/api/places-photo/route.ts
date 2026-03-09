@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 
 /**
  * GET /api/places-photo?name={restaurantName}&lat={lat}&lng={lng}

@@ -71,7 +71,8 @@ export async function POST(req: Request) {
     const menuLines = extractLikelyMenuLines(text);
 
     return NextResponse.json({ url, menuLines });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unknown error" }, { status: 500 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Supabase not configured — load from localStorage only
       try {
         const raw = localStorage.getItem(PROFILE_KEY);
-        if (raw) setAllergens(JSON.parse(raw) as AllergenId[]);
+        if (raw) setAllergens(JSON.parse(raw) as AllergenId[]); // eslint-disable-line react-hooks/set-state-in-effect
       } catch { /* ignore */ }
       setLoading(false);
       return;
@@ -83,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function signIn(email: string, password: string, staySignedIn: boolean): Promise<string | null> {

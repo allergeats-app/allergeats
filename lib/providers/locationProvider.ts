@@ -168,8 +168,8 @@ out body center 100;`;
       if (!name) continue;
 
       // Ways return lat/lng under `center`; nodes have them directly
-      const elLat = (el as any).center?.lat ?? el.lat;
-      const elLng = (el as any).center?.lon ?? el.lng ?? el.lon ?? 0;
+      const elLat = (el as { center?: { lat: number; lon: number }; lat?: number }).center?.lat ?? el.lat;
+      const elLng = (el as { center?: { lat: number; lon: number }; lng?: number; lon?: number }).center?.lon ?? el.lng ?? (el as { lon?: number }).lon ?? 0;
       if (!elLat) continue;
 
       const distance = Math.round(haversineDistance(lat, lng, elLat, elLng) * 10) / 10;

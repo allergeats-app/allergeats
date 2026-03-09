@@ -49,7 +49,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   useEffect(() => {
     const restaurant = findRestaurant(id);
     if (!restaurant) {
-      setNotFound(true);
+      setNotFound(true); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
 
@@ -141,7 +141,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             <div style={{ marginTop: 16, padding: "16px", borderRadius: 14, background: "#f9fafb", border: "1px solid #e5e7eb" }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#374151", marginBottom: 6 }}>No menu data available</div>
               <div style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.5, marginBottom: 12 }}>
-                We found this restaurant near you but don't have allergen information for it yet. You can scan the menu manually.
+                We found this restaurant near you but don&apos;t have allergen information for it yet. You can scan the menu manually.
               </div>
               <CameraScanButton
                 style={{ display: "inline-block", padding: "10px 18px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer" }}

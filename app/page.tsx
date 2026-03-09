@@ -21,15 +21,15 @@ export default function HomePage() {
   useEffect(() => {
     if (!loading && allergens.length > 0 && !initializedRef.current) {
       initializedRef.current = true;
-      setSelected(allergens);
+      setSelected(allergens); // eslint-disable-line react-hooks/set-state-in-effect
     }
-  }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, allergens]);
 
   // Auto-save with debounce whenever selection changes (signed-in users only)
   useEffect(() => {
     if (!user || !initializedRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    setSaveState("idle");
+    setSaveState("idle"); // eslint-disable-line react-hooks/set-state-in-effect
     debounceRef.current = setTimeout(async () => {
       setSaveState("saving");
       await saveAllergens(selected);

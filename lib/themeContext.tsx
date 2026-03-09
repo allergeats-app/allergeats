@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem("allegeats_theme");
     const dark = saved === "dark";
-    setIsDark(dark);
+    setIsDark(dark); // eslint-disable-line react-hooks/set-state-in-effect
     applyVars(dark);
   }, []);
 
