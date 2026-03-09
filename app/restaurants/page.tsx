@@ -16,11 +16,12 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 
-type SortOption = "distance" | "most-safe" | "least-avoid";
+type SortOption = "best-match" | "distance" | "most-safe" | "least-avoid";
 type LayoutOption = "list" | "grid" | "map";
 type TypeFilter = "all" | "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches";
 
 const SORT_CHIPS = [
+  { value: "best-match"  as SortOption, label: "Best Match" },
   { value: "distance"    as SortOption, label: "Nearest" },
   { value: "most-safe"   as SortOption, label: "Most Allergy-Friendly" },
   { value: "least-avoid" as SortOption, label: "Lowest Risk" },
@@ -55,7 +56,7 @@ function RestaurantsContent() {
   const queryParam = searchParams.get("q") ?? "";
 
   const [query, setQuery]                 = useState(queryParam);
-  const [sort, setSort]                   = useState<SortOption>("distance");
+  const [sort, setSort]                   = useState<SortOption>("best-match");
   const [typeFilter, setTypeFilter]       = useState<TypeFilter>("all");
   const [onlyWithMenu, setOnlyWithMenu]   = useState(false);
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>(() => {
@@ -174,6 +175,19 @@ function RestaurantsContent() {
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
     switch (sort) {
+      case "best-match":
+        list = [...list].sort((a, b) => {
+          // Composite: safe% weighted 60%, avoid% weighted 30%, distance 10%
+          const score = (r: typeof a) => {
+            const t = r.summary.total || 1;
+            const safePct = r.summary.likelySafe / t;
+            const avoidPct = r.summary.avoid / t;
+            const dist = r.distance ?? 10;
+            return safePct * 0.6 - avoidPct * 0.3 - (dist / 50) * 0.1;
+          };
+          return score(b) - score(a);
+        });
+        break;
       case "distance":
         list = [...list].sort((a, b) => (a.distance ?? 99) - (b.distance ?? 99));
         break;
