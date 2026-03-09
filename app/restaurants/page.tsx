@@ -22,8 +22,8 @@ type TypeFilter = "all" | "burgers" | "mexican" | "chicken" | "coffee" | "sandwi
 
 const SORT_CHIPS = [
   { value: "distance"    as SortOption, label: "Nearest" },
-  { value: "most-safe"   as SortOption, label: "Most Safe" },
-  { value: "least-avoid" as SortOption, label: "Fewest Avoid" },
+  { value: "most-safe"   as SortOption, label: "Most Allergy-Friendly" },
+  { value: "least-avoid" as SortOption, label: "Lowest Risk" },
 ];
 
 const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
