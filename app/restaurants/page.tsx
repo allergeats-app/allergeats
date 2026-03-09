@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/authContext";
 import { scoreRestaurant } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
+import { RestaurantMap } from "@/components/RestaurantMap";
 import { FilterChips } from "@/components/FilterChips";
 import { EmptyState } from "@/components/EmptyState";
 import { AllergySelector } from "@/components/AllergySelector";
@@ -16,6 +17,7 @@ import type { Restaurant, ScoredRestaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 
 type SortOption = "distance" | "most-safe" | "least-avoid";
+type LayoutOption = "list" | "grid" | "map";
 type TypeFilter = "all" | "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches";
 
 const SORT_CHIPS = [
@@ -70,7 +72,8 @@ function RestaurantsContent() {
   const [radiusMiles, setRadiusMiles]     = useState(10);
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>(() => loadProfileAllergens());
   const [showAllergyPanel, setShowAllergyPanel] = useState(false);
-  const [layout, setLayout] = useState<"list" | "grid">("list");
+  const [layout, setLayout] = useState<LayoutOption>("list");
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [windowWidth, setWindowWidth] = useState(() => typeof window !== "undefined" ? window.innerWidth : 768);
   const { allergens: authAllergens, loading: authLoading } = useAuth();
 
@@ -115,6 +118,10 @@ function RestaurantsContent() {
         const usingDemoLocation = !position;
         const lat = position?.lat ?? 37.7749;
         const lng = position?.lng ?? -122.4194;
+
+        if (!usingDemoLocation && !cancelled) {
+          setUserCoords({ lat, lng });
+        }
 
         if (usingDemoLocation && !cancelled) {
           setUsingFallback(true);
@@ -262,7 +269,7 @@ function RestaurantsContent() {
       </div>
 
       {/* Restaurant list */}
-      <div style={{ maxWidth: layout === "grid" ? (windowWidth < 640 ? 600 : 960) : 600, margin: "0 auto", padding: "16px 16px 0" }}>
+      <div style={{ maxWidth: layout === "map" ? "100%" : layout === "grid" ? (windowWidth < 640 ? 600 : 960) : 600, margin: "0 auto", padding: "16px 16px 0" }}>
         {loading ? (
           <div style={{ padding: "64px 0", textAlign: "center" }}>
             <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
@@ -302,48 +309,46 @@ function RestaurantsContent() {
                   Search wider →
                 </button>
                 <div style={{ display: "flex", gap: 4, marginLeft: 8 }}>
-                  <button
-                    onClick={() => setLayout("list")}
-                    title="List view"
-                    style={{
-                      width: 30, height: 30, borderRadius: 8, border: "1.5px solid",
-                      borderColor: layout === "list" ? "#eb1700" : "var(--c-border)",
-                      background: layout === "list" ? "#eb1700" : "var(--c-card)",
-                      color: layout === "list" ? "#fff" : "var(--c-sub)",
-                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
-                    }}
-                  >
-                    ☰
-                  </button>
-                  <button
-                    onClick={() => setLayout("grid")}
-                    title="Grid view"
-                    style={{
-                      width: 30, height: 30, borderRadius: 8, border: "1.5px solid",
-                      borderColor: layout === "grid" ? "#eb1700" : "var(--c-border)",
-                      background: layout === "grid" ? "#eb1700" : "var(--c-card)",
-                      color: layout === "grid" ? "#fff" : "var(--c-sub)",
-                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
-                    }}
-                  >
-                    ⊞
-                  </button>
+                  {(["list", "grid", "map"] as LayoutOption[]).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => setLayout(l)}
+                      title={l === "list" ? "List view" : l === "grid" ? "Grid view" : "Map view"}
+                      style={{
+                        width: 30, height: 30, borderRadius: 8, border: "1.5px solid",
+                        borderColor: layout === l ? "#eb1700" : "var(--c-border)",
+                        background: layout === l ? "#eb1700" : "var(--c-card)",
+                        color: layout === l ? "#fff" : "var(--c-sub)",
+                        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
+                      }}
+                    >
+                      {l === "list" ? "☰" : l === "grid" ? "⊞" : "🗺"}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-            <div style={{
-              display: "grid",
-              gap: 12,
-              gridTemplateColumns: layout === "grid"
-                ? windowWidth < 480 ? "repeat(2, 1fr)"
-                : windowWidth < 768 ? "repeat(2, 1fr)"
-                : "repeat(3, 1fr)"
-                : "1fr",
-            }}>
-              {filtered.map((r) => (
-                <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
-              ))}
-            </div>
+            {layout === "map" ? (
+              <RestaurantMap
+                restaurants={filtered}
+                userLat={userCoords?.lat}
+                userLng={userCoords?.lng}
+              />
+            ) : (
+              <div style={{
+                display: "grid",
+                gap: 12,
+                gridTemplateColumns: layout === "grid"
+                  ? windowWidth < 480 ? "repeat(2, 1fr)"
+                  : windowWidth < 768 ? "repeat(2, 1fr)"
+                  : "repeat(3, 1fr)"
+                  : "1fr",
+              }}>
+                {filtered.map((r) => (
+                  <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
