@@ -181,7 +181,8 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea }: P
               whiteSpace: "nowrap",
             }}
           >
-            🔍 Search this area
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, display: "inline-block", verticalAlign: "middle", marginRight: 6 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search this area
           </button>
         </div>
       )}

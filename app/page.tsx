@@ -198,7 +198,7 @@ export default function HomePage() {
                 <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Chicken Alfredo</div>
                 <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff1f0", color: "#b91c1c", border: "1px solid #f3c5c0", whiteSpace: "nowrap" }}>High</span>
               </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", marginBottom: 4 }}>❌ Avoid</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", marginBottom: 4 }}>✗ Avoid</div>
               <div style={{ fontSize: 12, color: "#b91c1c" }}>Contains: dairy, wheat</div>
             </div>
           </div>

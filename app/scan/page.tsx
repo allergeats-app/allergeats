@@ -546,7 +546,12 @@ function StaffBlock({ row }: { row: Row }) {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ fontSize: 30, lineHeight: 1, flexShrink: 0 }}>📷</div>
+                  <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36 }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isScanning ? "var(--c-text)" : "#fff"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 17, fontWeight: 900, color: isScanning ? "var(--c-text)" : "#fff" }}>
                       {isScanning ? "Scanning menu…" : "Scan Menu with Camera"}
@@ -668,7 +673,12 @@ function StaffBlock({ row }: { row: Row }) {
                     onClick={() => setActiveInput(v => v === "manual" ? null : "manual")}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                   >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "manual" ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>📋</div>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "manual" ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={activeInput === "manual" ? "#fff" : "var(--c-sub)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                      </svg>
+                    </div>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Paste Menu Text</div>
                       <div style={{ fontSize: 12, color: "var(--c-sub)" }}>Type or paste items manually</div>

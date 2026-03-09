@@ -7,26 +7,26 @@ import type { ScoredRestaurant } from "@/lib/types";
 
 type Props = { restaurant: ScoredRestaurant; compact?: boolean };
 
-function coverForRestaurant(cuisine: string, name: string): { bg: string; emoji: string } {
+function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   const c = cuisine.toLowerCase();
   const n = name.toLowerCase();
   if (n.includes("mcdonald") || c.includes("burger") || n.includes("burger") || n.includes("wendy") || n.includes("shake shack") || n.includes("five guys"))
-    return { bg: "linear-gradient(135deg, #fde68a 0%, #fca5a5 100%)", emoji: "🍔" };
+    return { bg: "linear-gradient(135deg, #fde68a 0%, #fca5a5 100%)" };
   if (c.includes("mexican") || c.includes("tex-mex") || n.includes("chipotle") || n.includes("taco"))
-    return { bg: "linear-gradient(135deg, #fed7aa 0%, #fde68a 100%)", emoji: "🌮" };
+    return { bg: "linear-gradient(135deg, #fed7aa 0%, #fde68a 100%)" };
   if (c.includes("chicken") || n.includes("chick-fil") || n.includes("popeyes") || n.includes("kfc"))
-    return { bg: "linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%)", emoji: "🍗" };
+    return { bg: "linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%)" };
   if (c.includes("coffee") || c.includes("café") || c.includes("cafe") || c.includes("bakery") || n.includes("starbucks") || n.includes("dunkin") || n.includes("panera"))
-    return { bg: "linear-gradient(135deg, #d6d3d1 0%, #a8a29e 100%)", emoji: "☕" };
+    return { bg: "linear-gradient(135deg, #d6d3d1 0%, #a8a29e 100%)" };
   if (c.includes("pizza") || n.includes("domino") || n.includes("pizza hut"))
-    return { bg: "linear-gradient(135deg, #fca5a5 0%, #fb923c 100%)", emoji: "🍕" };
+    return { bg: "linear-gradient(135deg, #fca5a5 0%, #fb923c 100%)" };
   if (c.includes("sandwich") || c.includes("sub") || n.includes("subway") || n.includes("jersey mike") || n.includes("jimmy john"))
-    return { bg: "linear-gradient(135deg, #bbf7d0 0%, #6ee7b7 100%)", emoji: "🥪" };
+    return { bg: "linear-gradient(135deg, #bbf7d0 0%, #6ee7b7 100%)" };
   if (c.includes("asian") || c.includes("chinese") || c.includes("sushi") || c.includes("japanese"))
-    return { bg: "linear-gradient(135deg, #fde68a 0%, #86efac 100%)", emoji: "🍜" };
+    return { bg: "linear-gradient(135deg, #fde68a 0%, #86efac 100%)" };
   if (c.includes("italian") || c.includes("pasta"))
-    return { bg: "linear-gradient(135deg, #fca5a5 0%, #fde68a 100%)", emoji: "🍝" };
-  return { bg: "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)", emoji: "🍽️" };
+    return { bg: "linear-gradient(135deg, #fca5a5 0%, #fde68a 100%)" };
+  return { bg: "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" };
 }
 
 function safetyBadge(safePercent: number, hasData: boolean): { label: string; bg: string; color: string } | null {
@@ -72,9 +72,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
               onError={() => setPhotoFailed(true)}
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
-          ) : (
-            <span style={{ fontSize: 48, lineHeight: 1 }}>{cover.emoji}</span>
-          )}
+          ) : null}
           {badge && (
             <div style={{
               position: "absolute", top: 10, right: 10,
@@ -109,7 +107,9 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
               transition: "background 0.15s",
             }}
           >
-            {favorited ? "♥" : "♡"}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
           </button>
         </div>
 
