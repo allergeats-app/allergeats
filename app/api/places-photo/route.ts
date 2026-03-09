@@ -14,8 +14,10 @@ export async function GET(req: Request) {
   const lat  = searchParams.get("lat");
   const lng  = searchParams.get("lng");
 
+  const NO_CACHE = { headers: { "Cache-Control": "no-store" } };
+
   const key = process.env.GOOGLE_PLACES_API_KEY;
-  if (!key || !name) return new Response(null, { status: 404 });
+  if (!key || !name) return new Response(null, { status: 404, ...NO_CACHE });
 
   try {
     // 1. Find the place and retrieve photo references
@@ -26,13 +28,13 @@ export async function GET(req: Request) {
       { next: { revalidate: 86400 } } // cache the Places lookup for 24h
     );
 
-    if (!findRes.ok) return new Response(null, { status: 404 });
+    if (!findRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
 
     const findData = await findRes.json();
     const photoRef: string | undefined =
       findData.candidates?.[0]?.photos?.[0]?.photo_reference;
 
-    if (!photoRef) return new Response(null, { status: 404 });
+    if (!photoRef) return new Response(null, { status: 404, ...NO_CACHE });
 
     // 2. Fetch and stream the actual photo bytes
     const photoRes = await fetch(
@@ -40,7 +42,7 @@ export async function GET(req: Request) {
       `?maxwidth=600&photo_reference=${photoRef}&key=${key}`
     );
 
-    if (!photoRes.ok) return new Response(null, { status: 404 });
+    if (!photoRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
 
     const imageBytes = await photoRes.arrayBuffer();
     return new Response(imageBytes, {
@@ -50,6 +52,6 @@ export async function GET(req: Request) {
       },
     });
   } catch {
-    return new Response(null, { status: 404 });
+    return new Response(null, { status: 404, ...NO_CACHE });
   }
 }
