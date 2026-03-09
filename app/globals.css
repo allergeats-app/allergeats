@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Theme CSS variables — defaults (light mode). Overridden by ThemeProvider via JS. */
+/* ── Theme tokens (light) ────────────────────────────────────────────────── */
 :root {
   --c-bg:     #f9f8f6;
   --c-card:   #ffffff;
@@ -15,8 +15,33 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ── Base ───────────────────────────────────────────────────────────────── */
 body {
   background: var(--c-bg);
   color: var(--c-text);
   font-family: Arial, Helvetica, sans-serif;
+  /* Remove iOS grey flash on tap */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove tap flash on interactive elements */
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  /* Removes the 300ms click delay on iOS/Android without disabling zoom */
+  touch-action: manipulation;
+}
+
+/* ── iOS input zoom fix ─────────────────────────────────────────────────── */
+/*
+  iOS Safari zooms the viewport when a focused input has font-size < 16px.
+  This is a11y-safe: we only enlarge, never shrink.
+  Inline styles on individual inputs (fontSize: 15 etc.) will override this
+  only where explicitly set — so we use !important here as a universal floor.
+*/
+input,
+select,
+textarea {
+  font-size: 16px !important;
 }

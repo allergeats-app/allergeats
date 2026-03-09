@@ -14,7 +14,7 @@ import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk } from "@/lib/t
 
 type RiskFilter = "all" | Risk;
 
-const RISK_ORDER: Risk[] = ["likely-safe", "avoid", "ask", "unknown"];
+const RISK_ORDER: Risk[] = ["avoid", "ask", "likely-safe", "unknown"];
 const SESSION_KEY = "allegeats_live_restaurants";
 
 const SECTION_META: Record<Risk, { label: string; mark: string; bg: string; border: string; markColor: string }> = {
@@ -175,8 +175,15 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
         {/* Menu section — only when data exists */}
         {!hasNoMenu && (
           <>
-            {/* Filter chips */}
-            <div style={{ marginBottom: 12 }}>
+            {/* Filter chips — sticky below the page header */}
+            <div style={{
+              position: "sticky", top: 48, zIndex: 40,
+              background: "var(--c-bg)", marginBottom: 12,
+              paddingTop: 10, paddingBottom: 8,
+              marginLeft: -16, marginRight: -16,
+              paddingLeft: 16, paddingRight: 16,
+              borderBottom: "1px solid var(--c-border)",
+            }}>
               <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2, marginBottom: 8 }}>
                 {RISK_CHIPS.map((c) => (
                   <button key={c.value} onClick={() => setFilter(c.value)} style={{ padding: "8px 14px", borderRadius: 999, border: `1.5px solid ${filter === c.value ? "#eb1700" : "#e5e7eb"}`, background: filter === c.value ? "#eb1700" : "#fff", color: filter === c.value ? "#fff" : "#374151", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0 }}>

@@ -117,7 +117,9 @@ export function MenuItemCard({ item }: Props) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: 0,
+              /* Minimum 44px tap target — invisible padding on touch */
+              padding: "10px 0 10px 12px",
+              margin: "-10px 0 -10px -12px",
             }}
           >
             {expanded ? "Hide questions" : "What to ask →"}

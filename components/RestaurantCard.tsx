@@ -99,13 +99,13 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(r.id); }}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
-              position: "absolute", bottom: 10, right: 12,
+              position: "absolute", bottom: 8, right: 8,
               background: favorited ? "#eb1700" : "rgba(0,0,0,0.38)",
               border: "none", borderRadius: 999,
-              width: 30, height: 30,
+              width: 44, height: 44,
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", backdropFilter: "blur(4px)",
-              fontSize: 15, lineHeight: 1,
+              fontSize: 18, lineHeight: 1,
               transition: "background 0.15s",
             }}
           >

@@ -128,7 +128,7 @@ export default function HomePage() {
         {/* Allergy selector card */}
         <div
           style={{
-            background: "#fff", border: "1px solid #e5e7eb",
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
             borderRadius: 24, padding: 24, width: "100%",
             boxShadow: "0 2px 8px rgba(0,0,0,0.06)", marginBottom: 16,
           }}
@@ -199,9 +199,9 @@ export default function HomePage() {
           </div>
           <div style={{ display: "grid", gap: 10 }}>
             {[
-              { n: "1", title: "Set Your Allergy Profile", desc: "Tell AllergEats what you need to avoid. Your profile travels with you — every restaurant, every scan, personalized to you." },
-              { n: "2", title: "Find Safe Restaurants or Scan Any Menu", desc: "Browse nearby restaurants filtered for your allergies, or point your camera at any menu for an instant safety analysis." },
-              { n: "3", title: "Know Exactly What to Order", desc: "See which dishes are safe, which need a quick staff check, and which to avoid — backed by AI analysis and real community reports from people with the same allergies." },
+              { n: "1", title: "Set Your Allergy Profile", desc: "Tell us what to avoid. Your profile syncs across every restaurant and scan." },
+              { n: "2", title: "Find Safe Restaurants or Scan Any Menu", desc: "Browse nearby restaurants filtered for your allergies, or point your camera at any menu." },
+              { n: "3", title: "Know Exactly What to Order", desc: "See what's safe, what to ask staff, and what to avoid — in seconds." },
             ].map(({ n, title, desc }) => (
               <div key={n} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 10, background: "#eb1700", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>

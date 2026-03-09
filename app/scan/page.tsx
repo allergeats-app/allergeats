@@ -373,9 +373,15 @@ function StaffBlock({ row }: { row: Row }) {
     );
   }
 
+  const SAFE_COLLAPSE_LIMIT = 3;
+
   function ResultSection({ tone, rows }: { tone: "safe" | "ask" | "avoid"; rows: Array<Row | AvoidRow> }) {
+    const [safeExpanded, setSafeExpanded] = useState(false);
     if (!rows.length) return null;
     const meta = SECTION_META[tone];
+    const isSafe = tone === "safe";
+    const visibleRows = isSafe && !safeExpanded ? rows.slice(0, SAFE_COLLAPSE_LIMIT) : rows;
+    const hiddenCount = rows.length - SAFE_COLLAPSE_LIMIT;
     return (
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -386,7 +392,7 @@ function StaffBlock({ row }: { row: Row }) {
           </div>
         </div>
         <div style={{ display: "grid", gap: 10 }}>
-          {rows.map((r, i) => (
+          {visibleRows.map((r, i) => (
             <div key={i} style={{ background: meta.bg, border: `1px solid ${meta.border}`, borderRadius: 16, padding: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
                 <DishName item={r.item} />
@@ -414,6 +420,19 @@ function StaffBlock({ row }: { row: Row }) {
             </div>
           ))}
         </div>
+        {isSafe && hiddenCount > 0 && (
+          <button
+            onClick={() => setSafeExpanded((v) => !v)}
+            style={{
+              marginTop: 8, width: "100%", padding: "11px 0",
+              background: "none", border: "1.5px solid var(--c-border)",
+              borderRadius: 12, fontSize: 13, fontWeight: 700,
+              color: "var(--c-sub)", cursor: "pointer",
+            }}
+          >
+            {safeExpanded ? `Show fewer` : `Show all ${rows.length} safe items →`}
+          </button>
+        )}
       </div>
     );
   }
@@ -503,56 +522,73 @@ function StaffBlock({ row }: { row: Row }) {
           {/* ── Step 2: Load menu ── */}
           {step === 2 && (
             <>
-              <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-                <div style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>How do you want to scan?</div>
-                <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>Choose a restaurant, paste a link, or type the menu yourself.</div>
-
-                {/* Option: Take a Photo */}
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  disabled={isScanning}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoScan(f); e.target.value = ""; }}
-                  style={{ display: "none" }}
-                />
-                <div
-                  onClick={() => { if (!isScanning) cameraInputRef.current?.click(); }}
-                  style={{ display: "block", border: `1.5px solid ${isScanning ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", cursor: isScanning ? "default" : "pointer", transition: "border-color 0.15s" }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px" }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: isScanning ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>
-                      {isScanning ? "📷" : "📷"}
+              {/* ── Primary CTA: Camera scan ── */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                disabled={isScanning}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoScan(f); e.target.value = ""; }}
+                style={{ display: "none" }}
+              />
+              <button
+                onClick={() => { if (!isScanning) cameraInputRef.current?.click(); }}
+                disabled={isScanning}
+                style={{
+                  width: "100%", padding: "20px", textAlign: "left",
+                  background: isScanning ? "var(--c-card)" : "#eb1700",
+                  border: `1.5px solid ${isScanning ? "var(--c-border)" : "#eb1700"}`,
+                  borderRadius: 20, cursor: isScanning ? "default" : "pointer",
+                  boxShadow: isScanning ? "none" : "0 4px 14px rgba(235,23,0,0.25)",
+                  transition: "background 0.15s",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ fontSize: 30, lineHeight: 1, flexShrink: 0 }}>📷</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 17, fontWeight: 900, color: isScanning ? "var(--c-text)" : "#fff" }}>
+                      {isScanning ? "Scanning menu…" : "Scan Menu with Camera"}
                     </div>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>{isScanning ? "Scanning…" : "Scan with Camera"}</div>
-                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{isScanning ? ["Uploading photo", "Reading menu items", "Extracting ingredients"][scanStep - 1] ?? "Processing…" : "Take a photo of any menu"}</div>
+                    <div style={{ fontSize: 13, marginTop: 2, color: isScanning ? "var(--c-sub)" : "rgba(255,255,255,0.82)" }}>
+                      {isScanning
+                        ? (["Uploading photo", "Reading menu items", "Extracting ingredients"][scanStep - 1] ?? "Processing…")
+                        : "Point your camera at any menu for instant analysis"}
                     </div>
-                    {!isScanning && <div style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#eb1700" }}>Tap →</div>}
                   </div>
-                  {isScanning && (
-                    <div style={{ padding: "0 16px 14px", display: "flex", gap: 6 }}>
-                      {["Upload", "Read", "Extract"].map((label, i) => (
-                        <div key={i} style={{ flex: 1 }}>
-                          <div style={{ height: 3, borderRadius: 999, background: scanStep > i ? "#eb1700" : "var(--c-border)", transition: "background 0.4s" }} />
-                          <div style={{ fontSize: 10, color: scanStep > i ? "#eb1700" : "var(--c-sub)", fontWeight: 700, marginTop: 3, textAlign: "center" }}>{label}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {photoPreview && isScanning && (
-                    <div style={{ padding: "0 16px 16px" }}>
-                      <img src={photoPreview} alt="Menu preview" style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 10 }} />
-                    </div>
-                  )}
-                  {fetchError && !isScanning && (
-                    <div style={{ margin: "0 16px 12px", padding: "10px 12px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{fetchError}</div>
-                  )}
+                  {!isScanning && <span style={{ fontSize: 22, color: "#fff", flexShrink: 0 }}>→</span>}
                 </div>
+                {isScanning && (
+                  <div style={{ marginTop: 14, display: "flex", gap: 6 }}>
+                    {["Upload", "Read", "Extract"].map((label, i) => (
+                      <div key={i} style={{ flex: 1 }}>
+                        <div style={{ height: 3, borderRadius: 999, background: scanStep > i ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.25)", transition: "background 0.4s" }} />
+                        <div style={{ fontSize: 10, fontWeight: 700, marginTop: 3, textAlign: "center", color: scanStep > i ? "var(--c-text)" : "var(--c-sub)" }}>{label}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </button>
+              {photoPreview && isScanning && (
+                <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid var(--c-border)" }}>
+                  <img src={photoPreview} alt="Menu preview" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
+                </div>
+              )}
+              {fetchError && !isScanning && (
+                <div style={{ padding: "10px 14px", borderRadius: 12, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{fetchError}</div>
+              )}
 
+              {/* Divider */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+                <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>or choose another way</span>
+                <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+              </div>
+
+              {/* ── Secondary options ── */}
+              <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                 {/* Option: Load a Restaurant */}
-                <div style={{ border: `1.5px solid ${activeInput === "preloaded" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", transition: "border-color 0.15s" }}>
+                <div style={{ borderBottom: `1px solid ${activeInput === "preloaded" ? "#eb1700" : "var(--c-border)"}`, transition: "border-color 0.15s" }}>
                   <button
                     onClick={() => setActiveInput(v => v === "preloaded" ? null : "preloaded")}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
@@ -571,13 +607,13 @@ function StaffBlock({ row }: { row: Row }) {
                         onChange={(e) => setRestaurantSearch(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter" && selectedMenu) loadSelectedRestaurant(); }}
                         placeholder="Search restaurants…"
-                        style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
+                        style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
                       />
                       <select
                         value={selectedMenuId}
                         onChange={(e) => setSelectedMenuId(e.target.value)}
                         disabled={!filteredMenus.length}
-                        style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
+                        style={{ width: "100%", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
                       >
                         {filteredMenus.length ? filteredMenus.map((m) => <option key={m.id} value={m.id}>{m.restaurant} — {m.category}</option>) : <option value="">No restaurants found</option>}
                       </select>
@@ -593,7 +629,7 @@ function StaffBlock({ row }: { row: Row }) {
                 </div>
 
                 {/* Option: Fetch From URL */}
-                <div style={{ border: `1.5px solid ${activeInput === "url" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", transition: "border-color 0.15s" }}>
+                <div style={{ borderBottom: `1px solid ${activeInput === "url" ? "#eb1700" : "var(--c-border)"}`, transition: "border-color 0.15s" }}>
                   <button
                     onClick={() => setActiveInput(v => v === "url" ? null : "url")}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
@@ -611,7 +647,7 @@ function StaffBlock({ row }: { row: Row }) {
                         value={menuUrl}
                         onChange={(e) => setMenuUrl(e.target.value)}
                         placeholder="https://restaurant.com/menu"
-                        style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, fontSize: 14, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
+                        style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
                       />
                       <button
                         onClick={fetchMenuFromUrl}
@@ -626,7 +662,7 @@ function StaffBlock({ row }: { row: Row }) {
                 </div>
 
                 {/* Option: Paste Menu Text */}
-                <div style={{ border: `1.5px solid ${activeInput === "manual" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, overflow: "hidden", transition: "border-color 0.15s" }}>
+                <div>
                   <button
                     onClick={() => setActiveInput(v => v === "manual" ? null : "manual")}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
@@ -644,7 +680,7 @@ function StaffBlock({ row }: { row: Row }) {
                         value={menu}
                         onChange={(e) => { setMenu(e.target.value); setMenuSource("manual"); setLoadedRestaurant(null); }}
                         placeholder="Paste menu items, one per line…"
-                        style={{ width: "100%", boxSizing: "border-box", minHeight: 140, resize: "vertical", border: "1px solid var(--c-border)", background: "var(--c-input)", color: "var(--c-text)", borderRadius: 10, padding: 12, fontSize: 14, lineHeight: 1.6, outline: "none" }}
+                        style={{ width: "100%", boxSizing: "border-box", minHeight: 140, resize: "vertical", border: "1px solid var(--c-border)", background: "var(--c-input)", color: "var(--c-text)", borderRadius: 10, padding: 12, lineHeight: 1.6, outline: "none" }}
                       />
                       <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 4, textAlign: "right" }}>{menuItems.length} items</div>
                     </div>
