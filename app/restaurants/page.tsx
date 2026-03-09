@@ -78,6 +78,7 @@ function RestaurantsContent() {
   const [showAllergyPanel, setShowAllergyPanel] = useState(false);
   const [layout, setLayout] = useState<LayoutOption>("list");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [windowWidth, setWindowWidth] = useState(() => typeof window !== "undefined" ? window.innerWidth : 768);
   const { allergens: authAllergens, loading: authLoading } = useAuth();
   const { isFavorite } = useFavorites();
@@ -120,23 +121,34 @@ function RestaurantsContent() {
       setUsingFallback(false);
 
       try {
-        const position = await locationProvider.getUserLocation();
-        const usingDemoLocation = !position;
-        const lat = position?.lat ?? 37.7749;
-        const lng = position?.lng ?? -122.4194;
+        let lat: number;
+        let lng: number;
 
-        if (!usingDemoLocation && !cancelled) {
-          setUserCoords({ lat, lng });
-        }
-
-        if (usingDemoLocation && !cancelled) {
-          setUsingFallback(true);
-          setLocationLabel("Location unavailable");
-        } else {
-          // Reverse-geocode in parallel with restaurant search
+        if (searchCenter) {
+          // Map-panned search — skip GPS, use the override center
+          lat = searchCenter.lat;
+          lng = searchCenter.lng;
           reverseGeocode(lat, lng).then((label) => {
             if (!cancelled) setLocationLabel(label);
           });
+        } else {
+          const position = await locationProvider.getUserLocation();
+          const usingDemoLocation = !position;
+          lat = position?.lat ?? 37.7749;
+          lng = position?.lng ?? -122.4194;
+
+          if (!usingDemoLocation && !cancelled) {
+            setUserCoords({ lat, lng });
+          }
+
+          if (usingDemoLocation && !cancelled) {
+            setUsingFallback(true);
+            setLocationLabel("Location unavailable");
+          } else {
+            reverseGeocode(lat, lng).then((label) => {
+              if (!cancelled) setLocationLabel(label);
+            });
+          }
         }
 
         let raw: Restaurant[];
@@ -160,7 +172,7 @@ function RestaurantsContent() {
 
     load();
     return () => { cancelled = true; };
-  }, [radiusMiles]);
+  }, [radiusMiles, searchCenter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const restaurants = useMemo(() => {
     return rawRestaurants.map((r) => scoreRestaurant(r, localAllergens));
@@ -309,37 +321,40 @@ function RestaurantsContent() {
         ) : filtered.length === 0 ? (
           <EmptyState
             title="No restaurants found"
-            subtitle={query ? `No results for "${query}". Try a different search.` : `Nothing within ${radiusMiles} miles. Try searching wider.`}
+            subtitle={query ? `No results for "${query}". Try a different search.` : `Nothing within ${radiusMiles} miles. Try 25 or 50 mi above.`}
             action={
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-                {!query && (
-                  <button
-                    onClick={() => setRadiusMiles((r) => r + 10)}
-                    style={{ padding: "12px 20px", background: "var(--c-text)", color: "var(--c-bg)", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}
-                  >
-                    Search {radiusMiles + 10} miles
-                  </button>
-                )}
-                <CameraScanButton style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
-                  Scan a Menu
-                </CameraScanButton>
-              </div>
+              <CameraScanButton style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
+                Scan a Menu
+              </CameraScanButton>
             }
           />
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
-              <div style={{ fontSize: 13, color: "#6b7280" }}>
-                {filtered.length} restaurant{filtered.length === 1 ? "" : "s"} within {radiusMiles} mi
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2, gap: 8, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 13, color: "#6b7280", flexShrink: 0 }}>
+                {filtered.length} restaurant{filtered.length === 1 ? "" : "s"}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <button
-                  onClick={() => setRadiusMiles((r) => r + 10)}
-                  style={{ fontSize: 12, fontWeight: 700, color: "#eb1700", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                >
-                  Search wider →
-                </button>
-                <div style={{ display: "flex", gap: 4, marginLeft: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {/* Radius segmented control */}
+                <div style={{ display: "flex", gap: 3, background: "var(--c-muted)", borderRadius: 10, padding: 3 }}>
+                  {[5, 10, 25, 50].map((mi) => (
+                    <button
+                      key={mi}
+                      onClick={() => { setSearchCenter(null); setRadiusMiles(mi); }}
+                      style={{
+                        padding: "4px 9px", borderRadius: 7, border: "none",
+                        background: radiusMiles === mi ? "var(--c-card)" : "transparent",
+                        color: radiusMiles === mi ? "var(--c-text)" : "var(--c-sub)",
+                        fontSize: 11, fontWeight: 700, cursor: "pointer",
+                        boxShadow: radiusMiles === mi ? "0 1px 4px rgba(0,0,0,0.12)" : "none",
+                        transition: "background 0.12s",
+                      }}
+                    >
+                      {mi} mi
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 4 }}>
                   {(["list", "grid", "map"] as LayoutOption[]).map((l) => (
                     <button
                       key={l}
@@ -364,6 +379,7 @@ function RestaurantsContent() {
                 restaurants={filtered}
                 userLat={userCoords?.lat}
                 userLng={userCoords?.lng}
+                onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
               />
             ) : (
               <div style={{

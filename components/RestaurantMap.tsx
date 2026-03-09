@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ScoredRestaurant } from "@/lib/types";
 
 type Props = {
   restaurants: ScoredRestaurant[];
   userLat?: number;
   userLng?: number;
+  onSearchArea?: (lat: number, lng: number) => void;
 };
 
 function markerColor(r: ScoredRestaurant): string {
@@ -26,9 +27,11 @@ function makeSvgIcon(color: string): string {
   )}`;
 }
 
-export function RestaurantMap({ restaurants, userLat, userLng }: Props) {
+export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
+  const originRef = useRef<{ lat: number; lng: number } | null>(null);
+  const [pendingSearch, setPendingSearch] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -53,6 +56,7 @@ export function RestaurantMap({ restaurants, userLat, userLng }: Props) {
       // Pick a center: user location → first restaurant → SF fallback
       const centerLat = userLat ?? restaurants[0]?.lat ?? 37.7749;
       const centerLng = userLng ?? restaurants[0]?.lng ?? -122.4194;
+      originRef.current = { lat: centerLat, lng: centerLng };
 
       const map = L.map(containerRef.current, { zoomControl: true }).setView(
         [centerLat, centerLng],
@@ -116,6 +120,21 @@ export function RestaurantMap({ restaurants, userLat, userLng }: Props) {
 
         L.marker([r.lat, r.lng], { icon }).addTo(map).bindPopup(popup);
       }
+
+      // "Search this area" — show button when user pans far enough from origin
+      map.on("moveend", () => {
+        const center = map.getCenter();
+        const origin = originRef.current;
+        if (!origin) return;
+        const dist = Math.sqrt(
+          (center.lat - origin.lat) ** 2 + (center.lng - origin.lng) ** 2
+        );
+        if (dist > 0.008) {
+          setPendingSearch({ lat: center.lat, lng: center.lng });
+        } else {
+          setPendingSearch(null);
+        }
+      });
     })();
 
     return () => {
@@ -128,24 +147,44 @@ export function RestaurantMap({ restaurants, userLat, userLng }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pan to new center when restaurants change
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || restaurants.length === 0) return;
-    // don't forcefully re-pan; map is already centered
-  }, [restaurants]);
-
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "calc(100vh - 220px)",
-        minHeight: 400,
-        borderRadius: 20,
-        overflow: "hidden",
-        border: "1px solid var(--c-border)",
-      }}
-    />
+    <div style={{ position: "relative" }}>
+      <div
+        ref={containerRef}
+        style={{
+          width: "100%",
+          height: "calc(100vh - 220px)",
+          minHeight: 400,
+          borderRadius: 20,
+          overflow: "hidden",
+          border: "1px solid var(--c-border)",
+        }}
+      />
+      {pendingSearch && onSearchArea && (
+        <div style={{
+          position: "absolute", top: 16, left: "50%", transform: "translateX(-50%)",
+          zIndex: 1000, pointerEvents: "auto",
+        }}>
+          <button
+            onClick={() => {
+              originRef.current = pendingSearch;
+              setPendingSearch(null);
+              onSearchArea(pendingSearch.lat, pendingSearch.lng);
+            }}
+            style={{
+              padding: "10px 20px",
+              background: "#111", color: "#fff",
+              border: "none", borderRadius: 999,
+              fontSize: 13, fontWeight: 800,
+              cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            🔍 Search this area
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
