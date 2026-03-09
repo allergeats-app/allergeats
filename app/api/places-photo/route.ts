@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     const findRes = await fetch(
       `https://maps.googleapis.com/maps/api/place/findplacefromtext/json` +
       `?input=${encodeURIComponent(name)}&inputtype=textquery&fields=photos${bias}&key=${key}`,
-      { next: { revalidate: 86400 } } // cache the Places lookup for 24h
+      { next: { revalidate: 3600 }, cache: "no-store" } // bypass stale cache
     );
 
     if (!findRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
