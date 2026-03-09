@@ -7,6 +7,8 @@ import { buildScanInput } from "@/lib/buildScanInput";
 import { useAuth } from "@/lib/authContext";
 import { analyzeMenu } from "@/lib/engine/analyzerPipeline";
 import { AllergySelector } from "@/components/AllergySelector";
+import { fetchCommunityScores, getCommunitySignal, submitDishReport, normalizeDish } from "@/lib/community";
+import type { CommunityScoreMap } from "@/lib/community";
 import type { Confidence, Row, AvoidRow, Results, LearnedRule, SourceType, MenuSource, RawMenuItem } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 import type { AnalyzedItem } from "@/lib/engine/types";
@@ -53,6 +55,9 @@ export default function ScanPage() {
   const [isScanning, setIsScanning]             = useState(false);
   const [photoPreview, setPhotoPreview]         = useState<string | null>(null);
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
+  const [communityScores, setCommunityScores]   = useState<CommunityScoreMap>(new Map());
+  // Track which dishes the user has already reported: "dish_normalized::allergen" → outcome
+  const [myReports, setMyReports]               = useState<Map<string, string>>(new Map());
 
   // Load from auth profile, then localStorage fallback
   useEffect(() => {
@@ -92,6 +97,13 @@ export default function ScanPage() {
 
   const avoidAllergens = useMemo(() => selectedAllergens as string[], [selectedAllergens]);
   const menuItems = useMemo(() => menu.split("\n").map((m) => m.trim()).filter(Boolean), [menu]);
+
+  // Fetch community scores whenever results are ready
+  useEffect(() => {
+    if (step !== 3 || menuItems.length === 0 || selectedAllergens.length === 0) return;
+    fetchCommunityScores(menuItems, selectedAllergens as string[], loadedRestaurant ?? undefined)
+      .then(setCommunityScores);
+  }, [step, menuItems, selectedAllergens, loadedRestaurant]);
 
   const filteredMenus = useMemo(() => {
     const q = normalize(restaurantSearch);
@@ -261,6 +273,80 @@ export default function ScanPage() {
     );
   }
 
+  function CommunityBadge({ item }: { item: string }) {
+    const signal = getCommunitySignal(item, avoidAllergens, communityScores);
+    if (signal.total === 0) return null;
+    const dominantlySafe = signal.safeTotal > signal.reactionTotal && signal.safeTotal >= 3;
+    const hasReactions = signal.reactionTotal > 0;
+    return (
+      <div style={{
+        marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5,
+        padding: "4px 10px", borderRadius: 999,
+        background: dominantlySafe ? "#dcfce7" : hasReactions ? "#fee2e2" : "#f3f4f6",
+        border: `1px solid ${dominantlySafe ? "#bbf7d0" : hasReactions ? "#f3c5c0" : "#e5e7eb"}`,
+        fontSize: 11, fontWeight: 700,
+        color: dominantlySafe ? "#15803d" : hasReactions ? "#b91c1c" : "#6b7280",
+      }}>
+        👥 {dominantlySafe
+          ? `${signal.safeTotal} ate safely`
+          : hasReactions
+            ? `${signal.reactionTotal} had reaction${signal.reactionTotal > 1 ? "s" : ""}`
+            : `${signal.total} report${signal.total > 1 ? "s" : ""}`}
+      </div>
+    );
+  }
+
+  function ReportBlock({ item }: { item: string }) {
+    const norm = normalizeDish(item);
+    // Use first allergen as the report key; report covers all active allergens
+    const allergen = avoidAllergens[0] ?? "unknown";
+    const key = `${norm}::${allergen}`;
+    const alreadyReported = myReports.get(key);
+
+    async function report(outcome: "safe" | "reaction") {
+      // Optimistic local update
+      const next = new Map(myReports);
+      next.set(key, outcome);
+      setMyReports(next);
+
+      // Submit for each allergen
+      for (const a of (avoidAllergens.length > 0 ? avoidAllergens : [allergen])) {
+        await submitDishReport({
+          dishName: item,
+          restaurantName: loadedRestaurant ?? undefined,
+          allergen: a,
+          outcome,
+        });
+      }
+
+      // Refresh community scores
+      const updated = await fetchCommunityScores(menuItems, selectedAllergens as string[], loadedRestaurant ?? undefined);
+      setCommunityScores(updated);
+    }
+
+    if (alreadyReported) {
+      return (
+        <div style={{ marginTop: 8, fontSize: 11, color: "#6b7280", fontWeight: 600 }}>
+          {alreadyReported === "safe" ? "✓ You reported this safe" : "⚠ You reported a reaction"} · <button onClick={() => { const n = new Map(myReports); n.delete(key); setMyReports(n); }} style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 11, cursor: "pointer", padding: 0 }}>Undo</button>
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
+        <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Did you eat this?</span>
+        <button
+          onClick={() => report("safe")}
+          style={{ padding: "5px 10px", borderRadius: 999, border: "1px solid #bbf7d0", background: "#f0fdf4", color: "#15803d", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+        >✓ Safe</button>
+        <button
+          onClick={() => report("reaction")}
+          style={{ padding: "5px 10px", borderRadius: 999, border: "1px solid #f3c5c0", background: "#fff1f0", color: "#b91c1c", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+        >⚠ Reaction</button>
+      </div>
+    );
+  }
+
   const SECTION_META = {
     safe:  { label: "Likely Safe", mark: "+", bg: "#f0fdf4", border: "#bbf7d0", textColor: "#15803d" },
     ask:   { label: "Ask Staff",   mark: "?", bg: "#fff7db", border: "#f4dd8d", textColor: "#854d0e" },
@@ -287,6 +373,7 @@ export default function ScanPage() {
                 {confBadge(r.confidence)}
               </div>
               {r.learned && <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4, fontWeight: 700 }}>From your history</div>}
+              <CommunityBadge item={r.item} />
               {tone === "ask" && r.inferredReasons.length > 0 && (
                 <div style={{ fontSize: 12, color: "#854d0e", marginTop: 6, lineHeight: 1.4 }}>Why: {r.inferredReasons.join(" · ")}</div>
               )}
@@ -295,6 +382,7 @@ export default function ScanPage() {
               )}
               {tone !== "safe" && <StaffBlock row={r} />}
               {tone === "ask" && <LearnBlock row={r} />}
+              <ReportBlock item={r.item} />
             </div>
           ))}
         </div>
