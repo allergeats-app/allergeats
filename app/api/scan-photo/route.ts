@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 1024,
+      max_tokens: 4096,
       messages: [
         {
           role: "user",
@@ -26,17 +26,25 @@ export async function POST(req: Request) {
             },
             {
               type: "text",
-              text: `This is a photo of a restaurant menu. Extract every food and drink item name visible.
+              text: `This is a photo of a restaurant menu. Extract every food and drink item visible.
 
-Return ONLY a plain list — one item per line, no numbers, no bullets, no prices, no descriptions, no categories, no extra text.
+For each item, output one line in this exact format:
+<Item Name> | <ingredients and description if shown>
+
+Rules:
+- If the menu shows a description or ingredients, include them after the pipe character
+- If no description is shown, just output the item name with no pipe
+- Include ALL ingredients, sauces, toppings, and preparation notes you can read — this is critical for allergy detection
+- Do NOT include prices, calories, item numbers, or section headers
+- One item per line
+- If you cannot read the menu clearly, extract what you can
+- If there is no menu visible, output: NO_MENU
 
 Example output:
-Classic Burger
-Caesar Salad
-Grilled Chicken Sandwich
-Chocolate Lava Cake
-
-If you cannot read the menu clearly, return the items you can make out. If there is no menu visible, return: NO_MENU`,
+Truffle Pasta | house-made fettuccine, black truffle butter, parmesan, crispy pancetta
+Classic Burger | beef patty, cheddar cheese, brioche bun, house mayo, lettuce, tomato
+Garden Salad
+Chocolate Lava Cake | warm chocolate cake, vanilla ice cream, contains eggs and dairy`,
             },
           ],
         },
@@ -49,10 +57,16 @@ If you cannot read the menu clearly, return the items you can make out. If there
       return NextResponse.json({ error: "No menu found in the image." }, { status: 422 });
     }
 
+    // Each line is "Name | description" or just "Name"
+    // We join name + description so the allergen engine sees all ingredients
     const menuLines = text
       .split("\n")
       .map((l) => l.trim())
-      .filter((l) => l.length > 0 && l !== "NO_MENU");
+      .filter((l) => l.length > 0 && l !== "NO_MENU")
+      .map((l) => {
+        const [name, desc] = l.split("|").map((s) => s.trim());
+        return desc ? `${name} — ${desc}` : name;
+      });
 
     return NextResponse.json({ ok: true, menuLines });
   } catch (err: unknown) {
