@@ -35,16 +35,9 @@ const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
   { value: "sandwiches", label: "Sandwiches" },
 ];
 
-function matchesType(cuisine: string, name: string, type: TypeFilter): boolean {
+function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: TypeFilter): boolean {
   if (type === "all") return true;
-  const c = cuisine.toLowerCase();
-  const n = name.toLowerCase();
-  if (type === "burgers")    return c.includes("burger") || n.includes("burger") || n.includes("mcdonald") || n.includes("shake shack") || n.includes("wendy") || n.includes("in-n-out") || n.includes("five guys");
-  if (type === "mexican")    return c.includes("mexican") || c.includes("tex-mex") || n.includes("chipotle") || n.includes("taco bell") || n.includes("taco");
-  if (type === "chicken")    return c.includes("chicken") || n.includes("chick-fil-a") || n.includes("chick fil") || n.includes("popeyes") || n.includes("kfc");
-  if (type === "coffee")     return c.includes("café") || c.includes("cafe") || c.includes("coffee") || c.includes("bakery") || c.includes("donut") || n.includes("starbucks") || n.includes("dunkin") || n.includes("panera");
-  if (type === "sandwiches") return c.includes("sandwich") || c.includes("sub") || n.includes("subway") || n.includes("jersey mike") || n.includes("jimmy john") || c.includes("pizza") || n.includes("domino");
-  return false;
+  return r.tags?.includes(type) ?? false;
 }
 
 const SESSION_KEY = "allegeats_live_restaurants";
@@ -167,7 +160,7 @@ function RestaurantsContent() {
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    let list = restaurants.filter((r) => matchesType(r.cuisine, r.name, typeFilter));
+    let list = restaurants.filter((r) => matchesType(r, typeFilter));
     if (onlyWithMenu) list = list.filter((r) => r.scoredItems.length > 0);
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 

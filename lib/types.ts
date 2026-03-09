@@ -75,11 +75,15 @@ export type RestaurantSafetySummary = {
   total: number;
 };
 
+// ─── Restaurant category tags (structured, used for filtering) ───────────────
+export type RestaurantTag = "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches";
+
 // ─── Restaurant ─────────────────────────────────────────────────────────────
 export type Restaurant = {
   id: string;
   name: string;
   cuisine: string;
+  tags?: RestaurantTag[];
   address?: string;
   lat?: number;
   lng?: number;

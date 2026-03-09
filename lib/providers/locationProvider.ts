@@ -10,7 +10,7 @@
  *   - Same GPS, but only returns MOCK_RESTAURANTS
  */
 
-import type { Restaurant, SourceType } from "@/lib/types";
+import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 
 export type Coordinates = { lat: number; lng: number };
@@ -52,6 +52,19 @@ function buildAddress(tags: Record<string, string>): string {
     tags["addr:state"],
   ].filter(Boolean);
   return parts.join(", ") || tags["addr:full"] || "";
+}
+
+/** Derive structured tags from an Overpass cuisine string (e.g. "burger;american") */
+function deriveTags(cuisine: string | undefined): RestaurantTag[] {
+  if (!cuisine) return [];
+  const c = cuisine.toLowerCase();
+  const tags: RestaurantTag[] = [];
+  if (/burger|american/.test(c))                     tags.push("burgers");
+  if (/mexican|tex.mex|taco/.test(c))                tags.push("mexican");
+  if (/chicken|wings/.test(c))                       tags.push("chicken");
+  if (/coffee|cafe|café|bakery|donut|pastry/.test(c)) tags.push("coffee");
+  if (/sandwich|sub|pizza|italian/.test(c))          tags.push("sandwiches");
+  return tags;
 }
 
 function formatCuisine(raw: string | undefined): string {
@@ -195,6 +208,7 @@ out body center 100;`;
           id: `osm-${el.id}`,
           name,
           cuisine: formatCuisine(el.tags.cuisine),
+          tags: deriveTags(el.tags.cuisine),
           address: buildAddress(el.tags),
           lat: elLat,
           lng: elLng,
