@@ -13,16 +13,16 @@ export function SettingsButton() {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // Close on outside click (pointerdown covers both mouse and touch)
   useEffect(() => {
     if (!open) return;
-    function onDown(e: MouseEvent) {
+    function onDown(e: PointerEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
   }, [open]);
 
   async function handleSignOut() {
