@@ -112,10 +112,10 @@ export default function HomePage() {
           <p
             style={{
               fontSize: 15, color: "var(--c-sub)", lineHeight: 1.5,
-              maxWidth: 300, margin: "8px auto 0",
+              maxWidth: 320, margin: "8px auto 0",
             }}
           >
-            Find restaurants where you can eat safely — filtered for your allergies.
+            Your safe dining assistant — scan menus, find safe restaurants, and eat out with confidence.
           </p>
         </div>
 
@@ -181,7 +181,7 @@ export default function HomePage() {
             marginBottom: 12,
           }}
         >
-          Find Restaurants Near Me →
+          Find Safe Restaurants Near Me →
         </Link>
 
         {/* Secondary CTA — opens camera directly */}
@@ -199,14 +199,14 @@ export default function HomePage() {
         {/* How it works */}
         <div style={{ width: "100%", marginTop: 40 }}>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>How AllergEats Protects You When Eating Out</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Finally Eat Out Without Guessing What's Safe</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Your Safe Dining Assistant</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Eat Out Confidently — Even with Food Allergies</div>
           </div>
           <div style={{ display: "grid", gap: 10 }}>
             {[
-              { n: "1", title: "Set Your Allergies", desc: "Select the foods you need to avoid so AllergEats can analyze menus based on your specific allergies." },
-              { n: "2", title: "Scan Any Menu", desc: "Take a picture of the restaurant menu and AllergEats will instantly scan the dishes and look for possible allergens." },
-              { n: "3", title: "See What's Safe — and What's Not", desc: "AllergEats highlights which dishes are safe, which require caution, and which should be avoided." },
+              { n: "1", title: "Set Your Allergy Profile", desc: "Tell AllergEats what you need to avoid. Your profile travels with you — every restaurant, every scan, personalized to you." },
+              { n: "2", title: "Find Safe Restaurants or Scan Any Menu", desc: "Browse nearby restaurants filtered for your allergies, or point your camera at any menu for an instant safety analysis." },
+              { n: "3", title: "Know Exactly What to Order", desc: "See which dishes are safe, which need a quick staff check, and which to avoid — backed by AI analysis and real community reports from people with the same allergies." },
             ].map(({ n, title, desc }) => (
               <div key={n} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 10, background: "#eb1700", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>
