@@ -11,12 +11,14 @@ export function RestaurantsHeader({
   activeFilterCount, showFilterDrawer, setShowFilterDrawer,
   layout, setLayout,
   loading, filteredCount, radiusMiles,
+  onHowItWorks,
 }: {
   locationLabel: string; usingFallback: boolean;
   query: string; setQuery: (q: string) => void;
   activeFilterCount: number; showFilterDrawer: boolean; setShowFilterDrawer: (v: boolean) => void;
   layout: LayoutOption; setLayout: (l: LayoutOption) => void;
   loading: boolean; filteredCount: number; radiusMiles: number;
+  onHowItWorks?: () => void;
 }) {
   return (
     <div style={{
@@ -40,7 +42,27 @@ export function RestaurantsHeader({
           <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
           </Link>
-          <div style={{ position: "absolute", right: 0 }}>
+          <div style={{ position: "absolute", right: 0, display: "flex", alignItems: "center", gap: 6 }}>
+            {onHowItWorks && (
+              <button
+                type="button"
+                onClick={onHowItWorks}
+                aria-label="How it works"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  background: "var(--c-card)", border: "1px solid var(--c-border)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+                  transition: "background 0.15s",
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/>
+                </svg>
+              </button>
+            )}
             <SettingsButton />
           </div>
         </div>

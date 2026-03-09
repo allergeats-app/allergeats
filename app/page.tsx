@@ -1,209 +1,336 @@
 "use client";
 
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { AllergySelector } from "@/components/AllergySelector";
-import { CameraScanButton } from "@/components/CameraScanButton";
-import { SettingsButton } from "@/components/SettingsButton";
 import { useAuth } from "@/lib/authContext";
-import { useTheme } from "@/lib/themeContext";
+import { useFavorites } from "@/lib/favoritesContext";
+import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
+import { scoreRestaurant } from "@/lib/scoring";
+import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
+import { RestaurantCard } from "@/components/RestaurantCard";
+import { RestaurantMap } from "@/components/RestaurantMap";
+import { EmptyState } from "@/components/EmptyState";
+import { CameraScanButton } from "@/components/CameraScanButton";
+import { AllergySelector } from "@/components/AllergySelector";
+import { RestaurantsHeader } from "@/components/RestaurantsHeader";
+import { RestaurantsFilterDrawer } from "@/components/RestaurantsFilterDrawer";
+import { HowItWorksSheet } from "@/components/HowItWorksSheet";
+import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
-import { useState, useEffect, useRef } from "react";
+import type { SortOption, LayoutOption, TypeFilter } from "./restaurants/types";
+
+const SESSION_KEY = "allegeats_live_restaurants";
+
+function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: TypeFilter): boolean {
+  if (type === "all") return true;
+  return r.tags?.includes(type) ?? false;
+}
 
 export default function HomePage() {
-  const { user, allergens, saveAllergens, loading } = useAuth();
-  useTheme(); // ensures re-render when theme changes
-  const [selected, setSelected] = useState<AllergenId[]>(allergens);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  return (
+    <Suspense fallback={
+      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
+        Loading…
+      </main>
+    }>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
+  const [query, setQuery]               = useState("");
+  const [sort, setSort]                 = useState<SortOption>("best-match");
+  const [typeFilter, setTypeFilter]     = useState<TypeFilter>("all");
+  const [onlyWithMenu, setOnlyWithMenu] = useState(true);
+  const [onlySaved, setOnlySaved]       = useState(false);
+  const [radiusMiles, setRadiusMiles]   = useState(10);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [showHowItWorks, setShowHowItWorks]     = useState(false);
+
+  // Safe initialization — no browser APIs during render
+  const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading]               = useState(true);
+  const [localAllergens, setLocalAllergens] = useState<AllergenId[]>([]);
+  const [saveState, setSaveState]           = useState<"idle" | "saving" | "saved">("idle");
+
+  const [locationLabel, setLocationLabel] = useState("Locating…");
+  const [usingFallback, setUsingFallback] = useState(false);
+  const [layout, setLayout]               = useState<LayoutOption>("list");
+  const [userCoords, setUserCoords]       = useState<{ lat: number; lng: number } | null>(null);
+  const [searchCenter, setSearchCenter]   = useState<{ lat: number; lng: number } | null>(null);
+
+  const { user, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
+  const { isFavorite } = useFavorites();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initializedRef = useRef(false);
 
-  // Keep local selection in sync when auth loads allergens (first load only)
+  // Hydrate from localStorage + sessionStorage after mount
   useEffect(() => {
-    if (!loading && allergens.length > 0 && !initializedRef.current) {
-      initializedRef.current = true;
-      setSelected(allergens); // eslint-disable-line react-hooks/set-state-in-effect
-    }
-  }, [loading, allergens]);
+    const local = loadProfileAllergens();
+    setLocalAllergens(local);
+    try {
+      const cached = sessionStorage.getItem(SESSION_KEY);
+      if (cached) {
+        setRawRestaurants(JSON.parse(cached) as Restaurant[]);
+        setLoading(false);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
-  // Auto-save with debounce whenever selection changes (signed-in users only)
+  // Auth allergens take priority over localStorage (first load only)
+  useEffect(() => {
+    if (!authLoading && authAllergens.length > 0 && !initializedRef.current) {
+      initializedRef.current = true;
+      setLocalAllergens(authAllergens);
+    }
+  }, [authLoading, authAllergens]);
+
+  // Debounced Supabase save when signed-in user changes allergens
   useEffect(() => {
     if (!user || !initializedRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    setSaveState("idle"); // eslint-disable-line react-hooks/set-state-in-effect
+    setSaveState("idle");
     debounceRef.current = setTimeout(async () => {
       setSaveState("saving");
-      await saveAllergens(selected);
+      await saveAllergens(localAllergens);
       setSaveState("saved");
       setTimeout(() => setSaveState("idle"), 2000);
     }, 800);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [localAllergens]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const activeFilterCount = [
+    sort !== "best-match",
+    typeFilter !== "all",
+    onlySaved,
+    !onlyWithMenu,
+    radiusMiles !== 10,
+  ].filter(Boolean).length;
+
+  async function reverseGeocode(lat: number, lng: number): Promise<string> {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const a = data.address ?? {};
+      return a.neighbourhood ?? a.suburb ?? a.city_district ?? a.city ?? a.town ?? a.village ?? `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
+    } catch {
+      return `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!rawRestaurants.length) setLoading(true);
+      setUsingFallback(false);
+
+      try {
+        let lat: number, lng: number;
+
+        if (searchCenter) {
+          lat = searchCenter.lat; lng = searchCenter.lng;
+          reverseGeocode(lat, lng).then((label) => { if (!cancelled) setLocationLabel(label); });
+        } else {
+          const position = await locationProvider.getUserLocation();
+          const usingDemoLocation = !position;
+          lat = position?.lat ?? 37.7749;
+          lng = position?.lng ?? -122.4194;
+          if (!usingDemoLocation && !cancelled) setUserCoords({ lat, lng });
+          if (usingDemoLocation && !cancelled) {
+            setUsingFallback(true);
+            setLocationLabel("Location unavailable");
+          } else {
+            reverseGeocode(lat, lng).then((label) => { if (!cancelled) setLocationLabel(label); });
+          }
+        }
+
+        let raw: Restaurant[];
+        try {
+          raw = await locationProvider.searchRestaurants(lat, lng, radiusMiles);
+        } catch {
+          const fallback = new MockLocationProvider();
+          raw = await fallback.searchRestaurants(lat, lng, 9999);
+          if (!cancelled) setUsingFallback(true);
+        }
+
+        try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw)); } catch { /* ignore */ }
+        if (!cancelled) setRawRestaurants(raw);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, [radiusMiles, searchCenter]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const restaurants = useMemo(() =>
+    rawRestaurants.map((r) => scoreRestaurant(r, localAllergens)),
+    [rawRestaurants, localAllergens]
+  );
+
+  function handleAllergenChange(next: AllergenId[]) {
+    setLocalAllergens(next);
+    saveProfileAllergens(next);
+    initializedRef.current = true;
+  }
+
+  function resetFilters() {
+    setSort("best-match");
+    setTypeFilter("all");
+    setOnlySaved(false);
+    setOnlyWithMenu(true);
+    setRadiusMiles(10);
+    setSearchCenter(null);
+  }
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    let list = restaurants.filter((r) => matchesType(r, typeFilter));
+    if (onlySaved)    list = list.filter((r) => isFavorite(r.id));
+    if (onlyWithMenu) list = list.filter((r) => r.scoredItems.length > 0);
+    if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
+
+    switch (sort) {
+      case "best-match":
+        list = [...list].sort((a, b) => {
+          const score = (r: typeof a) => {
+            const t = r.summary.total || 1;
+            return (r.summary.likelySafe / t) * 0.6
+              - (r.summary.avoid / t) * 0.3
+              - ((r.distance ?? 10) / 50) * 0.1;
+          };
+          return score(b) - score(a);
+        });
+        break;
+      case "distance":    list = [...list].sort((a, b) => (a.distance ?? 99) - (b.distance ?? 99)); break;
+      case "most-safe":   list = [...list].sort((a, b) => b.summary.likelySafe - a.summary.likelySafe); break;
+      case "least-avoid": list = [...list].sort((a, b) => a.summary.avoid - b.summary.avoid); break;
+    }
+    return list;
+  }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite]);
+
+  const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
+  const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
+  const openHowItWorks    = useCallback(() => setShowHowItWorks(true), []);
+  const closeHowItWorks   = useCallback(() => setShowHowItWorks(false), []);
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "var(--c-bg)",
-        fontFamily: "Inter, Arial, sans-serif",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Top nav */}
-      <nav style={{ display: "flex", justifyContent: "flex-end", padding: "14px 20px" }}>
-        <SettingsButton />
-      </nav>
+    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
 
-      {/* Hero */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "24px 20px 48px",
-          maxWidth: 520,
-          margin: "0 auto",
-          width: "100%",
-        }}
-      >
-        {/* Brand */}
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <Image src="/logo.png" alt="AllergEats" width={320} height={80} style={{ width: "auto", height: 80, maxWidth: "90vw", display: "block", margin: "0 auto", transform: "translateX(-2px)" }} priority />
-          <p
-            style={{
-              fontSize: 15, color: "var(--c-sub)", lineHeight: 1.5,
-              maxWidth: 320, margin: "8px auto 0",
-            }}
-          >
-            Your safe dining assistant — scan menus, find safe restaurants, and eat out with confidence.
-          </p>
-        </div>
+      <RestaurantsHeader
+        locationLabel={locationLabel}
+        usingFallback={usingFallback}
+        query={query}
+        setQuery={setQuery}
+        activeFilterCount={activeFilterCount}
+        showFilterDrawer={showFilterDrawer}
+        setShowFilterDrawer={setShowFilterDrawer}
+        layout={layout}
+        setLayout={setLayout}
+        loading={loading}
+        filteredCount={filtered.length}
+        radiusMiles={radiusMiles}
+        onHowItWorks={openHowItWorks}
+      />
 
-        {/* Allergy selector card */}
-        <div
-          style={{
-            background: "var(--c-card)", border: "1px solid var(--c-border)",
-            borderRadius: 24, padding: 24, width: "100%",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)", marginBottom: 16,
-          }}
-        >
-          <div
-            style={{
-              display: "flex", justifyContent: "space-between",
-              alignItems: "center", marginBottom: 14,
-            }}
-          >
-            <div style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+      {/* ── Allergy profile section ──────────────────────────────────────── */}
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
+        <div style={{
+          background: "var(--c-card)", border: "1px solid var(--c-border)",
+          borderRadius: 20, padding: "16px 16px 14px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Your Allergies
             </div>
-            {user && (
-              <div style={{
-                fontSize: 11, fontWeight: 700,
-                color: saveState === "saved" ? "#22c55e" : saveState === "saving" ? "#9ca3af" : "#9ca3af",
-                transition: "color 0.3s",
-              }}>
-                {saveState === "saved" ? "✓ Saved" : saveState === "saving" ? "Saving…" : "Auto-saved"}
-              </div>
-            )}
-          </div>
-
-          <AllergySelector selected={selected} onChange={setSelected} limit={4} />
-
-          {!user && (
-            <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 12, background: "#fafaf8", border: "1px solid var(--c-border)", textAlign: "center" }}>
-              <span style={{ fontSize: 13, color: "var(--c-sub)" }}>
-                <Link href="/auth" style={{ color: "#eb1700", fontWeight: 700, textDecoration: "none" }}>Sign in</Link>
-                {" "}to Save your Allergy Profile
-              </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {user && (
+                <span style={{
+                  fontSize: 11, fontWeight: 700,
+                  color: saveState === "saved" ? "#22c55e" : "var(--c-sub)",
+                  transition: "color 0.3s",
+                }}>
+                  {saveState === "saved" ? "Saved" : saveState === "saving" ? "Saving…" : "Auto-saved"}
+                </span>
+              )}
+              {!user && (
+                <Link href="/auth" style={{ fontSize: 11, fontWeight: 700, color: "#eb1700", textDecoration: "none" }}>
+                  Sign in to save
+                </Link>
+              )}
             </div>
-          )}
-        </div>
-
-        {/* Primary CTA */}
-        <Link
-          href="/restaurants"
-          style={{
-            display: "block", width: "100%", padding: "16px 0",
-            borderRadius: 16, background: "#eb1700", color: "#fff",
-            fontSize: 15, fontWeight: 800, textAlign: "center",
-            textDecoration: "none", boxShadow: "0 4px 14px rgba(235,23,0,0.25)",
-            marginBottom: 12,
-          }}
-        >
-          Find Safe Restaurants Near Me →
-        </Link>
-
-        {/* Secondary CTA — opens camera directly */}
-        <CameraScanButton
-          style={{
-            display: "block", width: "100%", padding: "14px 0",
-            borderRadius: 16, background: "var(--c-card)",
-            border: "1px solid var(--c-border)",
-            color: "var(--c-text)",
-            fontSize: 14, fontWeight: 700, textAlign: "center",
-            cursor: "pointer",
-          }}
-        />
-
-        {/* How it works */}
-        <div style={{ width: "100%", marginTop: 40 }}>
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Your Safe Dining Assistant</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Eat Out Confidently — Even with Food Allergies</div>
           </div>
-          <div style={{ display: "grid", gap: 10 }}>
-            {[
-              { n: "1", title: "Set Your Allergy Profile", desc: "Tell us what to avoid. Your profile syncs across every restaurant and scan." },
-              { n: "2", title: "Find Safe Restaurants or Scan Any Menu", desc: "Browse nearby restaurants filtered for your allergies, or point your camera at any menu." },
-              { n: "3", title: "Know Exactly What to Order", desc: "See what's safe, what to ask staff, and what to avoid — in seconds." },
-            ].map(({ n, title, desc }) => (
-              <div key={n} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px" }}>
-                <div style={{ width: 32, height: 32, borderRadius: 10, background: "#eb1700", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", marginBottom: 3 }}>{title}</div>
-                  <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>{desc}</div>
-                </div>
-              </div>
+          <AllergySelector selected={localAllergens} onChange={handleAllergenChange} limit={4} />
+        </div>
+      </div>
+
+      <RestaurantsFilterDrawer
+        open={showFilterDrawer}
+        onClose={closeDrawer}
+        activeFilterCount={activeFilterCount}
+        loading={loading}
+        filteredCount={filtered.length}
+        localAllergens={localAllergens}
+        onAllergenChange={handleAllergenChange}
+        sort={sort}
+        setSort={setSort}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+        radiusMiles={radiusMiles}
+        setRadiusMiles={setRadiusMiles}
+        clearSearchCenter={clearSearchCenter}
+        onlyWithMenu={onlyWithMenu}
+        setOnlyWithMenu={setOnlyWithMenu}
+        onlySaved={onlySaved}
+        setOnlySaved={setOnlySaved}
+        onReset={resetFilters}
+      />
+
+      <HowItWorksSheet open={showHowItWorks} onClose={closeHowItWorks} />
+
+      {/* ── Results ─────────────────────────────────────────────────────── */}
+      <div className={`rp-results rp-results--${layout}`}>
+        {loading ? (
+          <div style={{ padding: "80px 0", textAlign: "center" }}>
+            <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
+            <div style={{ fontSize: 12, color: "#9ca3af" }}>Searching within {radiusMiles} miles</div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            title="No restaurants found"
+            subtitle={
+              query
+                ? `No results for "${query}". Try a different search.`
+                : `Nothing within ${radiusMiles} miles. Try a wider radius in Filters.`
+            }
+            action={
+              <CameraScanButton style={{ display: "inline-block", padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
+                Scan a Menu
+              </CameraScanButton>
+            }
+          />
+        ) : layout === "map" ? (
+          <RestaurantMap
+            restaurants={filtered}
+            userLat={userCoords?.lat}
+            userLng={userCoords?.lng}
+            onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
+          />
+        ) : (
+          <div className={layout === "grid" ? "rp-grid" : undefined} style={{ display: "grid", gap: 12 }}>
+            {filtered.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
             ))}
           </div>
-        </div>
-
-        {/* Example results */}
-        <div style={{ width: "100%", marginTop: 36 }}>
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>See How it Works</div>
-            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 6 }}>Menu analyzed by AllergEats</div>
-            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2 }}>Dairy + wheat allergies selected</div>
-          </div>
-          <div style={{ display: "grid", gap: 10 }}>
-            <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Grilled Salmon</div>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#f9fafb", color: "#6b7280", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}>Low</span>
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#15803d" }}>✓ Likely Safe</div>
-            </div>
-            <div style={{ background: "#fff7db", border: "1px solid #f4dd8d", borderRadius: 16, padding: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Caesar Salad</div>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff7db", color: "#854d0e", border: "1px solid #f4dd8d", whiteSpace: "nowrap" }}>Medium</span>
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#854d0e", marginBottom: 4 }}>⚠ Ask Staff</div>
-              <div style={{ fontSize: 12, color: "#854d0e" }}>Why: Caesar dressing may contain egg, dairy, or anchovies</div>
-            </div>
-            <div style={{ background: "#fff1f0", border: "1px solid #f3c5c0", borderRadius: 16, padding: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Chicken Alfredo</div>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff1f0", color: "#b91c1c", border: "1px solid #f3c5c0", whiteSpace: "nowrap" }}>High</span>
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", marginBottom: 4 }}>✗ Avoid</div>
-              <div style={{ fontSize: 12, color: "#b91c1c" }}>Contains: dairy, wheat</div>
-            </div>
-          </div>
-        </div>
-
+        )}
       </div>
     </main>
   );
