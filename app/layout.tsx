@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/authContext";
+import { FavoritesProvider } from "@/lib/favoritesContext";
 import { ThemeProvider } from "@/lib/themeContext";
 
 const geistSans = Geist({
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           <AuthProvider>
+            <FavoritesProvider>
             {children}
             <footer style={{
               textAlign: "center",
@@ -39,6 +41,7 @@ export default function RootLayout({
             }}>
               Always confirm with staff before ordering. AllergEats is a decision-support tool, not medical advice.
             </footer>
+            </FavoritesProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

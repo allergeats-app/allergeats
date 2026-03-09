@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { useAuth } from "@/lib/authContext";
+import { useFavorites } from "@/lib/favoritesContext";
 import { scoreRestaurant } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
@@ -59,6 +60,7 @@ function RestaurantsContent() {
   const [sort, setSort]                   = useState<SortOption>("best-match");
   const [typeFilter, setTypeFilter]       = useState<TypeFilter>("all");
   const [onlyWithMenu, setOnlyWithMenu]   = useState(false);
+  const [onlySaved, setOnlySaved]         = useState(false);
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>(() => {
     try {
       const cached = sessionStorage.getItem(SESSION_KEY);
@@ -78,6 +80,7 @@ function RestaurantsContent() {
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [windowWidth, setWindowWidth] = useState(() => typeof window !== "undefined" ? window.innerWidth : 768);
   const { allergens: authAllergens, loading: authLoading } = useAuth();
+  const { isFavorite } = useFavorites();
 
   useEffect(() => {
     function onResize() { setWindowWidth(window.innerWidth); }
@@ -171,6 +174,7 @@ function RestaurantsContent() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     let list = restaurants.filter((r) => matchesType(r, typeFilter));
+    if (onlySaved) list = list.filter((r) => isFavorite(r.id));
     if (onlyWithMenu) list = list.filter((r) => r.scoredItems.length > 0);
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
@@ -199,7 +203,7 @@ function RestaurantsContent() {
         break;
     }
     return list;
-  }, [restaurants, query, sort, typeFilter, onlyWithMenu]);
+  }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite]);
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
@@ -271,15 +275,26 @@ function RestaurantsContent() {
                 </button>
               ))}
             </div>
-            <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer", width: "fit-content" }}>
-              <input
-                type="checkbox"
-                checked={onlyWithMenu}
-                onChange={(e) => setOnlyWithMenu(e.target.checked)}
-                style={{ width: 15, height: 15, accentColor: "#eb1700", cursor: "pointer" }}
-              />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-sub)" }}>Only show restaurants with menu data</span>
-            </label>
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={onlySaved}
+                  onChange={(e) => setOnlySaved(e.target.checked)}
+                  style={{ width: 15, height: 15, accentColor: "#eb1700", cursor: "pointer" }}
+                />
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-sub)" }}>♥ Saved only</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={onlyWithMenu}
+                  onChange={(e) => setOnlyWithMenu(e.target.checked)}
+                  style={{ width: 15, height: 15, accentColor: "#eb1700", cursor: "pointer" }}
+                />
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-sub)" }}>Only show restaurants with menu data</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
