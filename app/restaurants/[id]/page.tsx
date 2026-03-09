@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { SettingsButton } from "@/components/SettingsButton";
 import { use } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { loadProfileAllergens } from "@/lib/allergenProfile";
@@ -115,9 +116,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e5e7eb", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/restaurants" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none" }}>← Restaurants</Link>
-          {scored?.sourceType === "official" && (
-            <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>Official allergen data</span>
-          )}
+          <SettingsButton />
         </div>
       </div>
 

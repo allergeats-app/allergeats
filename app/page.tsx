@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { AllergySelector } from "@/components/AllergySelector";
 import { CameraScanButton } from "@/components/CameraScanButton";
+import { SettingsButton } from "@/components/SettingsButton";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import type { AllergenId } from "@/lib/types";
@@ -50,53 +51,8 @@ export default function HomePage() {
       }}
     >
       {/* Top nav */}
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          padding: "14px 20px",
-        }}
-      >
-        {user ? (
-          <Link
-            href="/profile"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "7px 14px",
-              borderRadius: 999,
-              background: "var(--c-card)",
-              border: "1px solid var(--c-border)",
-              textDecoration: "none",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-            }}
-          >
-            <div
-              style={{
-                width: 24, height: 24, borderRadius: "50%",
-                background: "#eb1700", color: "#fff",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11, fontWeight: 900,
-              }}
-            >
-              {user.email?.[0].toUpperCase()}
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Account</span>
-          </Link>
-        ) : (
-          <Link
-            href="/auth"
-            style={{
-              padding: "7px 16px", borderRadius: 999,
-              background: "var(--c-text)", color: "var(--c-bg)",
-              fontSize: 13, fontWeight: 700, textDecoration: "none",
-            }}
-          >
-            Sign In
-          </Link>
-        )}
+      <nav style={{ display: "flex", justifyContent: "flex-end", padding: "14px 20px" }}>
+        <SettingsButton />
       </nav>
 
       {/* Hero */}

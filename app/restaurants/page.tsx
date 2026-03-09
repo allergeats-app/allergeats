@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { SettingsButton } from "@/components/SettingsButton";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { useAuth } from "@/lib/authContext";
 import { useFavorites } from "@/lib/favoritesContext";
@@ -290,15 +291,18 @@ function RestaurantsContent() {
       }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "grid", gap: 8 }}>
 
-          {/* Row 1 — centered logo + location */}
-          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 32 }}>
-            <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-              <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
-            </Link>
-            <span style={{ position: "absolute", right: 0, fontSize: 11, color: "#9ca3af", maxWidth: "35%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
+          {/* Row 1 — location left · logo center · settings right */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36 }}>
+            <span style={{ position: "absolute", left: 0, fontSize: 11, color: "#9ca3af", maxWidth: "35%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {locationLabel}
               {usingFallback && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample</span>}
             </span>
+            <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+              <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
+            </Link>
+            <div style={{ position: "absolute", right: 0 }}>
+              <SettingsButton />
+            </div>
           </div>
 
           {/* Row 2 — search + filter button */}

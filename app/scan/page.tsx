@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SettingsButton } from "@/components/SettingsButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { buildScanInput } from "@/lib/buildScanInput";
@@ -453,7 +454,7 @@ function StaffBlock({ row }: { row: Row }) {
             <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}>← Home</Link>
           )}
           <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Menu Scan</span>
-          <span style={{ fontSize: 13, color: "var(--c-sub)" }}>Step {step} of 3</span>
+          <SettingsButton />
         </div>
       </div>
 
