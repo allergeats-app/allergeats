@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { useAuth } from "@/lib/authContext";
 import { useFavorites } from "@/lib/favoritesContext";
@@ -253,14 +254,14 @@ function RestaurantsContent() {
       }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "grid", gap: 8 }}>
 
-          {/* Row 1 — nav · location */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none", flexShrink: 0 }}>
-              ← Back
+          {/* Row 1 — centered logo + location */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 32 }}>
+            <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+              <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
             </Link>
-            <span style={{ fontSize: 12, color: "#9ca3af", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              · {locationLabel}
-              {usingFallback && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample data</span>}
+            <span style={{ position: "absolute", right: 0, fontSize: 11, color: "#9ca3af", maxWidth: "35%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
+              {locationLabel}
+              {usingFallback && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample</span>}
             </span>
           </div>
 
