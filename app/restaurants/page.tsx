@@ -127,7 +127,7 @@ function RestaurantsContent() {
 
         if (usingDemoLocation && !cancelled) {
           setUsingFallback(true);
-          setLocationLabel("Demo location");
+          setLocationLabel("Location unavailable");
         } else {
           // Reverse-geocode in parallel with restaurant search
           reverseGeocode(lat, lng).then((label) => {
@@ -197,7 +197,7 @@ function RestaurantsContent() {
             <span style={{ fontSize: 13, color: "#9ca3af" }}>·</span>
             <span style={{ fontSize: 12, color: "#9ca3af" }}>{locationLabel}</span>
             {usingFallback && (
-              <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>· Demo data</span>
+              <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700 }}>· Showing sample restaurants</span>
             )}
             <button
               onClick={() => setShowAllergyPanel((v) => !v)}
