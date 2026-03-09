@@ -110,6 +110,12 @@ export function SettingsButton() {
                 <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
               </Link>
 
+              {/* My Allergies */}
+              <Link href="/allergies" onClick={() => setOpen(false)} style={itemStyle}>
+                <span>My Allergies</span>
+                <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
+              </Link>
+
               {/* Dark mode */}
               <button onClick={toggle} style={itemStyle}>
                 <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
