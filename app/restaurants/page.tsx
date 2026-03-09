@@ -58,8 +58,16 @@ function RestaurantsContent() {
   const [sort, setSort]                   = useState<SortOption>("distance");
   const [typeFilter, setTypeFilter]       = useState<TypeFilter>("all");
   const [onlyWithMenu, setOnlyWithMenu]   = useState(false);
-  const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
-  const [loading, setLoading]             = useState(true);
+  const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>(() => {
+    try {
+      const cached = sessionStorage.getItem(SESSION_KEY);
+      if (cached) return JSON.parse(cached) as Restaurant[];
+    } catch { /* ignore */ }
+    return [];
+  });
+  const [loading, setLoading]             = useState(() => {
+    try { return !sessionStorage.getItem(SESSION_KEY); } catch { return true; }
+  });
   const [locationLabel, setLocationLabel] = useState("Locating…");
   const [usingFallback, setUsingFallback] = useState(false);
   const [radiusMiles, setRadiusMiles]     = useState(10);
@@ -103,7 +111,8 @@ function RestaurantsContent() {
     let cancelled = false;
 
     async function load() {
-      setLoading(true);
+      // Only show spinner if there's nothing cached yet
+      if (!rawRestaurants.length) setLoading(true);
       setUsingFallback(false);
 
       try {
