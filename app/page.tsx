@@ -217,18 +217,17 @@ export default function HomePage() {
         {/* Example results */}
         <div style={{ width: "100%", marginTop: 36 }}>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Example</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>Results look like this</div>
-            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 6 }}>Scanning a pasta menu for dairy + wheat allergies</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", lineHeight: 1.2 }}>See How it Works</div>
+            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 6 }}>Menu analyzed by AllergEats</div>
+            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2 }}>Dairy + wheat allergies selected</div>
           </div>
           <div style={{ display: "grid", gap: 10 }}>
-            <div style={{ background: "#fff1f0", border: "1px solid #f3c5c0", borderRadius: 16, padding: 14 }}>
+            <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Chicken Alfredo</div>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff1f0", color: "#b91c1c", border: "1px solid #f3c5c0", whiteSpace: "nowrap" }}>High</span>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Grilled Salmon</div>
+                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#f9fafb", color: "#6b7280", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}>Low</span>
               </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", marginBottom: 4 }}>❌ Avoid</div>
-              <div style={{ fontSize: 12, color: "#b91c1c" }}>Contains: dairy, wheat</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#15803d" }}>✓ Likely Safe</div>
             </div>
             <div style={{ background: "#fff7db", border: "1px solid #f4dd8d", borderRadius: 16, padding: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
@@ -238,12 +237,13 @@ export default function HomePage() {
               <div style={{ fontSize: 12, fontWeight: 800, color: "#854d0e", marginBottom: 4 }}>⚠ Ask Staff</div>
               <div style={{ fontSize: 12, color: "#854d0e" }}>Why: Caesar dressing may contain egg, dairy, or anchovies</div>
             </div>
-            <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 14 }}>
+            <div style={{ background: "#fff1f0", border: "1px solid #f3c5c0", borderRadius: 16, padding: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Grilled Salmon</div>
-                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#f9fafb", color: "#6b7280", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}>Low</span>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Chicken Alfredo</div>
+                <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#fff1f0", color: "#b91c1c", border: "1px solid #f3c5c0", whiteSpace: "nowrap" }}>High</span>
               </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#15803d" }}>✓ Likely Safe</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#b91c1c", marginBottom: 4 }}>❌ Avoid</div>
+              <div style={{ fontSize: 12, color: "#b91c1c" }}>Contains: dairy, wheat</div>
             </div>
           </div>
         </div>
