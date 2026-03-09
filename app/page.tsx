@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AllergySelector } from "@/components/AllergySelector";
+import { CameraScanButton } from "@/components/CameraScanButton";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import type { AllergenId } from "@/lib/types";
@@ -183,20 +184,17 @@ export default function HomePage() {
           Find Restaurants Near Me →
         </Link>
 
-        {/* Secondary CTA — go to scan page */}
-        <Link
-          href="/scan"
+        {/* Secondary CTA — opens camera directly */}
+        <CameraScanButton
           style={{
             display: "block", width: "100%", padding: "14px 0",
             borderRadius: 16, background: "var(--c-card)",
             border: "1px solid var(--c-border)",
             color: "var(--c-text)",
             fontSize: 14, fontWeight: 700, textAlign: "center",
-            cursor: "pointer", textDecoration: "none",
+            cursor: "pointer",
           }}
-        >
-          Scan a Menu
-        </Link>
+        />
 
         {/* How it works */}
         <div style={{ width: "100%", marginTop: 40 }}>
