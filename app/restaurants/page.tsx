@@ -71,7 +71,7 @@ function RestaurantsContent() {
   const [query, setQuery]               = useState(queryParam);
   const [sort, setSort]                 = useState<SortOption>("best-match");
   const [typeFilter, setTypeFilter]     = useState<TypeFilter>("all");
-  const onlyWithMenu = true;
+  const [onlyWithMenu, setOnlyWithMenu] = useState(true);
   const [onlySaved, setOnlySaved]       = useState(false);
   const [radiusMiles, setRadiusMiles]   = useState(10);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
@@ -104,6 +104,7 @@ function RestaurantsContent() {
     sort !== "best-match",
     typeFilter !== "all",
     onlySaved,
+    !onlyWithMenu,
     radiusMiles !== 10,
   ].filter(Boolean).length;
 
@@ -204,6 +205,7 @@ function RestaurantsContent() {
     setSort("best-match");
     setTypeFilter("all");
     setOnlySaved(false);
+    setOnlyWithMenu(true);
     setRadiusMiles(10);
     setSearchCenter(null);
     setLocalAllergens([]);
@@ -435,6 +437,18 @@ function RestaurantsContent() {
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Saved restaurants only</div>
                 <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>Show only places you&apos;ve hearted</div>
+              </div>
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={onlyWithMenu}
+                onChange={(e) => setOnlyWithMenu(e.target.checked)}
+                style={{ width: 18, height: 18, accentColor: "#eb1700", cursor: "pointer", flexShrink: 0 }}
+              />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Has allergy data</div>
+                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>Only show restaurants with scored menu items</div>
               </div>
             </label>
           </div>
