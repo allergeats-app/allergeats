@@ -255,7 +255,7 @@ function RestaurantsContent() {
       }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "grid", gap: 8 }}>
 
-          {/* Row 1 — nav · location · filter */}
+          {/* Row 1 — nav · location */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "#6b7280", textDecoration: "none", flexShrink: 0 }}>
               ← Back
@@ -264,34 +264,36 @@ function RestaurantsContent() {
               · {locationLabel}
               {usingFallback && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample data</span>}
             </span>
+          </div>
+
+          {/* Row 2 — search + filter button */}
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search restaurants…"
+              style={{
+                flex: 1, minWidth: 0, boxSizing: "border-box",
+                padding: "11px 16px",
+                border: "1px solid var(--c-border)", borderRadius: 14, fontSize: 15,
+                background: "var(--c-card)", outline: "none", color: "var(--c-text)",
+              }}
+            />
             <button
               onClick={() => setShowFilterDrawer((v) => !v)}
               style={{
                 flexShrink: 0,
                 display: "flex", alignItems: "center", gap: 5,
-                padding: "7px 13px", borderRadius: 999,
+                padding: "0 14px", borderRadius: 14, height: 46,
                 background: activeFilterCount > 0 ? "#eb1700" : "var(--c-card)",
                 border: `1.5px solid ${activeFilterCount > 0 ? "#eb1700" : "var(--c-border)"}`,
                 color: activeFilterCount > 0 ? "#fff" : "var(--c-text)",
-                fontSize: 12, fontWeight: 700, cursor: "pointer",
+                fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap",
               }}
             >
               Filters{activeFilterCount > 0 ? ` · ${activeFilterCount}` : ""}
             </button>
           </div>
-
-          {/* Row 2 — search */}
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search restaurants…"
-            style={{
-              width: "100%", boxSizing: "border-box",
-              padding: "11px 16px",
-              border: "1px solid var(--c-border)", borderRadius: 14, fontSize: 15,
-              background: "var(--c-card)", outline: "none", color: "var(--c-text)",
-            }}
-          />
 
           {/* Row 3 — count · layout toggle */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
