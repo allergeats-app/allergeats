@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { buildScanInput } from "@/lib/buildScanInput";
 import { useAuth } from "@/lib/authContext";
@@ -55,6 +55,7 @@ export default function ScanPage() {
   const [isScanning, setIsScanning]             = useState(false);
   const [photoPreview, setPhotoPreview]         = useState<string | null>(null);
   const [scanStep, setScanStep]                 = useState(0); // 0=idle 1=uploading 2=reading 3=analyzing
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
   const [communityScores, setCommunityScores]   = useState<CommunityScoreMap>(new Map());
   // Track which dishes the user has already reported: "dish_normalized::allergen" → outcome
@@ -517,15 +518,19 @@ export default function ScanPage() {
                 <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>Choose a restaurant, paste a link, or type the menu yourself.</div>
 
                 {/* Option: Take a Photo */}
-                <label style={{ display: "block", border: `1.5px solid ${isScanning ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", cursor: isScanning ? "default" : "pointer", transition: "border-color 0.15s" }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    disabled={isScanning}
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoScan(f); e.target.value = ""; }}
-                    style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
-                  />
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  disabled={isScanning}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoScan(f); e.target.value = ""; }}
+                  style={{ display: "none" }}
+                />
+                <div
+                  onClick={() => { if (!isScanning) cameraInputRef.current?.click(); }}
+                  style={{ display: "block", border: `1.5px solid ${isScanning ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", cursor: isScanning ? "default" : "pointer", transition: "border-color 0.15s" }}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: isScanning ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>
                       {isScanning ? "📷" : "📷"}
@@ -554,7 +559,7 @@ export default function ScanPage() {
                   {fetchError && !isScanning && (
                     <div style={{ margin: "0 16px 12px", padding: "10px 12px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{fetchError}</div>
                   )}
-                </label>
+                </div>
 
                 {/* Option: Load a Restaurant */}
                 <div style={{ border: `1.5px solid ${activeInput === "preloaded" ? "#eb1700" : "var(--c-border)"}`, borderRadius: 14, marginBottom: 10, overflow: "hidden", transition: "border-color 0.15s" }}>
