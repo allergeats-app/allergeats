@@ -43,13 +43,47 @@ function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: 
   return r.tags?.includes(type) ?? false;
 }
 
-function DrawerSection({ title, children }: { title: string; children: React.ReactNode }) {
+function DrawerSection({ title, hint, last, children }: { title: string; hint?: string; last?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>
-        {title}
+    <div style={{
+      paddingBottom: 24, marginBottom: 24,
+      borderBottom: last ? "none" : "1px solid var(--c-border)",
+    }}>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          {title}
+        </div>
+        {hint && (
+          <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3 }}>{hint}</div>
+        )}
       </div>
       {children}
+    </div>
+  );
+}
+
+function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      style={{
+        width: 46, height: 28, borderRadius: 999, flexShrink: 0,
+        background: checked ? "#eb1700" : "var(--c-border)",
+        position: "relative", cursor: "pointer",
+        transition: "background 0.2s",
+      }}
+    >
+      <div style={{
+        position: "absolute",
+        top: 4,
+        left: checked ? 22 : 4,
+        width: 20, height: 20, borderRadius: 999,
+        background: "#fff",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.22)",
+        transition: "left 0.18s cubic-bezier(0.4,0,0.2,1)",
+      }} />
     </div>
   );
 }
@@ -332,8 +366,8 @@ function RestaurantsContent() {
           onClick={() => setShowFilterDrawer(false)}
           style={{
             position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.35)",
-            zIndex: 100, backdropFilter: "blur(2px)",
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 100, backdropFilter: "blur(3px)",
           }}
         />
       )}
@@ -344,130 +378,167 @@ function RestaurantsContent() {
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 101,
           background: "var(--c-card)",
-          borderTopLeftRadius: 24, borderTopRightRadius: 24,
-          boxShadow: "0 -8px 40px rgba(0,0,0,0.18)",
+          borderTopLeftRadius: 28, borderTopRightRadius: 28,
+          boxShadow: "0 -12px 48px rgba(0,0,0,0.2)",
           transform: showFilterDrawer ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
-          maxHeight: "84vh", overflowY: "auto",
-          padding: "0 20px 40px",
+          transition: "transform 0.3s cubic-bezier(0.32,0.72,0,1)",
+          maxHeight: "88vh",
+          display: "flex", flexDirection: "column",
         }}
       >
-        {/* Drawer handle bar */}
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 10, marginBottom: 2 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 999, background: "var(--c-border)" }} />
+        {/* Scrollable content */}
+        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px" }}>
+
+          {/* Handle */}
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, marginBottom: 4 }}>
+            <div style={{ width: 40, height: 5, borderRadius: 999, background: "var(--c-border)" }} />
+          </div>
+
+          {/* Header */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "14px 0 20px",
+            position: "sticky", top: 0,
+            background: "var(--c-card)", zIndex: 1,
+            borderBottom: "1px solid var(--c-border)",
+            marginBottom: 24,
+          }}>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", lineHeight: 1 }}>Filters</div>
+              {activeFilterCount > 0 && (
+                <div style={{ fontSize: 12, color: "#eb1700", fontWeight: 700, marginTop: 3 }}>
+                  {activeFilterCount} active
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setShowFilterDrawer(false)}
+              style={{
+                width: 32, height: 32, borderRadius: 999,
+                background: "var(--c-muted)", border: "none",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 14, cursor: "pointer", color: "var(--c-sub)", fontWeight: 700,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Allergies */}
+          <DrawerSection title="Your allergies" hint="Results update as you change selections">
+            <AllergySelector selected={localAllergens} onChange={handleAllergenChange} />
+          </DrawerSection>
+
+          {/* Sort */}
+          <DrawerSection title="Sort by">
+            <FilterChips chips={SORT_CHIPS} active={sort} onChange={setSort} />
+          </DrawerSection>
+
+          {/* Cuisine */}
+          <DrawerSection title="Cuisine type">
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {TYPE_CHIPS.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setTypeFilter(c.value)}
+                  style={{
+                    padding: "8px 16px", borderRadius: 999,
+                    border: `1.5px solid ${typeFilter === c.value ? "var(--c-text)" : "var(--c-border)"}`,
+                    background: typeFilter === c.value ? "var(--c-text)" : "transparent",
+                    color: typeFilter === c.value ? "var(--c-bg)" : "var(--c-sub)",
+                    fontSize: 13, fontWeight: 700, cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </DrawerSection>
+
+          {/* Radius */}
+          <DrawerSection title="Search radius" hint="Larger radius searches more of the map">
+            <div style={{ display: "flex", gap: 8 }}>
+              {[5, 10, 25, 50].map((mi) => (
+                <button
+                  key={mi}
+                  onClick={() => { setSearchCenter(null); setRadiusMiles(mi); }}
+                  style={{
+                    flex: 1, padding: "12px 0", borderRadius: 14,
+                    border: `1.5px solid ${radiusMiles === mi ? "#eb1700" : "var(--c-border)"}`,
+                    background: radiusMiles === mi ? "#fef2f2" : "transparent",
+                    color: radiusMiles === mi ? "#eb1700" : "var(--c-sub)",
+                    fontSize: 14, fontWeight: 800, cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {mi}
+                  <span style={{ fontSize: 11, fontWeight: 600, display: "block", marginTop: 1, opacity: 0.75 }}>mi</span>
+                </button>
+              ))}
+            </div>
+          </DrawerSection>
+
+          {/* Toggles */}
+          <DrawerSection title="Show only" last>
+            <div style={{ display: "grid", gap: 0 }}>
+              {([
+                { checked: onlyWithMenu, onChange: setOnlyWithMenu, label: "Has allergy data", hint: "Only restaurants with scored menu items" },
+                { checked: onlySaved,    onChange: setOnlySaved,    label: "Saved restaurants", hint: "Only places you've hearted" },
+              ] as const).map(({ checked, onChange, label, hint: rowHint }, i, arr) => (
+                <div
+                  key={label}
+                  onClick={() => onChange(!checked)}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    gap: 12, padding: "14px 0", cursor: "pointer",
+                    borderBottom: i < arr.length - 1 ? "1px solid var(--c-border)" : "none",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)" }}>{label}</div>
+                    <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{rowHint}</div>
+                  </div>
+                  <ToggleSwitch checked={checked} onChange={onChange} />
+                </div>
+              ))}
+            </div>
+          </DrawerSection>
+
         </div>
 
-        {/* Drawer header */}
+        {/* Sticky footer */}
         <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "12px 0 16px",
-          position: "sticky", top: 0, background: "var(--c-card)", zIndex: 1,
+          padding: "12px 20px 32px",
+          borderTop: "1px solid var(--c-border)",
+          background: "var(--c-card)",
+          display: "flex", gap: 10,
         }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)" }}>Filters</span>
+          {activeFilterCount > 0 && (
+            <button
+              onClick={resetFilters}
+              style={{
+                flex: "0 0 auto", padding: "0 18px", height: 50,
+                background: "transparent", border: "1.5px solid var(--c-border)",
+                borderRadius: 14, fontSize: 13, fontWeight: 700,
+                color: "var(--c-sub)", cursor: "pointer", whiteSpace: "nowrap",
+              }}
+            >
+              Reset
+            </button>
+          )}
           <button
             onClick={() => setShowFilterDrawer(false)}
-            style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: "var(--c-sub)", padding: 4, lineHeight: 1 }}
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Allergies */}
-        <DrawerSection title="Your allergies">
-          <AllergySelector selected={localAllergens} onChange={handleAllergenChange} />
-        </DrawerSection>
-
-        {/* Sort */}
-        <DrawerSection title="Sort by">
-          <FilterChips chips={SORT_CHIPS} active={sort} onChange={setSort} />
-        </DrawerSection>
-
-        {/* Cuisine */}
-        <DrawerSection title="Cuisine">
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {TYPE_CHIPS.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setTypeFilter(c.value)}
-                style={{
-                  padding: "7px 14px", borderRadius: 999,
-                  border: `1.5px solid ${typeFilter === c.value ? "#111" : "var(--c-border)"}`,
-                  background: typeFilter === c.value ? "var(--c-text)" : "transparent",
-                  color: typeFilter === c.value ? "var(--c-bg)" : "var(--c-sub)",
-                  fontSize: 13, fontWeight: 700, cursor: "pointer",
-                }}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-        </DrawerSection>
-
-        {/* Radius */}
-        <DrawerSection title="Search radius">
-          <div style={{ display: "flex", gap: 8 }}>
-            {[5, 10, 25, 50].map((mi) => (
-              <button
-                key={mi}
-                onClick={() => { setSearchCenter(null); setRadiusMiles(mi); }}
-                style={{
-                  flex: 1, padding: "10px 0", borderRadius: 12,
-                  border: `1.5px solid ${radiusMiles === mi ? "#eb1700" : "var(--c-border)"}`,
-                  background: radiusMiles === mi ? "#fef2f2" : "transparent",
-                  color: radiusMiles === mi ? "#eb1700" : "var(--c-sub)",
-                  fontSize: 13, fontWeight: 700, cursor: "pointer",
-                }}
-              >
-                {mi} mi
-              </button>
-            ))}
-          </div>
-        </DrawerSection>
-
-        {/* More filters */}
-        <DrawerSection title="More filters">
-          <div style={{ display: "grid", gap: 14 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={onlySaved}
-                onChange={(e) => setOnlySaved(e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: "#eb1700", cursor: "pointer", flexShrink: 0 }}
-              />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Saved restaurants only</div>
-                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>Show only places you&apos;ve hearted</div>
-              </div>
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={onlyWithMenu}
-                onChange={(e) => setOnlyWithMenu(e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: "#eb1700", cursor: "pointer", flexShrink: 0 }}
-              />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Has allergy data</div>
-                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>Only show restaurants with scored menu items</div>
-              </div>
-            </label>
-          </div>
-        </DrawerSection>
-
-        {/* Reset */}
-        {activeFilterCount > 0 && (
-          <button
-            onClick={resetFilters}
             style={{
-              width: "100%", padding: "13px 0",
-              background: "none", border: "1.5px solid var(--c-border)",
-              borderRadius: 12, fontSize: 13, fontWeight: 700,
-              color: "#6b7280", cursor: "pointer",
+              flex: 1, padding: "0 20px", height: 50,
+              background: "#111", color: "#fff",
+              border: "none", borderRadius: 14,
+              fontSize: 15, fontWeight: 800, cursor: "pointer",
             }}
           >
-            Reset all filters
+            {loading ? "Loading…" : `Show ${filtered.length} restaurant${filtered.length === 1 ? "" : "s"}`}
           </button>
-        )}
+        </div>
       </div>
 
       {/* ── Restaurant list ───────────────────────────────────────────── */}
