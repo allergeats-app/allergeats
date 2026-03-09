@@ -48,16 +48,19 @@ const SESSION_KEY = "allegeats_live_restaurants";
 
 // ── Shared sub-components ───────────────────────────────────────────────────
 
-function DrawerSection({ title, hint, last, children }: {
-  title: string; hint?: string; last?: boolean; children: React.ReactNode;
+function DrawerSection({ title, hint, last, action, children }: {
+  title: string; hint?: string; last?: boolean; action?: React.ReactNode; children: React.ReactNode;
 }) {
   return (
     <div style={{ paddingBottom: 24, marginBottom: 24, borderBottom: last ? "none" : "1px solid var(--c-border)" }}>
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          {title}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            {title}
+          </div>
+          {hint && <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3 }}>{hint}</div>}
         </div>
-        {hint && <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3 }}>{hint}</div>}
+        {action}
       </div>
       {children}
     </div>
@@ -271,7 +274,7 @@ function FilterDrawer({
   }, [open, onClose]);
 
   const toggleRows = [
-    { checked: onlyWithMenu, onChange: setOnlyWithMenu, label: "Has allergy data",   hint: "Only restaurants with scored menu items" },
+    { checked: onlyWithMenu, onChange: setOnlyWithMenu, label: "Available Menus Only", hint: "Only restaurants with scored menu items" },
     { checked: onlySaved,    onChange: setOnlySaved,    label: "Saved restaurants",  hint: "Only places you've hearted" },
   ];
 
@@ -352,7 +355,22 @@ function FilterDrawer({
           </div>
 
           {/* Allergies */}
-          <DrawerSection title="Your allergies" hint="Results update as you change selections">
+          <DrawerSection
+            title="Your allergies"
+            hint="Results update as you change selections"
+            action={localAllergens.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => onAllergenChange([])}
+                style={{
+                  fontSize: 12, fontWeight: 700, color: "#eb1700",
+                  background: "none", border: "none", cursor: "pointer", padding: 0,
+                }}
+              >
+                Clear
+              </button>
+            ) : undefined}
+          >
             <AllergySelector selected={localAllergens} onChange={onAllergenChange} />
           </DrawerSection>
 
@@ -465,10 +483,16 @@ function FilterDrawer({
               flex: 1, padding: "0 20px", height: 52,
               background: "var(--c-text)", color: "var(--c-bg)",
               border: "none", borderRadius: 14,
-              fontSize: 15, fontWeight: 800, cursor: "pointer",
+              cursor: "pointer", display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 1,
             }}
           >
-            {loading ? "Loading…" : `Show ${filteredCount} restaurant${filteredCount === 1 ? "" : "s"}`}
+            <span style={{ fontSize: 15, fontWeight: 800, lineHeight: 1 }}>Done</span>
+            {!loading && (
+              <span style={{ fontSize: 11, fontWeight: 500, opacity: 0.7, lineHeight: 1 }}>
+                {filteredCount} restaurant{filteredCount === 1 ? "" : "s"}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -506,7 +530,6 @@ function RestaurantsContent() {
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading]               = useState(true);
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>([]);
-  const [windowWidth, setWindowWidth]       = useState(768);
 
   const [locationLabel, setLocationLabel] = useState("Locating…");
   const [usingFallback, setUsingFallback] = useState(false);
@@ -520,7 +543,6 @@ function RestaurantsContent() {
   // Hydrate from localStorage + sessionStorage after mount
   useEffect(() => {
     setLocalAllergens(loadProfileAllergens());
-    setWindowWidth(window.innerWidth);
     try {
       const cached = sessionStorage.getItem(SESSION_KEY);
       if (cached) {
@@ -531,19 +553,12 @@ function RestaurantsContent() {
   }, []);
 
   const activeFilterCount = [
-    localAllergens.length > 0,
     sort !== "best-match",
     typeFilter !== "all",
     onlySaved,
     !onlyWithMenu,
     radiusMiles !== 10,
   ].filter(Boolean).length;
-
-  useEffect(() => {
-    function onResize() { setWindowWidth(window.innerWidth); }
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
 
   // Auth allergens take priority over localStorage
   useEffect(() => {
@@ -629,8 +644,6 @@ function RestaurantsContent() {
     setOnlyWithMenu(true);
     setRadiusMiles(10);
     setSearchCenter(null);
-    setLocalAllergens([]);
-    saveProfileAllergens([]);
   }
 
   const filtered = useMemo(() => {
@@ -703,10 +716,7 @@ function RestaurantsContent() {
       />
 
       {/* ── Results ─────────────────────────────────────────────────────── */}
-      <div style={{
-        maxWidth: layout === "map" ? "100%" : layout === "grid" ? (windowWidth < 640 ? 600 : 960) : 600,
-        margin: "0 auto", padding: "16px 16px 0",
-      }}>
+      <div className={`rp-results rp-results--${layout}`}>
         {loading ? (
           <div style={{ padding: "80px 0", textAlign: "center" }}>
             <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
@@ -734,14 +744,7 @@ function RestaurantsContent() {
             onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
           />
         ) : (
-          <div style={{
-            display: "grid", gap: 12,
-            gridTemplateColumns: layout === "grid"
-              ? windowWidth < 480 ? "repeat(2, 1fr)"
-              : windowWidth < 768 ? "repeat(2, 1fr)"
-              : "repeat(3, 1fr)"
-              : "1fr",
-          }}>
+          <div className={layout === "grid" ? "rp-grid" : undefined} style={{ display: "grid", gap: 12 }}>
             {filtered.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
             ))}

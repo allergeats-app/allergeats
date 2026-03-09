@@ -45,3 +45,24 @@ select,
 textarea {
   font-size: 16px !important;
 }
+
+/* ── Restaurants page responsive layout ─────────────────────────────────── */
+.rp-results {
+  margin: 0 auto;
+  padding: 16px 16px 0;
+}
+.rp-results--list { max-width: 600px; }
+.rp-results--map  { max-width: 100%; }
+.rp-results--grid { max-width: 600px; }
+
+.rp-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 640px) {
+  .rp-results--grid { max-width: 960px; }
+}
+
+@media (min-width: 768px) {
+  .rp-grid { grid-template-columns: repeat(3, 1fr); }
+}
