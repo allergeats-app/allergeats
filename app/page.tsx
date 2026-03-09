@@ -7,31 +7,37 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import type { AllergenId } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function HomePage() {
   const { user, allergens, saveAllergens, loading } = useAuth();
   useTheme(); // ensures re-render when theme changes
   const [selected, setSelected] = useState<AllergenId[]>(allergens);
-  const [savedSelection, setSavedSelection] = useState<AllergenId[]>(allergens);
-  const [saved, setSaved] = useState(false);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initializedRef = useRef(false);
 
-  // Keep local selection in sync when auth loads allergens
+  // Keep local selection in sync when auth loads allergens (first load only)
   useEffect(() => {
-    if (!loading && allergens.length > 0 && selected.length === 0) {
+    if (!loading && allergens.length > 0 && !initializedRef.current) {
+      initializedRef.current = true;
       setSelected(allergens);
-      setSavedSelection(allergens);
     }
   }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join();
-
-  async function handleSave() {
-    await saveAllergens(selected);
-    setSavedSelection([...selected]);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-  }
+  // Auto-save with debounce whenever selection changes (signed-in users only)
+  useEffect(() => {
+    if (!user || !initializedRef.current) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSaveState("idle");
+    debounceRef.current = setTimeout(async () => {
+      setSaveState("saving");
+      await saveAllergens(selected);
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 2000);
+    }, 800);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <main
@@ -137,28 +143,17 @@ export default function HomePage() {
               Your Allergies
             </div>
             {user && (
-              <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 700 }}>
-                Synced to account
+              <div style={{
+                fontSize: 11, fontWeight: 700,
+                color: saveState === "saved" ? "#22c55e" : saveState === "saving" ? "#9ca3af" : "#9ca3af",
+                transition: "color 0.3s",
+              }}>
+                {saveState === "saved" ? "✓ Saved" : saveState === "saving" ? "Saving…" : "Auto-saved"}
               </div>
             )}
           </div>
 
           <AllergySelector selected={selected} onChange={setSelected} limit={4} />
-
-          {user && (isDirty || saved) && (
-            <button
-              onClick={handleSave}
-              style={{
-                marginTop: 20, width: "100%", padding: "14px 0",
-                borderRadius: 14, border: "none",
-                background: saved ? "#22c55e" : "var(--c-text)",
-                color: "#fff", fontSize: 14, fontWeight: 800,
-                cursor: "pointer", transition: "background 0.2s",
-              }}
-            >
-              {saved ? "Saved!" : "Save to Account"}
-            </button>
-          )}
 
           {!user && (
             <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 12, background: "#fafaf8", border: "1px solid var(--c-border)", textAlign: "center" }}>
