@@ -54,6 +54,7 @@ export default function ScanPage() {
   const [fetchError, setFetchError]             = useState<string | null>(null);
   const [isScanning, setIsScanning]             = useState(false);
   const [photoPreview, setPhotoPreview]         = useState<string | null>(null);
+  const [scanStep, setScanStep]                 = useState(0); // 0=idle 1=uploading 2=reading 3=analyzing
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
   const [communityScores, setCommunityScores]   = useState<CommunityScoreMap>(new Map());
   // Track which dishes the user has already reported: "dish_normalized::allergen" → outcome
@@ -137,19 +138,22 @@ export default function ScanPage() {
 
   async function handlePhotoScan(file: File) {
     setIsScanning(true);
+    setScanStep(1);
     setFetchError(null);
     setPhotoPreview(URL.createObjectURL(file));
     try {
       const fd = new FormData();
       fd.append("image", file);
+      setScanStep(2);
       const res = await fetch("/api/scan-photo", { method: "POST", body: fd });
+      setScanStep(3);
       const data = await res.json();
       if (!res.ok) { setFetchError(data?.error ?? "Scan failed"); setPhotoPreview(null); return; }
       const lines: string[] = data.menuLines ?? [];
       if (!lines.length) { setFetchError("Couldn't read any menu items from that photo."); setPhotoPreview(null); return; }
       setMenu(lines.join("\n")); setMenuSource("manual"); setAnalyzed(false); setActiveInput(null);
     } catch (err: unknown) { setFetchError(err instanceof Error ? err.message : "Network error"); setPhotoPreview(null); }
-    finally { setIsScanning(false); }
+    finally { setIsScanning(false); setScanStep(0); }
   }
 
   function loadSelectedRestaurant() {
@@ -348,10 +352,35 @@ export default function ScanPage() {
   }
 
   const SECTION_META = {
-    safe:  { label: "Likely Safe", mark: "+", bg: "#f0fdf4", border: "#bbf7d0", textColor: "#15803d" },
-    ask:   { label: "Ask Staff",   mark: "?", bg: "#fff7db", border: "#f4dd8d", textColor: "#854d0e" },
-    avoid: { label: "Avoid",       mark: "!", bg: "#fff1f0", border: "#f3c5c0", textColor: "#b91c1c" },
+    safe:  { label: "Likely Safe",  subtitle: "No allergen signals found for your profile", mark: "✓", bg: "#f0fdf4", border: "#bbf7d0", textColor: "#15803d" },
+    ask:   { label: "Check First",  subtitle: "May contain your allergens — verify with staff", mark: "?", bg: "#fff7db", border: "#f4dd8d", textColor: "#854d0e" },
+    avoid: { label: "Avoid",        subtitle: "Contains or likely contains your allergens", mark: "!", bg: "#fff1f0", border: "#f3c5c0", textColor: "#b91c1c" },
   };
+
+  function DishName({ item }: { item: string }) {
+    const parts = item.split("—");
+    const name = parts[0].trim();
+    const desc = parts.length > 1 ? parts.slice(1).join("—").trim() : null;
+    return (
+      <div>
+        <div style={{ fontWeight: 800, fontSize: 14, color: "#111", lineHeight: 1.3 }}>{name}</div>
+        {desc && <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2, lineHeight: 1.4 }}>{desc}</div>}
+      </div>
+    );
+  }
+
+  function TriggerPills({ hits, color }: { hits: string[]; color: string }) {
+    if (!hits.length) return null;
+    return (
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+        {hits.slice(0, 6).map((h) => (
+          <span key={h} style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: `${color}22`, color, border: `1px solid ${color}44` }}>
+            {h}
+          </span>
+        ))}
+      </div>
+    );
+  }
 
   function ResultSection({ tone, rows }: { tone: "safe" | "ask" | "avoid"; rows: Array<Row | AvoidRow> }) {
     if (!rows.length) return null;
@@ -359,26 +388,34 @@ export default function ScanPage() {
     return (
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 13, fontWeight: 900, color: meta.textColor }}>{meta.mark}</div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 14, fontWeight: 900, color: meta.textColor }}>{meta.mark}</div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label}</div>
-            <div style={{ fontSize: 12, color: "#6b7280" }}>{rows.length} item{rows.length === 1 ? "" : "s"}</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label} <span style={{ fontWeight: 600, color: "#6b7280" }}>({rows.length})</span></div>
+            <div style={{ fontSize: 11, color: "#9ca3af" }}>{meta.subtitle}</div>
           </div>
         </div>
         <div style={{ display: "grid", gap: 10 }}>
           {rows.map((r, i) => (
             <div key={i} style={{ background: meta.bg, border: `1px solid ${meta.border}`, borderRadius: 16, padding: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "#111", lineHeight: 1.3 }}>{r.item}</div>
-                {confBadge(r.confidence)}
+                <DishName item={r.item} />
+                {r.learned && <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 7px", borderRadius: 999, background: "#e0e7ff", color: "#4338ca", flexShrink: 0 }}>YOUR HISTORY</span>}
               </div>
-              {r.learned && <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4, fontWeight: 700 }}>From your history</div>}
               <CommunityBadge item={r.item} />
-              {tone === "ask" && r.inferredReasons.length > 0 && (
-                <div style={{ fontSize: 12, color: "#854d0e", marginTop: 6, lineHeight: 1.4 }}>Why: {r.inferredReasons.join(" · ")}</div>
-              )}
               {tone === "avoid" && "hitsAllergens" in r && (
-                <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 6, fontWeight: 700 }}>Contains: {r.hitsAllergens.join(", ")}</div>
+                <>
+                  <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 8, fontWeight: 700 }}>Contains: {r.hitsAllergens.join(", ")}</div>
+                  <TriggerPills hits={r.hits} color="#b91c1c" />
+                </>
+              )}
+              {tone === "ask" && r.inferredReasons.length > 0 && (
+                <>
+                  <div style={{ fontSize: 12, color: "#854d0e", marginTop: 6, lineHeight: 1.4 }}>Why: {r.inferredReasons.join(" · ")}</div>
+                  <TriggerPills hits={r.hits} color="#854d0e" />
+                </>
+              )}
+              {tone === "safe" && r.hits.length > 0 && (
+                <div style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>Scanned for: {r.hits.slice(0, 4).join(", ")}{r.hits.length > 4 ? "…" : ""}</div>
               )}
               {tone !== "safe" && <StaffBlock row={r} />}
               {tone === "ask" && <LearnBlock row={r} />}
@@ -491,14 +528,24 @@ export default function ScanPage() {
                   />
                   <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: isScanning ? "#eb1700" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>
-                      {isScanning ? "⏳" : "📷"}
+                      {isScanning ? "📷" : "📷"}
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>{isScanning ? "Reading menu…" : "Scan with Camera"}</div>
-                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{isScanning ? "Claude is extracting menu items" : "Take a photo of any menu"}</div>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>{isScanning ? "Scanning…" : "Scan with Camera"}</div>
+                      <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{isScanning ? ["Uploading photo", "Reading menu items", "Extracting ingredients"][scanStep - 1] ?? "Processing…" : "Take a photo of any menu"}</div>
                     </div>
                     {!isScanning && <div style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#eb1700" }}>Tap →</div>}
                   </div>
+                  {isScanning && (
+                    <div style={{ padding: "0 16px 14px", display: "flex", gap: 6 }}>
+                      {["Upload", "Read", "Extract"].map((label, i) => (
+                        <div key={i} style={{ flex: 1 }}>
+                          <div style={{ height: 3, borderRadius: 999, background: scanStep > i ? "#eb1700" : "var(--c-border)", transition: "background 0.4s" }} />
+                          <div style={{ fontSize: 10, color: scanStep > i ? "#eb1700" : "var(--c-sub)", fontWeight: 700, marginTop: 3, textAlign: "center" }}>{label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {photoPreview && isScanning && (
                     <div style={{ padding: "0 16px 16px" }}>
                       <img src={photoPreview} alt="Menu preview" style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 10 }} />
@@ -648,8 +695,13 @@ export default function ScanPage() {
             <>
               {/* Summary bar */}
               <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", marginBottom: 12 }}>
-                  {loadedRestaurant ? loadedRestaurant : "Scan Results"} — {menuItems.length} items
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>
+                    {loadedRestaurant ? loadedRestaurant : "Scan Results"} — {menuItems.length} items
+                  </div>
+                  {communityScores.size > 0 && (
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6b7280" }}>👥 Community data</div>
+                  )}
                 </div>
                 <div style={{ height: 8, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex" }}>
                   <div style={{ width: `${menuItems.length ? (results.safe.length / menuItems.length) * 100 : 0}%`, background: "#22c55e", transition: "width 0.5s" }} />
