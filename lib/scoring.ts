@@ -77,6 +77,59 @@ export function scoreMenuItem(
   };
 }
 
+// ─── Data quality / coverage tiers ───────────────────────────────────────────
+
+export type CoverageTier = "full" | "partial" | "limited" | "none";
+
+/**
+ * Classifies a restaurant by how much menu data has been analyzed.
+ *   full    ≥ 20 items — comprehensive, results are highly trustworthy
+ *   partial  5–19 items — decent signal, most decisions are reliable
+ *   limited  1–4 items — thin data, treat with caution
+ *   none     0 items   — no analysis available
+ */
+export function coverageTier(total: number): CoverageTier {
+  if (total === 0)  return "none";
+  if (total < 5)   return "limited";
+  if (total < 20)  return "partial";
+  return "full";
+}
+
+export function coverageTierLabel(total: number): string {
+  const tier = coverageTier(total);
+  switch (tier) {
+    case "full":    return "Full menu analyzed";
+    case "partial": return `Partial menu · ${total} items`;
+    case "limited": return `Limited data · ${total} item${total === 1 ? "" : "s"}`;
+    case "none":    return "No menu data yet";
+  }
+}
+
+export function coverageTierColor(tier: CoverageTier): string {
+  switch (tier) {
+    case "full":    return "#22c55e"; // green
+    case "partial": return "#3b82f6"; // blue
+    case "limited": return "#f59e0b"; // amber
+    case "none":    return "#9ca3af"; // gray
+  }
+}
+
+// ─── Coverage weight for scoring ─────────────────────────────────────────────
+
+/**
+ * Maps item count to a [0, 1] confidence weight aligned with coverage tiers.
+ *   none    (0)     → 0
+ *   limited (1–4)   → 0.05–0.20  (very thin, barely counts)
+ *   partial (5–19)  → 0.25–0.97  (linearly scales to full)
+ *   full    (20+)   → 1.0
+ */
+export function coverageWeight(total: number): number {
+  if (total === 0)  return 0;
+  if (total < 5)   return (total / 4) * 0.20;          // 0.05 → 0.20
+  if (total < 20)  return 0.25 + ((total - 5) / 15) * 0.75; // 0.25 → 1.0
+  return 1.0;
+}
+
 /**
  * Best-match ranking score for a ScoredRestaurant.
  *
@@ -101,19 +154,17 @@ export function bestMatchScore(r: {
 
   const safeRatio  = likelySafe / total;
   const avoidRatio = avoid / total;
-
-  // Coverage weight: ramps to 1.0 at 15 items; thin data gets partial credit
-  const coverage = Math.min(total, 15) / 15;
+  const cw = coverageWeight(total);
 
   // Core safety signal — coverage-weighted safe ratio
-  const safeScore = safeRatio * coverage * 0.45;
+  const safeScore = safeRatio * cw * 0.45;
 
   // Avoid penalty — both ratio and absolute count matter
   // (10 avoids is much worse than 1 even at the same ratio)
   const avoidPenalty = avoidRatio * 0.35 + (Math.min(avoid, 8) / 8) * 0.08;
 
-  // Zero-avoid bonus: reward when we have enough data to be confident
-  const zeroAvoidBonus = avoid === 0 && total >= 8 ? 0.15 : 0;
+  // Zero-avoid bonus: only meaningful at partial+ coverage (5+ items)
+  const zeroAvoidBonus = avoid === 0 && total >= 5 ? 0.15 * cw : 0;
 
   // Distance penalty: diminishing returns, max effect at 15mi
   const distPenalty = (Math.min(dist, 15) / 15) * 0.08;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useFavorites } from "@/lib/favoritesContext";
+import { coverageTier, coverageTierLabel, coverageTierColor } from "@/lib/scoring";
 import type { ScoredRestaurant } from "@/lib/types";
 
 type Props = { restaurant: ScoredRestaurant; compact?: boolean };
@@ -77,12 +78,6 @@ function fitExplanation(level: FitLevel, avoidCount: number, askCount: number, s
   }
 }
 
-function coverageLabel(total: number): string {
-  if (total === 0) return "No menu data yet";
-  if (total < 5) return "Limited menu data";
-  return `${total} items analyzed`;
-}
-
 export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const { summary } = r;
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
@@ -92,7 +87,9 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const level = fitLevel(safePercent, summary.avoid, summary.ask, summary.total);
   const badge = fitBadge(level);
   const explanation = fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe);
-  const coverage = coverageLabel(summary.total);
+  const tier = coverageTier(summary.total);
+  const tierLabel = coverageTierLabel(summary.total);
+  const tierColor = coverageTierColor(tier);
 
   const [photoFailed, setPhotoFailed] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -197,7 +194,10 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
                     <Stat count={summary.ask}        label="Ask"   color="#d97706" />
                     <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--c-sub)" }}>{coverage}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{tierLabel}</span>
+                  </div>
                 </div>
               )}
               {compact && (
