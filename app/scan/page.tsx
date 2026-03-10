@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { SettingsButton } from "@/components/SettingsButton";
+import { recordScan } from "@/lib/scanHistory";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { buildScanInput } from "@/lib/buildScanInput";
@@ -107,6 +108,21 @@ export default function ScanPage() {
     fetchCommunityScores(menuItems, selectedAllergens as string[], loadedRestaurant ?? undefined)
       .then(setCommunityScores);
   }, [step, menuItems, selectedAllergens, loadedRestaurant]);
+
+  // Record scan to history when results are first ready
+  useEffect(() => {
+    if (step !== 3 || menuItems.length === 0) return;
+    recordScan({
+      restaurantName: loadedRestaurant ?? "Manual scan",
+      source:         menuSource,
+      totalItems:     menuItems.length,
+      safeCount:      results.safe.length,
+      askCount:       results.ask.length,
+      avoidCount:     results.avoid.length,
+      allergens:      selectedAllergens as string[],
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]); // fire once when step becomes 3
 
   const filteredMenus = useMemo(() => {
     const q = normalize(restaurantSearch);

@@ -7,6 +7,7 @@ import { use } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { loadProfileAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant } from "@/lib/scoring";
+import { recordView } from "@/lib/recentlyViewed";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { CameraScanButton } from "@/components/CameraScanButton";
 import { SourceBadge } from "@/components/SourceBadge";
@@ -56,6 +57,14 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
     const profileAllergens = loadProfileAllergens();
     setScored(scoreRestaurant(restaurant, profileAllergens));
+    recordView({
+      id:       restaurant.id,
+      name:     restaurant.name,
+      cuisine:  restaurant.cuisine,
+      lat:      restaurant.lat ?? undefined,
+      lng:      restaurant.lng ?? undefined,
+      distance: restaurant.distance ?? undefined,
+    });
   }, [id]);
 
   const categories = useMemo(() => {

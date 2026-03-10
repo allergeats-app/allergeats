@@ -104,6 +104,12 @@ export function SettingsButton() {
                 </div>
               </div>
 
+              {/* Saved & Recent */}
+              <Link href="/saved" onClick={() => setOpen(false)} style={itemStyle}>
+                <span>Saved & Recent</span>
+                <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
+              </Link>
+
               {/* My Account */}
               <Link href="/profile" onClick={() => setOpen(false)} style={itemStyle}>
                 <span>My Account</span>
