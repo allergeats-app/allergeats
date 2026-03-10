@@ -59,12 +59,20 @@ function fitBadge(level: FitLevel): { bg: string; color: string } {
   }
 }
 
-function fitExplanation(level: FitLevel, avoidCount: number, safeCount: number): string {
+function fitExplanation(level: FitLevel, avoidCount: number, askCount: number, safeCount: number): string {
   switch (level) {
-    case "Great Match":  return `${safeCount} safe items, nothing to avoid`;
-    case "Good Option":  return avoidCount === 1 ? "1 item to watch — most options are safe" : `${safeCount} safe picks with a few cautions`;
-    case "Use Caution":  return `${avoidCount} items to avoid — check before ordering`;
-    case "Limited Data": return "Tap to scan the menu yourself";
+    case "Great Match":
+      return avoidCount === 0
+        ? `${safeCount} safe items, nothing to avoid`
+        : `${safeCount} safe items, very little to worry about`;
+    case "Good Option":
+      if (avoidCount === 0) return `${safeCount} safe picks — ask about ${askCount} item${askCount === 1 ? "" : "s"}`;
+      if (avoidCount === 1) return "1 item to avoid — most options are safe";
+      return `${safeCount} safe picks, ${avoidCount} items to avoid`;
+    case "Use Caution":
+      return `${avoidCount} item${avoidCount === 1 ? "" : "s"} to avoid — check before ordering`;
+    case "Limited Data":
+      return "Tap to scan the menu yourself";
   }
 }
 
@@ -82,7 +90,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const cover = coverForRestaurant(r.cuisine, r.name);
   const level = fitLevel(safePercent, summary.avoid, summary.ask, summary.total);
   const badge = fitBadge(level);
-  const explanation = fitExplanation(level, summary.avoid, summary.likelySafe);
+  const explanation = fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe);
   const coverage = coverageLabel(summary.total);
 
   const [photoFailed, setPhotoFailed] = useState(false);
