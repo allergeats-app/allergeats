@@ -27,11 +27,13 @@ export type SignalSource =
   | "dish-possible"
   | "cuisine"
   | "prep"
-  | "ambiguity";
+  | "ambiguity"
+  | "memory";    // learned from user/staff feedback — highest authority
 
 export const SIGNAL_WEIGHT: Record<SignalSource, number> = {
   direct:          5,
   synonym:         4,
+  memory:          5, // matches direct — verified by real human experience
   dish:            3,
   sauce:           3,
   "dish-common":   3,

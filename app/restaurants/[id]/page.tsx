@@ -14,6 +14,8 @@ import { MenuItemCard } from "@/components/MenuItemCard";
 import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
 import { trackEvent } from "@/lib/analytics";
+import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
+import { fitLevel as fitLevelFn } from "@/lib/fitLevel";
 import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk, AllergenId } from "@/lib/types";
 
 type RiskFilter = "all" | Risk;
@@ -78,13 +80,30 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     if (!restaurant) { setNotFound(true); return; } // eslint-disable-line react-hooks/set-state-in-effect
     const allergens = loadProfileAllergens();
     setUserAllergens(allergens);
-    setScored(scoreRestaurant(restaurant, allergens));
+    const sr = scoreRestaurant(restaurant, allergens);
+    setScored(sr);
     recordView({
       id: restaurant.id, name: restaurant.name, cuisine: restaurant.cuisine,
       lat: restaurant.lat ?? undefined, lng: restaurant.lng ?? undefined,
       distance: restaurant.distance ?? undefined,
     });
     trackEvent("restaurant_detail_viewed", { id });
+    // Log analysis summary for outcome tracking
+    const { summary } = sr;
+    const safeP = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
+    logRestaurantAnalysis({
+      id:             `log_${Date.now()}`,
+      createdAt:      Date.now(),
+      restaurantId:   restaurant.id,
+      restaurantName: restaurant.name,
+      cuisine:        restaurant.cuisine,
+      userAllergens:  allergens,
+      totalItems:     summary.total,
+      safeCount:      summary.likelySafe,
+      askCount:       summary.ask,
+      avoidCount:     summary.avoid,
+      fitLevel:       fitLevelFn(safeP, summary.avoid, summary.ask, summary.total),
+    });
   }, [id]);
 
   // Categories sorted by safe-item count descending (safest sections first)
@@ -483,7 +502,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                         )}
                       </div>
                       <div style={{ display: "grid", gap: 8 }}>
-                        {items.map((item) => <MenuItemCard key={item.id} item={item} />)}
+                        {items.map((item) => <MenuItemCard key={item.id} item={item} restaurantId={scored.id} restaurantName={scored.name} />)}
                       </div>
                     </div>
                   );
@@ -513,7 +532,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                         </div>
                       </div>
                       <div style={{ display: "grid", gap: 8 }}>
-                        {items.map((item) => <MenuItemCard key={item.id} item={item} />)}
+                        {items.map((item) => <MenuItemCard key={item.id} item={item} restaurantId={scored.id} restaurantName={scored.name} />)}
                       </div>
                     </div>
                   );

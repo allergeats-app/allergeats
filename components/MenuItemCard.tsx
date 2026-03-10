@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { ScoredMenuItem } from "@/lib/types";
 import { RiskBadge } from "./RiskBadge";
 import { ConfidenceBadge } from "./ConfidenceBadge";
+import { submitFeedback } from "@/lib/learning/learningEngine";
+import type { FeedbackType } from "@/lib/learning/types";
 
 const ALLERGEN_LABEL: Record<string, string> = {
   dairy: "Dairy", egg: "Egg", wheat: "Wheat", gluten: "Gluten",
@@ -28,13 +30,25 @@ const RISK_BORDER: Record<string, string> = {
   "unknown":     "#e5e7eb",
 };
 
-type Props = { item: ScoredMenuItem };
+type FeedbackOption = {
+  label: string;
+  type: FeedbackType;
+  allergen?: string;
+};
 
-export function MenuItemCard({ item }: Props) {
-  const [expanded, setExpanded] = useState(false);
-  const [copied, setCopied] = useState(false);
+type Props = {
+  item: ScoredMenuItem;
+  /** When provided, enables the feedback UI for this item */
+  restaurantId?: string;
+  restaurantName?: string;
+};
 
-  const bg = RISK_BG[item.risk] ?? "#f9fafb";
+export function MenuItemCard({ item, restaurantId, restaurantName }: Props) {
+  const [expanded, setExpanded]           = useState(false);
+  const [copied, setCopied]               = useState(false);
+  const [feedbackState, setFeedbackState] = useState<"idle" | "open" | "done">("idle");
+
+  const bg     = RISK_BG[item.risk]     ?? "#f9fafb";
   const border = RISK_BORDER[item.risk] ?? "#e5e7eb";
 
   async function copyQuestions() {
@@ -43,6 +57,66 @@ export function MenuItemCard({ item }: Props) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
+
+  // Build correction options based on the current risk level
+  const primaryAllergen = item.userAllergenHits[0] ?? item.detectedAllergens[0];
+  const feedbackOptions: FeedbackOption[] = item.risk === "likely-safe"
+    ? [
+        {
+          label: primaryAllergen
+            ? `Had my allergen (${aLabel(primaryAllergen)})`
+            : "Actually contained an allergen",
+          type:     "found-unsafe",
+          allergen: primaryAllergen,
+        },
+        { label: "Cross-contact / shared fryer",  type: "shared-fryer",          allergen: primaryAllergen },
+        { label: "Staff confirmed it's unsafe",   type: "staff-confirmed-unsafe", allergen: primaryAllergen },
+      ]
+    : [
+        {
+          label: primaryAllergen
+            ? `No ${aLabel(primaryAllergen)} — was safe`
+            : "Was actually safe",
+          type:     "false-positive",
+          allergen: primaryAllergen,
+        },
+        { label: "Staff confirmed it's safe", type: "staff-confirmed-safe", allergen: primaryAllergen },
+      ];
+
+  function handleFeedback(option: FeedbackOption) {
+    if (!restaurantId || !restaurantName) return;
+    submitFeedback({
+      restaurantId,
+      restaurantName,
+      dishName:           item.name,
+      type:               option.type,
+      allergen:           option.allergen,
+      originalRisk:       item.risk,
+      originalConfidence: item.confidence,
+    });
+    setFeedbackState("done");
+  }
+
+  function handleConfirm() {
+    if (!restaurantId || !restaurantName) return;
+    // Positive signal: user confirms the app's prediction was right
+    const type: FeedbackType =
+      item.risk === "avoid" || item.risk === "ask"
+        ? "found-unsafe"
+        : "confirmed-safe";
+    submitFeedback({
+      restaurantId,
+      restaurantName,
+      dishName:           item.name,
+      type,
+      allergen:           primaryAllergen,
+      originalRisk:       item.risk,
+      originalConfidence: item.confidence,
+    });
+    setFeedbackState("done");
+  }
+
+  const showFeedback = !!restaurantId;
 
   return (
     <div
@@ -117,7 +191,6 @@ export function MenuItemCard({ item }: Props) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              /* Minimum 44px tap target — invisible padding on touch */
               padding: "10px 0 10px 12px",
               margin: "-10px 0 -10px -12px",
             }}
@@ -155,6 +228,90 @@ export function MenuItemCard({ item }: Props) {
           >
             {copied ? "Copied!" : "Copy questions"}
           </button>
+        </div>
+      )}
+
+      {/* ── Feedback row ─────────────────────────────────────────────────────── */}
+      {showFeedback && feedbackState !== "done" && (
+        <div style={{
+          marginTop: 4,
+          paddingTop: 10,
+          borderTop: "1px solid rgba(0,0,0,0.06)",
+        }}>
+          {feedbackState === "idle" ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Was this right?</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  onClick={handleConfirm}
+                  title="Yes, correct"
+                  style={{
+                    width: 32, height: 32, borderRadius: 999,
+                    border: "1px solid #d1fae5", background: "#f0fdf4",
+                    fontSize: 14, cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#15803d",
+                  }}
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={() => setFeedbackState("open")}
+                  title="No, something's wrong"
+                  style={{
+                    width: 32, height: 32, borderRadius: 999,
+                    border: "1px solid #fecaca", background: "#fff1f0",
+                    fontSize: 14, cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#b91c1c",
+                  }}
+                >
+                  ✗
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gap: 6 }}>
+              <div style={{ fontSize: 11, color: "#6b7280", fontWeight: 700, marginBottom: 2 }}>
+                What was wrong?
+              </div>
+              {feedbackOptions.map((opt) => (
+                <button
+                  key={opt.type}
+                  onClick={() => handleFeedback(opt)}
+                  style={{
+                    width: "100%", padding: "9px 12px", borderRadius: 10,
+                    border: "1px solid #e5e7eb", background: "#fff",
+                    color: "#374151", fontSize: 12, fontWeight: 600,
+                    cursor: "pointer", textAlign: "left",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <button
+                onClick={() => setFeedbackState("idle")}
+                style={{
+                  background: "none", border: "none",
+                  fontSize: 11, color: "#9ca3af", cursor: "pointer",
+                  padding: "4px 0", textAlign: "left",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Feedback confirmed */}
+      {showFeedback && feedbackState === "done" && (
+        <div style={{
+          marginTop: 4, paddingTop: 10,
+          borderTop: "1px solid rgba(0,0,0,0.06)",
+          fontSize: 11, color: "#15803d", fontWeight: 700,
+        }}>
+          Thanks — we&apos;ll use this to improve.
         </div>
       )}
     </div>
