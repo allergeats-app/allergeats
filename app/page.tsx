@@ -52,7 +52,7 @@ function HomeContent() {
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading]               = useState(true);
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>([]);
-  const [saveState, setSaveState]           = useState<"idle" | "saving" | "saved">("idle");
+  const [saveState, setSaveState]           = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   const [locationLabel, setLocationLabel] = useState("Locating…");
   const [usingFallback, setUsingFallback] = useState(false);
@@ -93,9 +93,14 @@ function HomeContent() {
     setSaveState("idle");
     debounceRef.current = setTimeout(async () => {
       setSaveState("saving");
-      await saveAllergens(localAllergens);
-      setSaveState("saved");
-      setTimeout(() => setSaveState("idle"), 2000);
+      try {
+        await saveAllergens(localAllergens);
+        setSaveState("saved");
+        setTimeout(() => setSaveState("idle"), 2000);
+      } catch {
+        setSaveState("error");
+        setTimeout(() => setSaveState("idle"), 4000);
+      }
     }, 800);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [localAllergens]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -257,10 +262,10 @@ function HomeContent() {
               {user && (
                 <span style={{
                   fontSize: 11, fontWeight: 700,
-                  color: saveState === "saved" ? "#22c55e" : "var(--c-sub)",
+                  color: saveState === "saved" ? "#22c55e" : saveState === "error" ? "#ef4444" : "var(--c-sub)",
                   transition: "color 0.3s",
                 }}>
-                  {saveState === "saved" ? "Saved" : saveState === "saving" ? "Saving…" : "Auto-saved"}
+                  {saveState === "saved" ? "Saved" : saveState === "saving" ? "Saving…" : saveState === "error" ? "Failed to save" : "Auto-saved"}
                 </span>
               )}
               {!user && (
