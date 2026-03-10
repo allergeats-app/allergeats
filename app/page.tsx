@@ -224,6 +224,7 @@ function HomeContent() {
   return (
     <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
 
+      {/* ── 1. Sticky header ─────────────────────────────────────────────── */}
       <RestaurantsHeader
         locationLabel={locationLabel}
         usingFallback={usingFallback}
@@ -240,8 +241,9 @@ function HomeContent() {
         onHowItWorks={openHowItWorks}
       />
 
-      {/* ── Allergy profile section ──────────────────────────────────────── */}
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
+
+        {/* ── 2. Allergy profile card ───────────────────────────────────── */}
         <div style={{
           background: "var(--c-card)", border: "1px solid var(--c-border)",
           borderRadius: 20, padding: "16px 16px 14px",
@@ -270,6 +272,59 @@ function HomeContent() {
           </div>
           <AllergySelector selected={localAllergens} onChange={handleAllergenChange} limit={4} />
         </div>
+
+        {/* ── 3. Trust strip ───────────────────────────────────────────── */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 16,
+          padding: "10px 4px", marginTop: 2,
+        }}>
+          {[
+            { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, label: "Allergen-aware" },
+            { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, label: "Real menu data" },
+            { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>, label: "Safe picks flagged" },
+          ].map(({ icon, label }) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--c-sub)", fontSize: 11, fontWeight: 600 }}>
+              {icon}
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {/* ── 4. Quick actions ─────────────────────────────────────────── */}
+        <div style={{ display: "flex", gap: 8, marginTop: 4, marginBottom: 4 }}>
+          <CameraScanButton style={{
+            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+            padding: "12px 0", borderRadius: 14,
+            background: "#eb1700", color: "#fff",
+            border: "none", cursor: "pointer",
+            fontSize: 13, fontWeight: 800,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            Scan a Menu
+          </CameraScanButton>
+          <button
+            type="button"
+            onClick={() => setOnlySaved(!onlySaved)}
+            style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              padding: "12px 0", borderRadius: 14,
+              background: onlySaved ? "#fef2f2" : "var(--c-card)",
+              border: `1.5px solid ${onlySaved ? "#eb1700" : "var(--c-border)"}`,
+              color: onlySaved ? "#eb1700" : "var(--c-sub)",
+              cursor: "pointer", fontSize: 13, fontWeight: 800,
+              transition: "all 0.15s",
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={onlySaved ? "#eb1700" : "none"} stroke={onlySaved ? "#eb1700" : "currentColor"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            Saved Places
+          </button>
+        </div>
+
       </div>
 
       <RestaurantsFilterDrawer
@@ -296,7 +351,7 @@ function HomeContent() {
 
       <HowItWorksSheet open={showHowItWorks} onClose={closeHowItWorks} />
 
-      {/* ── Results ─────────────────────────────────────────────────────── */}
+      {/* ── 5 & 6. Best Match + full results ─────────────────────────────── */}
       <div className={`rp-results rp-results--${layout}`}>
         {loading ? (
           <div style={{ padding: "80px 0", textAlign: "center" }}>
@@ -325,11 +380,44 @@ function HomeContent() {
             onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
           />
         ) : (
-          <div className={layout === "grid" ? "rp-grid" : undefined} style={{ display: "grid", gap: 12 }}>
-            {filtered.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
-            ))}
-          </div>
+          <>
+            {/* ── Best Match for You ──────────────────────────────── */}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Best Match for You
+                </span>
+              </div>
+              <div style={{ position: "relative" }}>
+                <div style={{
+                  position: "absolute", top: 12, right: 12, zIndex: 1,
+                  background: "#eb1700", color: "#fff",
+                  fontSize: 10, fontWeight: 800, padding: "3px 9px",
+                  borderRadius: 999, letterSpacing: "0.04em", pointerEvents: "none",
+                }}>
+                  #1 Match
+                </div>
+                <RestaurantCard restaurant={filtered[0]} compact={false} />
+              </div>
+            </div>
+
+            {/* ── All Restaurants ─────────────────────────────────── */}
+            {filtered.length > 1 && (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "20px 0 10px" }}>
+                  More Nearby
+                </div>
+                <div className={layout === "grid" ? "rp-grid" : undefined} style={{ display: "grid", gap: 12 }}>
+                  {filtered.slice(1).map((r) => (
+                    <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
     </main>
