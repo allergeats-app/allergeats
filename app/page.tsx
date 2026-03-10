@@ -510,7 +510,7 @@ function HomeContent() {
               </div>
               <div style={{ position: "relative" }}>
                 <div style={{
-                  position: "absolute", top: 12, right: 12, zIndex: 1,
+                  position: "absolute", top: 12, left: 12, zIndex: 1,
                   background: "#eb1700", color: "#fff",
                   fontSize: 10, fontWeight: 800, padding: "3px 9px",
                   borderRadius: 999, letterSpacing: "0.04em", pointerEvents: "none",
