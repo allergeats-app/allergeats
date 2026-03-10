@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/lib/analytics";
 
 const CAMERA_SESSION_KEY = "allegeats_camera_scan";
 
@@ -48,7 +49,7 @@ export function CameraScanButton({ style, children = "Scan a Menu" }: Props) {
         style={{ display: "none" }}
       />
       <button
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => { trackEvent("scan_tapped"); fileInputRef.current?.click(); }}
         disabled={scanning}
         style={style}
       >

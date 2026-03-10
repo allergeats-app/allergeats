@@ -26,9 +26,9 @@ export default function AuthPage() {
   const [info, setInfo]             = useState<string | null>(null);
   const [loading, setLoading]       = useState(false);
 
-  // Already signed in — go to profile
+  // Already signed in — go home
   useEffect(() => {
-    if (user) router.replace("/profile");
+    if (user) router.replace("/");
   }, [user, router]);
 
   // Pre-fill email if remembered

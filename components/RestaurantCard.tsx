@@ -4,11 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useFavorites } from "@/lib/favoritesContext";
 import { coverageTier, coverageTierLabel, coverageTierColor } from "@/lib/scoring";
+import { fitLevel, fitBadge, fitExplanation } from "@/lib/fitLevel";
 import type { ScoredRestaurant } from "@/lib/types";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = { restaurant: ScoredRestaurant; compact?: boolean };
-
-type FitLevel = "Great Match" | "Good Option" | "Use Caution" | "Limited Data";
 
 function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   const c = cuisine.toLowerCase();
@@ -32,51 +32,6 @@ function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   return { bg: "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" };
 }
 
-function fitLevel(safePercent: number, avoidCount: number, askCount: number, total: number): FitLevel {
-  // Not enough data to say anything meaningful
-  if (total < 5) return "Limited Data";
-
-  const avoidPercent = (avoidCount / total) * 100;
-  const askPercent   = (askCount   / total) * 100;
-
-  // Great Match: strong coverage, dominant safe ratio, minimal avoid and ask
-  if (total >= 8 && safePercent >= 60 && avoidPercent <= 10 && askPercent <= 35)
-    return "Great Match";
-
-  // Good Option: decent safe ratio, low avoid — moderate ask is acceptable
-  if (safePercent >= 40 && avoidPercent < 20 && avoidCount <= 4)
-    return "Good Option";
-
-  // Use Caution: notable avoid count, low safe ratio, or lots of ask
-  return "Use Caution";
-}
-
-function fitBadge(level: FitLevel): { bg: string; color: string } {
-  switch (level) {
-    case "Great Match":  return { bg: "#dcfce7", color: "#15803d" };
-    case "Good Option":  return { bg: "#fef9c3", color: "#a16207" };
-    case "Use Caution":  return { bg: "#fee2e2", color: "#b91c1c" };
-    case "Limited Data": return { bg: "#f1f5f9", color: "#64748b" };
-  }
-}
-
-function fitExplanation(level: FitLevel, avoidCount: number, askCount: number, safeCount: number): string {
-  switch (level) {
-    case "Great Match":
-      return avoidCount === 0
-        ? "Strong match for your allergies"
-        : "Mostly safe menu with very low risk";
-    case "Good Option":
-      if (avoidCount === 0) return `${safeCount} safe picks — ask about ${askCount} item${askCount === 1 ? "" : "s"}`;
-      if (avoidCount === 1) return "1 item to avoid — most options are safe";
-      return `${safeCount} safe picks, ${avoidCount} items to avoid`;
-    case "Use Caution":
-      if (avoidCount === 0) return "Many items need clarification — ask staff before ordering";
-      return `${avoidCount} item${avoidCount === 1 ? "" : "s"} to avoid — check before ordering`;
-    case "Limited Data":
-      return "Tap to scan the menu yourself";
-  }
-}
 
 export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const { summary } = r;
@@ -100,7 +55,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
       : null;
 
   return (
-    <Link href={`/restaurants/${r.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+    <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { name: r.name, fit: level })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
       <div style={{
         background: "var(--c-card)",
         border: "1px solid var(--c-border)",
@@ -145,7 +100,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             </div>
           )}
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(r.id); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { name: r.name }); toggleFavorite(r.id); }}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
               position: "absolute", bottom: 8, right: 8,

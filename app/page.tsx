@@ -17,6 +17,7 @@ import { HowItWorksSheet } from "@/components/HowItWorksSheet";
 import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 import type { SortOption, LayoutOption, TypeFilter } from "./restaurants/types";
+import { trackEvent } from "@/lib/analytics";
 
 const SESSION_KEY = "allegeats_live_restaurants";
 
@@ -277,6 +278,7 @@ function HomeContent() {
   );
 
   function handleAllergenChange(next: AllergenId[]) {
+    trackEvent("filters_allergens_changed", { count: next.length });
     setLocalAllergens(next);
     saveProfileAllergens(next);
     initializedRef.current = true;
@@ -333,7 +335,7 @@ function HomeContent() {
 
   const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
-  const openHowItWorks    = useCallback(() => setShowHowItWorks(true), []);
+  const openHowItWorks    = useCallback(() => { trackEvent("how_it_works_opened"); setShowHowItWorks(true); }, []);
   const closeHowItWorks   = useCallback(() => setShowHowItWorks(false), []);
 
   return (
@@ -422,7 +424,7 @@ function HomeContent() {
           </CameraScanButton>
           <button
             type="button"
-            onClick={() => setLayout(layout === "map" ? "list" : "map")}
+            onClick={() => { const next = layout === "map" ? "list" : "map"; if (next === "map") trackEvent("map_view_opened"); setLayout(next); }}
             style={{
               flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
               padding: "12px 0", borderRadius: 14,
@@ -452,7 +454,7 @@ function HomeContent() {
         localAllergens={localAllergens}
         onAllergenChange={handleAllergenChange}
         sort={sort}
-        setSort={setSort}
+        setSort={(v) => { trackEvent("filters_sort_changed", { sort: v }); setSort(v); }}
         typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}
         radiusMiles={radiusMiles}
