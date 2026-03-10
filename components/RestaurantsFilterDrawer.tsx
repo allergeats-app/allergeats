@@ -11,6 +11,7 @@ const SORT_CHIPS = [
   { value: "distance"    as SortOption, label: "Nearest" },
   { value: "most-safe"   as SortOption, label: "Most Allergy-Friendly" },
   { value: "least-avoid" as SortOption, label: "Lowest Risk" },
+  { value: "coverage"    as SortOption, label: "Most Menu Data" },
 ];
 
 const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [

@@ -78,6 +78,50 @@ export function scoreMenuItem(
 }
 
 /**
+ * Best-match ranking score for a ScoredRestaurant.
+ *
+ * Design goals (in priority order):
+ *   1. Zero avoids with sufficient coverage → highest signal of safety
+ *   2. High safe ratio, weighted by how much data we have
+ *   3. Penalise avoid items by both ratio and absolute count
+ *   4. Favour closer restaurants (diminishing returns, capped at 15mi)
+ *   5. Penalise thin/no data so uncertain restaurants don't bubble up
+ *
+ * Returns a number in roughly (-0.7, 0.7) — higher is better.
+ */
+export function bestMatchScore(r: {
+  summary: { likelySafe: number; avoid: number; total: number };
+  distance?: number | null;
+}): number {
+  const { likelySafe, avoid, total } = r.summary;
+  const dist = r.distance ?? 15;
+
+  // No menu data: push toward bottom; tiebreak by distance
+  if (total === 0) return -(0.5 + Math.min(dist, 15) / 150);
+
+  const safeRatio  = likelySafe / total;
+  const avoidRatio = avoid / total;
+
+  // Coverage weight: ramps to 1.0 at 15 items; thin data gets partial credit
+  const coverage = Math.min(total, 15) / 15;
+
+  // Core safety signal — coverage-weighted safe ratio
+  const safeScore = safeRatio * coverage * 0.45;
+
+  // Avoid penalty — both ratio and absolute count matter
+  // (10 avoids is much worse than 1 even at the same ratio)
+  const avoidPenalty = avoidRatio * 0.35 + (Math.min(avoid, 8) / 8) * 0.08;
+
+  // Zero-avoid bonus: reward when we have enough data to be confident
+  const zeroAvoidBonus = avoid === 0 && total >= 8 ? 0.15 : 0;
+
+  // Distance penalty: diminishing returns, max effect at 15mi
+  const distPenalty = (Math.min(dist, 15) / 15) * 0.08;
+
+  return safeScore - avoidPenalty + zeroAvoidBonus - distPenalty;
+}
+
+/**
  * Scores all menu items in a restaurant and computes the safety summary.
  * @param userAllergens  AllergenId[] from the user's profile (no conversion needed)
  */

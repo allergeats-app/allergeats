@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useFavorites } from "@/lib/favoritesContext";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
-import { scoreRestaurant } from "@/lib/scoring";
+import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
@@ -300,19 +300,33 @@ function HomeContent() {
 
     switch (sort) {
       case "best-match":
+        // Coverage-weighted safe ratio + zero-avoid bonus + distance penalty
+        list = [...list].sort((a, b) => bestMatchScore(b) - bestMatchScore(a));
+        break;
+      case "distance":
+        list = [...list].sort((a, b) => (a.distance ?? 99) - (b.distance ?? 99));
+        break;
+      case "most-safe":
+        // Sort by safe ratio (not raw count) so big menus don't unfairly dominate;
+        // tie-break by total items (more coverage = more confidence)
         list = [...list].sort((a, b) => {
-          const score = (r: typeof a) => {
-            const t = r.summary.total || 1;
-            return (r.summary.likelySafe / t) * 0.6
-              - (r.summary.avoid / t) * 0.3
-              - ((r.distance ?? 10) / 50) * 0.1;
-          };
-          return score(b) - score(a);
+          const ratioA = a.summary.total > 0 ? a.summary.likelySafe / a.summary.total : 0;
+          const ratioB = b.summary.total > 0 ? b.summary.likelySafe / b.summary.total : 0;
+          return ratioB - ratioA || b.summary.total - a.summary.total;
         });
         break;
-      case "distance":    list = [...list].sort((a, b) => (a.distance ?? 99) - (b.distance ?? 99)); break;
-      case "most-safe":   list = [...list].sort((a, b) => b.summary.likelySafe - a.summary.likelySafe); break;
-      case "least-avoid": list = [...list].sort((a, b) => a.summary.avoid - b.summary.avoid); break;
+      case "least-avoid":
+        // Sort by avoid ratio (not raw count); tie-break by distance
+        list = [...list].sort((a, b) => {
+          const ratioA = a.summary.total > 0 ? a.summary.avoid / a.summary.total : 1;
+          const ratioB = b.summary.total > 0 ? b.summary.avoid / b.summary.total : 1;
+          return ratioA - ratioB || (a.distance ?? 99) - (b.distance ?? 99);
+        });
+        break;
+      case "coverage":
+        // Most menu items analyzed first — useful for finding well-documented restaurants
+        list = [...list].sort((a, b) => b.summary.total - a.summary.total);
+        break;
     }
     return list;
   }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite]);
