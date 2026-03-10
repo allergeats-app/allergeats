@@ -57,7 +57,7 @@ export default function AuthPage() {
     if (mode === "signin") {
       if (rememberEmail) localStorage.setItem(REMEMBER_KEY, email);
       else localStorage.removeItem(REMEMBER_KEY);
-      router.push("/profile");
+      router.push("/");
     } else {
       setInfo("Check your email to confirm your account, then sign in.");
       setMode("signin");
