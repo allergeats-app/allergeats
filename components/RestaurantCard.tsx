@@ -7,6 +7,8 @@ import type { ScoredRestaurant } from "@/lib/types";
 
 type Props = { restaurant: ScoredRestaurant; compact?: boolean };
 
+type FitLevel = "Great Match" | "Good Option" | "Use Caution" | "Limited Data";
+
 function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   const c = cuisine.toLowerCase();
   const n = name.toLowerCase();
@@ -29,11 +31,36 @@ function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   return { bg: "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" };
 }
 
-function safetyBadge(safePercent: number, hasData: boolean): { label: string; bg: string; color: string } | null {
-  if (!hasData) return null;
-  if (safePercent >= 70) return { label: `${Math.round(safePercent)}% Safe`, bg: "#dcfce7", color: "#15803d" };
-  if (safePercent >= 40) return { label: `${Math.round(safePercent)}% Safe`, bg: "#fef9c3", color: "#a16207" };
-  return { label: `${Math.round(safePercent)}% Safe`, bg: "#fee2e2", color: "#b91c1c" };
+function fitLevel(safePercent: number, avoidCount: number, total: number): FitLevel {
+  if (total === 0) return "Limited Data";
+  if (total < 5) return "Limited Data";
+  if (avoidCount === 0 && safePercent >= 60) return "Great Match";
+  if (avoidCount <= 1 && safePercent >= 45) return "Good Option";
+  return "Use Caution";
+}
+
+function fitBadge(level: FitLevel): { bg: string; color: string } {
+  switch (level) {
+    case "Great Match":  return { bg: "#dcfce7", color: "#15803d" };
+    case "Good Option":  return { bg: "#fef9c3", color: "#a16207" };
+    case "Use Caution":  return { bg: "#fee2e2", color: "#b91c1c" };
+    case "Limited Data": return { bg: "#f1f5f9", color: "#64748b" };
+  }
+}
+
+function fitExplanation(level: FitLevel, avoidCount: number, safeCount: number): string {
+  switch (level) {
+    case "Great Match":  return `${safeCount} safe items, nothing to avoid`;
+    case "Good Option":  return avoidCount === 1 ? "1 item to watch — most options are safe" : `${safeCount} safe picks with a few cautions`;
+    case "Use Caution":  return `${avoidCount} items to avoid — check before ordering`;
+    case "Limited Data": return "Tap to scan the menu yourself";
+  }
+}
+
+function coverageLabel(total: number): string {
+  if (total === 0) return "No menu data yet";
+  if (total < 5) return "Limited menu data";
+  return `${total} items analyzed`;
 }
 
 export function RestaurantCard({ restaurant: r, compact = false }: Props) {
@@ -42,7 +69,10 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
   const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
   const cover = coverForRestaurant(r.cuisine, r.name);
-  const badge = safetyBadge(safePercent, summary.total > 0);
+  const level = fitLevel(safePercent, summary.avoid, summary.total);
+  const badge = fitBadge(level);
+  const explanation = fitExplanation(level, summary.avoid, summary.likelySafe);
+  const coverage = coverageLabel(summary.total);
 
   const [photoFailed, setPhotoFailed] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -73,16 +103,14 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
           ) : null}
-          {badge && (
-            <div style={{
-              position: "absolute", top: 10, right: 10,
-              background: badge.bg, color: badge.color,
-              padding: "5px 10px", borderRadius: 999,
-              fontSize: 12, fontWeight: 800,
-            }}>
-              {badge.label}
-            </div>
-          )}
+          <div style={{
+            position: "absolute", top: 10, right: 10,
+            background: badge.bg, color: badge.color,
+            padding: "5px 10px", borderRadius: 999,
+            fontSize: 12, fontWeight: 800,
+          }}>
+            {level}
+          </div>
           {r.distance != null && (
             <div style={{
               position: "absolute", bottom: 10, left: 12,
@@ -115,13 +143,19 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
 
         {/* Card body */}
         <div style={{ padding: compact ? "10px 12px 12px" : "14px 16px 16px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: compact ? 7 : 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: compact ? 6 : 4 }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 900, fontSize: compact ? 13 : 17, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
               <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
             </div>
             {!compact && <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>View →</div>}
           </div>
+
+          {!compact && (
+            <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 10, lineHeight: 1.4 }}>
+              {explanation}
+            </div>
+          )}
 
           {summary.total > 0 ? (
             <div>
@@ -131,21 +165,42 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
                 <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />
               </div>
               {!compact && (
-                <div style={{ display: "flex", gap: 14, marginTop: 8 }}>
-                  <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
-                  <Stat count={summary.ask}        label="Ask"   color="#d97706" />
-                  <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                  <div style={{ display: "flex", gap: 14 }}>
+                    <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
+                    <Stat count={summary.ask}        label="Ask"   color="#d97706" />
+                    <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--c-sub)" }}>{coverage}</div>
                 </div>
               )}
               {compact && (
-                <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-                  <Stat count={summary.likelySafe} label="✓" color="#16a34a" />
-                  <Stat count={summary.avoid}      label="✗" color="#dc2626" />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <Stat count={summary.likelySafe} label="✓" color="#16a34a" />
+                    <Stat count={summary.avoid}      label="✗" color="#dc2626" />
+                  </div>
+                  <div style={{
+                    fontSize: 11, fontWeight: 700,
+                    color: badge.color, background: badge.bg,
+                    padding: "2px 8px", borderRadius: 999,
+                  }}>
+                    {level}
+                  </div>
                 </div>
               )}
             </div>
           ) : (
-            <div style={{ fontSize: 11, color: "var(--c-sub)" }}>No data yet</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 12, color: "var(--c-sub)" }}>
+                {compact ? "No menu data" : "Menu not analyzed yet — tap to scan"}
+              </div>
+              {compact && (
+                <div style={{ fontSize: 11, fontWeight: 700, color: badge.color, background: badge.bg, padding: "2px 8px", borderRadius: 999 }}>
+                  {level}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
