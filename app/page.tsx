@@ -382,21 +382,22 @@ function HomeContent() {
           </CameraScanButton>
           <button
             type="button"
-            onClick={() => setOnlySaved(!onlySaved)}
+            onClick={() => setLayout(layout === "map" ? "list" : "map")}
             style={{
               flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
               padding: "12px 0", borderRadius: 14,
-              background: onlySaved ? "#fef2f2" : "var(--c-card)",
-              border: `1.5px solid ${onlySaved ? "#eb1700" : "var(--c-border)"}`,
-              color: onlySaved ? "#eb1700" : "var(--c-sub)",
+              background: layout === "map" ? "#fef2f2" : "var(--c-card)",
+              border: `1.5px solid ${layout === "map" ? "#eb1700" : "var(--c-border)"}`,
+              color: layout === "map" ? "#eb1700" : "var(--c-sub)",
               cursor: "pointer", fontSize: 13, fontWeight: 800,
               transition: "all 0.15s",
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill={onlySaved ? "#eb1700" : "none"} stroke={onlySaved ? "#eb1700" : "currentColor"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+              <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
             </svg>
-            Saved Places
+            Map View
           </button>
         </div>
 
