@@ -63,8 +63,8 @@ function fitExplanation(level: FitLevel, avoidCount: number, askCount: number, s
   switch (level) {
     case "Great Match":
       return avoidCount === 0
-        ? `${safeCount} safe items, nothing to avoid`
-        : `${safeCount} safe items, very little to worry about`;
+        ? "Strong match for your allergies"
+        : "Mostly safe menu with very low risk";
     case "Good Option":
       if (avoidCount === 0) return `${safeCount} safe picks — ask about ${askCount} item${askCount === 1 ? "" : "s"}`;
       if (avoidCount === 1) return "1 item to avoid — most options are safe";
