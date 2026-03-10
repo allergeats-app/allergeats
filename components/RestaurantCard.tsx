@@ -108,8 +108,14 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             background: badge.bg, color: badge.color,
             padding: "5px 10px", borderRadius: 999,
             fontSize: 12, fontWeight: 800,
+            textAlign: "center", lineHeight: 1.2,
           }}>
             {level}
+            {!compact && summary.total > 0 && (
+              <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.8, marginTop: 1 }}>
+                {Math.round(safePercent)}% safe
+              </div>
+            )}
           </div>
           {r.distance != null && (
             <div style={{
