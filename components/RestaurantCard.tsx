@@ -31,11 +31,22 @@ function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   return { bg: "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" };
 }
 
-function fitLevel(safePercent: number, avoidCount: number, total: number): FitLevel {
-  if (total === 0) return "Limited Data";
+function fitLevel(safePercent: number, avoidCount: number, askCount: number, total: number): FitLevel {
+  // Not enough data to say anything meaningful
   if (total < 5) return "Limited Data";
-  if (avoidCount === 0 && safePercent >= 60) return "Great Match";
-  if (avoidCount <= 1 && safePercent >= 45) return "Good Option";
+
+  const avoidPercent = (avoidCount / total) * 100;
+  const askPercent   = (askCount   / total) * 100;
+
+  // Great Match: strong coverage, dominant safe ratio, minimal avoid and ask
+  if (total >= 8 && safePercent >= 60 && avoidPercent <= 10 && askPercent <= 35)
+    return "Great Match";
+
+  // Good Option: decent safe ratio, low avoid — moderate ask is acceptable
+  if (safePercent >= 40 && avoidPercent < 20 && avoidCount <= 4)
+    return "Good Option";
+
+  // Use Caution: notable avoid count, low safe ratio, or lots of ask
   return "Use Caution";
 }
 
@@ -69,7 +80,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
   const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
   const cover = coverForRestaurant(r.cuisine, r.name);
-  const level = fitLevel(safePercent, summary.avoid, summary.total);
+  const level = fitLevel(safePercent, summary.avoid, summary.ask, summary.total);
   const badge = fitBadge(level);
   const explanation = fitExplanation(level, summary.avoid, summary.likelySafe);
   const coverage = coverageLabel(summary.total);
