@@ -91,6 +91,32 @@ function SmartEmptyState({
   );
 }
 
+function SkeletonCard({ featured = false }: { featured?: boolean }) {
+  return (
+    <div style={{
+      background: "var(--c-card)", border: "1px solid var(--c-border)",
+      borderRadius: 24, overflow: "hidden",
+      boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
+    }}>
+      {/* Cover */}
+      <div className="skeleton" style={{ height: featured ? 110 : 80, borderRadius: 0 }} />
+      {/* Body */}
+      <div style={{ padding: featured ? "14px 16px 16px" : "10px 12px 12px" }}>
+        <div className="skeleton" style={{ height: featured ? 18 : 14, width: "60%", marginBottom: 8 }} />
+        <div className="skeleton" style={{ height: 11, width: "35%", marginBottom: featured ? 14 : 10 }} />
+        <div className="skeleton" style={{ height: 5, width: "100%", borderRadius: 999, marginBottom: featured ? 10 : 0 }} />
+        {featured && (
+          <div style={{ display: "flex", gap: 14, marginTop: 4 }}>
+            <div className="skeleton" style={{ height: 11, width: 36 }} />
+            <div className="skeleton" style={{ height: 11, width: 36 }} />
+            <div className="skeleton" style={{ height: 11, width: 36 }} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: TypeFilter): boolean {
   if (type === "all") return true;
   return r.tags?.includes(type) ?? false;
@@ -430,10 +456,21 @@ function HomeContent() {
       {/* ── 5 & 6. Best Match + full results ─────────────────────────────── */}
       <div className={`rp-results rp-results--${layout}`}>
         {loading ? (
-          <div style={{ padding: "80px 0", textAlign: "center" }}>
-            <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 700, marginBottom: 4 }}>Finding restaurants near you…</div>
-            <div style={{ fontSize: 12, color: "#9ca3af" }}>Searching within {radiusMiles} miles</div>
-          </div>
+          <>
+            {/* Featured skeleton */}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                <div className="skeleton" style={{ width: 13, height: 13, borderRadius: 999 }} />
+                <div className="skeleton" style={{ width: 140, height: 10 }} />
+              </div>
+              <SkeletonCard featured />
+            </div>
+            {/* List skeletons */}
+            <div className="skeleton" style={{ height: 10, width: 80, margin: "20px 0 10px" }} />
+            <div style={{ display: "grid", gap: 12 }}>
+              {[0, 1, 2].map((i) => <SkeletonCard key={i} />)}
+            </div>
+          </>
         ) : filtered.length === 0 ? (
           <SmartEmptyState
             query={query}
