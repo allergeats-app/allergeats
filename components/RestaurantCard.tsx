@@ -70,6 +70,7 @@ function fitExplanation(level: FitLevel, avoidCount: number, askCount: number, s
       if (avoidCount === 1) return "1 item to avoid — most options are safe";
       return `${safeCount} safe picks, ${avoidCount} items to avoid`;
     case "Use Caution":
+      if (avoidCount === 0) return "Many items need clarification — ask staff before ordering";
       return `${avoidCount} item${avoidCount === 1 ? "" : "s"} to avoid — check before ordering`;
     case "Limited Data":
       return "Tap to scan the menu yourself";
@@ -130,7 +131,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             textAlign: "center", lineHeight: 1.2,
           }}>
             {level}
-            {!compact && summary.total > 0 && (
+            {!compact && summary.total >= 5 && (
               <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.8, marginTop: 1 }}>
                 {Math.round(safePercent)}% safe
               </div>
