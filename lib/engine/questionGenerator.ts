@@ -136,6 +136,20 @@ const QUESTION_TEMPLATES: QuestionTemplate[] = [
       `The sauce in "${dish}" (${trigger}) may contain ${ALLERGEN_LABELS[allergen]} — can you tell me what's in it?`,
   },
 
+  // Ingredient ontology: "common" — allergen almost always present, confirm and ask about variants
+  {
+    source: "dish-common",
+    question: (allergen, dish, trigger) =>
+      `"${dish}" typically contains ${ALLERGEN_LABELS[allergen]} as part of the classic ${trigger} recipe. Can you confirm, and is a ${allergen}-free version available?`,
+  },
+
+  // Ingredient ontology: "possible" — allergen appears in many but not all versions
+  {
+    source: "dish-possible",
+    question: (allergen, dish, trigger) =>
+      `Some versions of ${trigger} contain ${ALLERGEN_LABELS[allergen]}. Does your "${dish}" include it, and can you check with the kitchen?`,
+  },
+
   // Prep signals — cross-contact risks
   {
     source: "prep",

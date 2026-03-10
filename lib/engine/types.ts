@@ -8,31 +8,37 @@ export type { AllergenId };
 /**
  * How a signal was produced — used to determine weight and message framing.
  * Weight mapping (conservative: err toward Avoid):
- *   direct      = 5  → definite allergen mention
- *   synonym     = 4  → known alias/synonym (e.g. "casein" = dairy)
- *   dish        = 3  → inferred from dish name (e.g. Alfredo → dairy)
- *   sauce       = 3  → inferred from sauce/condiment
- *   cuisine     = 2  → elevated risk from cuisine context
- *   prep        = 2  → preparation method implies cross-contact or ingredient
- *   ambiguity   = 1  → vague language (house sauce, seasonal, chef's special)
+ *   direct        = 5  → definite allergen mention
+ *   synonym       = 4  → known alias/synonym (e.g. "casein" = dairy)
+ *   dish          = 3  → inferred from dish name (e.g. Alfredo → dairy)
+ *   sauce         = 3  → inferred from sauce/condiment
+ *   dish-common   = 3  → ingredient ontology: allergen is common in this dish → Avoid
+ *   dish-possible = 2  → ingredient ontology: allergen sometimes present in this dish → Ask
+ *   cuisine       = 2  → elevated risk from cuisine context
+ *   prep          = 2  → preparation method implies cross-contact or ingredient
+ *   ambiguity     = 1  → vague language (house sauce, seasonal, chef's special)
  */
 export type SignalSource =
   | "direct"
   | "synonym"
   | "dish"
   | "sauce"
+  | "dish-common"
+  | "dish-possible"
   | "cuisine"
   | "prep"
   | "ambiguity";
 
 export const SIGNAL_WEIGHT: Record<SignalSource, number> = {
-  direct:    5,
-  synonym:   4,
-  dish:      3,
-  sauce:     3,
-  cuisine:   2,
-  prep:      2,
-  ambiguity: 1,
+  direct:          5,
+  synonym:         4,
+  dish:            3,
+  sauce:           3,
+  "dish-common":   3,
+  "dish-possible": 2,
+  cuisine:         2,
+  prep:            2,
+  ambiguity:       1,
 };
 
 /** A single piece of evidence that an allergen may be present */

@@ -9,6 +9,7 @@ import { SIGNAL_WEIGHT } from "./types";
 import { getCuisineSignals } from "./cuisineInference";
 import { getPrepSignals } from "./prepRisk";
 import { getAmbiguitySignals } from "./ambiguityDetector";
+import { detectIngredientSignals } from "./ingredientInferencer";
 import { scoreItem } from "./riskScorer";
 import { generateStaffQuestions } from "./questionGenerator";
 import { parseMenuLines } from "./menuParser";
@@ -64,14 +65,17 @@ function analyzeDish(
   // Layer 1 + 2: direct ingredients + synonyms + dish/sauce inference (via vocab)
   allSignals.push(...detectVocabSignals(dish.normalized, userAllergens));
 
-  // Layer 3: preparation method risks
+  // Layer 3: structured dish/ingredient ontology (ingredient-chain reasoning)
+  allSignals.push(...detectIngredientSignals(dish.normalized, userAllergens));
+
+  // Layer 4: preparation method risks
   allSignals.push(...getPrepSignals(dish.normalized, userAllergens));
 
-  // Layer 4: cuisine context (only add if not already covered by vocab signals)
+  // Layer 5: cuisine context (only add if not already covered by vocab signals)
   const cuisineSignals = getCuisineSignals(cuisineContext, userAllergens);
   allSignals.push(...cuisineSignals);
 
-  // Layer 5: ambiguity detection
+  // Layer 6: ambiguity detection
   allSignals.push(...getAmbiguitySignals(dish.normalized, userAllergens));
 
   const signals = deduplicateSignals(allSignals);
@@ -80,11 +84,16 @@ function analyzeDish(
   const scored = scoreItem(signals, userAllergens, sourceType);
 
   // Collect ALL detected allergens (not just user's profile) for informational display
-  const allVocabSignals = detectVocabSignals(dish.normalized, [
+  const ALL_ALLERGENS: AllergenId[] = [
     "dairy", "egg", "wheat", "gluten", "soy", "peanut", "tree-nut",
     "sesame", "fish", "shellfish", "mustard", "corn", "legumes", "oats",
-  ]);
-  const allDetected = [...new Set(allVocabSignals.map((s) => s.allergen))];
+  ];
+  const allVocabSignals = detectVocabSignals(dish.normalized, ALL_ALLERGENS);
+  const allOntologySignals = detectIngredientSignals(dish.normalized, ALL_ALLERGENS);
+  const allDetected = [...new Set([
+    ...allVocabSignals.map((s) => s.allergen),
+    ...allOntologySignals.map((s) => s.allergen),
+  ])];
 
   // Generate staff questions for signals that hit user's profile
   const relevantSignals = signals.filter((s) => userAllergens.includes(s.allergen));
