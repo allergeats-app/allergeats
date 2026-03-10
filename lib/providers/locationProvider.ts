@@ -111,6 +111,34 @@ async function fetchOverpass(query: string): Promise<{ elements: OverpassElement
   throw new Error("All Overpass endpoints failed");
 }
 
+// ─── Spatial result cache ─────────────────────────────────────────────────────
+// Buckets lat/lng to ~1.1km grid so minor movement reuses cached results.
+// TTL: 5 minutes. Stored in sessionStorage so it clears on tab close.
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+function overpassCacheKey(lat: number, lng: number, radiusMiles: number): string {
+  return `oa_${lat.toFixed(2)}_${lng.toFixed(2)}_${radiusMiles}`;
+}
+
+function readOverpassCache(key: string): Restaurant[] | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const { ts, results } = JSON.parse(raw) as { ts: number; results: Restaurant[] };
+    if (Date.now() - ts > CACHE_TTL_MS) { sessionStorage.removeItem(key); return null; }
+    return results;
+  } catch { return null; }
+}
+
+function writeOverpassCache(key: string, results: Restaurant[]): void {
+  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), results })); }
+  catch { /* ignore quota errors */ }
+}
+
+// In-flight dedup: same cache key → same promise, prevents concurrent duplicate requests
+const inFlight = new Map<string, Promise<Restaurant[]>>();
+
 // ─── Geolocation (shared) ─────────────────────────────────────────────────────
 
 const FALLBACK: Coordinates = { lat: 37.7749, lng: -122.4194 };
@@ -122,7 +150,7 @@ function getRealLocation(): Promise<Coordinates | null> {
     let resolved = false;
     function done(c: Coordinates | null) { if (!resolved) { resolved = true; resolve(c); } }
 
-    // Try high-accuracy (GPS) with a 6s window
+    // Try high-accuracy (GPS) with a 10s window (6s was too short indoors)
     navigator.geolocation.getCurrentPosition(
       (pos) => done({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => {
@@ -133,7 +161,7 @@ function getRealLocation(): Promise<Coordinates | null> {
           { timeout: 10000, enableHighAccuracy: false }
         );
       },
-      { timeout: 6000, enableHighAccuracy: true }
+      { timeout: 10000, enableHighAccuracy: true }
     );
   });
 }
@@ -156,6 +184,24 @@ export class LiveLocationProvider implements LocationProvider {
   }
 
   async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
+    const cacheKey = overpassCacheKey(lat, lng, radiusMiles);
+
+    // Return cached results if still fresh
+    const cached = readOverpassCache(cacheKey);
+    if (cached) return cached;
+
+    // Deduplicate concurrent requests for the same location+radius
+    const existing = inFlight.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = this._fetchFromOverpass(lat, lng, radiusMiles);
+    inFlight.set(cacheKey, promise);
+    promise.finally(() => inFlight.delete(cacheKey));
+    return promise;
+  }
+
+  private async _fetchFromOverpass(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
+    const cacheKey = overpassCacheKey(lat, lng, radiusMiles);
     const radiusMeters = Math.round(radiusMiles * 1609.34);
 
     // Query both nodes AND ways (restaurants mapped as areas) with center coords for ways
@@ -168,7 +214,7 @@ export class LiveLocationProvider implements LocationProvider {
   way["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
   way["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
 );
-out body center 100;`;
+out body center;`;
 
     const data = await fetchOverpass(query);
     const elements: OverpassElement[] = data.elements ?? [];
@@ -219,7 +265,9 @@ out body center 100;`;
       }
     }
 
-    return results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+    const sorted = results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+    writeOverpassCache(cacheKey, sorted);
+    return sorted;
   }
 }
 
