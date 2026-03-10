@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { ingestFromText } from "@/lib/menu-ingestion";
+import type { NormalizedMenu } from "@/lib/menu-ingestion";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -7,6 +9,9 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get("image") as File | null;
+    const restaurantId   = (formData.get("restaurantId")   as string | null) ?? undefined;
+    const restaurantName = (formData.get("restaurantName") as string | null) ?? undefined;
+
     if (!file) return NextResponse.json({ error: "No image provided" }, { status: 400 });
 
     const buffer = await file.arrayBuffer();
@@ -57,18 +62,30 @@ Chocolate Lava Cake | warm chocolate cake, vanilla ice cream, contains eggs and 
       return NextResponse.json({ error: "No menu found in the image." }, { status: 422 });
     }
 
-    // Each line is "Name | description" or just "Name"
-    // We join name + description so the allergen engine sees all ingredients
-    const menuLines = text
+    // Parse Claude's "Name | description" lines into plain text for the ingestion pipeline
+    const cleanedLines = text
       .split("\n")
       .map((l) => l.trim())
-      .filter((l) => l.length > 0 && l !== "NO_MENU")
-      .map((l) => {
-        const [name, desc] = l.split("|").map((s) => s.trim());
-        return desc ? `${name} — ${desc}` : name;
-      });
+      .filter((l) => l.length > 0 && l !== "NO_MENU");
 
-    return NextResponse.json({ ok: true, menuLines });
+    // Feed the extracted text through the ingestion pipeline
+    const plainText = cleanedLines.join("\n");
+    const menu: NormalizedMenu = await ingestFromText(plainText, {
+      restaurantId:  restaurantId  ?? "unknown",
+      restaurantName: restaurantName ?? "Unknown Restaurant",
+      sourceLabel:   "Photo scan",
+    });
+
+    // Override source type to image (ingestFromText sets user_upload)
+    (menu as { sourceType: string }).sourceType = "image";
+
+    // Backward-compatible flat lines for the scan page
+    const menuLines = cleanedLines.map((l) => {
+      const [name, desc] = l.split("|").map((s) => s.trim());
+      return desc ? `${name} — ${desc}` : name;
+    });
+
+    return NextResponse.json({ ok: true, menuLines, menu });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: msg }, { status: 500 });

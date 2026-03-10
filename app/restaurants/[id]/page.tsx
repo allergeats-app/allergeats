@@ -6,8 +6,7 @@ import { use } from "react";
 import { SettingsButton } from "@/components/SettingsButton";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { loadProfileAllergens } from "@/lib/allergenProfile";
-import { scoreRestaurant, coverageTier, coverageTierLabel, coverageTierColor } from "@/lib/scoring";
-import { fitLevel, fitBadge, fitExplanation, fitReasoningBullets } from "@/lib/fitLevel";
+import { coverageTierColor } from "@/lib/scoring";
 import { recordView } from "@/lib/recentlyViewed";
 import { useFavorites } from "@/lib/favoritesContext";
 import { MenuItemCard } from "@/components/MenuItemCard";
@@ -15,14 +14,14 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
 import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
-import { fitLevel as fitLevelFn } from "@/lib/fitLevel";
-import type { Restaurant, ScoredRestaurant, ScoredMenuItem, Risk, AllergenId } from "@/lib/types";
+import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
+import type { RestaurantDetailViewModel, SafeOrderRecommendation } from "@/lib/analysis";
+import type { Restaurant, Risk, AllergenId } from "@/lib/types";
 
 type RiskFilter = "all" | Risk;
 
 const RISK_ORDER: Risk[] = ["avoid", "ask", "likely-safe", "unknown"];
 const SESSION_KEY = "allegeats_live_restaurants";
-const CONF_RANK: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
 
 const RISK_META: Record<Risk, { label: string; mark: string; color: string; bg: string; border: string }> = {
   "avoid":       { label: "Avoid",       mark: "!", color: "#b91c1c", bg: "#fff1f0", border: "#f3c5c0" },
@@ -67,111 +66,76 @@ function findRestaurant(id: string): Restaurant | undefined {
 
 export default function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [scored, setScored]             = useState<ScoredRestaurant | null>(null);
+  const [vm, setVm]                       = useState<RestaurantDetailViewModel | null>(null);
+  const [restaurant, setRestaurant]       = useState<Restaurant | null>(null);
   const [userAllergens, setUserAllergens] = useState<AllergenId[]>([]);
-  const [notFound, setNotFound]         = useState(false);
-  const [riskFilter, setRiskFilter]     = useState<RiskFilter>("all");
-  const [photoFailed, setPhotoFailed]   = useState(false);
+  const [notFound, setNotFound]           = useState(false);
+  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("all");
+  const [photoFailed, setPhotoFailed]     = useState(false);
   const [questionsCopied, setQuestionsCopied] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
-    const restaurant = findRestaurant(id);
-    if (!restaurant) { setNotFound(true); return; } // eslint-disable-line react-hooks/set-state-in-effect
+    const found = findRestaurant(id);
+    if (!found) { setNotFound(true); return; } // eslint-disable-line react-hooks/set-state-in-effect
     const allergens = loadProfileAllergens();
     setUserAllergens(allergens);
-    const sr = scoreRestaurant(restaurant, allergens);
-    setScored(sr);
+
+    const analysis  = analyzeRestaurant(found, allergens);
+    const viewModel = buildDetailViewModel(analysis, { distance: found.distance ?? undefined });
+    setVm(viewModel);
+    setRestaurant(found);
+
     recordView({
-      id: restaurant.id, name: restaurant.name, cuisine: restaurant.cuisine,
-      lat: restaurant.lat ?? undefined, lng: restaurant.lng ?? undefined,
-      distance: restaurant.distance ?? undefined,
+      id: found.id, name: found.name, cuisine: found.cuisine,
+      lat: found.lat ?? undefined, lng: found.lng ?? undefined,
+      distance: found.distance ?? undefined,
     });
     trackEvent("restaurant_detail_viewed", { id });
-    // Log analysis summary for outcome tracking
-    const { summary } = sr;
-    const safeP = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
+
+    const { summary, hero } = viewModel;
     logRestaurantAnalysis({
       id:             `log_${Date.now()}`,
       createdAt:      Date.now(),
-      restaurantId:   restaurant.id,
-      restaurantName: restaurant.name,
-      cuisine:        restaurant.cuisine,
+      restaurantId:   found.id,
+      restaurantName: found.name,
+      cuisine:        found.cuisine,
       userAllergens:  allergens,
       totalItems:     summary.total,
       safeCount:      summary.likelySafe,
       askCount:       summary.ask,
       avoidCount:     summary.avoid,
-      fitLevel:       fitLevelFn(safeP, summary.avoid, summary.ask, summary.total),
+      fitLevel:       hero.fitLevel,
     });
   }, [id]);
 
-  // Categories sorted by safe-item count descending (safest sections first)
-  const categories = useMemo<string[]>(() => {
-    if (!scored) return [];
-    const safeBycat: Record<string, number> = {};
-    const order: string[] = [];
-    for (const item of scored.scoredItems) {
-      const cat = item.category;
-      if (!cat) continue;
-      if (!(cat in safeBycat)) { safeBycat[cat] = 0; order.push(cat); }
-      if (item.risk === "likely-safe") safeBycat[cat]++;
-    }
-    return [...order].sort((a, b) => (safeBycat[b] ?? 0) - (safeBycat[a] ?? 0));
-  }, [scored]);
-
-  // Top 5 likely-safe items sorted by confidence descending
-  const bestOptions = useMemo<ScoredMenuItem[]>(() => {
-    if (!scored) return [];
-    return scored.scoredItems
-      .filter((i) => i.risk === "likely-safe")
-      .sort((a, b) => (CONF_RANK[b.confidence] ?? 1) - (CONF_RANK[a.confidence] ?? 1))
-      .slice(0, 5);
-  }, [scored]);
-
-  // Unique staff questions from all ask-risk items
-  const aggregatedQuestions = useMemo<string[]>(() => {
-    if (!scored) return [];
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const item of scored.scoredItems) {
-      if (item.risk !== "ask") continue;
-      for (const q of item.staffQuestions) {
-        const key = q.toLowerCase().trim();
-        if (!seen.has(key)) { seen.add(key); out.push(q); }
-      }
-    }
-    return out.slice(0, 8);
-  }, [scored]);
+  // All analyzed items flattened (respects current section sort order)
+  const allItems = useMemo(() => vm ? vm.sections.flatMap((s) => s.items) : [], [vm]);
 
   // Items matching the current risk filter
-  const filteredItems = useMemo<ScoredMenuItem[]>(() => {
-    if (!scored) return [];
-    return riskFilter === "all"
-      ? scored.scoredItems
-      : scored.scoredItems.filter((i) => i.risk === riskFilter);
-  }, [scored, riskFilter]);
+  const filteredItems = useMemo(
+    () => riskFilter === "all" ? allItems : allItems.filter((i) => i.risk === riskFilter),
+    [allItems, riskFilter],
+  );
 
-  const hasCategories = categories.length > 1;
+  const hasCategories = (vm?.sections.length ?? 0) > 1;
 
-  // When categories exist: group filtered items by category, sort by risk within each
-  const byCategory = useMemo<Map<string, ScoredMenuItem[]>>(() => {
-    if (!hasCategories) return new Map();
-    const map = new Map<string, ScoredMenuItem[]>();
-    for (const item of filteredItems) {
-      const cat = item.category ?? "Other";
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat)!.push(item);
-    }
-    for (const items of map.values()) {
-      items.sort((a, b) => RISK_ORDER.indexOf(a.risk) - RISK_ORDER.indexOf(b.risk));
+  // When categories exist: group filtered items by section, items sorted by risk within each
+  const bySectionFiltered = useMemo(() => {
+    if (!vm || !hasCategories) return new Map<string, typeof allItems>();
+    const map = new Map<string, typeof allItems>();
+    for (const section of vm.sections) {
+      const items = section.items.filter((i) => riskFilter === "all" || i.risk === riskFilter);
+      if (items.length > 0) map.set(section.sectionName, [...items].sort(
+        (a, b) => RISK_ORDER.indexOf(a.risk) - RISK_ORDER.indexOf(b.risk)
+      ));
     }
     return map;
-  }, [filteredItems, hasCategories]);
+  }, [vm, hasCategories, riskFilter, allItems]);
 
-  // When no categories: group by risk
-  const byRisk = useMemo<Record<Risk, ScoredMenuItem[]>>(() => {
-    const groups: Record<Risk, ScoredMenuItem[]> = { avoid: [], ask: [], "likely-safe": [], unknown: [] };
+  // When no categories: group filtered items by risk
+  const byRisk = useMemo<Record<Risk, typeof allItems>>(() => {
+    const groups: Record<Risk, typeof allItems> = { avoid: [], ask: [], "likely-safe": [], unknown: [] };
     if (hasCategories) return groups;
     for (const item of filteredItems) groups[item.risk].push(item);
     return groups;
@@ -189,28 +153,23 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     );
   }
 
-  if (!scored) {
+  if (!vm || !restaurant) {
     return <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
   }
 
-  const { summary } = scored;
+  const { hero, summary, coverage, whyThisWorks, aggregatedStaffQuestions, bestOptions } = vm;
+  const badge      = { bg: hero.fitBadgeBg, color: hero.fitBadgeColor };
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
   const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
   const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
-  const level      = fitLevel(safePercent, summary.avoid, summary.ask, summary.total);
-  const badge      = fitBadge(level);
-  const oneliner   = fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe);
-  const reasoning  = fitReasoningBullets(level, summary);
-  const tier       = coverageTier(summary.total);
-  const tierLabel  = coverageTierLabel(summary.total);
-  const tierColor  = coverageTierColor(tier);
-  const favorited  = isFavorite(scored.id);
-  const hasNoMenu  = scored.scoredItems.length === 0;
-  const noAllergens = userAllergens.length === 0;
+  const tierColor    = coverageTierColor(coverage.tier);
+  const favorited    = isFavorite(restaurant.id);
+  const hasNoMenu    = summary.total === 0;
+  const noAllergens  = userAllergens.length === 0;
 
   // Cover photo from Google Places (falls back to gradient)
-  const photoSrc = !photoFailed && scored.lat != null && scored.lng != null
-    ? `/api/places-photo?name=${encodeURIComponent(scored.name)}&lat=${scored.lat}&lng=${scored.lng}`
+  const photoSrc = !photoFailed && restaurant.lat != null && restaurant.lng != null
+    ? `/api/places-photo?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
     : null;
 
   const RISK_CHIPS: { value: RiskFilter; label: string }[] = [
@@ -222,7 +181,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   ];
 
   async function copyQuestions() {
-    const text = aggregatedQuestions.map((q) => `• ${q}`).join("\n");
+    const text = aggregatedStaffQuestions.map((q) => `• ${q}`).join("\n");
     await navigator.clipboard.writeText(text).catch(() => {});
     setQuestionsCopied(true);
     setTimeout(() => setQuestionsCopied(false), 2000);
@@ -255,13 +214,13 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
           {/* Cover photo / gradient strip */}
           <div style={{
             height: 110,
-            background: photoSrc ? "#e5e7eb" : coverGradient(scored.cuisine, scored.name),
+            background: photoSrc ? "#e5e7eb" : coverGradient(hero.cuisine, hero.restaurantName),
             position: "relative", overflow: "hidden",
           }}>
             {photoSrc && (
               <img
                 src={photoSrc}
-                alt={scored.name}
+                alt={hero.restaurantName}
                 onError={() => setPhotoFailed(true)}
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
@@ -275,7 +234,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                 fontSize: 12, fontWeight: 800, lineHeight: 1.2,
                 textAlign: "center",
               }}>
-                {level}
+                {hero.fitLabel}
                 {summary.total >= 5 && (
                   <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.8, marginTop: 1 }}>
                     {Math.round(safePercent)}% safe
@@ -290,13 +249,13 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             {/* Name + save button */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 900, fontSize: 20, color: "var(--c-text)", lineHeight: 1.2 }}>{scored.name}</div>
+                <div style={{ fontWeight: 900, fontSize: 20, color: "var(--c-text)", lineHeight: 1.2 }}>{hero.restaurantName}</div>
                 <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>
-                  {scored.cuisine}{scored.distance != null && ` · ${scored.distance} mi`}
+                  {hero.cuisine}{hero.distance != null && ` · ${hero.distance} mi`}
                 </div>
               </div>
               <button
-                onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { name: scored.name }); toggleFavorite(scored.id); }}
+                onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { name: hero.restaurantName }); toggleFavorite(restaurant.id); }}
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
                   flexShrink: 0, width: 40, height: 40, borderRadius: 999,
@@ -315,7 +274,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             {/* One-liner explanation */}
             {!hasNoMenu && (
               <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16, lineHeight: 1.4 }}>
-                {oneliner}
+                {hero.fitExplanation}
               </div>
             )}
 
@@ -349,10 +308,10 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                   <StatPill count={summary.avoid}      label="Avoid" color="#b91c1c" bg="#fff1f0" />
                 </div>
 
-                {/* Coverage */}
+                {/* Coverage trust signal */}
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                   <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{tierLabel}</span>
+                  <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{coverage.coverageLine}</span>
                 </div>
               </>
             )}
@@ -390,8 +349,8 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {bestOptions.map((item) => (
-                  <BestOptionCard key={item.id} item={item} />
+                {bestOptions.map((rec) => (
+                  <BestOptionCard key={rec.item.id} rec={rec} />
                 ))}
               </div>
             )}
@@ -407,30 +366,31 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               borderRadius: 16, padding: "14px 16px",
             }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
-                {reasoning.map((bullet, i) => (
+                {whyThisWorks.map((bullet, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                     <span style={{ color: badge.color, fontWeight: 900, fontSize: 13, lineHeight: "1.5", flexShrink: 0 }}>·</span>
                     <span style={{ fontSize: 13, color: "var(--c-text)", lineHeight: 1.5 }}>{bullet}</span>
                   </div>
                 ))}
               </div>
+              {/* Phase 5: trust signal */}
               <div style={{ fontSize: 11, color: "var(--c-sub)", lineHeight: 1.4 }}>
-                Always confirm with staff before ordering.
+                {coverage.trustSignal} · Always confirm with staff before ordering.
               </div>
             </div>
           </section>
         )}
 
         {/* ── 4b. Questions to ask staff ── */}
-        {!hasNoMenu && aggregatedQuestions.length > 0 && (
+        {!hasNoMenu && aggregatedStaffQuestions.length > 0 && (
           <section style={{ marginBottom: 28 }}>
-            <SectionHeader label="Questions to ask staff" count={aggregatedQuestions.length} />
+            <SectionHeader label="Questions to ask staff" count={aggregatedStaffQuestions.length} />
             <div style={{
               background: "#fff7db", border: "1px solid #f4dd8d",
               borderRadius: 16, padding: "14px 16px",
             }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 12 }}>
-                {aggregatedQuestions.map((q, i) => (
+                {aggregatedStaffQuestions.map((q, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
                     <span style={{ color: "#854d0e", fontWeight: 700, fontSize: 13, lineHeight: "1.5", flexShrink: 0 }}>•</span>
                     <span style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}>{q}</span>
@@ -486,23 +446,22 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             {filteredItems.length === 0 ? (
               <EmptyState title="No items match" subtitle="Try a different filter." />
             ) : hasCategories ? (
-              /* Grouped by menu section (safest categories first) */
+              /* Grouped by menu section (safest sections first, from view model) */
               <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 8 }}>
-                {categories.map((cat) => {
-                  const items = byCategory.get(cat);
+                {vm.sections.map((section) => {
+                  const items = bySectionFiltered.get(section.sectionName);
                   if (!items?.length) return null;
-                  const safeCount = items.filter((i) => i.risk === "likely-safe").length;
                   return (
-                    <div key={cat}>
+                    <div key={section.sectionName}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-                        <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{cat}</span>
+                        <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{section.sectionName}</span>
                         <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length}</span>
-                        {safeCount > 0 && riskFilter === "all" && (
-                          <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>{safeCount} safe</span>
+                        {section.safeCount > 0 && riskFilter === "all" && (
+                          <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>{section.safeCount} safe</span>
                         )}
                       </div>
                       <div style={{ display: "grid", gap: 8 }}>
-                        {items.map((item) => <MenuItemCard key={item.id} item={item} restaurantId={scored.id} restaurantName={scored.name} />)}
+                        {items.map((item) => <MenuItemCard key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />)}
                       </div>
                     </div>
                   );
@@ -532,7 +491,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                         </div>
                       </div>
                       <div style={{ display: "grid", gap: 8 }}>
-                        {items.map((item) => <MenuItemCard key={item.id} item={item} restaurantId={scored.id} restaurantName={scored.name} />)}
+                        {items.map((item) => <MenuItemCard key={item.id} item={item} restaurantId={restaurant.id} restaurantName={restaurant.name} />)}
                       </div>
                     </div>
                   );
@@ -594,7 +553,7 @@ function SectionHeader({ label, count }: { label: string; count?: number }) {
   );
 }
 
-function BestOptionCard({ item }: { item: ScoredMenuItem }) {
+function BestOptionCard({ rec }: { rec: SafeOrderRecommendation }) {
   return (
     <div style={{
       background: "#f0fdf4", border: "1px solid #bbf7d0",
@@ -602,10 +561,16 @@ function BestOptionCard({ item }: { item: ScoredMenuItem }) {
       display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
     }}>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", lineHeight: 1.3 }}>{item.name}</div>
-        {item.explanation && (
-          <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3, lineHeight: 1.4 }}>
-            {item.explanation}
+        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", lineHeight: 1.3 }}>{rec.item.name}</div>
+        {rec.item.category && (
+          <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2 }}>{rec.item.category}</div>
+        )}
+        <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3, lineHeight: 1.4 }}>
+          {rec.explanation}
+        </div>
+        {rec.askNotes.length > 0 && (
+          <div style={{ fontSize: 11, color: "#854d0e", marginTop: 4 }}>
+            Ask: {rec.askNotes[0]}
           </div>
         )}
       </div>
@@ -613,7 +578,7 @@ function BestOptionCard({ item }: { item: ScoredMenuItem }) {
         flexShrink: 0, padding: "3px 10px", borderRadius: 999,
         background: "#dcfce7", color: "#15803d", fontSize: 11, fontWeight: 700,
       }}>
-        Safe
+        {rec.reasonLabel}
       </span>
     </div>
   );

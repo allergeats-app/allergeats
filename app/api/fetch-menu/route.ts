@@ -1,42 +1,17 @@
 import { NextResponse } from "next/server";
-
-function stripHtml(html: string) {
-  html = html.replace(/<script[\s\S]*?<\/script>/gi, " ");
-  html = html.replace(/<style[\s\S]*?<\/style>/gi, " ");
-  const text = html.replace(/<[^>]*>/g, " ");
-  return text
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function extractLikelyMenuLines(text: string) {
-  // Try to create “lines”
-  const roughLines = text
-    .split(/[\r\n]+/)
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  const lines = roughLines.length > 30 ? roughLines : text.split(" • ").map((l) => l.trim()).filter(Boolean);
-
-  const priceLike = /\$?\d+(\.\d{2})?/;
-  const foodLike =
-    /(burger|taco|salad|pizza|chicken|steak|pasta|soup|wings|fries|sandwich|wrap|bowl|dessert|cake|ice cream|coffee|tea)/i;
-
-  const filtered = lines
-    .map((l) => l.replace(/\s+/g, " ").trim())
-    .filter((l) => l.length >= 10 && l.length <= 160)
-    .filter((l) => priceLike.test(l) || foodLike.test(l));
-
-  return Array.from(new Set(filtered)).slice(0, 250);
-}
+import { ingestFromHtml, toRawMenuItems } from "@/lib/menu-ingestion";
+import type { NormalizedMenu } from "@/lib/menu-ingestion";
+import { persistMenu } from "@/lib/db/persistMenu";
 
 export async function POST(req: Request) {
   try {
-    const { url } = (await req.json()) as { url?: string };
+    const body = (await req.json()) as {
+      url?: string;
+      restaurantId?: string;
+      restaurantName?: string;
+    };
+    const { url, restaurantId, restaurantName } = body;
+
     if (!url) return NextResponse.json({ error: "Missing url" }, { status: 400 });
 
     let parsed: URL;
@@ -67,10 +42,26 @@ export async function POST(req: Request) {
     }
 
     const html = await res.text();
-    const text = stripHtml(html);
-    const menuLines = extractLikelyMenuLines(text);
 
-    return NextResponse.json({ url, menuLines });
+    const menu: NormalizedMenu = await ingestFromHtml(html, {
+      restaurantId:  restaurantId ?? parsed.hostname,
+      restaurantName: restaurantName ?? parsed.hostname,
+      sourceUrl:     url,
+      sourceLabel:   `${restaurantName ?? parsed.hostname} website`,
+    });
+
+    // Backward-compatible flat lines for the scan page
+    const menuLines = toRawMenuItems(menu).map((item) =>
+      [item.name, item.description].filter(Boolean).join(" — ")
+    );
+
+    // Persist when we have a real restaurantId
+    let persisted: Awaited<ReturnType<typeof persistMenu>> | undefined;
+    if (restaurantId && restaurantName) {
+      persisted = await persistMenu(menu, { id: restaurantId, name: restaurantName });
+    }
+
+    return NextResponse.json({ url, menuLines, menu, ...(persisted ? { persisted } : {}) });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json({ error: msg }, { status: 500 });

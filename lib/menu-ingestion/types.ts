@@ -43,6 +43,11 @@ export type NormalizedMenuItem = {
   itemName: string;
   description?: string;
   price?: string;
+  /**
+   * Official allergen IDs from a trusted source (e.g. official_api or aggregator_api).
+   * When present, these bypass text inference and are scored with high confidence.
+   */
+  allergens?: string[];
   /** The original unmodified text as extracted from the source. */
   rawText: string;
   /** Lowercased, cleaned text used by the analysis pipeline. */

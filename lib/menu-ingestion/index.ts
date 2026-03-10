@@ -43,6 +43,7 @@ export { WebsiteHtmlAdapter } from "./adapters/websiteHtmlAdapter";
 export { UserUploadAdapter }  from "./adapters/userUploadAdapter";
 export { OfficialApiAdapter } from "./adapters/officialApiAdapter";
 export { NutritionixAdapter } from "./adapters/nutritionixAdapter";
+export type { NutritionixFood } from "./adapters/nutritionixAdapter";
 export { PdfAdapter }         from "./adapters/pdfAdapter";
 export { ImageAdapter }       from "./adapters/imageAdapter";
 
