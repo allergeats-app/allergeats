@@ -48,6 +48,13 @@ export type Coordinates = {
   accuracy?: number;
   /** Unix timestamp (ms) when the position was recorded. */
   timestamp?: number;
+  /**
+   * How this position was obtained — used for UI explainability and trust decisions.
+   *   "gps"     → enableHighAccuracy succeeded (most reliable)
+   *   "network" → low-accuracy fallback succeeded (cell/Wi-Fi/IP)
+   *   "cached"  → pulled from last-known-location store (may be up to 20min stale)
+   */
+  source?: "gps" | "network" | "cached";
 };
 
 export interface LocationProvider {
@@ -282,12 +289,13 @@ const inFlight = new Map<string, Promise<Restaurant[]>>();
 
 // ─── Geolocation (shared) ─────────────────────────────────────────────────────
 
-function fromPosition(pos: GeolocationPosition): Coordinates {
+function fromPosition(pos: GeolocationPosition, source: "gps" | "network"): Coordinates {
   return {
     lat:       pos.coords.latitude,
     lng:       pos.coords.longitude,
     accuracy:  pos.coords.accuracy,
     timestamp: pos.timestamp,
+    source,
   };
 }
 
@@ -305,14 +313,15 @@ function getRealLocation(): Promise<Coordinates | null> {
 
     // Try high-accuracy (GPS) with a 10s window (6s was too short indoors)
     navigator.geolocation.getCurrentPosition(
-      (pos) => done(fromPosition(pos)),
+      (pos) => done(fromPosition(pos, "gps")),
       () => {
         // High-accuracy failed — fall back to network/IP location
         navigator.geolocation.getCurrentPosition(
-          (pos) => done(fromPosition(pos)),
+          (pos) => done(fromPosition(pos, "network")),
           () => {
             // Both failed — use last-known location if fresh enough
-            done(loadLastLocation());
+            const cached = loadLastLocation();
+            done(cached ? { ...cached, source: "cached" } : null);
           },
           { timeout: 10000, enableHighAccuracy: false },
         );
