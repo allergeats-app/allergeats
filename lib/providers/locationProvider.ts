@@ -12,6 +12,7 @@
 
 import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
+import { upsertRestaurant } from "@/lib/registry";
 
 export type Coordinates = { lat: number; lng: number };
 
@@ -240,27 +241,50 @@ out body center;`;
 
       const mock = findMockMatch(name);
 
+      const address  = buildAddress(el.tags);
+      const cuisine  = formatCuisine(el.tags.cuisine);
+      const osmId    = `${el.id > 0 ? "node" : "way"}/${Math.abs(el.id)}`;
+      const website  = el.tags?.website || el.tags?.["contact:website"];
+      const phone    = el.tags?.phone   || el.tags?.["contact:phone"];
+
+      // Register every discovered restaurant in the canonical registry.
+      // This deduplicates across sources and builds the cross-reference table.
+      const canonical = upsertRestaurant({
+        displayName: name,
+        address:     address || undefined,
+        lat:         elLat,
+        lng:         elLng,
+        phone:       phone  || undefined,
+        website:     website || undefined,
+        cuisine:     el.tags.cuisine,
+        osmId,
+        sourceType:  "osm",
+        confidence:  "medium",
+      });
+
       if (mock) {
         results.push({
           ...mock,
-          id: `live-${el.id}`,
-          address: buildAddress(el.tags) || mock.address,
+          id: canonical.registryId,
+          address: address || mock.address,
           lat: elLat,
           lng: elLng,
           distance,
         });
       } else {
         results.push({
-          id: `osm-${el.id}`,
+          id: canonical.registryId,
           name,
-          cuisine: formatCuisine(el.tags.cuisine),
+          cuisine,
           tags: deriveTags(el.tags.cuisine),
-          address: buildAddress(el.tags),
+          address,
           lat: elLat,
           lng: elLng,
           distance,
+          phone:      phone   || undefined,
+          website:    website || undefined,
           sourceType: "scraped" as SourceType,
-          menuItems: [],
+          menuItems:  [],
         });
       }
     }
