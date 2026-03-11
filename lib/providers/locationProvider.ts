@@ -52,7 +52,12 @@ export type Coordinates = {
 
 export interface LocationProvider {
   getUserLocation(): Promise<Coordinates | null>;
-  searchRestaurants(lat: number, lng: number, radiusMiles: number, query?: string): Promise<Restaurant[]>;
+  /**
+   * @param accuracy  Optional GPS accuracy in metres. When provided, the provider
+   *                  can expand the search radius for coarse locations. Callers
+   *                  should pass `coords.accuracy` from the result of getUserLocation().
+   */
+  searchRestaurants(lat: number, lng: number, radiusMiles: number, accuracy?: number): Promise<Restaurant[]>;
 }
 
 // ─── Permissions API probe (exported for UI) ──────────────────────────────────
@@ -147,10 +152,13 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type OverpassElement = {
+  type: "node" | "way" | "relation";
   id: number;
-  lat: number;
-  lng?: number;
+  /** Present on node elements. */
+  lat?: number;
   lon?: number;
+  /** Present on way/relation elements when `out center` is used. */
+  center?: { lat: number; lon: number };
   tags: Record<string, string>;
 };
 
@@ -200,9 +208,13 @@ function findMockMatch(liveName: string): Restaurant | undefined {
  * that are actually nearby. Expand proportionally so poor-accuracy searches still
  * return useful results, capped at 3× the requested radius.
  *
- *  accuracy ≤ 100m → no expansion (accurate)
- *  accuracy 100–500m → 1.5× expansion
- *  accuracy > 500m  → 2.5× expansion (cell / IP location)
+ *  accuracy ≤ 100m  → no expansion (GPS-quality)
+ *  100–500m         → 1.5× (Wi-Fi / cell — v1 multiplier, may tune per urban density)
+ *  > 500m           → 2.5× (IP-based; capped at 3×)
+ *
+ * Future tuning: consider actual accuracy value (e.g. 150m vs 900m within the 100–1000m
+ * band), retry with larger radius when zero results are returned, or use urban/suburban
+ * density signals to calibrate expansion differently by area.
  */
 function effectiveRadiusMiles(requestedMiles: number, accuracy?: number): number {
   if (!accuracy || accuracy <= 100) return requestedMiles;
@@ -332,8 +344,9 @@ export class LiveLocationProvider implements LocationProvider {
     return loc;
   }
 
-  async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
-    const radius   = effectiveRadiusMiles(radiusMiles, this._lastAccuracy);
+  async searchRestaurants(lat: number, lng: number, radiusMiles: number, accuracy?: number): Promise<Restaurant[]> {
+    // Explicit accuracy param takes precedence; fall back to last-seen from getUserLocation()
+    const radius   = effectiveRadiusMiles(radiusMiles, accuracy ?? this._lastAccuracy);
     const cacheKey = overpassCacheKey(lat, lng, radius);
 
     const cached = readOverpassCache(cacheKey);
@@ -373,8 +386,8 @@ out body center;`;
       const name = el.tags?.name;
       if (!name) continue;
 
-      const elLat = (el as { center?: { lat: number; lon: number }; lat?: number }).center?.lat ?? el.lat;
-      const elLng = (el as { center?: { lat: number; lon: number }; lng?: number; lon?: number }).center?.lon ?? el.lng ?? (el as { lon?: number }).lon ?? 0;
+      const elLat = el.center?.lat ?? el.lat;
+      const elLng = el.center?.lon ?? el.lon ?? 0;
       if (!elLat) continue;
 
       const distance = Math.round(haversineDistance(lat, lng, elLat, elLng) * 10) / 10;
@@ -386,7 +399,7 @@ out body center;`;
       const mock    = findMockMatch(name);
       const address = buildAddress(el.tags);
       const cuisine = formatCuisine(el.tags.cuisine);
-      const osmId   = `${el.id > 0 ? "node" : "way"}/${Math.abs(el.id)}`;
+      const osmId   = `${el.type}/${el.id}`;
       const website = el.tags?.website || el.tags?.["contact:website"];
       const phone   = el.tags?.phone   || el.tags?.["contact:phone"];
 
@@ -446,7 +459,7 @@ export class MockLocationProvider implements LocationProvider {
     return getRealLocation();
   }
 
-  async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
+  async searchRestaurants(lat: number, lng: number, radiusMiles: number, _accuracy?: number): Promise<Restaurant[]> {
     return MOCK_RESTAURANTS.map((r) => ({
       ...r,
       distance:
