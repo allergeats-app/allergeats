@@ -217,7 +217,7 @@ function findMockMatch(liveName: string): Restaurant | undefined {
  *
  *  accuracy ≤ 100m  → no expansion (GPS-quality)
  *  100–500m         → 1.5× (Wi-Fi / cell — v1 multiplier, may tune per urban density)
- *  > 500m           → 2.5× (IP-based; capped at 3×)
+ *  > 500m           → 2.5× (IP-based / very coarse)
  *
  * Future tuning: consider actual accuracy value (e.g. 150m vs 900m within the 100–1000m
  * band), retry with larger radius when zero results are returned, or use urban/suburban
@@ -225,8 +225,8 @@ function findMockMatch(liveName: string): Restaurant | undefined {
  */
 function effectiveRadiusMiles(requestedMiles: number, accuracy?: number): number {
   if (!accuracy || accuracy <= 100) return requestedMiles;
-  if (accuracy <= 500) return Math.min(requestedMiles * 1.5, requestedMiles * 3);
-  return Math.min(requestedMiles * 2.5, requestedMiles * 3);
+  if (accuracy <= 500) return requestedMiles * 1.5;
+  return requestedMiles * 2.5;
 }
 
 // ─── Overpass mirrors (tried in order until one succeeds) ─────────────────────

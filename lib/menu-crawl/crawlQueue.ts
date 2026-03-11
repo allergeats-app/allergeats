@@ -36,8 +36,12 @@ import { REFRESH_INTERVAL_MS, SOURCE_PRIORITY } from "./types";
 
 const QUEUE_KEY = "allegeats_crawl_queue";
 
-/** Maximum consecutive failures before a restaurant is deprioritized. */
-const MAX_FAILURES_BEFORE_BACKOFF = 3;
+/**
+ * After this many consecutive failures the exponential backoff caps at 7 days
+ * (2^n hours, capped). Restaurants are NOT permanently excluded — they continue
+ * to be re-tried once the backoff window expires.
+ */
+const MAX_FAILURES_FOR_WEEKLY_BACKOFF = 7; // 2^7 h = 128h > 7-day cap → weekly retries
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
@@ -250,10 +254,8 @@ export function getNextCrawlBatch(limit = 5): CrawlQueueEntry[] {
   };
 
   return Object.values(queue)
-    // Only return restaurants that are actually overdue
+    // Only return restaurants that are actually overdue (backoff handles failure pacing)
     .filter((r) => new Date(r.nextCrawlDue).getTime() <= now)
-    // Skip ones with too many recent failures
-    .filter((r) => r.consecutiveFailures < MAX_FAILURES_BEFORE_BACKOFF)
     .sort((a, b) => {
       const tierDiff = tierOrder[a.refreshTier] - tierOrder[b.refreshTier];
       if (tierDiff !== 0) return tierDiff;
