@@ -9,6 +9,7 @@ import { loadProfileAllergens } from "@/lib/allergenProfile";
 import { coverageTierColor } from "@/lib/scoring";
 import { fitLevel } from "@/lib/fitLevel";
 import { recordView } from "@/lib/recentlyViewed";
+import { bumpInteraction, registerForCrawl } from "@/lib/menu-crawl";
 import { useFavorites } from "@/lib/favoritesContext";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -117,6 +118,11 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     });
     trackEvent("restaurant_detail_viewed", { id });
 
+    // Register in crawl queue (idempotent) and bump interaction count
+    // so frequently viewed restaurants are refreshed more often.
+    registerForCrawl(found.id, { sourceUrl: found.website ?? undefined });
+    bumpInteraction(found.id);
+
     // Log analysis summary (uses base analysis — before memory overlay)
     const { summary } = analysis;
     const safeP = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
@@ -157,13 +163,15 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     submitFeedback: _submitMemoryFeedback,
   } = useRestaurantMemory(id, restaurant?.name ?? "", enhancedItems);
 
-  // Wrap hook's submitFeedback to also bump memoryVersion, triggering re-analysis
+  // Wrap hook's submitFeedback to also bump memoryVersion (triggering re-analysis)
+  // and bump crawl interaction count so actively-used restaurants refresh more often.
   const handleFeedback = useCallback(
     (params: FeedbackParams) => {
       _submitMemoryFeedback(params);
       setMemoryVersion((v) => v + 1);
+      bumpInteraction(id);
     },
-    [_submitMemoryFeedback],
+    [_submitMemoryFeedback, id],
   );
 
   // ── Final view model ────────────────────────────────────────────────────────
