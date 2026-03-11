@@ -17,12 +17,12 @@ import { scoreMenuConfidence, scoreItemConfidence } from "./scoreSourceConfidenc
 import { dedupeMenuSections } from "./dedupeMenuItems";
 import { normalizeMenuItemText, normalizeSectionName } from "./normalizeMenuText";
 
-/** Max raw snapshot size stored for traceability (20 KB) */
-const MAX_SNAPSHOT_BYTES = 20_000;
+/** Max raw snapshot size stored for traceability (20 000 chars ≈ 20 KB for ASCII). */
+const MAX_SNAPSHOT_CHARS = 20_000;
 
 function truncateSnapshot(raw: string): string {
-  if (raw.length <= MAX_SNAPSHOT_BYTES) return raw;
-  return raw.slice(0, MAX_SNAPSHOT_BYTES) + "\n… [truncated]";
+  if (raw.length <= MAX_SNAPSHOT_CHARS) return raw;
+  return raw.slice(0, MAX_SNAPSHOT_CHARS) + "\n… [truncated]";
 }
 
 /**
