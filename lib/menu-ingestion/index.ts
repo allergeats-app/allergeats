@@ -46,6 +46,10 @@ export { NutritionixAdapter } from "./adapters/nutritionixAdapter";
 export type { NutritionixFood } from "./adapters/nutritionixAdapter";
 export { PdfAdapter }         from "./adapters/pdfAdapter";
 export { ImageAdapter }       from "./adapters/imageAdapter";
+export { ToastAdapter }       from "./adapters/toastAdapter";
+export type { ToastAdapterConfig, ToastMenusResponse } from "./adapters/toastAdapter";
+export { SquareAdapter }      from "./adapters/squareAdapter";
+export type { SquareAdapterConfig, SquareCatalogResponse } from "./adapters/squareAdapter";
 
 // ─── Convenience functions ────────────────────────────────────────────────────
 
