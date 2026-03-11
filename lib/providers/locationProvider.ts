@@ -133,12 +133,12 @@ function loadLastLocation(): Coordinates | null {
   try {
     const raw = localStorage.getItem(LAST_LOCATION_KEY);
     if (!raw) return null;
-    const stored = JSON.parse(raw) as Coordinates & { savedAt: number };
-    if (Date.now() - stored.savedAt > LAST_LOCATION_TTL_MS) {
+    const { savedAt, ...coords } = JSON.parse(raw) as Coordinates & { savedAt: number };
+    if (Date.now() - savedAt > LAST_LOCATION_TTL_MS) {
       localStorage.removeItem(LAST_LOCATION_KEY);
       return null;
     }
-    return { lat: stored.lat, lng: stored.lng, accuracy: stored.accuracy, timestamp: stored.timestamp };
+    return coords;
   } catch { return null; }
 }
 
@@ -262,8 +262,9 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
  * Cache key for Overpass results.
  * toFixed(3) buckets at ~110m (vs toFixed(2) at ~1.1km) so users
  * moving a meaningful distance get a fresh query rather than stale results.
- * The accuracy band is included so coarse-location searches (wider radius)
- * don't collide with precise-location searches for the same spot.
+ * The effective radius (already expanded by effectiveRadiusMiles) is part of
+ * the key, so coarse-location searches naturally get a different key than
+ * precise ones without needing an explicit accuracy field.
  */
 function overpassCacheKey(lat: number, lng: number, radiusMiles: number): string {
   return `oa_${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMiles}`;
