@@ -10,17 +10,22 @@
  *   as containing dairy (true globally), that pattern deserves a validated
  *   global rule — even if the dish ontology already covers it.
  *
- * Promotion: candidate → validated when trustWeightTotal >= THRESHOLD.
+ * Promotion path:
+ *   candidate (new, trustWeightTotal < 4)
+ *     → supported (trustWeightTotal >= 4, no conflict)
+ *     → validated (trustWeightTotal >= 8, no conflict)
+ *
  * Conflict: if opposing evidence accumulates, mark both sides "conflicted"
- *   and hold in queue for manual review.
+ *   and demote back to candidate for manual review.
  */
 
 import type { CandidateRule, FeedbackEntry } from "./types";
 
 const KEY = "allegeats_candidate_rules";
-const PROMOTION_THRESHOLD = 8;
+const SUPPORT_THRESHOLD   = 4;   // candidate → supported
+const PROMOTION_THRESHOLD = 8;   // supported → validated
 
-const SAFE_TYPES = new Set([
+const SAFE_TYPES = new Set<FeedbackEntry["type"]>([
   "confirmed-safe",
   "staff-confirmed-safe",
   "false-positive",
@@ -28,36 +33,43 @@ const SAFE_TYPES = new Set([
 
 function load(): CandidateRule[] {
   if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(KEY) ?? "[]"); }
+  catch { return []; }
 }
 
 function save(rules: CandidateRule[]): void {
   try { localStorage.setItem(KEY, JSON.stringify(rules)); } catch { }
 }
 
+function deriveStatus(
+  rule: Pick<CandidateRule, "trustWeightTotal" | "conflicted">,
+): CandidateRule["status"] {
+  if (rule.conflicted)                              return "candidate";
+  if (rule.trustWeightTotal >= PROMOTION_THRESHOLD) return "validated";
+  if (rule.trustWeightTotal >= SUPPORT_THRESHOLD)   return "supported";
+  return "candidate";
+}
+
 /** Add or update a candidate rule from a feedback entry */
 export function recordCandidateRule(feedback: FeedbackEntry): void {
   if (!feedback.allergen) return;
 
-  const outcome = SAFE_TYPES.has(feedback.type) ? "safe" : "unsafe";
+  const outcome         = SAFE_TYPES.has(feedback.type) ? "safe" : "unsafe";
   const oppositeOutcome = outcome === "safe" ? "unsafe" : "safe";
-  const rules = load();
+  const rules           = load();
 
-  // Check for opposing rule (same pattern + allergen, opposite outcome)
   const opposite = rules.find(
     (r) =>
       r.pattern === feedback.dishNormalized &&
       r.allergen === feedback.allergen &&
-      r.outcome === oppositeOutcome,
+      r.outcome  === oppositeOutcome,
   );
 
   const existing = rules.find(
     (r) =>
       r.pattern === feedback.dishNormalized &&
       r.allergen === feedback.allergen &&
-      r.outcome === outcome,
+      r.outcome  === outcome,
   );
 
   if (existing) {
@@ -67,23 +79,13 @@ export function recordCandidateRule(feedback: FeedbackEntry): void {
     if (!existing.sources.includes(feedback.type))
       existing.sources.push(feedback.type);
 
-    // Promote if threshold met and no conflict
-    if (
-      existing.trustWeightTotal >= PROMOTION_THRESHOLD &&
-      existing.status === "candidate" &&
-      !existing.conflicted
-    ) {
-      existing.status = "validated";
-    }
-
-    // Mark both sides conflicted if opposing evidence exists
     if (opposite) {
       existing.conflicted = true;
       opposite.conflicted  = true;
-      // Demote validated rules back to candidate when conflict arises
-      if (existing.status === "validated") existing.status = "candidate";
-      if (opposite.status === "validated") opposite.status = "candidate";
     }
+
+    existing.status = deriveStatus(existing);
+    if (opposite) opposite.status = deriveStatus(opposite);
   } else {
     const newRule: CandidateRule = {
       id:               `cr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -99,7 +101,10 @@ export function recordCandidateRule(feedback: FeedbackEntry): void {
       conflicted:       !!opposite,
     };
 
-    if (opposite) opposite.conflicted = true;
+    if (opposite) {
+      opposite.conflicted = true;
+      opposite.status     = deriveStatus(opposite);
+    }
     rules.push(newRule);
   }
 
@@ -110,8 +115,12 @@ export function getValidatedRules(): CandidateRule[] {
   return load().filter((r) => r.status === "validated" && !r.conflicted);
 }
 
+export function getSupportedRules(): CandidateRule[] {
+  return load().filter((r) => r.status === "supported" && !r.conflicted);
+}
+
 export function getCandidateRules(): CandidateRule[] {
-  return load().filter((r) => r.status === "candidate");
+  return load().filter((r) => r.status === "candidate" && !r.conflicted);
 }
 
 export function getConflictedRules(): CandidateRule[] {

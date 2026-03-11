@@ -17,6 +17,8 @@ import type {
   RestaurantMenuAnalysis,
   RestaurantDetailViewModel,
   RestaurantDetailHero,
+  RestaurantWarning,
+  MemoryInsight,
 } from "./types";
 import { generateSafeOrderRecommendations } from "./safeOrderEngine";
 import { fitLevel, fitBadge, fitExplanation, fitReasoningBullets } from "@/lib/fitLevel";
@@ -101,7 +103,14 @@ function sortSections(
  */
 export function buildDetailViewModel(
   analysis: RestaurantMenuAnalysis,
-  opts: { distance?: number; isSaved?: boolean } = {},
+  opts: {
+    distance?: number;
+    isSaved?: boolean;
+    /** Restaurant-level warnings from the memory layer (e.g. shared fryer). */
+    restaurantWarnings?: RestaurantWarning[];
+    /** Pre-computed memory insights — pass getRestaurantInsights() output here. */
+    memoryInsights?: MemoryInsight[];
+  } = {},
 ): RestaurantDetailViewModel {
   const { summary, coverage } = analysis;
   const safePercent = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
@@ -153,5 +162,7 @@ export function buildDetailViewModel(
       ),
     },
     aggregatedStaffQuestions,
+    restaurantWarnings: opts.restaurantWarnings ?? [],
+    memoryInsights:     opts.memoryInsights     ?? [],
   };
 }

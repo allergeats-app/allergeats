@@ -37,6 +37,17 @@ function rankItem(item: AnalyzedMenuItem): number {
 // ─── Label + explanation builders ────────────────────────────────────────────
 
 function buildReasonLabel(item: AnalyzedMenuItem): string {
+  // Memory-confirmed overrides other labels
+  const staffMemory = item.memorySignals?.find(
+    (s) => s.hasStaffConfirmation && (s.verdict === "safe" || s.memoryChanged),
+  );
+  if (staffMemory) return "Restaurant-confirmed safe";
+
+  const communityMemory = item.memorySignals?.find(
+    (s) => s.verdict === "safe" && !s.hasStaffConfirmation && s.sourceCount >= 3,
+  );
+  if (communityMemory) return "Community-confirmed safe";
+
   if (item.ingestionConfidence === "high" && item.staffQuestions.length === 0) {
     return "Verified safe";
   }
@@ -49,6 +60,10 @@ function buildReasonLabel(item: AnalyzedMenuItem): string {
 }
 
 function buildExplanation(item: AnalyzedMenuItem): string {
+  // If memory changed the risk, lead with the memory explanation
+  const impactfulSignal = item.memorySignals?.find((s) => s.memoryChanged);
+  if (impactfulSignal) return impactfulSignal.note;
+
   const parts: string[] = [];
 
   if (item.ingestionConfidence === "high") {
@@ -65,7 +80,11 @@ function buildExplanation(item: AnalyzedMenuItem): string {
     parts.push("Looks safe — but one ingredient is worth confirming.");
   }
 
-  if (item.confidence === "High" && item.ingestionConfidence !== "high") {
+  // Append informational memory note even when risk didn't change
+  const memoryNote = item.memorySignals?.[0]?.note;
+  if (memoryNote) {
+    parts.push(memoryNote);
+  } else if (item.confidence === "High" && item.ingestionConfidence !== "high") {
     parts.push("High-confidence analysis.");
   } else if (item.confidence === "Low") {
     parts.push("Limited ingredient data — always mention your allergy.");

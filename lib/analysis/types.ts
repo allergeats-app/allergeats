@@ -15,6 +15,7 @@ import type { ScoredMenuItem, RestaurantSafetySummary } from "@/lib/types";
 import type { SourceConfidence, MenuIngestionSourceType } from "@/lib/menu-ingestion/types";
 import type { CoverageTier } from "@/lib/scoring";
 import type { FitLevel } from "@/lib/fitLevel";
+import type { MemorySignal, MemoryInsight, RestaurantWarning } from "@/lib/learning/types";
 
 // ─── Item-level analysis ──────────────────────────────────────────────────────
 
@@ -33,7 +34,16 @@ export type AnalyzedMenuItem = ScoredMenuItem & {
    * e.g. "high" for official API items, "low" for image OCR items.
    */
   ingestionConfidence: SourceConfidence;
+  /**
+   * Memory signals from the restaurant learning layer.
+   * Populated by applyMemoryToAnalysis() — absent when no memory exists.
+   * When present, `risk` on this item reflects the memory-adjusted value.
+   */
+  memorySignals?: MemorySignal[];
 };
+
+// Re-export learning types used by analysis layer consumers
+export type { MemorySignal, MemoryInsight, RestaurantWarning };
 
 // ─── Section-level analysis ───────────────────────────────────────────────────
 
@@ -143,4 +153,14 @@ export type RestaurantDetailViewModel = {
   coverage: MenuCoverageInfo;
   /** Deduplicated staff questions from all ask-risk items (max 8). */
   aggregatedStaffQuestions: string[];
+  /**
+   * Restaurant-level warnings from the memory layer (shared fryer, cross-contact, etc.).
+   * Empty array when no warnings have been reported.
+   */
+  restaurantWarnings: RestaurantWarning[];
+  /**
+   * Distilled memory insights ready for display on the detail page.
+   * Empty array when no memory exists for this restaurant.
+   */
+  memoryInsights: MemoryInsight[];
 };
