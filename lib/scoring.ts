@@ -37,7 +37,10 @@ export function scoreMenuItem(
   cuisineContext = ""
 ): ScoredMenuItem {
   const srcType = item.sourceType ?? restaurantSource;
-  const text = [item.name, item.description].filter(Boolean).join(" ");
+
+  // Prefer pre-cleaned normalizedText from the ingestion layer when available.
+  // Falls back to joining name + description (same as before) for legacy items.
+  const text = item.normalizedText || [item.name, item.description].filter(Boolean).join(" ");
 
   // Run through the new engine
   const analyzed = analyzeLine(text, userAllergens, cuisineContext, srcType);
@@ -54,13 +57,21 @@ export function scoreMenuItem(
     ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
     : [...analyzed.matchedAllergens];
 
+  // Per-item sourceConfidence from the ingestion adapter takes precedence over the
+  // engine's own confidence estimate. This lets a single well-documented item inside
+  // a medium-confidence scrape (e.g. one that listed official allergens inline) be
+  // treated as high confidence without upgrading the whole restaurant's source tier.
+  const confidence: Confidence = item.sourceConfidence
+    ? mapConfidence(item.sourceConfidence)
+    : mapConfidence(analyzed.confidence);
+
   return {
     id:          item.id,
     name:        item.name,
     description: item.description,
     category:    item.category,
     sourceType:  srcType,
-    confidence:  mapConfidence(analyzed.confidence),
+    confidence,
     risk,
     detectedAllergens: allDetected,
     inferredAllergens: analyzed.signals
@@ -71,10 +82,12 @@ export function scoreMenuItem(
         .filter((s) => s.source !== "direct" && s.source !== "synonym")
         .map((s) => s.reason)
     )],
-    triggerTerms:  [...new Set(analyzed.signals.map((s) => s.trigger))],
-    explanation:   analyzed.explanation,
+    triggerTerms:   [...new Set(analyzed.signals.map((s) => s.trigger))],
+    explanation:    analyzed.explanation,
     staffQuestions: analyzed.staffQuestions,
     userAllergenHits,
+    sectionIndex:   item.sectionIndex,
+    sourceSignals:  item.sourceSignals,
   };
 }
 

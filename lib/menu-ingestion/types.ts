@@ -143,7 +143,10 @@ export const INGESTION_SOURCE_TO_LEGACY: Record<MenuIngestionSourceType, SourceT
 export function toRawMenuItems(menu: NormalizedMenu): RawMenuItem[] {
   const legacySource = INGESTION_SOURCE_TO_LEGACY[menu.sourceType];
   const items: RawMenuItem[] = [];
-  for (const section of menu.sections) {
+
+  for (let sectionIndex = 0; sectionIndex < menu.sections.length; sectionIndex++) {
+    const section = menu.sections[sectionIndex];
+
     for (const item of section.items) {
       items.push({
         id:          item.itemId,
@@ -151,9 +154,17 @@ export function toRawMenuItems(menu: NormalizedMenu): RawMenuItem[] {
         description: item.description,
         category:    section.sectionName === "Menu" ? undefined : section.sectionName,
         sourceType:  legacySource,
-        allergens:   item.allergens,   // preserve official allergen arrays through the bridge
+        allergens:   item.allergens,
+
+        // ── Ingestion-layer richness ──────────────────────────────────────
+        // normalizedText: only carry forward when non-empty (pipeline fills it)
+        normalizedText:   item.normalizedText || undefined,
+        sourceConfidence: item.sourceConfidence,
+        sourceSignals:    item.sourceSignals?.length ? item.sourceSignals : undefined,
+        sectionIndex,
       });
     }
   }
+
   return items;
 }

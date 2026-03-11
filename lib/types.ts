@@ -45,6 +45,32 @@ export type RawMenuItem = {
    * is scored with high confidence rather than relying solely on description parsing.
    */
   allergens?: string[];
+
+  // ── Ingestion-layer richness (populated by toRawMenuItems) ──────────────
+  /**
+   * Pre-cleaned text produced by the ingestion normalizer.
+   * When present, the scoring engine uses this instead of re-cleaning name + description,
+   * which avoids redundant normalization passes.
+   */
+  normalizedText?: string;
+  /**
+   * Per-item source confidence from the ingestion adapter ("high" | "medium" | "low").
+   * Takes precedence over the restaurant-level sourceType confidence in scoreMenuItem().
+   * Allows a single well-documented item inside a scrape to be treated as high confidence.
+   */
+  sourceConfidence?: "high" | "medium" | "low";
+  /**
+   * Human-readable evidence trail explaining why this item has its confidence level.
+   * Preserved through scoring so it can be surfaced in the UI or debug tooling.
+   * E.g. ["Toast POS — restaurant-controlled data", "has price — likely real menu item"]
+   */
+  sourceSignals?: string[];
+  /**
+   * Zero-based index of the section this item came from in the original NormalizedMenu.
+   * Preserves section ordering through the flat-array bridge so the UI can
+   * re-group or sort items by their original menu structure.
+   */
+  sectionIndex?: number;
 };
 
 // ─── Scored menu item (after running through the scoring pipeline) ──────────
@@ -64,6 +90,10 @@ export type ScoredMenuItem = {
   staffQuestions: string[];
   /** Allergens from this item that match the user's own allergy profile */
   userAllergenHits: string[];
+  /** Section position from the original NormalizedMenu (0-based). Undefined for legacy items. */
+  sectionIndex?: number;
+  /** Evidence trail from the ingestion adapter — surfaced in UI / debug tooling. */
+  sourceSignals?: string[];
 };
 
 // ─── Restaurant safety summary (derived from scored items, never hardcoded) ──
