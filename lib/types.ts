@@ -124,6 +124,13 @@ export type Restaurant = {
   imageUrl?: string | null;
   phone?: string;
   website?: string;
+  /**
+   * When true, the restaurant was discovered from a live source (OSM / Google / Yelp)
+   * but its menu items come from a generic chain template (MOCK_RESTAURANTS), not
+   * location-specific data. The UI should make clear that menu details may differ
+   * by location and have not been verified for this specific store.
+   */
+  menuIsGenericChainTemplate?: boolean;
 };
 
 // ─── Restaurant with scoring applied ────────────────────────────────────────

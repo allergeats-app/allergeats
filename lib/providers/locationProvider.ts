@@ -2,23 +2,132 @@
  * Location provider interface + implementations.
  *
  * LiveLocationProvider (default):
- *   - Gets real GPS via browser Geolocation API
- *   - Queries Overpass API (OpenStreetMap) for real nearby restaurants
- *   - Merges with MOCK_RESTAURANTS menu data when a known chain is nearby
+ *   - Gets real GPS via browser Geolocation API (accuracy + timestamp captured)
+ *   - Falls back to last-known location (localStorage, 20min TTL) when GPS fails
+ *   - Queries Overpass / OpenStreetMap for nearby restaurant discovery
+ *   - Auto-expands search radius when accuracy is coarse (> 500m)
+ *   - Blends live OSM results with MOCK_RESTAURANTS chain templates when a chain
+ *     is matched — results tagged menuIsGenericChainTemplate=true for UI disclosure
  *
  * MockLocationProvider (fallback if Overpass fails):
- *   - Same GPS, but only returns MOCK_RESTAURANTS
+ *   - Same GPS logic, but only returns MOCK_RESTAURANTS
+ *
+ * ── Discovery source hierarchy (aspirational) ───────────────────────────────
+ * Overpass/OSM is the current live source. It is useful for bootstrapping but
+ * has variable data quality and inconsistent chain coverage. The intended
+ * production stack is:
+ *
+ *   1. Google Places API  — highest quality, consistent chain coverage, photos
+ *   2. Yelp Fusion API    — strong community data, reviews, open hours
+ *   3. Own canonical DB   — deduped cross-source registry (lib/registry/)
+ *   4. Overpass/OSM       — supplemental, especially for independent restaurants
+ *
+ * When Google Places or Yelp is wired, implement them as additional LocationProvider
+ * implementations and merge/dedup via upsertRestaurant() in the canonical registry.
+ * Required env vars: GOOGLE_PLACES_API_KEY, YELP_API_KEY.
+ *
+ * ── Exported helpers ────────────────────────────────────────────────────────
+ *   checkLocationPermission() → "granted" | "denied" | "prompt" | "unsupported"
+ *   locationAccuracyLabel(accuracy) → "Approximate location" | "Nearby" | null
+ *   isAccurate(accuracy) → boolean (≤ 100m)
  */
 
 import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { upsertRestaurant } from "@/lib/registry";
 
-export type Coordinates = { lat: number; lng: number };
+export type Coordinates = {
+  lat: number;
+  lng: number;
+  /**
+   * Horizontal accuracy radius in metres (from GeolocationCoordinates.accuracy).
+   * < 100m  → GPS / strong Wi-Fi — results are highly reliable
+   * 100–1000m → Wi-Fi / cell — reasonable for nearby search
+   * > 1000m → IP-based or very poor signal — show "Approximate location" in UI
+   */
+  accuracy?: number;
+  /** Unix timestamp (ms) when the position was recorded. */
+  timestamp?: number;
+};
 
 export interface LocationProvider {
   getUserLocation(): Promise<Coordinates | null>;
   searchRestaurants(lat: number, lng: number, radiusMiles: number, query?: string): Promise<Restaurant[]>;
+}
+
+// ─── Permissions API probe (exported for UI) ──────────────────────────────────
+
+export type LocationPermissionState = "granted" | "denied" | "prompt" | "unsupported";
+
+/**
+ * Check the browser's current geolocation permission state without triggering a prompt.
+ *
+ * - "granted"     → location was already approved; call getUserLocation() immediately
+ * - "denied"      → user blocked location; show "Enable location" CTA, skip the wait
+ * - "prompt"      → first time; show explanation copy before requesting
+ * - "unsupported" → Permissions API unavailable (older browsers / server-side)
+ *
+ * Note: result can change while the app is open (user can revoke in browser settings),
+ * so call this each time the location flow starts rather than caching the result.
+ */
+export async function checkLocationPermission(): Promise<LocationPermissionState> {
+  if (typeof navigator === "undefined" || !navigator.permissions) return "unsupported";
+  try {
+    const status = await navigator.permissions.query({ name: "geolocation" });
+    return status.state as LocationPermissionState;
+  } catch {
+    return "unsupported";
+  }
+}
+
+// ─── Accuracy helpers (exported for UI) ───────────────────────────────────────
+
+/**
+ * Return a human-readable accuracy label for display in the UI.
+ *
+ *  > 1000m → "Approximate location"  (IP-based; results may be off)
+ *  101–1000m → "Nearby"             (cell/Wi-Fi; reasonable but not precise)
+ *  ≤ 100m  → null                   (GPS-quality; no label needed)
+ */
+export function locationAccuracyLabel(accuracy?: number): string | null {
+  if (accuracy == null) return null;
+  if (accuracy > 1000) return "Approximate location";
+  if (accuracy > 100)  return "Nearby";
+  return null;
+}
+
+/**
+ * True when accuracy is good enough to trust for precise nearby results.
+ * Used internally to decide whether to expand the search radius.
+ */
+export function isAccurate(accuracy?: number): boolean {
+  return accuracy != null && accuracy <= 100;
+}
+
+// ─── Last-known-location cache (localStorage, 20min TTL) ─────────────────────
+
+const LAST_LOCATION_KEY = "allegeats_last_location";
+const LAST_LOCATION_TTL_MS = 20 * 60 * 1000;
+
+function saveLastLocation(c: Coordinates): void {
+  if (typeof localStorage === "undefined") return;
+  try {
+    localStorage.setItem(LAST_LOCATION_KEY, JSON.stringify({ ...c, savedAt: Date.now() }));
+  } catch { /* ignore quota errors */ }
+}
+
+function loadLastLocation(): Coordinates | null {
+  if (typeof localStorage === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(LAST_LOCATION_KEY);
+    if (!raw) return null;
+    const stored = JSON.parse(raw) as Coordinates & { savedAt: number };
+    if (Date.now() - stored.savedAt > LAST_LOCATION_TTL_MS) {
+      localStorage.removeItem(LAST_LOCATION_KEY);
+      return null;
+    }
+    return { lat: stored.lat, lng: stored.lng, accuracy: stored.accuracy, timestamp: stored.timestamp };
+  } catch { return null; }
 }
 
 // ─── Haversine ────────────────────────────────────────────────────────────────
@@ -60,33 +169,45 @@ function deriveTags(cuisine: string | undefined): RestaurantTag[] {
   if (!cuisine) return [];
   const c = cuisine.toLowerCase();
   const tags: RestaurantTag[] = [];
-  if (/burger|american/.test(c))                     tags.push("burgers");
-  if (/mexican|tex.mex|taco/.test(c))                tags.push("mexican");
-  if (/chicken|wings/.test(c))                       tags.push("chicken");
+  if (/burger|american/.test(c))                      tags.push("burgers");
+  if (/mexican|tex.mex|taco/.test(c))                 tags.push("mexican");
+  if (/chicken|wings/.test(c))                        tags.push("chicken");
   if (/coffee|cafe|café|bakery|donut|pastry/.test(c)) tags.push("coffee");
-  if (/sandwich|sub|pizza|italian/.test(c))          tags.push("sandwiches");
+  if (/sandwich|sub|pizza|italian/.test(c))           tags.push("sandwiches");
   return tags;
 }
 
 function formatCuisine(raw: string | undefined): string {
   if (!raw) return "Restaurant";
-  // Overpass cuisine tags are lowercase_underscored, e.g. "american;burgers"
   return raw
     .split(/[;,]/)
     .map((s) => s.trim().replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
     .join(" / ");
 }
 
-/**
- * Find a MOCK_RESTAURANT whose name appears in (or contains) the live restaurant name.
- * e.g. "McDonald's #1234" → matches "McDonald's"
- */
 function findMockMatch(liveName: string): Restaurant | undefined {
   const lower = liveName.toLowerCase();
   return MOCK_RESTAURANTS.find((m) => {
     const mockLower = m.name.toLowerCase();
     return lower.includes(mockLower) || mockLower.includes(lower);
   });
+}
+
+// ─── Radius expansion for coarse accuracy ─────────────────────────────────────
+
+/**
+ * When the user's GPS accuracy is poor, a fixed search radius will miss restaurants
+ * that are actually nearby. Expand proportionally so poor-accuracy searches still
+ * return useful results, capped at 3× the requested radius.
+ *
+ *  accuracy ≤ 100m → no expansion (accurate)
+ *  accuracy 100–500m → 1.5× expansion
+ *  accuracy > 500m  → 2.5× expansion (cell / IP location)
+ */
+function effectiveRadiusMiles(requestedMiles: number, accuracy?: number): number {
+  if (!accuracy || accuracy <= 100) return requestedMiles;
+  if (accuracy <= 500) return Math.min(requestedMiles * 1.5, requestedMiles * 3);
+  return Math.min(requestedMiles * 2.5, requestedMiles * 3);
 }
 
 // ─── Overpass mirrors (tried in order until one succeeds) ─────────────────────
@@ -118,8 +239,15 @@ async function fetchOverpass(query: string): Promise<{ elements: OverpassElement
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
+/**
+ * Cache key for Overpass results.
+ * toFixed(3) buckets at ~110m (vs toFixed(2) at ~1.1km) so users
+ * moving a meaningful distance get a fresh query rather than stale results.
+ * The accuracy band is included so coarse-location searches (wider radius)
+ * don't collide with precise-location searches for the same spot.
+ */
 function overpassCacheKey(lat: number, lng: number, radiusMiles: number): string {
-  return `oa_${lat.toFixed(2)}_${lng.toFixed(2)}_${radiusMiles}`;
+  return `oa_${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMiles}`;
 }
 
 function readOverpassCache(key: string): Restaurant[] | null {
@@ -142,27 +270,42 @@ const inFlight = new Map<string, Promise<Restaurant[]>>();
 
 // ─── Geolocation (shared) ─────────────────────────────────────────────────────
 
-const FALLBACK: Coordinates = { lat: 37.7749, lng: -122.4194 };
+function fromPosition(pos: GeolocationPosition): Coordinates {
+  return {
+    lat:       pos.coords.latitude,
+    lng:       pos.coords.longitude,
+    accuracy:  pos.coords.accuracy,
+    timestamp: pos.timestamp,
+  };
+}
 
 function getRealLocation(): Promise<Coordinates | null> {
   if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(null);
 
   return new Promise((resolve) => {
     let resolved = false;
-    function done(c: Coordinates | null) { if (!resolved) { resolved = true; resolve(c); } }
+    function done(c: Coordinates | null) {
+      if (resolved) return;
+      resolved = true;
+      if (c) saveLastLocation(c); // persist for next session / fallback
+      resolve(c);
+    }
 
     // Try high-accuracy (GPS) with a 10s window (6s was too short indoors)
     navigator.geolocation.getCurrentPosition(
-      (pos) => done({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => done(fromPosition(pos)),
       () => {
         // High-accuracy failed — fall back to network/IP location
         navigator.geolocation.getCurrentPosition(
-          (pos) => done({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-          () => done(null),
-          { timeout: 10000, enableHighAccuracy: false }
+          (pos) => done(fromPosition(pos)),
+          () => {
+            // Both failed — use last-known location if fresh enough
+            done(loadLastLocation());
+          },
+          { timeout: 10000, enableHighAccuracy: false },
         );
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      { timeout: 10000, enableHighAccuracy: true },
     );
   });
 }
@@ -180,32 +323,35 @@ function dedupKey(name: string): string {
 // ─── Live provider (Overpass API) ─────────────────────────────────────────────
 
 export class LiveLocationProvider implements LocationProvider {
+  /** Last accuracy seen — stored so searchRestaurants can expand radius if needed. */
+  private _lastAccuracy?: number;
+
   async getUserLocation(): Promise<Coordinates | null> {
-    return getRealLocation();
+    const loc = await getRealLocation();
+    if (loc) this._lastAccuracy = loc.accuracy;
+    return loc;
   }
 
   async searchRestaurants(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
-    const cacheKey = overpassCacheKey(lat, lng, radiusMiles);
+    const radius   = effectiveRadiusMiles(radiusMiles, this._lastAccuracy);
+    const cacheKey = overpassCacheKey(lat, lng, radius);
 
-    // Return cached results if still fresh
     const cached = readOverpassCache(cacheKey);
     if (cached) return cached;
 
-    // Deduplicate concurrent requests for the same location+radius
     const existing = inFlight.get(cacheKey);
     if (existing) return existing;
 
-    const promise = this._fetchFromOverpass(lat, lng, radiusMiles);
+    const promise = this._fetchFromOverpass(lat, lng, radius);
     inFlight.set(cacheKey, promise);
     promise.finally(() => inFlight.delete(cacheKey));
     return promise;
   }
 
   private async _fetchFromOverpass(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
-    const cacheKey = overpassCacheKey(lat, lng, radiusMiles);
+    const cacheKey    = overpassCacheKey(lat, lng, radiusMiles);
     const radiusMeters = Math.round(radiusMiles * 1609.34);
 
-    // Query both nodes AND ways (restaurants mapped as areas) with center coords for ways
     const query = `[out:json][timeout:30];
 (
   node["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
@@ -217,44 +363,39 @@ export class LiveLocationProvider implements LocationProvider {
 );
 out body center;`;
 
-    const data = await fetchOverpass(query);
+    const data     = await fetchOverpass(query);
     const elements: OverpassElement[] = data.elements ?? [];
 
-    const seen = new Set<string>();
+    const seen    = new Set<string>();
     const results: Restaurant[] = [];
 
     for (const el of elements) {
       const name = el.tags?.name;
       if (!name) continue;
 
-      // Ways return lat/lng under `center`; nodes have them directly
       const elLat = (el as { center?: { lat: number; lon: number }; lat?: number }).center?.lat ?? el.lat;
       const elLng = (el as { center?: { lat: number; lon: number }; lng?: number; lon?: number }).center?.lon ?? el.lng ?? (el as { lon?: number }).lon ?? 0;
       if (!elLat) continue;
 
       const distance = Math.round(haversineDistance(lat, lng, elLat, elLng) * 10) / 10;
 
-      // Deduplicate by normalised name (strips store numbers)
       const key = dedupKey(name);
       if (seen.has(key)) continue;
       seen.add(key);
 
-      const mock = findMockMatch(name);
+      const mock    = findMockMatch(name);
+      const address = buildAddress(el.tags);
+      const cuisine = formatCuisine(el.tags.cuisine);
+      const osmId   = `${el.id > 0 ? "node" : "way"}/${Math.abs(el.id)}`;
+      const website = el.tags?.website || el.tags?.["contact:website"];
+      const phone   = el.tags?.phone   || el.tags?.["contact:phone"];
 
-      const address  = buildAddress(el.tags);
-      const cuisine  = formatCuisine(el.tags.cuisine);
-      const osmId    = `${el.id > 0 ? "node" : "way"}/${Math.abs(el.id)}`;
-      const website  = el.tags?.website || el.tags?.["contact:website"];
-      const phone    = el.tags?.phone   || el.tags?.["contact:phone"];
-
-      // Register every discovered restaurant in the canonical registry.
-      // This deduplicates across sources and builds the cross-reference table.
       const canonical = upsertRestaurant({
         displayName: name,
         address:     address || undefined,
         lat:         elLat,
         lng:         elLng,
-        phone:       phone  || undefined,
+        phone:       phone   || undefined,
         website:     website || undefined,
         cuisine:     el.tags.cuisine,
         osmId,
@@ -265,21 +406,24 @@ out body center;`;
       if (mock) {
         results.push({
           ...mock,
-          id: canonical.registryId,
-          address: address || mock.address,
-          lat: elLat,
-          lng: elLng,
+          id:       canonical.registryId,
+          address:  address || mock.address,
+          lat:      elLat,
+          lng:      elLng,
           distance,
+          // Flag: menu items are from a generic chain template, not this specific store.
+          // The UI uses this to show a "Menu may vary by location" disclaimer.
+          menuIsGenericChainTemplate: true,
         });
       } else {
         results.push({
-          id: canonical.registryId,
+          id:         canonical.registryId,
           name,
           cuisine,
-          tags: deriveTags(el.tags.cuisine),
+          tags:       deriveTags(el.tags.cuisine),
           address,
-          lat: elLat,
-          lng: elLng,
+          lat:        elLat,
+          lng:        elLng,
           distance,
           phone:      phone   || undefined,
           website:    website || undefined,
