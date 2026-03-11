@@ -23,6 +23,10 @@ export type {
   SafeOrderRecommendation,
   RestaurantDetailHero,
   RestaurantDetailViewModel,
+  // Learning layer types re-exported for page-level consumers
+  MemorySignal,
+  MemoryInsight,
+  RestaurantWarning,
 } from "./types";
 
 // Analysis pipeline
