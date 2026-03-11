@@ -31,11 +31,11 @@ export class OfficialApiAdapter implements MenuIngestionAdapter<Restaurant> {
     for (const item of restaurant.menuItems) {
       const categoryName = item.category ?? "Menu";
 
-      if (!categoryMap.has(categoryName)) {
-        categoryMap.set(categoryName, { sectionName: categoryName, items: [] });
+      let section = categoryMap.get(categoryName);
+      if (!section) {
+        section = { sectionName: categoryName, items: [] };
+        categoryMap.set(categoryName, section);
       }
-
-      const section = categoryMap.get(categoryName)!;
       const rawText = item.name + (item.description ? ` — ${item.description}` : "");
 
       section.items.push({

@@ -42,16 +42,17 @@ export function scoreMenuItem(
   // Run through the new engine
   const analyzed = analyzeLine(text, userAllergens, cuisineContext, srcType);
 
-  // Official allergens from authoritative source (e.g. Nutritionix).
-  // These are ground-truth and override any gaps in text detection.
-  const officialAllergens = (item.allergens ?? []) as AllergenId[];
+  // Official allergens are ground-truth from a verified source (Nutritionix / official API).
+  // If any hit the user's profile → always "avoid". No "ask" path for official data —
+  // it's binary: the allergen is either present or it isn't.
+  const officialAllergens: AllergenId[] = (item.allergens ?? []) as AllergenId[];
   const officialHits = officialAllergens.filter((a) => userAllergens.includes(a));
 
   const risk: Risk = officialHits.length > 0 ? "avoid" : mapRisk(analyzed.risk);
-  const allDetected = [...new Set([...(analyzed.allDetectedAllergens as string[]), ...(officialAllergens as string[])])];
-  const userAllergenHits = officialHits.length > 0
-    ? [...new Set([...(analyzed.matchedAllergens as string[]), ...(officialHits as string[])])]
-    : analyzed.matchedAllergens as string[];
+  const allDetected: string[] = [...new Set([...analyzed.allDetectedAllergens, ...officialAllergens])];
+  const userAllergenHits: string[] = officialHits.length > 0
+    ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
+    : [...analyzed.matchedAllergens];
 
   return {
     id:          item.id,
@@ -64,7 +65,7 @@ export function scoreMenuItem(
     detectedAllergens: allDetected,
     inferredAllergens: analyzed.signals
       .filter((s) => ["dish", "sauce", "cuisine", "prep"].includes(s.source))
-      .map((s) => s.allergen as string),
+      .map((s) => s.allergen),
     inferredReasons: [...new Set(
       analyzed.signals
         .filter((s) => s.source !== "direct" && s.source !== "synonym")

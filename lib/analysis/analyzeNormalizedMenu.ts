@@ -191,8 +191,9 @@ export function analyzeRestaurant(
   const categoryMap = new Map<string, AnalyzedMenuItem[]>();
   for (const item of scored.scoredItems) {
     const cat = item.category ?? "Menu";
-    if (!categoryMap.has(cat)) categoryMap.set(cat, []);
-    categoryMap.get(cat)!.push({
+    let catItems = categoryMap.get(cat);
+    if (!catItems) { catItems = []; categoryMap.set(cat, catItems); }
+    catItems.push({
       ...item,
       sectionName:         cat,
       itemId:              item.id,

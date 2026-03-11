@@ -5,6 +5,16 @@ import type { NormalizedMenu } from "@/lib/menu-ingestion";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+/** Max image size we'll accept (10 MB). */
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
+const ALLOWED_MEDIA_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -14,9 +24,26 @@ export async function POST(req: Request) {
 
     if (!file) return NextResponse.json({ error: "No image provided" }, { status: 400 });
 
+    // Validate file size before reading into memory
+    if (file.size > MAX_IMAGE_BYTES) {
+      return NextResponse.json(
+        { error: "Image too large — maximum size is 10 MB" },
+        { status: 413 }
+      );
+    }
+
+    // Validate MIME type from client declaration (Anthropic API enforces this on its end too)
+    const declaredType = file.type || "image/jpeg";
+    if (!ALLOWED_MEDIA_TYPES.has(declaredType)) {
+      return NextResponse.json(
+        { error: "Unsupported image type — use JPEG, PNG, GIF, or WebP" },
+        { status: 415 }
+      );
+    }
+    const mediaType = declaredType as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+
     const buffer = await file.arrayBuffer();
     const base64 = Buffer.from(buffer).toString("base64");
-    const mediaType = (file.type || "image/jpeg") as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
@@ -56,9 +83,11 @@ Chocolate Lava Cake | warm chocolate cake, vanilla ice cream, contains eggs and 
       ],
     });
 
-    const text = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    // Guard against unexpected response shapes from the Anthropic API
+    const textBlock = message.content.find((c) => c.type === "text");
+    const text = textBlock?.type === "text" ? textBlock.text.trim() : "";
 
-    if (text === "NO_MENU" || !text) {
+    if (!text || text === "NO_MENU") {
       return NextResponse.json({ error: "No menu found in the image." }, { status: 422 });
     }
 
@@ -71,9 +100,9 @@ Chocolate Lava Cake | warm chocolate cake, vanilla ice cream, contains eggs and 
     // Feed the extracted text through the ingestion pipeline
     const plainText = cleanedLines.join("\n");
     const menu: NormalizedMenu = await ingestFromText(plainText, {
-      restaurantId:  restaurantId  ?? "unknown",
+      restaurantId:   restaurantId  ?? "unknown",
       restaurantName: restaurantName ?? "Unknown Restaurant",
-      sourceLabel:   "Photo scan",
+      sourceLabel:    "Photo scan",
     });
 
     // Override source type to image (ingestFromText sets user_upload)

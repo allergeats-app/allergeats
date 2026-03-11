@@ -72,11 +72,11 @@ export class NutritionixAdapter implements MenuIngestionAdapter<NutritionixFood[
     for (const food of foods) {
       const categoryName = food._category ?? "Menu";
 
-      if (!categoryMap.has(categoryName)) {
-        categoryMap.set(categoryName, { sectionName: categoryName, items: [] });
-      }
-
-      const section       = categoryMap.get(categoryName)!;
+      let section = categoryMap.get(categoryName);
+      if (!section) {
+        section = { sectionName: categoryName, items: [] };
+        categoryMap.set(categoryName, section);
+      };
       const description   = food.nf_ingredient_statement ?? undefined;
       const rawText       = food.food_name + (description ? ` — ${description}` : "");
       const allergens     = extractAllergens(food);

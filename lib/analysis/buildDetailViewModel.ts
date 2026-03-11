@@ -123,14 +123,18 @@ export function buildDetailViewModel(
     coverageLine:   coverage.coverageLine,
   };
 
-  // Aggregate unique staff questions from ask-risk items
+  // Aggregate unique staff questions from ask-risk items (exit early at cap)
   const seen = new Set<string>();
   const aggregatedStaffQuestions: string[] = [];
-  for (const item of analysis.allItems) {
+  outer: for (const item of analysis.allItems) {
     if (item.risk !== "ask") continue;
     for (const q of item.staffQuestions) {
       const key = q.toLowerCase().trim();
-      if (!seen.has(key)) { seen.add(key); aggregatedStaffQuestions.push(q); }
+      if (!seen.has(key)) {
+        seen.add(key);
+        aggregatedStaffQuestions.push(q);
+        if (aggregatedStaffQuestions.length >= 8) break outer;
+      }
     }
   }
 
@@ -148,6 +152,6 @@ export function buildDetailViewModel(
         coverage.sourceConfidence,
       ),
     },
-    aggregatedStaffQuestions: aggregatedStaffQuestions.slice(0, 8),
+    aggregatedStaffQuestions,
   };
 }

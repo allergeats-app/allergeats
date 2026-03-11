@@ -151,6 +151,7 @@ export function toRawMenuItems(menu: NormalizedMenu): RawMenuItem[] {
         description: item.description,
         category:    section.sectionName === "Menu" ? undefined : section.sectionName,
         sourceType:  legacySource,
+        allergens:   item.allergens,   // preserve official allergen arrays through the bridge
       });
     }
   }
