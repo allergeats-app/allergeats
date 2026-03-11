@@ -5,9 +5,11 @@
  *
  * Flow:
  *   1. Adapter.ingest()      → raw NormalizedMenu (rawText preserved, not yet normalized)
- *   2. normalizeMenuText()   → builds normalizedText on every item
- *   3. dedupeMenuSections()  → removes duplicate items within each section
- *   4. scoreItemConfidence() → annotates per-item confidence + signals
+ *   2. sanitizeMenu()        → structural validation: trim strings, drop empty items/sections,
+ *                              repair missing itemIds, ensure required menu fields exist
+ *   3. normalizeMenuText()   → builds normalizedText on every item
+ *   4. dedupeMenuSections()  → removes duplicate items within each section
+ *   5. scoreItemConfidence() → annotates per-item confidence + signals
  *
  * The pipeline is adapter-agnostic: any MenuIngestionAdapter plugs in here.
  */
@@ -16,6 +18,7 @@ import type { NormalizedMenu, MenuIngestionAdapter, IngestionMeta } from "../typ
 import { scoreMenuConfidence, scoreItemConfidence } from "./scoreSourceConfidence";
 import { dedupeMenuSections } from "./dedupeMenuItems";
 import { normalizeMenuItemText, normalizeSectionName } from "./normalizeMenuText";
+import { sanitizeMenu } from "./sanitizeMenu";
 
 /** Max raw snapshot size stored for traceability (20 000 chars ≈ 20 KB for ASCII). */
 const MAX_SNAPSHOT_CHARS = 20_000;
@@ -41,11 +44,14 @@ export async function ingestMenu<TInput>(
   // Step 1: adapter produces raw menu
   const raw = await adapter.ingest(input, meta);
 
-  // Step 2: normalize section names + item text
+  // Step 2: sanitize — trim, drop empties, repair required fields
+  const { menu: sanitized } = sanitizeMenu(raw);
+
+  // Step 3: normalize section names + item text
   const normalized: NormalizedMenu = {
-    ...raw,
-    confidence: scoreMenuConfidence(adapter.sourceType),
-    sections: raw.sections.map((section) => ({
+    ...sanitized,
+    confidence: scoreMenuConfidence(adapter.sourceType, sanitized),
+    sections: sanitized.sections.map((section) => ({
       sectionName: normalizeSectionName(section.sectionName),
       items: section.items.map((item) => {
         const combined = [item.itemName, item.description].filter(Boolean).join(" ");
@@ -55,13 +61,13 @@ export async function ingestMenu<TInput>(
         };
       }),
     })),
-    rawSnapshot: raw.rawSnapshot ? truncateSnapshot(raw.rawSnapshot) : undefined,
+    rawSnapshot: sanitized.rawSnapshot ? truncateSnapshot(sanitized.rawSnapshot) : undefined,
   };
 
-  // Step 3: dedupe within each section
+  // Step 4: dedupe within each section
   normalized.sections = dedupeMenuSections(normalized.sections);
 
-  // Step 4: score per-item confidence
+  // Step 5: score per-item confidence
   for (const section of normalized.sections) {
     for (const item of section.items) {
       scoreItemConfidence(item, adapter.sourceType);
