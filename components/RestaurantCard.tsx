@@ -47,12 +47,16 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const tierColor = coverageTierColor(tier);
 
   const [photoFailed, setPhotoFailed] = useState(false);
+  const [photoLoaded, setPhotoLoaded] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(r.id);
-  const photoSrc =
-    !photoFailed && r.lat != null && r.lng != null
-      ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
-      : null;
+  const photoSrc = !photoFailed
+    ? r.googlePlaceId
+      ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
+      : r.lat != null && r.lng != null
+        ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
+        : null
+    : null;
 
   return (
     <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
@@ -65,16 +69,17 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
         cursor: "pointer",
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
-        {/* Cover image area */}
-        <div style={{ height: compact ? 80 : 110, background: photoSrc ? "#e5e7eb" : cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-          {photoSrc ? (
+        {/* Cover image area — cuisine gradient is always the base; photo fades in on load */}
+        <div style={{ height: compact ? 80 : 110, background: cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+          {photoSrc && (
             <img
               src={photoSrc}
               alt={r.name}
+              onLoad={() => setPhotoLoaded(true)}
               onError={() => setPhotoFailed(true)}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: photoLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
             />
-          ) : null}
+          )}
           <div style={{
             position: "absolute", top: 10, right: 10,
             background: badge.bg, color: badge.color,

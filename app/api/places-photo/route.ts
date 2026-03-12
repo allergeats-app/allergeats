@@ -1,44 +1,66 @@
-
 /**
- * GET /api/places-photo?name={restaurantName}&lat={lat}&lng={lng}
+ * GET /api/places-photo?placeId={placeId}
+ *               or
+ *     /api/places-photo?name={restaurantName}&lat={lat}&lng={lng}
  *
- * Proxies a Google Places photo for the named restaurant.
+ * Proxies a Google Places photo for a restaurant.
  * The API key stays server-side — the client never sees it.
- * Returns the image bytes directly (jpeg/webp) with a 24h cache header,
- * or 404 if no photo is found or the key is not configured.
+ *
+ * Preferred path: pass `placeId` (Google place_id) — resolves directly to
+ *   Place Details → photo references, no name-matching ambiguity.
+ * Fallback path:  pass `name` (+ optional lat/lng bias) — uses
+ *   findplacefromtext, which can mis-match. Use only when place_id is absent.
+ *
+ * Returns image bytes with a 24h cache header, or 404 if no photo found /
+ * key not configured.
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const name = searchParams.get("name") ?? "";
-  const lat  = searchParams.get("lat");
-  const lng  = searchParams.get("lng");
+  const placeId = searchParams.get("placeId");
+  const name    = searchParams.get("name") ?? "";
+  const lat     = searchParams.get("lat");
+  const lng     = searchParams.get("lng");
 
   const NO_CACHE = { headers: { "Cache-Control": "no-store" } };
 
   const key = process.env.GOOGLE_PLACES_API_KEY;
-  if (!key || !name) return new Response(null, { status: 404, ...NO_CACHE });
+  if (!key) return new Response(null, { status: 404, ...NO_CACHE });
+  if (!placeId && !name) return new Response(null, { status: 404, ...NO_CACHE });
 
   try {
-    // 1. Find the place and retrieve photo references
-    const bias = lat && lng ? `&locationbias=circle:5000@${lat},${lng}` : "";
-    const findRes = await fetch(
-      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json` +
-      `?input=${encodeURIComponent(name)}&inputtype=textquery&fields=photos${bias}&key=${key}`,
-      { next: { revalidate: 3600 }, cache: "no-store" } // bypass stale cache
-    );
+    let photoRef: string | undefined;
 
-    if (!findRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
-
-    const findData = await findRes.json();
-    const photoRef: string | undefined =
-      findData.candidates?.[0]?.photos?.[0]?.photo_reference;
+    if (placeId) {
+      // ── Preferred: Place Details by ID — unambiguous ─────────────────────
+      const detailRes = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json` +
+        `?place_id=${encodeURIComponent(placeId)}&fields=photos&key=${key}`,
+        { next: { revalidate: 3600 } },
+      );
+      if (detailRes.ok) {
+        const detail = await detailRes.json();
+        photoRef = detail.result?.photos?.[0]?.photo_reference;
+      }
+    } else {
+      // ── Fallback: text search with optional location bias ─────────────────
+      const bias = lat && lng ? `&locationbias=circle:5000@${lat},${lng}` : "";
+      const findRes = await fetch(
+        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json` +
+        `?input=${encodeURIComponent(name)}&inputtype=textquery&fields=photos${bias}&key=${key}`,
+        { next: { revalidate: 3600 } },
+      );
+      if (findRes.ok) {
+        const findData = await findRes.json();
+        photoRef = findData.candidates?.[0]?.photos?.[0]?.photo_reference;
+      }
+    }
 
     if (!photoRef) return new Response(null, { status: 404, ...NO_CACHE });
 
-    // 2. Fetch and stream the actual photo bytes
+    // ── Fetch and proxy the actual photo bytes ────────────────────────────
     const photoRes = await fetch(
       `https://maps.googleapis.com/maps/api/place/photo` +
-      `?maxwidth=600&photo_reference=${photoRef}&key=${key}`
+      `?maxwidth=600&photo_reference=${photoRef}&key=${key}`,
     );
 
     if (!photoRes.ok) return new Response(null, { status: 404, ...NO_CACHE });

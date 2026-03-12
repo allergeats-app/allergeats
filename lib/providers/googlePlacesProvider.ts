@@ -36,6 +36,32 @@ import type { PlaceResult }                           from "@/app/api/places-nea
  */
 const MIN_GOOGLE_RESULTS = 5;
 
+/** Client-side sessionStorage cache TTL — mirrors the server's revalidate window. */
+const PLACES_CACHE_TTL_MS = 5 * 60 * 1000;
+
+// ─── Client-side sessionStorage cache ────────────────────────────────────────
+// Mirrors the Overpass cache pattern to avoid redundant API calls when the user
+// moves only slightly or re-mounts the page within the same session.
+
+function placesCacheKey(lat: number, lng: number, radiusMiles: number): string {
+  return `gp_${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMiles}`;
+}
+
+function readPlacesCache(key: string): PlaceResult[] | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const { ts, results } = JSON.parse(raw) as { ts: number; results: PlaceResult[] };
+    if (Date.now() - ts > PLACES_CACHE_TTL_MS) { sessionStorage.removeItem(key); return null; }
+    return results;
+  } catch { return null; }
+}
+
+function writePlacesCache(key: string, results: PlaceResult[]): void {
+  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), results })); }
+  catch { /* ignore quota errors */ }
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -105,26 +131,33 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     accuracy?: number,
   ): Promise<Restaurant[]> {
     const radiusMeters = Math.round(radiusMiles * 1609.34);
+    const cacheKey     = placesCacheKey(lat, lng, radiusMiles);
 
     let googlePlaces: PlaceResult[] = [];
     let googleFailed = false;
 
-    try {
-      const res = await fetch("/api/places-nearby", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ lat, lng, radiusMeters }),
-        signal:  AbortSignal.timeout(15_000),
-      });
+    const cached = readPlacesCache(cacheKey);
+    if (cached) {
+      googlePlaces = cached;
+    } else {
+      try {
+        const res = await fetch("/api/places-nearby", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ lat, lng, radiusMeters }),
+          signal:  AbortSignal.timeout(15_000),
+        });
 
-      if (res.ok) {
-        const data = await res.json() as { places: PlaceResult[] };
-        googlePlaces = data.places ?? [];
-      } else {
+        if (res.ok) {
+          const data = await res.json() as { places: PlaceResult[] };
+          googlePlaces = data.places ?? [];
+          if (googlePlaces.length > 0) writePlacesCache(cacheKey, googlePlaces);
+        } else {
+          googleFailed = true;
+        }
+      } catch {
         googleFailed = true;
       }
-    } catch {
-      googleFailed = true;
     }
 
     // Fall back to Overpass when Google has no key or fails
@@ -171,28 +204,30 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       if (mock) {
         results.push({
           ...mock,
-          id:       canonical.registryId,
-          address:  p.address || mock.address,
-          lat:      p.lat,
-          lng:      p.lng,
+          id:            canonical.registryId,
+          address:       p.address || mock.address,
+          lat:           p.lat,
+          lng:           p.lng,
           distance,
+          googlePlaceId: p.placeId,
           menuIsGenericChainTemplate: true,
         });
       } else {
         const cuisine = cuisineFromTypes(p.types);
         results.push({
-          id:         canonical.registryId,
-          name:       p.name,
+          id:            canonical.registryId,
+          name:          p.name,
           cuisine,
-          tags:       tagsFromTypes(p.types),
-          address:    p.address,
-          lat:        p.lat,
-          lng:        p.lng,
+          tags:          tagsFromTypes(p.types),
+          address:       p.address,
+          lat:           p.lat,
+          lng:           p.lng,
           distance,
-          phone:      p.phone,
-          website:    p.website,
-          sourceType: "scraped" as SourceType,
-          menuItems:  [],
+          phone:         p.phone,
+          website:       p.website,
+          googlePlaceId: p.placeId,
+          sourceType:    "scraped" as SourceType,
+          menuItems:     [],
         });
       }
     }

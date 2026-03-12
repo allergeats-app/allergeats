@@ -122,6 +122,8 @@ export type Restaurant = {
   menuItems: RawMenuItem[];
   /** Image URL from enrichment system (website / Google Places / Yelp) */
   imageUrl?: string | null;
+  /** Google Places place_id — when present, used by /api/places-photo for unambiguous lookup. */
+  googlePlaceId?: string;
   phone?: string;
   website?: string;
   /**
