@@ -135,29 +135,28 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       googlePlaces = cached;
     } else {
       try {
-        // Run all three searches in parallel:
-        // 1. General restaurant search (prominence-ranked — fast food dominates)
-        // 2. Casual dining keyword — surfaces Outback, Chili's, Applebee's, etc.
-        // 3. Fine dining keyword — surfaces upscale restaurants
-        const [mainRes, casualRes, fineDiningRes] = await Promise.all([
+        // Run all searches in parallel to overcome prominence-ranking bias.
+        // Each keyword targets a category that fast-food chains suppress:
+        //   casual dining      → Chili's, Applebee's, Outback
+        //   fine dining        → upscale restaurants
+        //   steakhouse         → Ruth's Chris, LongHorn, etc.
+        //   winery restaurant  → Cooper's Hawk, etc.
+        const keywords = ["casual dining", "fine dining", "steakhouse", "winery restaurant"];
+        const [mainRes, ...keywordResponses] = await Promise.all([
           fetch("/api/places-nearby", {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
             body:    JSON.stringify({ lat, lng, radiusMeters }),
             signal:  AbortSignal.timeout(35_000),
           }),
-          fetch("/api/places-nearby", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ lat, lng, radiusMeters, keyword: "casual dining" }),
-            signal:  AbortSignal.timeout(35_000),
-          }),
-          fetch("/api/places-nearby", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ lat, lng, radiusMeters, keyword: "fine dining" }),
-            signal:  AbortSignal.timeout(35_000),
-          }),
+          ...keywords.map((keyword) =>
+            fetch("/api/places-nearby", {
+              method:  "POST",
+              headers: { "Content-Type": "application/json" },
+              body:    JSON.stringify({ lat, lng, radiusMeters, keyword }),
+              signal:  AbortSignal.timeout(35_000),
+            })
+          ),
         ]);
 
         if (mainRes.ok) {
@@ -167,9 +166,9 @@ export class GooglePlacesLocationProvider implements LocationProvider {
           googleFailed = true;
         }
 
-        // Merge supplemental keyword results by placeId — non-fatal if either fails
+        // Merge all keyword results by placeId — non-fatal if any fail
         const seen = new Set(googlePlaces.map((p) => p.placeId));
-        for (const supplementalRes of [casualRes, fineDiningRes]) {
+        for (const supplementalRes of keywordResponses) {
           if (supplementalRes.ok) {
             const supplementalData = await supplementalRes.json() as { places: PlaceResult[] };
             for (const p of supplementalData.places ?? []) {
