@@ -84,7 +84,7 @@ export async function POST(req: Request) {
     const firstUrl =
       `${BASE_URL}?location=${lat},${lng}` +
       `&radius=${Math.round(radiusMeters)}` +
-      `&type=restaurant` +
+      `&type=food` +
       `&key=${key}`;
 
     const firstRes = await fetch(firstUrl, { next: { revalidate: 300 } });
