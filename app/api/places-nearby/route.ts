@@ -4,11 +4,14 @@
  * Server-side proxy for Google Places Nearby Search (legacy API).
  * The API key stays server-side — the client never sees it.
  *
- * Request body: { lat: number; lng: number; radiusMeters: number }
- * Response:     { places: PlaceResult[] }  (simplified — only fields we use)
+ * Fetches up to 3 pages (60 results max) by following next_page_token.
+ * Google requires a ~2s pause between page requests — this is handled here
+ * so the client gets all results in a single response.
  *
- * Returns 200 with { places: [] } when the key is not configured, so the client
- * can detect "no key" vs "network error" and fall back gracefully.
+ * Request body: { lat: number; lng: number; radiusMeters: number }
+ * Response:     { places: PlaceResult[] }
+ *
+ * Returns 200 with { places: [] } when the key is not configured.
  * Returns 500 only on genuine upstream failures.
  */
 
@@ -36,10 +39,33 @@ type NearbySearchResult = {
   photos?:  { photo_reference: string }[];
 };
 
+type NearbySearchPage = {
+  status:            string;
+  results:           NearbySearchResult[];
+  next_page_token?:  string;
+};
+
+const BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
+const MAX_PAGES = 3;
+/** Google requires a short pause before the next_page_token becomes valid. */
+const PAGE_DELAY_MS = 2000;
+
+function toPlaceResult(r: NearbySearchResult): PlaceResult {
+  return {
+    placeId:  r.place_id,
+    name:     r.name,
+    lat:      r.geometry.location.lat,
+    lng:      r.geometry.location.lng,
+    address:  r.vicinity,
+    types:    r.types ?? [],
+    photoRef: r.photos?.[0]?.photo_reference,
+  };
+}
+
 export async function POST(req: Request) {
   const key = process.env.GOOGLE_PLACES_API_KEY;
 
-  // Return empty — client interprets as "no key, fall back to OSM"
+  // Return empty — client falls back to Overpass
   if (!key) {
     return Response.json({ places: [] });
   }
@@ -52,36 +78,47 @@ export async function POST(req: Request) {
   }
 
   try {
-    const url =
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json` +
-      `?location=${lat},${lng}` +
+    const allPlaces: PlaceResult[] = [];
+
+    // ── Page 1 ────────────────────────────────────────────────────────────────
+    const firstUrl =
+      `${BASE_URL}?location=${lat},${lng}` +
       `&radius=${Math.round(radiusMeters)}` +
       `&type=restaurant` +
       `&key=${key}`;
 
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) {
-      return new Response("Places API error", { status: 502 });
+    const firstRes = await fetch(firstUrl, { next: { revalidate: 300 } });
+    if (!firstRes.ok) return new Response("Places API error", { status: 502 });
+
+    const firstPage = await firstRes.json() as NearbySearchPage;
+    if (firstPage.status !== "OK" && firstPage.status !== "ZERO_RESULTS") {
+      return new Response(`Places API status: ${firstPage.status}`, { status: 502 });
     }
 
-    const data = await res.json() as { status: string; results: NearbySearchResult[] };
+    allPlaces.push(...(firstPage.results ?? []).map(toPlaceResult));
 
-    // ZERO_RESULTS is a valid success state
-    if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-      return new Response(`Places API status: ${data.status}`, { status: 502 });
+    // ── Pages 2–3 (follow next_page_token) ────────────────────────────────────
+    let pageToken = firstPage.next_page_token;
+
+    for (let page = 2; page <= MAX_PAGES && pageToken; page++) {
+      // Google requires a short delay before the token is valid
+      await new Promise((r) => setTimeout(r, PAGE_DELAY_MS));
+
+      const pageRes = await fetch(
+        `${BASE_URL}?pagetoken=${pageToken}&key=${key}`,
+        { cache: "no-store" }, // page tokens are single-use — never cache
+      );
+
+      if (!pageRes.ok) break; // don't fail the whole request on a pagination error
+
+      const pageData = await pageRes.json() as NearbySearchPage;
+      if (pageData.status !== "OK") break;
+
+      allPlaces.push(...(pageData.results ?? []).map(toPlaceResult));
+      pageToken = pageData.next_page_token;
     }
 
-    const places: PlaceResult[] = (data.results ?? []).map((r) => ({
-      placeId:  r.place_id,
-      name:     r.name,
-      lat:      r.geometry.location.lat,
-      lng:      r.geometry.location.lng,
-      address:  r.vicinity,
-      types:    r.types ?? [],
-      photoRef: r.photos?.[0]?.photo_reference,
-    }));
-
-    return Response.json({ places });
+    return Response.json({ places: allPlaces });
   } catch (err) {
     console.error("[places-nearby]", err);
     return new Response("Internal error", { status: 500 });
