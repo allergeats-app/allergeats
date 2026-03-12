@@ -7,6 +7,7 @@ import { useFavorites } from "@/lib/favoritesContext";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
+import type { Coordinates } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -151,11 +152,12 @@ function HomeContent() {
   const [localAllergens, setLocalAllergens] = useState<AllergenId[]>([]);
   const [saveState, setSaveState]           = useState<"idle" | "saving" | "saved" | "error">("idle");
 
-  const [locationLabel, setLocationLabel] = useState("Locating…");
-  const [usingFallback, setUsingFallback] = useState(false);
-  const [layout, setLayout]               = useState<LayoutOption>("list");
-  const [userCoords, setUserCoords]       = useState<{ lat: number; lng: number } | null>(null);
-  const [searchCenter, setSearchCenter]   = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLabel, setLocationLabel]   = useState("Locating…");
+  const [locationMode, setLocationMode]     = useState<"precise" | "approximate" | "cached" | "unavailable">("unavailable");
+  const [resultsSource, setResultsSource]   = useState<"live" | "mock">("live");
+  const [layout, setLayout]                 = useState<LayoutOption>("list");
+  const [userLocation, setUserLocation]     = useState<Coordinates | null>(null);
+  const [searchCenter, setSearchCenter]     = useState<{ lat: number; lng: number } | null>(null);
 
   const { user, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
   const { isFavorite } = useFavorites();
@@ -230,35 +232,57 @@ function HomeContent() {
 
     async function load() {
       if (!rawRestaurants.length) setLoading(true);
-      setUsingFallback(false);
+      setResultsSource("live");
 
       try {
         let lat: number, lng: number;
+        let accuracy: number | undefined;
 
         if (searchCenter) {
-          lat = searchCenter.lat; lng = searchCenter.lng;
-          reverseGeocode(lat, lng).then((label) => { if (!cancelled) setLocationLabel(label); });
+          // User manually panned the map — search that area, not current location
+          lat = searchCenter.lat;
+          lng = searchCenter.lng;
+          setLocationMode("precise");
+          setLocationLabel("Searching this area");
+          reverseGeocode(lat, lng).then((name) => { if (!cancelled) setLocationLabel(`Map · ${name}`); });
         } else {
           const position = await locationProvider.getUserLocation();
-          const usingDemoLocation = !position;
-          lat = position?.lat ?? 37.7749;
-          lng = position?.lng ?? -122.4194;
-          if (!usingDemoLocation && !cancelled) setUserCoords({ lat, lng });
-          if (usingDemoLocation && !cancelled) {
-            setUsingFallback(true);
-            setLocationLabel("Location unavailable");
-          } else {
-            reverseGeocode(lat, lng).then((label) => { if (!cancelled) setLocationLabel(label); });
+
+          if (!position) {
+            // No GPS, no network, no cache — don't silently fake a location
+            if (!cancelled) {
+              setLocationMode("unavailable");
+              setLocationLabel("Location unavailable");
+              setLoading(false);
+            }
+            return;
           }
+
+          lat       = position.lat;
+          lng       = position.lng;
+          accuracy  = position.accuracy;
+
+          if (!cancelled) {
+            setUserLocation(position);
+            // Derive display mode from source + accuracy
+            const mode: "precise" | "approximate" | "cached" =
+              position.source === "cached"                        ? "cached"      :
+              (accuracy != null && accuracy <= 100)               ? "precise"     :
+                                                                    "approximate";
+            setLocationMode(mode);
+          }
+
+          reverseGeocode(lat, lng).then((name) => { if (!cancelled) setLocationLabel(name); });
         }
 
         let raw: Restaurant[];
         try {
-          raw = await locationProvider.searchRestaurants(lat, lng, radiusMiles);
+          // Pass accuracy so the provider can expand the search radius for coarse locations
+          raw = await locationProvider.searchRestaurants(lat, lng, radiusMiles, accuracy);
         } catch {
           const fallback = new MockLocationProvider();
           raw = await fallback.searchRestaurants(lat, lng, 9999);
-          if (!cancelled) setUsingFallback(true);
+          if (!cancelled) setResultsSource("mock");
         }
 
         try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw)); } catch { /* ignore */ }
@@ -344,7 +368,8 @@ function HomeContent() {
       {/* ── 1. Sticky header ─────────────────────────────────────────────── */}
       <RestaurantsHeader
         locationLabel={locationLabel}
-        usingFallback={usingFallback}
+        locationMode={locationMode}
+        resultsSource={resultsSource}
         query={query}
         setQuery={setQuery}
         activeFilterCount={activeFilterCount}
@@ -503,8 +528,8 @@ function HomeContent() {
         ) : layout === "map" ? (
           <RestaurantMap
             restaurants={filtered}
-            userLat={userCoords?.lat}
-            userLng={userCoords?.lng}
+            userLat={userLocation?.lat}
+            userLng={userLocation?.lng}
             onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
           />
         ) : (

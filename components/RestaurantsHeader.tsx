@@ -6,14 +6,16 @@ import { SettingsButton } from "@/components/SettingsButton";
 import type { LayoutOption } from "@/app/restaurants/types";
 
 export function RestaurantsHeader({
-  locationLabel, usingFallback,
+  locationLabel, locationMode, resultsSource,
   query, setQuery,
   activeFilterCount, showFilterDrawer, setShowFilterDrawer,
   layout, setLayout,
   loading, filteredCount, radiusMiles,
   onHowItWorks,
 }: {
-  locationLabel: string; usingFallback: boolean;
+  locationLabel: string;
+  locationMode: "precise" | "approximate" | "cached" | "unavailable";
+  resultsSource: "live" | "mock";
   query: string; setQuery: (q: string) => void;
   activeFilterCount: number; showFilterDrawer: boolean; setShowFilterDrawer: (v: boolean) => void;
   layout: LayoutOption; setLayout: (l: LayoutOption) => void;
@@ -37,7 +39,9 @@ export function RestaurantsHeader({
             maxWidth: "35%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>
             {locationLabel}
-            {usingFallback && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample</span>}
+            {resultsSource === "mock"      && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample</span>}
+            {resultsSource === "live" && locationMode === "cached"      && <span style={{ color: "#f59e0b", fontWeight: 600 }}> · Saved</span>}
+            {resultsSource === "live" && locationMode === "approximate" && <span style={{ color: "#f59e0b", fontWeight: 600 }}> · Approx.</span>}
           </span>
           <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
