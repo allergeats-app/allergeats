@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/authContext";
 import { useFavorites } from "@/lib/favoritesContext";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
-import { locationProvider, MockLocationProvider } from "@/lib/providers/locationProvider";
+import { locationProvider, MockLocationProvider, checkLocationPermission } from "@/lib/providers/locationProvider";
 import type { Coordinates } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
@@ -246,10 +246,22 @@ function HomeContent() {
           setLocationLabel("Searching this area");
           reverseGeocode(lat, lng).then((name) => { if (!cancelled) setLocationLabel(`Map · ${name}`); });
         } else {
+          // Preflight: if the user has already denied location, skip the GPS wait entirely.
+          // "prompt" and "unsupported" still proceed — we let the browser handle those naturally.
+          const permission = await checkLocationPermission();
+          if (permission === "denied") {
+            if (!cancelled) {
+              setLocationMode("unavailable");
+              setLocationLabel("Location blocked");
+              setLoading(false);
+            }
+            return;
+          }
+
           const position = await locationProvider.getUserLocation();
 
           if (!position) {
-            // No GPS, no network, no cache — don't silently fake a location
+            // GPS + network both failed and no cache — don't silently fake a location
             if (!cancelled) {
               setLocationMode("unavailable");
               setLocationLabel("Location unavailable");
@@ -512,6 +524,31 @@ function HomeContent() {
               {[0, 1, 2].map((i) => <SkeletonCard key={i} />)}
             </div>
           </>
+        ) : filtered.length === 0 && locationMode === "unavailable" ? (
+          <div style={{ padding: "56px 0 32px", textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 12, lineHeight: 1 }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--c-border)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }} aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
+              </svg>
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 6 }}>Location unavailable</div>
+            <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 28, lineHeight: 1.5 }}>
+              {locationLabel === "Location blocked"
+                ? "Enable location in your browser settings to find nearby restaurants."
+                : "We couldn't determine your location. Search the map or scan a menu directly."}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 300, margin: "0 auto 28px" }}>
+              <button type="button" onClick={() => setLayout("map")} style={{ padding: "11px 18px", borderRadius: 14, background: "var(--c-card)", border: "1.5px solid var(--c-border)", color: "var(--c-text)", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                Search the map
+              </button>
+            </div>
+            <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 12 }}>Or scan any menu directly</div>
+            <CameraScanButton style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 22px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Scan a Menu
+            </CameraScanButton>
+          </div>
         ) : filtered.length === 0 ? (
           <SmartEmptyState
             query={query}
@@ -546,7 +583,9 @@ function HomeContent() {
                   </span>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--c-sub)", paddingLeft: 19 }}>
-                  Based on your allergies, menu data, and nearby distance
+                  {searchCenter
+                    ? "Best option in this area based on your allergies and menu data"
+                    : "Based on your allergies, menu data, and nearby distance"}
                 </div>
               </div>
               <div style={{ position: "relative" }}>
@@ -566,7 +605,7 @@ function HomeContent() {
             {filtered.length > 1 && (
               <>
                 <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "20px 0 10px" }}>
-                  More Nearby
+                  {searchCenter ? "More in This Area" : "More Nearby"}
                 </div>
                 <div className={layout === "grid" ? "rp-grid" : undefined} style={{ display: "grid", gap: 12 }}>
                   {filtered.slice(1).map((r) => (
