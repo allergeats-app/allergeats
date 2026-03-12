@@ -135,12 +135,21 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       googlePlaces = cached;
     } else {
       try {
-        // Run general restaurant search and fine-dining keyword search in parallel
-        const [mainRes, fineDiningRes] = await Promise.all([
+        // Run all three searches in parallel:
+        // 1. General restaurant search (prominence-ranked — fast food dominates)
+        // 2. Casual dining keyword — surfaces Outback, Chili's, Applebee's, etc.
+        // 3. Fine dining keyword — surfaces upscale restaurants
+        const [mainRes, casualRes, fineDiningRes] = await Promise.all([
           fetch("/api/places-nearby", {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
             body:    JSON.stringify({ lat, lng, radiusMeters }),
+            signal:  AbortSignal.timeout(35_000),
+          }),
+          fetch("/api/places-nearby", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ lat, lng, radiusMeters, keyword: "casual dining" }),
             signal:  AbortSignal.timeout(35_000),
           }),
           fetch("/api/places-nearby", {
@@ -158,18 +167,19 @@ export class GooglePlacesLocationProvider implements LocationProvider {
           googleFailed = true;
         }
 
-        if (fineDiningRes.ok) {
-          const fdData = await fineDiningRes.json() as { places: PlaceResult[] };
-          // Merge fine dining results by placeId — avoid duplicates already in main set
-          const seen = new Set(googlePlaces.map((p) => p.placeId));
-          for (const p of fdData.places ?? []) {
-            if (!seen.has(p.placeId)) {
-              googlePlaces.push(p);
-              seen.add(p.placeId);
+        // Merge supplemental keyword results by placeId — non-fatal if either fails
+        const seen = new Set(googlePlaces.map((p) => p.placeId));
+        for (const supplementalRes of [casualRes, fineDiningRes]) {
+          if (supplementalRes.ok) {
+            const supplementalData = await supplementalRes.json() as { places: PlaceResult[] };
+            for (const p of supplementalData.places ?? []) {
+              if (!seen.has(p.placeId)) {
+                googlePlaces.push(p);
+                seen.add(p.placeId);
+              }
             }
           }
         }
-        // Fine dining fetch failure is non-fatal — main results still used
 
         if (googlePlaces.length > 0) writePlacesCache(cacheKey, googlePlaces);
       } catch {
