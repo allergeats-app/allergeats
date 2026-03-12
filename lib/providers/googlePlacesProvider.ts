@@ -29,13 +29,6 @@ import type { PlaceResult }                           from "@/app/api/places-nea
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-/**
- * If Google returns fewer than this many results we treat it as a soft failure
- * and supplement with Overpass results. Avoids showing a nearly empty list when
- * the Places API is working but returns sparse data for the area.
- */
-const MIN_GOOGLE_RESULTS = 5;
-
 /** Client-side sessionStorage cache TTL — mirrors the server's revalidate window. */
 const PLACES_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -166,18 +159,18 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
     }
 
-    // Map Google results first so we know the real distinct-location count
-    // (raw API count can be inflated by many branches of the same chain, which
-    // _mapPlaces deduplicates by placeId; MIN_GOOGLE_RESULTS must be checked
-    // AFTER mapping to avoid the "10 Subways → 1 result" problem)
-    const mapped = this._mapPlaces(lat, lng, googlePlaces);
-
-    if (mapped.length < MIN_GOOGLE_RESULTS) {
-      const overpassResults = await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
-      return this._mergeResults(lat, lng, googlePlaces, overpassResults);
+    // Always merge Google + Overpass.
+    // Google over-represents chain branches (10 nearby Subways all pass the
+    // threshold but show zero diversity). Overpass fills in independent
+    // restaurants and provides the variety users actually want.
+    // _mergeResults deduplicates by name, so chains present in both sources
+    // appear only once with Google's richer data taking precedence.
+    if (googlePlaces.length === 0) {
+      return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
     }
 
-    return mapped;
+    const overpassResults = await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[]);
+    return this._mergeResults(lat, lng, googlePlaces, overpassResults);
   }
 
   // ─── Mapping ────────────────────────────────────────────────────────────────
