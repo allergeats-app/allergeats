@@ -112,9 +112,9 @@ export function coverageTier(total: number): CoverageTier {
 export function coverageTierLabel(total: number): string {
   const tier = coverageTier(total);
   switch (tier) {
-    case "full":    return "Full menu analyzed";
-    case "partial": return `Partial menu · ${total} items`;
-    case "limited": return `Limited data · ${total} item${total === 1 ? "" : "s"}`;
+    case "full":    return "Strong coverage";
+    case "partial": return `Moderate coverage · ${total} items`;
+    case "limited": return `Limited coverage · ${total} item${total === 1 ? "" : "s"}`;
     case "none":    return "No menu data yet";
   }
 }
