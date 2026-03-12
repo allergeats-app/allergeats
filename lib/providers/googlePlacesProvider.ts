@@ -44,7 +44,8 @@ const PLACES_CACHE_TTL_MS = 5 * 60 * 1000;
 // moves only slightly or re-mounts the page within the same session.
 
 function placesCacheKey(lat: number, lng: number, radiusMiles: number): string {
-  return `gp_${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMiles}`;
+  // v2: invalidates caches written when type=restaurant was in use
+  return `gpf2_${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMiles}`;
 }
 
 function readPlacesCache(key: string): PlaceResult[] | null {

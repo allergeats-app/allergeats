@@ -48,7 +48,7 @@ type NearbySearchPage = {
 const BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 const MAX_PAGES = 3;
 /** Google requires a short pause before the next_page_token becomes valid. */
-const PAGE_DELAY_MS = 2000;
+const PAGE_DELAY_MS = 1500;
 
 function toPlaceResult(r: NearbySearchResult): PlaceResult {
   return {
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       `&type=food` +
       `&key=${key}`;
 
-    const firstRes = await fetch(firstUrl, { next: { revalidate: 300 } });
+    const firstRes = await fetch(firstUrl, { cache: "no-store" });
     if (!firstRes.ok) return new Response("Places API error", { status: 502 });
 
     const firstPage = await firstRes.json() as NearbySearchPage;
