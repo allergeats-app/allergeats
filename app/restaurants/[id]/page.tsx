@@ -9,7 +9,9 @@ import { loadProfileAllergens } from "@/lib/allergenProfile";
 import { coverageTierColor } from "@/lib/scoring";
 import { fitLevel } from "@/lib/fitLevel";
 import { recordView } from "@/lib/recentlyViewed";
-import { bumpInteraction, registerForCrawl } from "@/lib/menu-crawl";
+import { bumpInteraction, registerForCrawl, markCrawled } from "@/lib/menu-crawl";
+import { toRawMenuItems } from "@/lib/menu-ingestion";
+import type { NormalizedMenu } from "@/lib/menu-ingestion";
 import { useFavorites } from "@/lib/favoritesContext";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -96,6 +98,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   const [questionsCopied, setQuestionsCopied] = useState(false);
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
+  const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
 
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -140,6 +143,53 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
       fitLevel:       fitLevel(safeP, summary.avoid, summary.ask, summary.total),
     });
   }, [id]);
+
+  // ── Auto-crawl: fetch menu from restaurant website when no menu data ────────
+  // Fires when the restaurant loads with 0 menu items. Uses the response body
+  // directly so the analysis updates immediately without a Supabase read.
+  useEffect(() => {
+    if (!restaurant) return;
+    if (restaurant.menuItems.length > 0) return;     // already have data
+    if (restaurant.menuIsGenericChainTemplate) return; // template counts as data
+    if (!restaurant.website) return;                  // nothing to crawl
+
+    let cancelled = false;
+    setCrawlStatus("fetching");
+
+    fetch("/api/fetch-menu", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        url:            restaurant.website,
+        restaurantId:   restaurant.id,
+        restaurantName: restaurant.name,
+      }),
+    })
+      .then(async (res) => {
+        if (cancelled) return;
+        if (!res.ok) { setCrawlStatus("failed"); return; }
+
+        const data = await res.json() as { menu?: NormalizedMenu };
+        if (!data.menu) { setCrawlStatus("empty"); return; }
+
+        const items = toRawMenuItems(data.menu);
+        if (items.length === 0) { setCrawlStatus("empty"); return; }
+
+        const enriched  = { ...restaurant, menuItems: items };
+        const allergens = loadProfileAllergens();
+        const analysis  = analyzeRestaurant(enriched, allergens);
+
+        if (!cancelled) {
+          setRestaurant(enriched);
+          setBaseAnalysis(analysis);
+          setCrawlStatus("done");
+          markCrawled(restaurant.id, "updated");
+        }
+      })
+      .catch(() => { if (!cancelled) setCrawlStatus("failed"); });
+
+    return () => { cancelled = true; };
+  }, [restaurant?.id, restaurant?.website]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Memory-enhanced analysis ────────────────────────────────────────────────
   // Re-computes when baseAnalysis loads, allergens change, or feedback is submitted.
@@ -372,17 +422,44 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
             {hasNoMenu ? (
               <div style={{ padding: 16, borderRadius: 14, background: "var(--c-muted)", border: "1px solid var(--c-border)" }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>No menu data available</div>
-                <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5, marginBottom: 14 }}>
-                  We found this restaurant but don&apos;t have allergen information yet. Scan the menu to get personalized results.
-                </div>
-                <CameraScanButton style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  padding: "10px 18px", background: "#eb1700", color: "#fff",
-                  borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
-                }}>
-                  Scan Menu →
-                </CameraScanButton>
+                {crawlStatus === "fetching" ? (
+                  <>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>Checking restaurant website…</div>
+                    <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                      Fetching menu data in the background.
+                    </div>
+                  </>
+                ) : crawlStatus === "failed" || crawlStatus === "empty" ? (
+                  <>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>
+                      {crawlStatus === "empty" ? "Menu not found on website" : "Couldn't fetch menu"}
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5, marginBottom: 14 }}>
+                      Scan the physical menu to get personalized allergen results.
+                    </div>
+                    <CameraScanButton style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      padding: "10px 18px", background: "#eb1700", color: "#fff",
+                      borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
+                    }}>
+                      Scan Menu →
+                    </CameraScanButton>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>No menu data available</div>
+                    <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5, marginBottom: 14 }}>
+                      We found this restaurant but don&apos;t have allergen information yet. Scan the menu to get personalized results.
+                    </div>
+                    <CameraScanButton style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      padding: "10px 18px", background: "#eb1700", color: "#fff",
+                      borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
+                    }}>
+                      Scan Menu →
+                    </CameraScanButton>
+                  </>
+                )}
               </div>
             ) : (
               <>
