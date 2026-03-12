@@ -348,7 +348,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                 </div>
               </div>
               <button
-                onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { name: hero.restaurantName }); toggleFavorite(restaurant.id); }}
+                onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier }); toggleFavorite(restaurant.id); }}
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
                   flexShrink: 0, width: 40, height: 40, borderRadius: 999,

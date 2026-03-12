@@ -55,7 +55,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
       : null;
 
   return (
-    <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { name: r.name, fit: level })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+    <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
       <div style={{
         background: "var(--c-card)",
         border: "1px solid var(--c-border)",
@@ -100,7 +100,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             </div>
           )}
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { name: r.name }); toggleFavorite(r.id); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier }); toggleFavorite(r.id); }}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
               position: "absolute", bottom: 8, right: 8,
