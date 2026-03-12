@@ -160,31 +160,37 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       }
     }
 
-    // Fall back to Overpass when Google has no key or fails
-    if (googleFailed || googlePlaces.length < MIN_GOOGLE_RESULTS) {
-      const overpassResults = await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
-
-      // If Google returned some results, merge them in (deduplicated)
-      if (googlePlaces.length > 0) {
-        return this._mergeResults(lat, lng, googlePlaces, overpassResults);
-      }
-
-      return overpassResults;
+    // Full failure — go straight to Overpass
+    if (googleFailed) {
+      return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
     }
 
-    return this._mapPlaces(lat, lng, googlePlaces);
+    // Map Google results first so we know the real distinct-location count
+    // (raw API count can be inflated by many branches of the same chain, which
+    // _mapPlaces deduplicates by placeId; MIN_GOOGLE_RESULTS must be checked
+    // AFTER mapping to avoid the "10 Subways → 1 result" problem)
+    const mapped = this._mapPlaces(lat, lng, googlePlaces);
+
+    if (mapped.length < MIN_GOOGLE_RESULTS) {
+      const overpassResults = await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
+      return this._mergeResults(lat, lng, googlePlaces, overpassResults);
+    }
+
+    return mapped;
   }
 
   // ─── Mapping ────────────────────────────────────────────────────────────────
 
   private _mapPlaces(userLat: number, userLng: number, places: PlaceResult[]): Restaurant[] {
+    // Dedup by placeId — each Google place_id is a distinct physical location.
+    // Name-based dedup was wrong: 10 nearby Subway locations all share a name
+    // but are different restaurants and must each appear as a card.
     const seen    = new Set<string>();
     const results: Restaurant[] = [];
 
     for (const p of places) {
-      const key = dedupKey(p.name);
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (seen.has(p.placeId)) continue;
+      seen.add(p.placeId);
 
       const distance = Math.round(haversineDistance(userLat, userLng, p.lat, p.lng) * 10) / 10;
       const mock     = findMockMatch(p.name);
