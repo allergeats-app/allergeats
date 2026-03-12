@@ -483,5 +483,8 @@ export class MockLocationProvider implements LocationProvider {
 }
 
 // ─── Default export ───────────────────────────────────────────────────────────
+// GooglePlacesLocationProvider is the production-grade provider.
+// It self-degrades to Overpass/OSM when GOOGLE_PLACES_API_KEY is not configured.
 
-export const locationProvider: LocationProvider = new LiveLocationProvider();
+import { GooglePlacesLocationProvider } from "./googlePlacesProvider";
+export const locationProvider: LocationProvider = new GooglePlacesLocationProvider();
