@@ -70,9 +70,9 @@ export async function POST(req: Request) {
     return Response.json({ places: [] });
   }
 
-  let lat: number, lng: number, radiusMeters: number;
+  let lat: number, lng: number, radiusMeters: number, keyword: string | undefined;
   try {
-    ({ lat, lng, radiusMeters } = await req.json() as { lat: number; lng: number; radiusMeters: number });
+    ({ lat, lng, radiusMeters, keyword } = await req.json() as { lat: number; lng: number; radiusMeters: number; keyword?: string });
   } catch {
     return new Response("Bad request", { status: 400 });
   }
@@ -85,6 +85,7 @@ export async function POST(req: Request) {
       `${BASE_URL}?location=${lat},${lng}` +
       `&radius=${Math.round(radiusMeters)}` +
       `&type=restaurant` +
+      (keyword ? `&keyword=${encodeURIComponent(keyword)}` : "") +
       `&key=${key}`;
 
     const firstRes = await fetch(firstUrl, { cache: "no-store" });
