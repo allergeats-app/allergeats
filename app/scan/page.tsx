@@ -106,7 +106,8 @@ export default function ScanPage() {
   useEffect(() => {
     if (step !== 3 || menuItems.length === 0 || selectedAllergens.length === 0) return;
     fetchCommunityScores(menuItems, selectedAllergens as string[], loadedRestaurant ?? undefined)
-      .then(setCommunityScores);
+      .then(setCommunityScores)
+      .catch(() => { /* community scores are non-critical — fail silently */ });
   }, [step, menuItems, selectedAllergens, loadedRestaurant]);
 
   // Record scan to history when results are first ready

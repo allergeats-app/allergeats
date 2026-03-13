@@ -30,6 +30,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "URL must start with http/https" }, { status: 400 });
     }
 
+    // Block SSRF targets: loopback, private ranges, link-local (AWS metadata), reserved
+    const hostname = parsed.hostname.toLowerCase();
+    const ssrfBlocked =
+      hostname === "localhost" ||
+      /^127\./.test(hostname) ||
+      /^0\.0\.0\.0/.test(hostname) ||
+      /^::1$/.test(hostname) ||
+      /^169\.254\./.test(hostname) ||           // link-local / AWS metadata
+      /^10\./.test(hostname) ||                  // RFC1918
+      /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname) || // RFC1918
+      /^192\.168\./.test(hostname) ||            // RFC1918
+      /^fc00:/i.test(hostname) ||                // IPv6 unique local
+      /^fe80:/i.test(hostname);                  // IPv6 link-local
+    if (ssrfBlocked) {
+      return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+    }
+
     // Abort the fetch if the remote server doesn't respond within FETCH_TIMEOUT_MS
     const controller = new AbortController();
     const timeoutId  = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);

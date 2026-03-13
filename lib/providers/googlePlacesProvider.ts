@@ -29,8 +29,8 @@ import type { PlaceResult }                           from "@/app/api/places-nea
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-/** Client-side sessionStorage cache TTL — mirrors the server's revalidate window. */
-const PLACES_CACHE_TTL_MS = 5 * 60 * 1000;
+/** Client-side sessionStorage cache TTL — 30 min reduces Google Places API spend. */
+const PLACES_CACHE_TTL_MS = 30 * 60 * 1000;
 
 // ─── Client-side sessionStorage cache ────────────────────────────────────────
 // Mirrors the Overpass cache pattern to avoid redundant API calls when the user

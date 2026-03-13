@@ -161,7 +161,8 @@ function HomeContent() {
 
   const { user, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
   const { isFavorite } = useFavorites();
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveSeqRef   = useRef(0); // Sequence counter — guards against out-of-order Supabase responses
   const initializedRef = useRef(false);
 
   // Hydrate from localStorage + sessionStorage after mount
@@ -185,18 +186,22 @@ function HomeContent() {
     }
   }, [authLoading, authAllergens]);
 
-  // Debounced Supabase save when signed-in user changes allergens
+  // Debounced Supabase save when signed-in user changes allergens.
+  // Sequence counter ensures a slow earlier response can't overwrite a newer save.
   useEffect(() => {
     if (!user || !initializedRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setSaveState("idle");
     debounceRef.current = setTimeout(async () => {
+      const seq = ++saveSeqRef.current;
       setSaveState("saving");
       try {
         await saveAllergens(localAllergens);
+        if (seq !== saveSeqRef.current) return; // stale response — a newer save is in flight
         setSaveState("saved");
         setTimeout(() => setSaveState("idle"), 2000);
       } catch {
+        if (seq !== saveSeqRef.current) return;
         setSaveState("error");
         setTimeout(() => setSaveState("idle"), 4000);
       }

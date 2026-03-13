@@ -5,8 +5,20 @@ import type { NormalizedMenu } from "@/lib/menu-ingestion";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+const MODEL = process.env.CLAUDE_MODEL ?? "claude-sonnet-4-6";
+
 /** Max image size we'll accept (10 MB). */
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+/** Timeout for the Anthropic API call. */
+const ANTHROPIC_TIMEOUT_MS = 25_000;
+
+// Magic byte signatures for image format validation
+const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
+  "image/jpeg": (b) => b[0] === 0xff && b[1] === 0xd8,
+  "image/png":  (b) => b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
+  "image/gif":  (b) => b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46,
+  "image/webp": (b) => b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50,
+};
 
 const ALLOWED_MEDIA_TYPES = new Set([
   "image/jpeg",
@@ -43,10 +55,25 @@ export async function POST(req: Request) {
     const mediaType = declaredType as "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
     const buffer = await file.arrayBuffer();
+
+    // Validate actual file bytes against declared MIME type (guards against spoofed Content-Type)
+    const magic = MAGIC[mediaType];
+    if (magic && !magic(new Uint8Array(buffer.slice(0, 12)))) {
+      return NextResponse.json(
+        { error: "File content does not match the declared image type" },
+        { status: 415 }
+      );
+    }
+
     const base64 = Buffer.from(buffer).toString("base64");
 
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS);
+
+    let message: Awaited<ReturnType<typeof client.messages.create>>;
+    try {
+      message = await client.messages.create({
+        model: MODEL,
       max_tokens: 4096,
       messages: [
         {
@@ -81,7 +108,17 @@ Chocolate Lava Cake | warm chocolate cake, vanilla ice cream, contains eggs and 
           ],
         },
       ],
-    });
+      });
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const isTimeout = err instanceof Error && err.name === "AbortError";
+      return NextResponse.json(
+        { error: isTimeout ? "Menu scan timed out — please try again" : "Failed to analyze image" },
+        { status: isTimeout ? 408 : 502 }
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     // Guard against unexpected response shapes from the Anthropic API
     const textBlock = message.content.find((c) => c.type === "text");

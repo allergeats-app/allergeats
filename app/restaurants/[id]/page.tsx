@@ -169,7 +169,13 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
         if (cancelled) return;
         if (!res.ok) { setCrawlStatus("failed"); return; }
 
-        const data = await res.json() as { menu?: NormalizedMenu };
+        let data: { menu?: NormalizedMenu };
+        try {
+          data = await res.json() as { menu?: NormalizedMenu };
+        } catch {
+          setCrawlStatus("failed");
+          return;
+        }
         if (!data.menu) { setCrawlStatus("empty"); return; }
 
         const items = toRawMenuItems(data.menu);

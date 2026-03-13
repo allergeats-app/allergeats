@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/authContext";
 import { FavoritesProvider } from "@/lib/favoritesContext";
 import { ThemeProvider } from "@/lib/themeContext";
 import { Analytics } from "@vercel/analytics/next";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,9 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <FavoritesProvider>
+            <ErrorBoundary>
             {children}
+            </ErrorBoundary>
             <footer style={{
               textAlign: "center",
               padding: "16px 20px 24px",
