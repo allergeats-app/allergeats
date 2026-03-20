@@ -130,6 +130,11 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 900, fontSize: compact ? 13 : 17, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
               <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
+              {!compact && r.address && (
+                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", opacity: 0.75 }}>
+                  {r.address}
+                </div>
+              )}
             </div>
             {!compact && <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>See menu fit →</div>}
           </div>
