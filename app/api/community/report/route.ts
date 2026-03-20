@@ -45,6 +45,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  const VALID_OUTCOMES = new Set(["safe", "reaction", "uncertain"]);
+  if (!VALID_OUTCOMES.has(outcome)) {
+    return NextResponse.json({ error: "Invalid outcome value" }, { status: 400 });
+  }
+
+  // Cap field lengths to prevent oversized inserts
+  if (dishName.length > 200 || allergen.length > 100 || (restaurantName && restaurantName.length > 200)) {
+    return NextResponse.json({ error: "Field value too long" }, { status: 400 });
+  }
+
   const dish_normalized = normalizeDish(dishName);
   const rest_normalized = normalizeRestaurant(restaurantName);
 

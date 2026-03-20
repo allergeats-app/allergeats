@@ -42,11 +42,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Nutritionix credentials not configured" }, { status: 503 });
   }
 
-  const body: RequestBody = await req.json();
+  let body: RequestBody;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
   const { brand, items } = body;
 
   if (!brand || !items?.length) {
     return NextResponse.json({ error: "brand and items are required" }, { status: 400 });
+  }
+
+  if (items.length > 500) {
+    return NextResponse.json({ error: "Too many items (max 500)" }, { status: 400 });
   }
 
   const headers = {
@@ -65,6 +74,7 @@ export async function POST(req: Request) {
       const res = await fetch(`${BASE}/nutrients`, {
         method: "POST",
         headers,
+        signal: AbortSignal.timeout(15_000),
         body: JSON.stringify({
           foods: batch.map((item) => ({
             food_name: item.name,

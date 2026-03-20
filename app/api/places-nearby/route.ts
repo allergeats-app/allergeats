@@ -49,6 +49,8 @@ const BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 const MAX_PAGES = 3;
 /** Google requires a short pause before the next_page_token becomes valid. */
 const PAGE_DELAY_MS = 1500;
+/** Timeout for each Google Places API fetch. */
+const FETCH_TIMEOUT_MS = 40_000;
 
 // ─── In-memory rate limiter ───────────────────────────────────────────────────
 // Limits each IP to MAX_REQUESTS_PER_WINDOW calls per WINDOW_MS.
@@ -101,6 +103,18 @@ export async function POST(req: Request) {
     return new Response("Bad request", { status: 400 });
   }
 
+  // Validate coordinate + radius ranges
+  if (
+    typeof lat !== "number" || lat < -90   || lat > 90   ||
+    typeof lng !== "number" || lng < -180  || lng > 180  ||
+    typeof radiusMeters !== "number" || radiusMeters < 1 || radiusMeters > 50_000
+  ) {
+    return new Response("Invalid coordinates or radius", { status: 400 });
+  }
+  if (keyword && (typeof keyword !== "string" || keyword.length > 100)) {
+    return new Response("Invalid keyword", { status: 400 });
+  }
+
   try {
     const allPlaces: PlaceResult[] = [];
 
@@ -112,7 +126,7 @@ export async function POST(req: Request) {
       (keyword ? `&keyword=${encodeURIComponent(keyword)}` : "") +
       `&key=${key}`;
 
-    const firstRes = await fetch(firstUrl, { cache: "no-store" });
+    const firstRes = await fetch(firstUrl, { cache: "no-store", signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     if (!firstRes.ok) return new Response("Places API error", { status: 502 });
 
     const firstPage = await firstRes.json() as NearbySearchPage;
@@ -131,7 +145,7 @@ export async function POST(req: Request) {
 
       const pageRes = await fetch(
         `${BASE_URL}?pagetoken=${pageToken}&key=${key}`,
-        { cache: "no-store" }, // page tokens are single-use — never cache
+        { cache: "no-store", signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
       );
 
       if (!pageRes.ok) break; // don't fail the whole request on a pagination error

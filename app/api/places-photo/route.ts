@@ -27,6 +27,11 @@ export async function GET(req: Request) {
   if (!key) return new Response(null, { status: 404, ...NO_CACHE });
   if (!placeId && !name) return new Response(null, { status: 404, ...NO_CACHE });
 
+  // Cap param lengths to prevent oversized upstream requests
+  if ((placeId && placeId.length > 300) || name.length > 200) {
+    return new Response(null, { status: 400, ...NO_CACHE });
+  }
+
   try {
     let photoRef: string | undefined;
 

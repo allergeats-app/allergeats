@@ -51,6 +51,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ scores: [] });
   }
 
+  // Cap array sizes to prevent oversized DB queries
+  const MAX_DISHES = 200;
+  const MAX_ALLERGENS = 20;
+  if (dishes.length > MAX_DISHES || allergens.length > MAX_ALLERGENS) {
+    return NextResponse.json({ error: "Too many items in request" }, { status: 400 });
+  }
+
   const dishNorms = [...new Set(dishes.map(normalizeDish))];
   const restNorm = normalizeRestaurant(restaurantName);
 
@@ -61,7 +68,9 @@ export async function POST(req: Request) {
     .in("dish_normalized", dishNorms)
     .in("allergen", allergens);
 
-  // Prefer restaurant-scoped results, but fall back to global
+  // Prefer restaurant-scoped results, but fall back to global.
+  // restNorm is sanitized by normalizeRestaurant (alphanumeric + spaces only)
+  // so special characters cannot mangle the Supabase filter string.
   if (restNorm) {
     query = query.or(`rest_normalized.eq.${restNorm},rest_normalized.is.null`);
   }
