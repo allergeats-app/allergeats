@@ -121,8 +121,14 @@ export function isAccurate(accuracy?: number): boolean {
 const LAST_LOCATION_KEY = "allegeats_last_location";
 const LAST_LOCATION_TTL_MS = 20 * 60 * 1000;
 
+/** Only persist positions with accuracy better than 20 km — IP-geolocated positions
+ *  (accuracy 50–100 km) are too coarse to be useful as a fallback and can place the
+ *  user in the wrong city/state entirely. */
+const MAX_SAVE_ACCURACY_M = 20_000;
+
 function saveLastLocation(c: Coordinates): void {
   if (typeof localStorage === "undefined") return;
+  if (c.accuracy != null && c.accuracy > MAX_SAVE_ACCURACY_M) return;
   try {
     localStorage.setItem(LAST_LOCATION_KEY, JSON.stringify({ ...c, savedAt: Date.now() }));
   } catch { /* ignore quota errors */ }

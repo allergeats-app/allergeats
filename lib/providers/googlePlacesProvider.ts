@@ -124,7 +124,7 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     radiusMiles: number,
     accuracy?: number,
   ): Promise<Restaurant[]> {
-    const radiusMeters = Math.round(radiusMiles * 1609.34);
+    const radiusMeters  = Math.round(radiusMiles * 1609.34);
     const cacheKey     = placesCacheKey(lat, lng, radiusMiles);
 
     let googlePlaces: PlaceResult[] = [];
@@ -202,7 +202,10 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     }
 
     const overpassResults = await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[]);
-    return this._mergeResults(lat, lng, googlePlaces, overpassResults);
+    const merged = this._mergeResults(lat, lng, googlePlaces, overpassResults);
+    // Hard-filter: drop anything outside the search radius (guards against a
+    // bad IP-geolocated user position returning distant restaurants).
+    return merged.filter((r) => r.distance == null || r.distance <= radiusMiles * 1.2);
   }
 
   // ─── Mapping ────────────────────────────────────────────────────────────────
