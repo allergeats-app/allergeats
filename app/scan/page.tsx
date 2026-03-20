@@ -80,7 +80,9 @@ export default function ScanPage() {
       const raw = sessionStorage.getItem("allegeats_camera_scan");
       if (raw) {
         sessionStorage.removeItem("allegeats_camera_scan");
-        const lines: string[] = JSON.parse(raw);
+        const parsed: unknown = JSON.parse(raw);
+        if (!Array.isArray(parsed) || !parsed.every((l) => typeof l === "string")) throw new Error("bad format");
+        const lines: string[] = parsed;
         if (lines.length > 0) {
           setMenu(lines.join("\n"));
           setMenuSource("manual");

@@ -73,7 +73,7 @@ export async function POST(req: Request) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { error: `Fetch failed: ${res.status} ${res.statusText}` },
+        { error: `Could not retrieve menu page (status ${res.status})` },
         { status: 400 }
       );
     }
@@ -105,8 +105,8 @@ export async function POST(req: Request) {
         sourceLabel:    `${restaurantName ?? parsed.hostname} website`,
       });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Ingestion failed";
-      return NextResponse.json({ error: msg }, { status: 422 });
+      console.error("[fetch-menu] ingestion error:", err);
+      return NextResponse.json({ error: "Could not extract menu from this page" }, { status: 422 });
     }
 
     // Backward-compatible flat lines for the scan page

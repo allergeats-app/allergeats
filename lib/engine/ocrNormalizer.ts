@@ -43,8 +43,10 @@ const STRIP_PATTERNS: RegExp[] = [
   /\s{2,}/g,                   // collapse extra whitespace (applied last)
 ];
 
+const MAX_NORMALIZE_INPUT = 50_000;
+
 export function normalizeText(raw: string): string {
-  let text = raw;
+  let text = raw.length > MAX_NORMALIZE_INPUT ? raw.slice(0, MAX_NORMALIZE_INPUT) : raw;
 
   // 1. Apply OCR fixes
   for (const [pattern, replacement] of OCR_FIXES) {

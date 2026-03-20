@@ -58,18 +58,23 @@ export async function POST(req: Request) {
   const dish_normalized = normalizeDish(dishName);
   const rest_normalized = normalizeRestaurant(restaurantName);
 
-  const { error } = await db.from("dish_reports").insert({
-    dish_name:       dishName,
-    dish_normalized,
-    restaurant_name: restaurantName ?? null,
-    rest_normalized,
-    allergen,
-    outcome,
-    user_id:         userId ?? null,
-  });
+  const { error: insertError } = await Promise.race([
+    db.from("dish_reports").insert({
+      dish_name:       dishName,
+      dish_normalized,
+      restaurant_name: restaurantName ?? null,
+      rest_normalized,
+      allergen,
+      outcome,
+      user_id:         userId ?? null,
+    }),
+    new Promise<{ error: { message: string } }>((_, reject) =>
+      setTimeout(() => reject(new Error("DB timeout")), 5000)
+    ),
+  ]).catch((err) => ({ error: { message: err instanceof Error ? err.message : "timeout" } }));
 
-  if (error) {
-    console.error("[community/report]", error);
+  if (insertError) {
+    console.error("[community/report]", insertError);
     return NextResponse.json({ error: "Failed to save report" }, { status: 500 });
   }
 

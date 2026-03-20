@@ -75,6 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(data.session);
       hydrateAllergens(data.session);
       setLoading(false);
+    }).catch((err) => {
+      console.error("[authContext] getSession failed:", err);
+      setLoading(false);
     });
 
     const { data: { subscription } } = sb.auth.onAuthStateChange((_event, sess) => {
@@ -82,7 +85,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       hydrateAllergens(sess);
     });
 
-    return () => subscription.unsubscribe();
+    // Sync allergen changes made in another browser tab
+    function onStorageChange(e: StorageEvent) {
+      if (e.key !== PROFILE_KEY || !e.newValue) return;
+      try {
+        const parsed = JSON.parse(e.newValue);
+        if (Array.isArray(parsed)) setAllergens(parsed as AllergenId[]);
+      } catch { /* ignore */ }
+    }
+    window.addEventListener("storage", onStorageChange);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("storage", onStorageChange);
+    };
   }, []);
 
   async function signIn(email: string, password: string, staySignedIn: boolean): Promise<string | null> {

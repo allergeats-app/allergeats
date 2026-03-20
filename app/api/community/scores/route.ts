@@ -75,7 +75,12 @@ export async function POST(req: Request) {
     query = query.or(`rest_normalized.eq.${restNorm},rest_normalized.is.null`);
   }
 
-  const { data, error } = await query;
+  const { data, error } = await Promise.race([
+    query,
+    new Promise<{ data: null; error: { message: string } }>((_, reject) =>
+      setTimeout(() => reject(new Error("DB timeout")), 5000)
+    ),
+  ]).catch(() => ({ data: null, error: { message: "timeout" } }));
   if (error || !data) return NextResponse.json({ scores: [] });
 
   // Aggregate in JS — simple and avoids a view dependency

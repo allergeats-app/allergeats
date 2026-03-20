@@ -71,9 +71,14 @@ export async function GET(req: Request) {
     if (!photoRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
 
     const imageBytes = await photoRes.arrayBuffer();
+    const upstreamType = photoRes.headers.get("Content-Type") ?? "";
+    const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const contentType = VALID_IMAGE_TYPES.find((t) => upstreamType.includes(t)) ?? "image/jpeg";
+
     return new Response(imageBytes, {
       headers: {
-        "Content-Type": photoRes.headers.get("Content-Type") ?? "image/jpeg",
+        "Content-Type": contentType,
+        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
       },
     });

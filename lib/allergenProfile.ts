@@ -55,11 +55,17 @@ export function profileToDetectorAllergens(profileAllergens: AllergenId[]): stri
 
 const STORAGE_KEY = "allegeats_profile_allergens";
 
+const VALID_ALLERGEN_IDS = new Set<string>(ALLERGEN_LIST.map((a) => a.id));
+
 export function loadProfileAllergens(): AllergenId[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as AllergenId[]) : [];
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Filter to known allergen IDs — prevents corrupted/injected data from reaching analysis
+    return parsed.filter((a): a is AllergenId => typeof a === "string" && VALID_ALLERGEN_IDS.has(a));
   } catch {
     return [];
   }

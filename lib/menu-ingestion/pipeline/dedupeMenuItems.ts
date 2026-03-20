@@ -18,12 +18,18 @@
 
 import type { NormalizedMenuItem, NormalizedMenuSection } from "../types";
 
-/** Choose the richer of two duplicate items */
+/** Choose the richer of two duplicate items, always preserving allergen data */
 function mergeItems(a: NormalizedMenuItem, b: NormalizedMenuItem): NormalizedMenuItem {
-  // Keep the one with more fields populated
-  const aScore = (a.description ? 2 : 0) + (a.price ? 1 : 0);
-  const bScore = (b.description ? 2 : 0) + (b.price ? 1 : 0);
-  return aScore >= bScore ? a : b;
+  // Merge allergen arrays from both versions — never discard allergen data
+  const mergedAllergens = a.allergens || b.allergens
+    ? [...new Set([...(a.allergens ?? []), ...(b.allergens ?? [])])]
+    : undefined;
+
+  const aScore = (a.description ? 2 : 0) + (a.price ? 1 : 0) + (a.allergens?.length ? 2 : 0);
+  const bScore = (b.description ? 2 : 0) + (b.price ? 1 : 0) + (b.allergens?.length ? 2 : 0);
+  const winner = aScore >= bScore ? a : b;
+
+  return mergedAllergens ? { ...winner, allergens: mergedAllergens } : winner;
 }
 
 /** Deduplicate items within a single section */
