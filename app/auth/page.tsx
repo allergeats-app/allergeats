@@ -21,7 +21,8 @@ export default function AuthPage() {
   const [mode, setMode]             = useState<Mode>("signin");
   const [email, setEmail]           = useState("");
   const [password, setPassword]     = useState("");
-  const [usernameVal, setUsername]  = useState("");
+  const [firstNameVal, setFirstName] = useState("");
+  const [lastNameVal,  setLastName]  = useState("");
   const [staySignedIn, setStay]     = useState(true);
   const [rememberEmail, setRemember] = useState(false);
   const [error, setError]           = useState<string | null>(null);
@@ -71,7 +72,7 @@ export default function AuthPage() {
 
     const err = mode === "signin"
       ? await signIn(email, password, staySignedIn)
-      : await signUp(email, password, usernameVal.trim() || undefined);
+      : await signUp(email, password, firstNameVal.trim(), lastNameVal.trim());
 
     setLoading(false);
 
@@ -194,22 +195,43 @@ export default function AuthPage() {
           </div>
 
           {mode === "signup" && (
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
-                Username <span style={{ fontWeight: 400, color: "var(--c-sub)" }}>(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={usernameVal}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. jonny123"
-                style={{
-                  width: "100%", boxSizing: "border-box",
-                  padding: "12px 14px", border: "1px solid #e5e7eb",
-                  borderRadius: 12, fontSize: 15, color: "var(--c-text)",
-                  background: "var(--c-input)", outline: "none",
-                }}
-              />
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={firstNameVal}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="First"
+                  style={{
+                    width: "100%", boxSizing: "border-box",
+                    padding: "12px 14px", border: "1px solid #e5e7eb",
+                    borderRadius: 12, fontSize: 15, color: "var(--c-text)",
+                    background: "var(--c-input)", outline: "none",
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={lastNameVal}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Last"
+                  style={{
+                    width: "100%", boxSizing: "border-box",
+                    padding: "12px 14px", border: "1px solid #e5e7eb",
+                    borderRadius: 12, fontSize: 15, color: "var(--c-text)",
+                    background: "var(--c-input)", outline: "none",
+                  }}
+                />
+              </div>
             </div>
           )}
 

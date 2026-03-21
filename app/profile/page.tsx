@@ -9,13 +9,14 @@ import { isPasskeySupported, registerPasskey, removePasskey } from "@/lib/passke
 import { getSupabaseClient } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
-  const { user, loading, username, saveUsername, signOut } = useAuth();
+  const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
   const { isDark, mode: themeMode, setMode: setThemeMode } = useTheme();
   const router = useRouter();
 
   const [signingOut, setSigningOut]       = useState(false);
-  const [usernameEdit, setUsernameEdit]   = useState("");
-  const [usernameSaved, setUsernameSaved] = useState(false);
+  const [firstEdit, setFirstEdit]   = useState("");
+  const [lastEdit,  setLastEdit]    = useState("");
+  const [nameSaved, setNameSaved]   = useState(false);
 
   // Passkey state
   const [passkeySupported, setPasskeySupported]   = useState(false);
@@ -28,8 +29,9 @@ export default function ProfilePage() {
   }, [loading, user, router]);
 
   useEffect(() => {
-    setUsernameEdit(username);
-  }, [username]);
+    setFirstEdit(firstName);
+    setLastEdit(lastName);
+  }, [firstName, lastName]);
 
   // Check passkey support and load existing credential
   useEffect(() => {
@@ -84,10 +86,10 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleSaveUsername() {
-    await saveUsername(usernameEdit.trim());
-    setUsernameSaved(true);
-    setTimeout(() => setUsernameSaved(false), 2000);
+  async function handleSaveName() {
+    await saveName(firstEdit, lastEdit);
+    setNameSaved(true);
+    setTimeout(() => setNameSaved(false), 2000);
   }
 
   async function handleSignOut() {
@@ -159,11 +161,11 @@ export default function ProfilePage() {
                 fontSize: 18, fontWeight: 900, flexShrink: 0,
               }}
             >
-              {(username?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
+              {(firstName?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
             </div>
             <div>
-              {username && <div style={{ fontWeight: 900, fontSize: 16, color: "var(--c-text)" }}>{username}</div>}
-              <div style={{ fontWeight: username ? 500 : 800, fontSize: username ? 13 : 15, color: username ? "var(--c-sub)" : "var(--c-text)" }}>{user.email}</div>
+              {displayName && <div style={{ fontWeight: 900, fontSize: 16, color: "var(--c-text)" }}>{displayName}</div>}
+              <div style={{ fontWeight: displayName ? 500 : 800, fontSize: displayName ? 13 : 15, color: displayName ? "var(--c-sub)" : "var(--c-text)" }}>{user.email}</div>
               <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>
                 Member since {new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               </div>
@@ -183,34 +185,45 @@ export default function ProfilePage() {
             Settings
           </div>
 
-          {/* Username */}
+          {/* Name */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 8 }}>
-              {username ? "Change username" : "Username"}
+              Name
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <input
                 type="text"
-                value={usernameEdit}
-                onChange={(e) => setUsernameEdit(e.target.value)}
-                placeholder="Add a username…"
+                value={firstEdit}
+                onChange={(e) => setFirstEdit(e.target.value)}
+                placeholder="First name"
                 style={{
-                  flex: 1, padding: "10px 12px", border: "1px solid var(--c-border)",
+                  flex: 1, minWidth: 100, padding: "10px 12px", border: "1px solid var(--c-border)",
                   borderRadius: 10, fontSize: 14, color: "var(--c-text)",
                   background: "var(--c-input)", outline: "none", boxSizing: "border-box",
                 }}
               />
-              {(usernameEdit.trim() !== username || usernameSaved) && (
+              <input
+                type="text"
+                value={lastEdit}
+                onChange={(e) => setLastEdit(e.target.value)}
+                placeholder="Last name"
+                style={{
+                  flex: 1, minWidth: 100, padding: "10px 12px", border: "1px solid var(--c-border)",
+                  borderRadius: 10, fontSize: 14, color: "var(--c-text)",
+                  background: "var(--c-input)", outline: "none", boxSizing: "border-box",
+                }}
+              />
+              {(firstEdit.trim() !== firstName || lastEdit.trim() !== lastName || nameSaved) && (
                 <button
-                  onClick={handleSaveUsername}
+                  onClick={handleSaveName}
                   style={{
                     padding: "10px 16px", borderRadius: 10, border: "none",
-                    background: usernameSaved ? "#22c55e" : "var(--c-text)",
+                    background: nameSaved ? "#22c55e" : "var(--c-text)",
                     color: "var(--c-bg)", fontSize: 13, fontWeight: 700,
                     cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
                   }}
                 >
-                  {usernameSaved ? "Saved!" : "Save"}
+                  {nameSaved ? "Saved!" : "Save"}
                 </button>
               )}
             </div>

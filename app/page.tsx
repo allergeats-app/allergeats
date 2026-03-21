@@ -159,7 +159,7 @@ function HomeContent() {
   const [userLocation, setUserLocation]     = useState<Coordinates | null>(null);
   const [searchCenter, setSearchCenter]     = useState<{ lat: number; lng: number } | null>(null);
 
-  const { user, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
+  const { user, firstName, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
   const { isFavorite } = useFavorites();
   const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveSeqRef   = useRef(0); // Sequence counter — guards against out-of-order Supabase responses
@@ -401,6 +401,13 @@ function HomeContent() {
       />
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
+
+        {/* ── Welcome greeting (signed-in users only) ───────────────────── */}
+        {user && firstName && (
+          <div style={{ marginBottom: 10, fontSize: 22, fontWeight: 900, color: "var(--c-text)" }}>
+            Welcome, {firstName}
+          </div>
+        )}
 
         {/* ── 2. Allergy profile card ───────────────────────────────────── */}
         <div style={{

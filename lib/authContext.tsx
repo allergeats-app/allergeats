@@ -12,14 +12,19 @@ const WAS_SESSION_ONLY_KEY = "allegeats_was_session_only";
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
-  username: string;
+  /** First name from user_metadata (falls back to legacy username) */
+  firstName: string;
+  /** Last name from user_metadata */
+  lastName: string;
+  /** Full display name — firstName + lastName, or email prefix as fallback */
+  displayName: string;
   loading: boolean;
   allergens: AllergenId[];
   signIn: (email: string, password: string, staySignedIn: boolean) => Promise<string | null>;
-  signUp: (email: string, password: string, username?: string) => Promise<string | null>;
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<string | null>;
   signOut: () => Promise<void>;
   saveAllergens: (allergens: AllergenId[]) => Promise<void>;
-  saveUsername: (name: string) => Promise<void>;
+  saveName: (firstName: string, lastName: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -28,10 +33,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession]     = useState<Session | null>(null);
   const [loading, setLoading]     = useState(true);
   const [allergens, setAllergens] = useState<AllergenId[]>([]);
-  const [username, setUsername]   = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName,  setLastName]  = useState<string>("");
 
-  function hydrateAllergens(sess: Session | null) {
-    const cloud = sess?.user?.user_metadata?.allergens as AllergenId[] | undefined;
+  function hydrate(sess: Session | null) {
+    const meta = sess?.user?.user_metadata ?? {};
+    // Support both new first_name/last_name and legacy username field
+    setFirstName((meta.first_name as string | undefined) ?? (meta.username as string | undefined) ?? "");
+    setLastName((meta.last_name  as string | undefined) ?? "");
+
+    const cloud = meta.allergens as AllergenId[] | undefined;
     if (cloud?.length) {
       setAllergens(cloud);
       try { localStorage.setItem(PROFILE_KEY, JSON.stringify(cloud)); } catch { /* ignore */ }
@@ -41,8 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (raw) setAllergens(JSON.parse(raw) as AllergenId[]);
       } catch { /* ignore */ }
     }
-    const name = sess?.user?.user_metadata?.username as string | undefined;
-    if (name) setUsername(name);
   }
 
   useEffect(() => {
@@ -73,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch { /* ignore */ }
       }
       setSession(data.session);
-      hydrateAllergens(data.session);
+      hydrate(data.session);
       setLoading(false);
     }).catch((err) => {
       console.error("[authContext] getSession failed:", err);
@@ -82,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = sb.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
-      hydrateAllergens(sess);
+      hydrate(sess);
     });
 
     // Sync allergen changes made in another browser tab
@@ -119,20 +128,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return error?.message ?? null;
   }
 
-  async function signUp(email: string, password: string, name?: string): Promise<string | null> {
+  async function signUp(email: string, password: string, first: string, last: string): Promise<string | null> {
     const sb = getSupabaseClient();
     if (!sb) return "Supabase is not configured.";
     const { error } = await sb.auth.signUp({
       email, password,
-      options: { data: { username: name ?? "" } },
+      options: { data: { first_name: first.trim(), last_name: last.trim() } },
     });
     return error?.message ?? null;
   }
 
-  async function saveUsername(name: string): Promise<void> {
-    setUsername(name);
+  async function saveName(first: string, last: string): Promise<void> {
+    setFirstName(first.trim());
+    setLastName(last.trim());
     const sb = getSupabaseClient();
-    if (sb && session) await sb.auth.updateUser({ data: { username: name } });
+    if (sb && session) await sb.auth.updateUser({ data: { first_name: first.trim(), last_name: last.trim() } });
   }
 
   async function signOut(): Promise<void> {
@@ -140,7 +150,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (sb) await sb.auth.signOut();
     setSession(null);
     setAllergens([]);
-    setUsername("");
+    setFirstName("");
+    setLastName("");
     try {
       sessionStorage.removeItem(SESSION_ONLY_KEY);
       localStorage.removeItem(WAS_SESSION_ONLY_KEY);
@@ -158,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, username, loading, allergens, signIn, signUp, signOut, saveAllergens, saveUsername }}
+      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, signIn, signUp, signOut, saveAllergens, saveName }}
     >
       {children}
     </AuthContext.Provider>

@@ -8,7 +8,7 @@ import { useTheme } from "@/lib/themeContext";
 
 export function SettingsButton() {
   const [open, setOpen] = useState(false);
-  const { user, username, signOut } = useAuth();
+  const { user, displayName, signOut } = useAuth();
   const { isDark, toggle } = useTheme();
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -92,11 +92,11 @@ export function SettingsButton() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 13, fontWeight: 900, flexShrink: 0,
                 }}>
-                  {(username || user.email)?.[0].toUpperCase()}
+                  {(displayName || user.email)?.[0].toUpperCase()}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  {username && (
-                    <div style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)", lineHeight: 1.2 }}>{username}</div>
+                  {displayName && (
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)", lineHeight: 1.2 }}>{displayName}</div>
                   )}
                   <div style={{ fontSize: 11, color: "var(--c-sub)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {user.email}
