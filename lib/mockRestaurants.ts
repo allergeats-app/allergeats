@@ -738,4 +738,174 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "jj-cookie",          name: "Chocolate Chunk Cookie",           category: "Desserts",  sourceType: "official", allergens: ["wheat","dairy","egg","soy","tree-nut"] },
     ],
   },
+
+  // ─── Chili's ─────────────────────────────────────────────────────────────────
+  // Source: chilis.com/allergen-information
+  {
+    id: "chilis",
+    name: "Chili's Grill & Bar",
+    cuisine: "Casual Dining · American",
+    tags: ["burgers"],
+    address: "1 Main St, Anytown, USA",
+    lat: 37.7749,
+    lng: -122.4194,
+    distance: 1.0,
+    sourceType: "official",
+    menuItems: [
+      // Appetizers
+      { id: "chils-blossom",       name: "Awesome Blossom Petals",           category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "chils-sw-eggrolls",   name: "Southwest Egg Rolls",              category: "Appetizers", sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      { id: "chils-loaded-skins",  name: "Loaded Potato Skins",              category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "chils-nachos",        name: "Nachos",                           category: "Appetizers", sourceType: "official", allergens: ["dairy","corn","soy","wheat"] },
+      { id: "chils-chips-salsa",   name: "Chips & Salsa",                    category: "Appetizers", sourceType: "official", allergens: ["corn"] },
+      { id: "chils-queso",         name: "Skillet Queso & Chips",            category: "Appetizers", sourceType: "official", allergens: ["dairy","corn","soy","wheat"] },
+      // Burgers
+      { id: "chils-old-timer",     name: "Old Timer Burger",                 category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "chils-bigmouth-bbq",  name: "Big Mouth Burger – Bacon BBQ",     category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "chils-mush-swiss",    name: "Mushroom Swiss Burger",            category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "chils-veggie-burger", name: "Veggie Burger",                    category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      // Chicken
+      { id: "chils-crispers",      name: "Chicken Crispers",                 category: "Chicken",    sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
+      { id: "chils-margarita-chk", name: "Margarita Grilled Chicken",        category: "Chicken",    sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "chils-ranch-chicken", name: "Crispy Chicken Ranch Sandwich",    category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      // Ribs & Steak
+      { id: "chils-ribs",          name: "Baby Back Ribs",                   category: "Ribs",       sourceType: "official", allergens: ["soy","wheat"] },
+      { id: "chils-sirloin",       name: "Classic Sirloin",                  category: "Steaks",     sourceType: "official", allergens: ["soy"] },
+      { id: "chils-fajita-trio",   name: "Fajita Trio",                      category: "Fajitas",    sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "chils-chicken-faj",   name: "Chicken Fajitas",                  category: "Fajitas",    sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "chils-steak-faj",     name: "Steak Fajitas",                    category: "Fajitas",    sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // Tex-Mex
+      { id: "chils-enchiladas",    name: "Combo Enchiladas",                 category: "Tex-Mex",    sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "chils-quesadilla",    name: "Chicken Quesadilla",               category: "Tex-Mex",    sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "chils-tacos",         name: "Street Corn Chicken Tacos",        category: "Tex-Mex",    sourceType: "official", allergens: ["wheat","dairy","soy","corn"] },
+      // Salads
+      { id: "chils-caesar",        name: "Caesar Salad",                     category: "Salads",     sourceType: "official", allergens: ["fish","egg","dairy","wheat"] },
+      { id: "chils-house-salad",   name: "House Salad",                      category: "Salads",     sourceType: "official", allergens: ["dairy","wheat"] },
+      { id: "chils-santa-fe",      name: "Santa Fe Chicken Salad",           category: "Salads",     sourceType: "official", allergens: ["wheat","dairy","egg","corn"] },
+      // Soups
+      { id: "chils-chili",         name: "Chili",                            category: "Soups",      sourceType: "official", allergens: ["soy","wheat"] },
+      // Sides
+      { id: "chils-mashed",        name: "Mashed Potatoes",                  category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "chils-corn",          name: "Corn on the Cob",                  category: "Sides",      sourceType: "official", allergens: ["corn"] },
+      { id: "chils-broccoli",      name: "Steamed Broccoli",                 category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "chils-fries",         name: "Seasoned Fries",                   category: "Sides",      sourceType: "official", allergens: ["soy","wheat"] },
+      // Desserts
+      { id: "chils-lava-cake",     name: "Molten Chocolate Cake",            category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "chils-skillet-brown", name: "Skillet Brownie",                  category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy","tree-nut"] },
+      { id: "chils-cheesecake",    name: "Cheesecake",                       category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg"] },
+    ],
+  },
+
+  // ─── Outback Steakhouse ──────────────────────────────────────────────────────
+  // Source: outback.com/menu (allergen info)
+  {
+    id: "outback",
+    name: "Outback Steakhouse",
+    cuisine: "Casual Dining · Steakhouse",
+    tags: ["burgers"],
+    address: "2 Main St, Anytown, USA",
+    lat: 37.7749,
+    lng: -122.4194,
+    distance: 1.2,
+    sourceType: "official",
+    menuItems: [
+      // Starters
+      { id: "obk-bloomin",         name: "Bloomin' Onion",                   category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "obk-bloomin-sauce",   name: "Bloomin' Onion Dipping Sauce",     category: "Appetizers", sourceType: "official", allergens: ["egg","soy","dairy"] },
+      { id: "obk-wings",           name: "Kookaburra Wings",                 category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
+      { id: "obk-coconut-shrimp",  name: "Coconut Shrimp",                   category: "Appetizers", sourceType: "official", allergens: ["shellfish","wheat","egg","tree-nut"] },
+      { id: "obk-shrimp-barbie",   name: "Shrimp on the Barbie",             category: "Appetizers", sourceType: "official", allergens: ["shellfish","soy"] },
+      { id: "obk-chicken-fingers", name: "Chicken Fingers",                  category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","soy"] },
+      { id: "obk-bread",           name: "Bushman Bread",                    category: "Bread",      sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      // Steaks
+      { id: "obk-outback-special", name: "Outback Special Sirloin",          category: "Steaks",     sourceType: "official", allergens: ["soy"] },
+      { id: "obk-ribeye",          name: "Bone-In Natural Cut Ribeye",        category: "Steaks",     sourceType: "official", allergens: ["soy"] },
+      { id: "obk-filet",           name: "Victoria's Filet Mignon",          category: "Steaks",     sourceType: "official", allergens: ["soy","dairy"] },
+      { id: "obk-prime-rib",       name: "Prime Rib",                        category: "Steaks",     sourceType: "official", allergens: ["soy","wheat"] },
+      { id: "obk-porterhouse",     name: "Porterhouse",                      category: "Steaks",     sourceType: "official", allergens: ["soy"] },
+      // Chicken
+      { id: "obk-alice-springs",   name: "Alice Springs Chicken",            category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "obk-grilled-chicken", name: "Grilled Chicken on the Barbie",    category: "Chicken",    sourceType: "official", allergens: ["soy"] },
+      { id: "obk-qld-chicken",     name: "Queensland Chicken & Shrimp",      category: "Chicken",    sourceType: "official", allergens: ["shellfish","dairy","soy","wheat"] },
+      // Seafood
+      { id: "obk-salmon",          name: "Grilled Salmon",                   category: "Seafood",    sourceType: "official", allergens: ["fish","soy"] },
+      { id: "obk-tilapia",         name: "Pan-Seared Tilapia",               category: "Seafood",    sourceType: "official", allergens: ["fish","soy","wheat","dairy"] },
+      { id: "obk-lobster-tails",   name: "Lobster Tails",                    category: "Seafood",    sourceType: "official", allergens: ["shellfish","dairy","soy"] },
+      // Pasta
+      { id: "obk-pasta-cream",     name: "Chicken & Pasta in Creamy Tomato", category: "Pasta",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      // Salads
+      { id: "obk-caesar",          name: "Caesar Salad",                     category: "Salads",     sourceType: "official", allergens: ["fish","egg","dairy","wheat"] },
+      { id: "obk-house-salad",     name: "House Salad",                      category: "Salads",     sourceType: "official", allergens: ["dairy","egg","wheat"] },
+      // Sides
+      { id: "obk-baked-potato",    name: "Loaded Baked Potato",              category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "obk-mac-cheese",      name: "Macaroni & Cheese",                category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "obk-asparagus",       name: "Grilled Asparagus",                category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "obk-seasonal-veg",    name: "Seasonal Mixed Veggies",           category: "Sides",      sourceType: "official", allergens: ["soy"] },
+      { id: "obk-fries",           name: "Seasoned Fries",                   category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "obk-mashed",          name: "Garlic Mashed Potatoes",           category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      // Desserts
+      { id: "obk-thunder",         name: "Chocolate Thunder from Down Under", category: "Desserts",  sourceType: "official", allergens: ["wheat","dairy","egg","soy","tree-nut"] },
+      { id: "obk-cheesecake",      name: "New York Style Cheesecake",        category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg"] },
+    ],
+  },
+
+  // ─── Applebee's ──────────────────────────────────────────────────────────────
+  // Source: applebees.com/en/menu (allergen information)
+  {
+    id: "applebees",
+    name: "Applebee's",
+    cuisine: "Casual Dining · American",
+    tags: ["burgers"],
+    address: "3 Main St, Anytown, USA",
+    lat: 37.7749,
+    lng: -122.4194,
+    distance: 1.5,
+    sourceType: "official",
+    menuItems: [
+      // Appetizers
+      { id: "appb-mozz-sticks",    name: "Mozzarella Sticks",                category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "appb-sp-art-dip",     name: "Spinach & Artichoke Dip",          category: "Appetizers", sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "appb-boneless-wings", name: "Boneless Wings",                   category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
+      { id: "appb-wonton-tacos",   name: "Chicken Wonton Tacos",             category: "Appetizers", sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
+      { id: "appb-nachos",         name: "Neighborhood Nachos",              category: "Appetizers", sourceType: "official", allergens: ["dairy","corn","soy","wheat"] },
+      { id: "appb-brew-pretzels",  name: "Beer Pretzels & Beer Cheese Dip",  category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      // Burgers
+      { id: "appb-classic-burger", name: "Classic Bacon Cheeseburger",       category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "appb-quesadilla-burg",name: "Quesadilla Burger",                category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "appb-super-smash",    name: "All-Day Brunch Burger",            category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      // Chicken & Sandwiches
+      { id: "appb-classic-chk",    name: "Classic Chicken Sandwich",         category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "appb-bourbon-chk",    name: "Bourbon Street Chicken & Shrimp",  category: "Chicken",    sourceType: "official", allergens: ["shellfish","wheat","soy"] },
+      { id: "appb-grilled-chk",    name: "Grilled Chicken",                  category: "Chicken",    sourceType: "official", allergens: ["soy"] },
+      // Fish
+      { id: "appb-beer-fish",      name: "Beer Battered Fish & Chips",       category: "Seafood",    sourceType: "official", allergens: ["fish","wheat","egg","soy"] },
+      // Steak
+      { id: "appb-sirloin",        name: "8 oz. Sirloin",                    category: "Steaks",     sourceType: "official", allergens: ["soy"] },
+      { id: "appb-ribeye",         name: "12 oz. Ribeye",                    category: "Steaks",     sourceType: "official", allergens: ["soy"] },
+      // Riblets & Ribs
+      { id: "appb-riblets",        name: "Riblets",                          category: "Ribs",       sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "appb-half-ribs",      name: "Half Rack of Ribs",                category: "Ribs",       sourceType: "official", allergens: ["wheat","soy"] },
+      // Pasta
+      { id: "appb-pasta-broccoli", name: "Three Cheese Chicken Penne",       category: "Pasta",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      // Fajitas & Tex-Mex
+      { id: "appb-chicken-faj",    name: "Chicken Fajitas",                  category: "Fajitas",    sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "appb-steak-faj",      name: "Steak Fajitas",                    category: "Fajitas",    sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // Salads
+      { id: "appb-oriental-salad", name: "Oriental Chicken Salad",           category: "Salads",     sourceType: "official", allergens: ["wheat","soy","sesame","egg","dairy","tree-nut"] },
+      { id: "appb-caesar",         name: "Caesar Salad",                     category: "Salads",     sourceType: "official", allergens: ["fish","egg","dairy","wheat"] },
+      { id: "appb-club-house",     name: "Classic Club House Grill Salad",   category: "Salads",     sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      // Sides
+      { id: "appb-fries",          name: "French Fries",                     category: "Sides",      sourceType: "official", allergens: ["soy","wheat"] },
+      { id: "appb-mashed",         name: "Garlic Mashed Potatoes",           category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "appb-broccoli",       name: "Steamed Broccoli",                 category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "appb-rice",           name: "Spanish Rice",                     category: "Sides",      sourceType: "official", allergens: ["soy"] },
+      // Kids
+      { id: "appb-kids-mac",       name: "Kids Macaroni & Cheese",           category: "Kids",       sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "appb-kids-chicken",   name: "Kids Grilled Chicken",             category: "Kids",       sourceType: "official", allergens: ["soy"] },
+      // Desserts
+      { id: "appb-triple-choc",    name: "Triple Chocolate Meltdown",        category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "appb-blondie",        name: "Blondie",                          category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","tree-nut","soy"] },
+      { id: "appb-cheesecake",     name: "Blue Ribbon Cheesecake",           category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg"] },
+    ],
+  },
 ];
