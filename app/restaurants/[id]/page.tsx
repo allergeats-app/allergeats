@@ -99,6 +99,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
+  const [showDrinks, setShowDrinks]   = useState(false);
 
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -631,59 +632,150 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
             {filteredItems.length === 0 ? (
               <EmptyState title="No items match" subtitle="Try a different filter." />
-            ) : hasCategories ? (
-              /* Grouped by menu section (safest sections first, from view model) */
-              <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 8 }}>
-                {vm.sections.map((section) => {
-                  const items = bySectionFiltered.get(section.sectionName);
-                  if (!items?.length) return null;
-                  return (
-                    <div key={section.sectionName}>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-                        <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{section.sectionName}</span>
-                        <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length}</span>
-                        {section.safeCount > 0 && riskFilter === "all" && (
-                          <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>{section.safeCount} safe</span>
-                        )}
-                      </div>
-                      <div style={{ display: "grid", gap: 8 }}>
-                        {items.map(renderItem)}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Grouped by risk */
-              <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingBottom: 8 }}>
-                {RISK_ORDER.map((risk) => {
-                  const items = byRisk[risk];
-                  if (!items.length) return null;
-                  const meta = RISK_META[risk];
-                  return (
-                    <div key={risk}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                        <div style={{
-                          width: 30, height: 30, borderRadius: 9,
-                          background: meta.bg, border: `1px solid ${meta.border}`,
-                          display: "grid", placeItems: "center",
-                          fontSize: 12, fontWeight: 900, color: meta.color, flexShrink: 0,
-                        }}>
-                          {meta.mark}
+            ) : hasCategories ? (() => {
+              const foodSections = vm.sections.filter((s) => !isDrinkSection(s.sectionName));
+              const drinkSections = vm.sections.filter((s) => isDrinkSection(s.sectionName));
+              const drinkItems = drinkSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
+              return (
+                <>
+                  {/* ── Food sections ── */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 8 }}>
+                    {foodSections.map((section) => {
+                      const items = bySectionFiltered.get(section.sectionName);
+                      if (!items?.length) return null;
+                      return (
+                        <div key={section.sectionName}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
+                            <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{section.sectionName}</span>
+                            <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length}</span>
+                            {section.safeCount > 0 && riskFilter === "all" && (
+                              <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>{section.safeCount} safe</span>
+                            )}
+                          </div>
+                          <div style={{ display: "grid", gap: 8 }}>
+                            {items.map(renderItem)}
+                          </div>
                         </div>
-                        <div>
-                          <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)" }}>{meta.label}</div>
-                          <div style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
+                      );
+                    })}
+                  </div>
+
+                  {/* ── Drinks collapsible ── */}
+                  {drinkItems.length > 0 && (
+                    <div style={{ marginTop: 8, marginBottom: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setShowDrinks((v) => !v)}
+                        style={{
+                          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "12px 16px", borderRadius: 14,
+                          background: "var(--c-card)", border: "1px solid var(--c-border)",
+                          cursor: "pointer", marginBottom: showDrinks ? 12 : 0,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 16 }}>🥤</span>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Drinks</span>
+                          <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{drinkItems.length} item{drinkItems.length === 1 ? "" : "s"}</span>
                         </div>
-                      </div>
-                      <div style={{ display: "grid", gap: 8 }}>
-                        {items.map(renderItem)}
-                      </div>
+                        <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>
+                          {showDrinks ? "Hide ▲" : "Show ▼"}
+                        </span>
+                      </button>
+                      {showDrinks && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                          {drinkSections.map((section) => {
+                            const items = bySectionFiltered.get(section.sectionName);
+                            if (!items?.length) return null;
+                            return (
+                              <div key={section.sectionName}>
+                                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
+                                  <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{section.sectionName}</span>
+                                  <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length}</span>
+                                </div>
+                                <div style={{ display: "grid", gap: 8 }}>
+                                  {items.map(renderItem)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  )}
+                </>
+              );
+            })() : (() => {
+              /* Grouped by risk — separate drinks from food */
+              const foodByRisk: Record<Risk, typeof allItems> = { avoid: [], ask: [], "likely-safe": [], unknown: [] };
+              const drinkItems: typeof allItems = [];
+              for (const item of filteredItems) {
+                const cat = item.category ?? item.sectionName ?? "";
+                if (isDrinkSection(cat)) drinkItems.push(item);
+                else foodByRisk[item.risk].push(item);
+              }
+              return (
+                <>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingBottom: 8 }}>
+                    {RISK_ORDER.map((risk) => {
+                      const items = foodByRisk[risk];
+                      if (!items.length) return null;
+                      const meta = RISK_META[risk];
+                      return (
+                        <div key={risk}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                            <div style={{
+                              width: 30, height: 30, borderRadius: 9,
+                              background: meta.bg, border: `1px solid ${meta.border}`,
+                              display: "grid", placeItems: "center",
+                              fontSize: 12, fontWeight: 900, color: meta.color, flexShrink: 0,
+                            }}>
+                              {meta.mark}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)" }}>{meta.label}</div>
+                              <div style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
+                            </div>
+                          </div>
+                          <div style={{ display: "grid", gap: 8 }}>
+                            {items.map(renderItem)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {drinkItems.length > 0 && (
+                    <div style={{ marginTop: 8, marginBottom: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setShowDrinks((v) => !v)}
+                        style={{
+                          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "12px 16px", borderRadius: 14,
+                          background: "var(--c-card)", border: "1px solid var(--c-border)",
+                          cursor: "pointer", marginBottom: showDrinks ? 12 : 0,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 16 }}>🥤</span>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Drinks</span>
+                          <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{drinkItems.length} item{drinkItems.length === 1 ? "" : "s"}</span>
+                        </div>
+                        <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>
+                          {showDrinks ? "Hide ▲" : "Show ▼"}
+                        </span>
+                      </button>
+                      {showDrinks && (
+                        <div style={{ display: "grid", gap: 8 }}>
+                          {drinkItems.map(renderItem)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </section>
         )}
 
@@ -740,6 +832,17 @@ function StatPill({ count, label, color, bg, active, onClick }: {
       {onClick && <span style={{ fontSize: 9, color, opacity: 0.55, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
     </button>
   );
+}
+
+const DRINK_KEYWORDS = [
+  "beverage", "drink", "coffee", "tea", "frappuccino", "shake", "smoothie",
+  "juice", "soda", "beer", "wine", "cocktail", "spirit", "mocktail",
+  "latte", "cappuccino", "espresso", "brew", "water", "frozen", "slushie",
+];
+
+function isDrinkSection(name: string): boolean {
+  const lower = name.toLowerCase();
+  return DRINK_KEYWORDS.some((k) => lower.includes(k));
 }
 
 function SectionHeader({ label, count }: { label: string; count?: number }) {
