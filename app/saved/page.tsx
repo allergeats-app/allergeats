@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { SettingsButton } from "@/components/SettingsButton";
-import { useFavorites } from "@/lib/favoritesContext";
+import { useFavorites, type FavoriteMeta } from "@/lib/favoritesContext";
 import { getRecentlyViewed, type RecentView } from "@/lib/recentlyViewed";
 import { getScanHistory, type ScanEntry } from "@/lib/scanHistory";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -90,7 +90,7 @@ function ScanCard({ entry }: { entry: ScanEntry }) {
 }
 
 function SavedContent() {
-  const { favorites } = useFavorites();
+  const { favorites, favoritesMeta } = useFavorites();
   const [recentViews, setRecentViews]   = useState<RecentView[]>([]);
   const [scanHistory, setScanHistory]   = useState<ScanEntry[]>([]);
 
@@ -178,24 +178,34 @@ function SavedContent() {
               <>
                 <SectionHeader label="Saved Places" count={favorites.size} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {savedNotViewed.map((id) => (
-                    <Link key={id} href={`/restaurants/${id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                      <div style={{
-                        background: "var(--c-card)", border: "1px solid var(--c-border)",
-                        borderRadius: 16, padding: "12px 14px",
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-                      }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#eb1700" stroke="none">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                          </svg>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--c-sub)" }}>Saved place</span>
+                  {savedNotViewed.map((id) => {
+                    const meta: FavoriteMeta | undefined = favoritesMeta.get(id);
+                    return (
+                      <Link key={id} href={`/restaurants/${id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        <div style={{
+                          background: "var(--c-card)", border: "1px solid var(--c-border)",
+                          borderRadius: 16, padding: "12px 14px",
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                        }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#eb1700" stroke="none" style={{ flexShrink: 0 }}>
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            {meta ? (
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{meta.name}</div>
+                                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>{meta.cuisine}</div>
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: 14, fontWeight: 700, color: "var(--c-sub)" }}>Saved place</span>
+                            )}
+                          </div>
+                          <span style={{ fontSize: 11, color: "var(--c-sub)", flexShrink: 0, paddingLeft: 10 }}>View →</span>
                         </div>
-                        <span style={{ fontSize: 11, color: "var(--c-sub)" }}>Tap to view →</span>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               </>
             )}

@@ -5,11 +5,15 @@ import { useAuth } from "./authContext";
 import { getSupabaseClient } from "./supabaseClient";
 
 const LOCAL_KEY = "allegeats_favorites";
+const LOCAL_META_KEY = "allegeats_favorites_meta";
+
+export type FavoriteMeta = { name: string; cuisine: string };
 
 type FavoritesContextValue = {
   favorites: Set<string>;
+  favoritesMeta: Map<string, FavoriteMeta>;
   isFavorite: (id: string) => boolean;
-  toggleFavorite: (id: string) => void;
+  toggleFavorite: (id: string, meta?: FavoriteMeta) => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -23,6 +27,14 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       if (raw) return new Set(JSON.parse(raw) as string[]);
     } catch { /* ignore */ }
     return new Set();
+  });
+
+  const [favoritesMeta, setFavoritesMeta] = useState<Map<string, FavoriteMeta>>(() => {
+    try {
+      const raw = localStorage.getItem(LOCAL_META_KEY);
+      if (raw) return new Map(Object.entries(JSON.parse(raw) as Record<string, FavoriteMeta>));
+    } catch { /* ignore */ }
+    return new Map();
   });
 
   // When user signs in, load their server-side favorites and merge with local
@@ -49,7 +61,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     return favorites.has(id);
   }
 
-  function toggleFavorite(id: string): void {
+  function toggleFavorite(id: string, meta?: FavoriteMeta): void {
     setFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -58,6 +70,14 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       } else {
         next.add(id);
         if (user) persistAdd(id);
+        if (meta) {
+          setFavoritesMeta((prevMeta) => {
+            const nextMeta = new Map(prevMeta);
+            nextMeta.set(id, meta);
+            try { localStorage.setItem(LOCAL_META_KEY, JSON.stringify(Object.fromEntries(nextMeta))); } catch { /* ignore */ }
+            return nextMeta;
+          });
+        }
       }
       try { localStorage.setItem(LOCAL_KEY, JSON.stringify([...next])); } catch { /* ignore */ }
       return next;
@@ -81,7 +101,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite }}>
+    <FavoritesContext.Provider value={{ favorites, favoritesMeta, isFavorite, toggleFavorite }}>
       {children}
     </FavoritesContext.Provider>
   );

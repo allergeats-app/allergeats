@@ -16,6 +16,8 @@ const SORT_CHIPS = [
 
 const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
   { value: "all",        label: "All" },
+  { value: "casual",     label: "Casual Dining" },
+  { value: "steakhouse", label: "Steakhouse" },
   { value: "burgers",    label: "Burgers" },
   { value: "mexican",    label: "Mexican" },
   { value: "chicken",    label: "Chicken" },

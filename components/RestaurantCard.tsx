@@ -81,6 +81,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
               alt={r.name}
               onLoad={() => setPhotoLoaded(true)}
               onError={() => setPhotoFailed(true)}
+              loading="lazy"
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: photoLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
             />
           )}
@@ -109,7 +110,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             </div>
           )}
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier }); toggleFavorite(r.id); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier }); toggleFavorite(r.id, { name: r.name, cuisine: r.cuisine }); }}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
               position: "absolute", bottom: 8, right: 8,
