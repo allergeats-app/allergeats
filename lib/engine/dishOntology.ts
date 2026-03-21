@@ -1001,4 +1001,285 @@ export const DISH_ONTOLOGY: DishEntry[] = [
       { ingredient: "cream", allergen: "dairy", confidence: "common", reason: "Panna cotta is a cream-based dessert" },
     ],
   },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // AMERICAN / PUB
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "buffalo wings",
+    variants:  ["buffalo wing", "buffalo wings", "buffalo chicken wing", "buffalo tenders"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "butter",       allergen: "dairy", confidence: "common",   reason: "Buffalo sauce is made with hot sauce emulsified with butter" },
+      { ingredient: "wheat flour",  allergen: "wheat", confidence: "possible", reason: "Wings are often floured or breaded before frying" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "possible", reason: "Breaded versions use egg wash" },
+    ],
+  },
+
+  {
+    canonical: "fried chicken",
+    variants:  ["fried chicken", "chicken tenders", "chicken strips", "chicken fingers", "crispy chicken"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "wheat flour",   allergen: "wheat", confidence: "common",   reason: "Fried chicken is dredged in seasoned wheat flour" },
+      { ingredient: "egg",           allergen: "egg",   confidence: "common",   reason: "Egg wash helps the breading adhere" },
+      { ingredient: "buttermilk",    allergen: "dairy", confidence: "possible", reason: "Southern fried chicken is often marinated in buttermilk" },
+    ],
+  },
+
+  {
+    canonical: "crab cakes",
+    variants:  ["crab cake", "crab cakes"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "crab meat",    allergen: "shellfish", confidence: "common",   reason: "Crab cakes are made with crab meat" },
+      { ingredient: "breadcrumbs",  allergen: "wheat",     confidence: "common",   reason: "Crab cakes are bound and coated with breadcrumbs" },
+      { ingredient: "egg",          allergen: "egg",       confidence: "common",   reason: "Egg is used as a binder in crab cakes" },
+      { ingredient: "mayonnaise",   allergen: "egg",       confidence: "common",   reason: "Mayo (egg-based) is used as a binder" },
+      { ingredient: "cream",        allergen: "dairy",     confidence: "possible", reason: "Some recipes add cream or dairy" },
+    ],
+  },
+
+  {
+    canonical: "lobster roll",
+    variants:  ["lobster roll", "lobster rolls"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "lobster",      allergen: "shellfish", confidence: "common", reason: "Lobster roll is filled with lobster meat" },
+      { ingredient: "hot dog bun",  allergen: "wheat",     confidence: "common", reason: "Lobster rolls are served in a buttered, toasted bun" },
+      { ingredient: "butter",       allergen: "dairy",     confidence: "common", reason: "Bun is toasted in butter; Connecticut style adds more butter" },
+      { ingredient: "mayonnaise",   allergen: "egg",       confidence: "possible", reason: "Maine style uses mayo-dressed lobster salad" },
+    ],
+  },
+
+  {
+    canonical: "poutine",
+    variants:  ["poutine"],
+    category:  "dish",
+    cuisine:   "Canadian",
+    ingredients: [
+      { ingredient: "cheese curds", allergen: "dairy", confidence: "common",   reason: "Poutine is topped with fresh cheese curds" },
+      { ingredient: "gravy",        allergen: "wheat", confidence: "possible", reason: "Gravy is often thickened with wheat flour" },
+    ],
+  },
+
+  {
+    canonical: "pot pie",
+    variants:  ["pot pie", "chicken pot pie", "beef pot pie"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "pastry crust", allergen: "wheat", confidence: "common",   reason: "Pot pie has a wheat-based pastry crust" },
+      { ingredient: "cream/milk",   allergen: "dairy", confidence: "common",   reason: "The filling is a cream-based sauce" },
+      { ingredient: "butter",       allergen: "dairy", confidence: "common",   reason: "Crust and sauce both use butter" },
+      { ingredient: "egg wash",     allergen: "egg",   confidence: "possible", reason: "Crust is often brushed with egg wash for browning" },
+    ],
+  },
+
+  {
+    canonical: "fish and chips",
+    variants:  ["fish and chips", "fish & chips", "fish n chips"],
+    category:  "dish",
+    cuisine:   "British",
+    ingredients: [
+      { ingredient: "battered fish",  allergen: "fish",  confidence: "common",   reason: "Fish and chips features battered white fish" },
+      { ingredient: "wheat batter",   allergen: "wheat", confidence: "common",   reason: "The fish is coated in a wheat-flour batter" },
+      { ingredient: "malt vinegar",   allergen: "gluten", confidence: "possible", reason: "Traditional accompaniment is malt (barley) vinegar" },
+    ],
+  },
+
+  {
+    canonical: "chicken cordon bleu",
+    variants:  ["cordon bleu"],
+    category:  "dish",
+    cuisine:   "French",
+    ingredients: [
+      { ingredient: "breadcrumbs",  allergen: "wheat", confidence: "common", reason: "Cordon bleu is breaded with wheat breadcrumbs" },
+      { ingredient: "egg wash",     allergen: "egg",   confidence: "common", reason: "Breading uses egg wash to adhere" },
+      { ingredient: "cheese",       allergen: "dairy", confidence: "common", reason: "Stuffed with cheese (typically Swiss or Gruyère)" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ASIAN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "fried rice",
+    variants:  ["fried rice", "wok fried rice", "egg fried rice"],
+    category:  "dish",
+    cuisine:   "Asian",
+    ingredients: [
+      { ingredient: "soy sauce", allergen: "soy",   confidence: "common", reason: "Fried rice is seasoned with soy sauce" },
+      { ingredient: "soy sauce", allergen: "wheat",  confidence: "common", reason: "Standard soy sauce contains wheat" },
+      { ingredient: "egg",       allergen: "egg",    confidence: "common", reason: "Egg fried rice is made with scrambled egg folded in" },
+      { ingredient: "sesame oil", allergen: "sesame", confidence: "possible", reason: "Many fried rice recipes finish with sesame oil" },
+    ],
+  },
+
+  {
+    canonical: "bulgogi",
+    variants:  ["bulgogi", "beef bulgogi", "pork bulgogi"],
+    category:  "dish",
+    cuisine:   "Korean",
+    ingredients: [
+      { ingredient: "soy sauce",  allergen: "soy",    confidence: "common",   reason: "Bulgogi marinade is soy sauce based" },
+      { ingredient: "soy sauce",  allergen: "wheat",   confidence: "common",   reason: "Standard soy sauce contains wheat" },
+      { ingredient: "sesame oil", allergen: "sesame",  confidence: "common",   reason: "Bulgogi marinade includes sesame oil" },
+      { ingredient: "sesame seeds", allergen: "sesame", confidence: "common",  reason: "Bulgogi is typically garnished with sesame seeds" },
+    ],
+  },
+
+  {
+    canonical: "ahi poke",
+    variants:  ["poke bowl", "ahi poke", "poke"],
+    category:  "dish",
+    cuisine:   "Hawaiian",
+    ingredients: [
+      { ingredient: "raw tuna",   allergen: "fish",   confidence: "common",   reason: "Ahi poke is made with raw yellowfin tuna" },
+      { ingredient: "soy sauce",  allergen: "soy",    confidence: "common",   reason: "Poke is marinated in soy sauce" },
+      { ingredient: "soy sauce",  allergen: "wheat",   confidence: "common",   reason: "Standard soy sauce contains wheat" },
+      { ingredient: "sesame oil", allergen: "sesame",  confidence: "common",   reason: "Poke is dressed with sesame oil" },
+      { ingredient: "sesame seeds", allergen: "sesame", confidence: "common",  reason: "Poke bowls are garnished with sesame seeds" },
+    ],
+  },
+
+  {
+    canonical: "peking duck",
+    variants:  ["peking duck", "beijing duck", "crispy duck"],
+    category:  "dish",
+    cuisine:   "Chinese",
+    ingredients: [
+      { ingredient: "hoisin sauce",    allergen: "soy",    confidence: "common", reason: "Peking duck is served with hoisin sauce" },
+      { ingredient: "hoisin sauce",    allergen: "wheat",   confidence: "common", reason: "Hoisin sauce contains wheat" },
+      { ingredient: "steamed pancakes", allergen: "wheat",  confidence: "common", reason: "Peking duck is wrapped in thin wheat-flour pancakes" },
+      { ingredient: "sesame",          allergen: "sesame",  confidence: "possible", reason: "Hoisin sauce often contains sesame" },
+    ],
+  },
+
+  {
+    canonical: "schnitzel",
+    variants:  ["schnitzel", "wiener schnitzel"],
+    category:  "dish",
+    cuisine:   "German",
+    ingredients: [
+      { ingredient: "wheat flour",  allergen: "wheat", confidence: "common", reason: "Schnitzel is dredged in flour before breading" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "common", reason: "Schnitzel is coated in egg wash" },
+      { ingredient: "breadcrumbs",  allergen: "wheat", confidence: "common", reason: "Schnitzel is coated in fine breadcrumbs" },
+      { ingredient: "butter",       allergen: "dairy", confidence: "possible", reason: "Wiener schnitzel is traditionally fried in clarified butter" },
+    ],
+  },
+
+  {
+    canonical: "katsu",
+    variants:  ["katsu", "tonkatsu", "chicken katsu", "pork katsu", "katsu curry"],
+    category:  "dish",
+    cuisine:   "Japanese",
+    ingredients: [
+      { ingredient: "panko breadcrumbs", allergen: "wheat", confidence: "common", reason: "Katsu is coated in Japanese panko (wheat) breadcrumbs" },
+      { ingredient: "egg wash",          allergen: "egg",   confidence: "common", reason: "Katsu uses egg wash to adhere the panko coating" },
+      { ingredient: "katsu sauce",       allergen: "wheat", confidence: "common", reason: "Tonkatsu sauce contains wheat (Worcestershire base)" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // EUROPEAN / MIDDLE EASTERN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "moussaka",
+    variants:  ["moussaka", "mousakka"],
+    category:  "dish",
+    cuisine:   "Greek",
+    ingredients: [
+      { ingredient: "béchamel sauce", allergen: "dairy", confidence: "common", reason: "Moussaka is topped with a thick béchamel sauce" },
+      { ingredient: "wheat flour",    allergen: "wheat", confidence: "common", reason: "Béchamel is thickened with wheat flour" },
+      { ingredient: "egg",            allergen: "egg",   confidence: "common", reason: "Béchamel topping often uses egg for richness" },
+    ],
+  },
+
+  {
+    canonical: "shepherd's pie",
+    variants:  ["shepherd's pie", "shepherds pie", "cottage pie"],
+    category:  "dish",
+    cuisine:   "British",
+    ingredients: [
+      { ingredient: "butter",      allergen: "dairy", confidence: "common",   reason: "Mashed potato topping uses butter and cream" },
+      { ingredient: "cream/milk",  allergen: "dairy", confidence: "common",   reason: "Mashed potatoes are made with cream or milk" },
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "possible", reason: "Gravy/sauce is often thickened with flour" },
+    ],
+  },
+
+  {
+    canonical: "meatballs",
+    variants:  ["meatball", "meatballs", "polpette"],
+    category:  "dish",
+    ingredients: [
+      { ingredient: "breadcrumbs",  allergen: "wheat", confidence: "common",   reason: "Meatballs are bound with breadcrumbs" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "common",   reason: "Egg is used as a binder in meatballs" },
+      { ingredient: "parmesan",     allergen: "dairy", confidence: "possible", reason: "Italian-style meatballs often contain parmesan" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // INDIAN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "butter chicken",
+    variants:  ["butter chicken", "murgh makhani", "chicken makhani"],
+    category:  "dish",
+    cuisine:   "Indian",
+    ingredients: [
+      { ingredient: "cream",  allergen: "dairy", confidence: "common", reason: "Butter chicken sauce is cream and tomato based" },
+      { ingredient: "butter", allergen: "dairy", confidence: "common", reason: "The sauce is enriched with butter (makhani = butter)" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // DESSERTS (additional)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "bread pudding",
+    variants:  ["bread pudding", "bread and butter pudding"],
+    category:  "dessert",
+    cuisine:   "British",
+    ingredients: [
+      { ingredient: "bread",   allergen: "wheat", confidence: "common", reason: "Bread pudding is made with stale bread" },
+      { ingredient: "eggs",    allergen: "egg",   confidence: "common", reason: "Bread pudding custard is egg-based" },
+      { ingredient: "milk/cream", allergen: "dairy", confidence: "common", reason: "Bread pudding is soaked in cream or milk custard" },
+    ],
+  },
+
+  {
+    canonical: "lava cake",
+    variants:  ["lava cake", "molten cake", "molten chocolate cake", "chocolate lava cake", "fondant au chocolat"],
+    category:  "dessert",
+    cuisine:   "French",
+    ingredients: [
+      { ingredient: "butter",      allergen: "dairy", confidence: "common", reason: "Lava cake batter is enriched with butter" },
+      { ingredient: "eggs",        allergen: "egg",   confidence: "common", reason: "Lava cake uses whole eggs and yolks for the batter" },
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "common", reason: "Lava cake contains a small amount of wheat flour" },
+    ],
+  },
+
+  {
+    canonical: "tres leches",
+    variants:  ["tres leches", "tres leches cake"],
+    category:  "dessert",
+    cuisine:   "Latin",
+    ingredients: [
+      { ingredient: "whole milk",        allergen: "dairy", confidence: "common", reason: "Tres leches is soaked in three types of milk" },
+      { ingredient: "condensed milk",    allergen: "dairy", confidence: "common", reason: "Condensed milk is one of the three milk soak components" },
+      { ingredient: "evaporated milk",   allergen: "dairy", confidence: "common", reason: "Evaporated milk is one of the three milk soak components" },
+      { ingredient: "eggs",              allergen: "egg",   confidence: "common", reason: "The sponge cake base uses eggs" },
+      { ingredient: "wheat flour",       allergen: "wheat", confidence: "common", reason: "The sponge cake base uses wheat flour" },
+    ],
+  },
 ];

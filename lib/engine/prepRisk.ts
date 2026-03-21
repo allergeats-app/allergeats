@@ -102,6 +102,41 @@ const PREP_PATTERNS: PrepPattern[] = [
     allergens: ["shellfish", "fish", "dairy", "egg"],
     reason: "Variable/seasonal preparations may contain any allergen — confirm with staff",
   },
+  {
+    terms: ["meuniere", "meunière", "à la meunière", "a la meuniere"],
+    allergens: ["dairy", "wheat", "gluten"],
+    reason: "Meunière = fish dredged in flour and sautéed in browned butter",
+  },
+  {
+    terms: ["wellington", "en croute", "en croûte", "in pastry", "wrapped in pastry"],
+    allergens: ["wheat", "gluten", "dairy", "egg"],
+    reason: "Wellington/en croûte involves wheat pastry dough, often with butter and egg wash",
+  },
+  {
+    terms: ["piccata", "piccata style"],
+    allergens: ["wheat", "gluten", "dairy"],
+    reason: "Piccata = dredged in flour and finished with a butter and lemon pan sauce",
+  },
+  {
+    terms: ["milanese", "alla milanese"],
+    allergens: ["wheat", "gluten", "egg"],
+    reason: "Milanese = breaded in flour and egg, then pan-fried",
+  },
+  {
+    terms: ["smothered", "smothered in"],
+    allergens: ["dairy"],
+    reason: "Smothered preparations are typically covered in a cream or cheese sauce",
+  },
+  {
+    terms: ["marsala", "marsala sauce", "chicken marsala"],
+    allergens: ["wheat", "gluten", "dairy"],
+    reason: "Marsala sauce is made with a butter and flour (roux) base finished with Marsala wine",
+  },
+  {
+    terms: ["parmigiana", "parmesan crusted", "parm crusted"],
+    allergens: ["dairy", "wheat", "gluten", "egg"],
+    reason: "Parmigiana involves a breadcrumb + egg coating, baked with cheese and tomato sauce",
+  },
 ];
 
 /** Returns preparation-risk signals (weight 2 = "prep") for a normalized item string */
