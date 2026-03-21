@@ -1,10 +1,25 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-type ThemeCtx = { isDark: boolean; toggle: () => void };
+export type ThemeMode = "system" | "light" | "dark";
 
-const ThemeContext = createContext<ThemeCtx>({ isDark: false, toggle: () => {} });
+type ThemeCtx = {
+  isDark:   boolean;
+  mode:     ThemeMode;
+  setMode:  (m: ThemeMode) => void;
+  /** Legacy toggle — cycles light → dark → system */
+  toggle:   () => void;
+};
+
+const ThemeContext = createContext<ThemeCtx>({
+  isDark:  false,
+  mode:    "system",
+  setMode: () => {},
+  toggle:  () => {},
+});
+
+const STORAGE_KEY = "alegeats_theme"; // intentional legacy key name — do not rename
 
 function applyVars(dark: boolean) {
   const r = document.documentElement;
@@ -29,25 +44,64 @@ function applyVars(dark: boolean) {
   }
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(false);
+function systemIsDark(): boolean {
+  return typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
 
-  // Load saved preference on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("allegeats_theme");
-    const dark = saved === "dark";
-    setIsDark(dark); // eslint-disable-line react-hooks/set-state-in-effect
-    applyVars(dark);
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // "system" is the default — no localStorage entry needed
+  const [mode, setModeState] = useState<ThemeMode>("system");
+  const [isDark, setIsDark]  = useState(false);
+
+  // Derive the actual dark value from mode
+  const resolve = useCallback((m: ThemeMode): boolean => {
+    if (m === "dark")   return true;
+    if (m === "light")  return false;
+    return systemIsDark();
   }, []);
 
-  // Apply vars whenever isDark changes
+  // Load saved mode on mount
   useEffect(() => {
-    applyVars(isDark);
-    localStorage.setItem("allegeats_theme", isDark ? "dark" : "light");
-  }, [isDark]);
+    const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
+    // Map legacy "dark"/"light" booleans and accept "system"
+    const initial: ThemeMode =
+      saved === "dark" || saved === "light" || saved === "system" ? saved : "system";
+    const dark = resolve(initial);
+    setModeState(initial);      // eslint-disable-line react-hooks/set-state-in-effect
+    setIsDark(dark);            // eslint-disable-line react-hooks/set-state-in-effect
+    applyVars(dark);
+  }, [resolve]);
+
+  // Listen for OS theme changes when in system mode
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    function onSystemChange() {
+      if (mode !== "system") return;
+      const dark = mq.matches;
+      setIsDark(dark);
+      applyVars(dark);
+    }
+    mq.addEventListener("change", onSystemChange);
+    return () => mq.removeEventListener("change", onSystemChange);
+  }, [mode]);
+
+  function setMode(m: ThemeMode) {
+    const dark = resolve(m);
+    setModeState(m);
+    setIsDark(dark);
+    applyVars(dark);
+    localStorage.setItem(STORAGE_KEY, m);
+  }
+
+  function toggle() {
+    // Cycle: light → dark → system
+    const next: ThemeMode = mode === "light" ? "dark" : mode === "dark" ? "system" : "light";
+    setMode(next);
+  }
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggle: () => setIsDark((v) => !v) }}>
+    <ThemeContext.Provider value={{ isDark, mode, setMode, toggle }}>
       {children}
     </ThemeContext.Provider>
   );

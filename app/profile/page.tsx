@@ -4,16 +4,24 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
-import { useTheme } from "@/lib/themeContext";
+import { useTheme, type ThemeMode } from "@/lib/themeContext";
+import { isPasskeySupported, registerPasskey, removePasskey } from "@/lib/passkey";
+import { getSupabaseClient } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
   const { user, loading, username, saveUsername, signOut } = useAuth();
-  const { isDark, toggle: toggleTheme } = useTheme();
+  const { isDark, mode: themeMode, setMode: setThemeMode } = useTheme();
   const router = useRouter();
 
   const [signingOut, setSigningOut]       = useState(false);
   const [usernameEdit, setUsernameEdit]   = useState("");
   const [usernameSaved, setUsernameSaved] = useState(false);
+
+  // Passkey state
+  const [passkeySupported, setPasskeySupported]   = useState(false);
+  const [passkeyRegistered, setPasskeyRegistered] = useState<string | null>(null); // credential_id
+  const [passkeyLoading, setPasskeyLoading]       = useState(false);
+  const [passkeyMsg, setPasskeyMsg]               = useState<{ text: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
@@ -22,6 +30,59 @@ export default function ProfilePage() {
   useEffect(() => {
     setUsernameEdit(username);
   }, [username]);
+
+  // Check passkey support and load existing credential
+  useEffect(() => {
+    isPasskeySupported().then(setPasskeySupported);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const sb = getSupabaseClient();
+    if (!sb) return;
+    sb.from("webauthn_credentials")
+      .select("credential_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single()
+      .then(({ data }) => { if (data) setPasskeyRegistered(data.credential_id as string); });
+  }, [user]);
+
+  async function handleAddPasskey() {
+    const sb = getSupabaseClient();
+    const session = (await sb?.auth.getSession())?.data.session;
+    if (!session?.access_token) return;
+    setPasskeyLoading(true);
+    setPasskeyMsg(null);
+    const err = await registerPasskey(session.access_token);
+    setPasskeyLoading(false);
+    if (err) {
+      setPasskeyMsg({ text: err, ok: false });
+    } else {
+      // Reload credential id
+      const { data } = await sb!.from("webauthn_credentials")
+        .select("credential_id").eq("user_id", user!.id).limit(1).single();
+      if (data) setPasskeyRegistered(data.credential_id as string);
+      setPasskeyMsg({ text: "Face ID added! You can now sign in with it.", ok: true });
+    }
+  }
+
+  async function handleRemovePasskey() {
+    if (!passkeyRegistered) return;
+    const sb = getSupabaseClient();
+    const session = (await sb?.auth.getSession())?.data.session;
+    if (!session?.access_token) return;
+    setPasskeyLoading(true);
+    setPasskeyMsg(null);
+    const err = await removePasskey(passkeyRegistered, session.access_token);
+    setPasskeyLoading(false);
+    if (err) {
+      setPasskeyMsg({ text: err, ok: false });
+    } else {
+      setPasskeyRegistered(null);
+      setPasskeyMsg({ text: "Face ID removed.", ok: true });
+    }
+  }
 
   async function handleSaveUsername() {
     await saveUsername(usernameEdit.trim());
@@ -155,28 +216,98 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Dark mode toggle */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Dark Mode</div>
-            <button
-              onClick={toggleTheme}
-              style={{
-                width: 52, height: 28, borderRadius: 999, border: "none",
-                background: isDark ? "#eb1700" : "#e5e7eb",
-                cursor: "pointer", position: "relative", transition: "background 0.2s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute", top: 3, left: isDark ? 27 : 3,
-                  width: 22, height: 22, borderRadius: "50%", background: "#fff",
-                  transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                }}
-              />
-            </button>
+          {/* Appearance / theme selector */}
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 10 }}>
+              Appearance
+            </div>
+            <div style={{ display: "flex", background: isDark ? "#2c2c2e" : "#f3f4f6", borderRadius: 12, padding: 4, gap: 2 }}>
+              {(["system", "light", "dark"] as ThemeMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setThemeMode(m)}
+                  style={{
+                    flex: 1, padding: "8px 0", borderRadius: 9, border: "none",
+                    background: themeMode === m ? (isDark ? "#3a3a3c" : "#fff") : "transparent",
+                    color: themeMode === m ? "var(--c-text)" : "var(--c-sub)",
+                    fontSize: 13, fontWeight: themeMode === m ? 700 : 500,
+                    cursor: "pointer",
+                    boxShadow: themeMode === m ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {m === "system" ? "Auto" : m === "light" ? "Light" : "Dark"}
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 6 }}>
+              {themeMode === "system" ? "Matches your phone's display settings" :
+               themeMode === "light" ? "Always light" : "Always dark"}
+            </div>
           </div>
         </div>
+
+        {/* Face ID / Passkey card — only shown on supported devices */}
+        {passkeySupported && (
+          <div
+            style={{
+              background: "var(--c-card)", border: "1px solid var(--c-border)",
+              borderRadius: 20, padding: 20,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 16 }}>
+              Security
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 3 }}>
+                  Face ID / Touch ID
+                </div>
+                <div style={{ fontSize: 13, color: "var(--c-sub)" }}>
+                  {passkeyRegistered
+                    ? "Sign in instantly with your face or fingerprint"
+                    : "Add biometric sign-in for faster, password-free login"}
+                </div>
+              </div>
+
+              <button
+                onClick={passkeyRegistered ? handleRemovePasskey : handleAddPasskey}
+                disabled={passkeyLoading}
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: 12,
+                  border: passkeyRegistered ? "1.5px solid #ef4444" : "none",
+                  background: passkeyRegistered ? "transparent" : "#eb1700",
+                  color: passkeyRegistered ? "#ef4444" : "#fff",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: passkeyLoading ? "not-allowed" : "pointer",
+                  whiteSpace: "nowrap",
+                  minWidth: 80,
+                  transition: "opacity 0.15s",
+                  opacity: passkeyLoading ? 0.5 : 1,
+                }}
+              >
+                {passkeyLoading ? "…" : passkeyRegistered ? "Remove" : "Set Up"}
+              </button>
+            </div>
+
+            {passkeyMsg && (
+              <div
+                style={{
+                  marginTop: 12, padding: "10px 14px", borderRadius: 10, fontSize: 13,
+                  background: passkeyMsg.ok ? "#f0fdf4" : "#fff1f0",
+                  border: `1px solid ${passkeyMsg.ok ? "#bbf7d0" : "#f3c5c0"}`,
+                  color: passkeyMsg.ok ? "#15803d" : "#b91c1c",
+                }}
+              >
+                {passkeyMsg.text}
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </main>

@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
+import { isPasskeySupported, authenticateWithPasskey } from "@/lib/passkey";
+import { getSupabaseClient } from "@/lib/supabaseClient";
 
 type Mode = "signin" | "signup";
 
@@ -25,17 +27,41 @@ export default function AuthPage() {
   const [error, setError]           = useState<string | null>(null);
   const [info, setInfo]             = useState<string | null>(null);
   const [loading, setLoading]       = useState(false);
+  const [passkeySupported, setPasskeySupported] = useState(false);
+  const [passkeyLoading, setPasskeyLoading]     = useState(false);
 
   // Already signed in — go home
   useEffect(() => {
     if (user) router.replace("/");
   }, [user, router]);
 
+  // Detect Face ID / Touch ID support
+  useEffect(() => {
+    isPasskeySupported().then(setPasskeySupported);
+  }, []);
+
   // Pre-fill email if remembered
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY);
     if (saved) { setEmail(saved); setRemember(true); } // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
+
+  async function handleFaceId() {
+    if (!email) { setError("Enter your email first, then tap Face ID"); return; }
+    setError(null);
+    setPasskeyLoading(true);
+    const result = await authenticateWithPasskey(email);
+    if ("error" in result) { setError(result.error); setPasskeyLoading(false); return; }
+    const sb = getSupabaseClient();
+    if (!sb) { setError("Auth not configured"); setPasskeyLoading(false); return; }
+    const { error: otpErr } = await sb.auth.verifyOtp({
+      token_hash: result.tokenHash,
+      type:       "magiclink",
+    });
+    setPasskeyLoading(false);
+    if (otpErr) { setError("Face ID sign-in failed — please use your password"); return; }
+    router.push("/");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,7 +124,7 @@ export default function AuthPage() {
         <div
           style={{
             display: "flex",
-            background: "#f3f4f6",
+            background: "var(--c-muted)",
             borderRadius: 12,
             padding: 4,
             marginBottom: 24,
@@ -113,8 +139,8 @@ export default function AuthPage() {
                 padding: "9px 0",
                 borderRadius: 9,
                 border: "none",
-                background: mode === m ? "#fff" : "transparent",
-                color: mode === m ? "#111" : "#6b7280",
+                background: mode === m ? "var(--c-card)" : "transparent",
+                color: mode === m ? "var(--c-text)" : "var(--c-sub)",
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: "pointer",
@@ -170,7 +196,7 @@ export default function AuthPage() {
           {mode === "signup" && (
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
-                Username <span style={{ fontWeight: 400, color: "#9ca3af" }}>(optional)</span>
+                Username <span style={{ fontWeight: 400, color: "var(--c-sub)" }}>(optional)</span>
               </label>
               <input
                 type="text"
@@ -180,8 +206,8 @@ export default function AuthPage() {
                 style={{
                   width: "100%", boxSizing: "border-box",
                   padding: "12px 14px", border: "1px solid #e5e7eb",
-                  borderRadius: 12, fontSize: 15, color: "#111",
-                  background: "#fafafa", outline: "none",
+                  borderRadius: 12, fontSize: 15, color: "var(--c-text)",
+                  background: "var(--c-input)", outline: "none",
                 }}
               />
             </div>
@@ -252,6 +278,54 @@ export default function AuthPage() {
           >
             {loading ? "…" : mode === "signin" ? "Sign In" : "Create Account"}
           </button>
+
+          {/* Face ID / Touch ID button — only shown on supported devices in sign-in mode */}
+          {mode === "signin" && passkeySupported && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0" }}>
+                <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+                <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>or</span>
+                <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+              </div>
+              <button
+                type="button"
+                onClick={handleFaceId}
+                disabled={passkeyLoading}
+                style={{
+                  padding: "14px 0",
+                  borderRadius: 14,
+                  border: "1.5px solid var(--c-border)",
+                  background: "var(--c-card)",
+                  color: "var(--c-text)",
+                  fontSize: 15,
+                  fontWeight: 800,
+                  cursor: passkeyLoading ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  transition: "background 0.15s",
+                }}
+              >
+                {passkeyLoading ? (
+                  "Verifying…"
+                ) : (
+                  <>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 2C9.24 2 7 4.24 7 7v1H5v13h14V8h-2V7c0-2.76-2.24-5-5-5zm0 2c1.66 0 3 1.34 3 3v1H9V7c0-1.66 1.34-3 3-3zm0 8c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" fill="currentColor" opacity="0.15"/>
+                      <path d="M9 12c0-.55.45-1 1-1 .28 0 .52.11.71.29" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      <circle cx="12" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <path d="M7 7c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                      <path d="M6 10c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1H6z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+                      <path d="M12 16.5v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Sign In with Face ID
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </form>
       </div>
 

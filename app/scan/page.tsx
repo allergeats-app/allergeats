@@ -271,9 +271,9 @@ export default function ScanPage() {
 function StaffBlock({ row }: { row: Row }) {
     return (
       <div style={{ marginTop: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 800, color: "#6b7280", marginBottom: 6 }}>Ask staff</div>
-        <div style={{ display: "grid", gap: 4 }}>{row.staffQuestions.slice(0, 3).map((q, i) => <div key={i} style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.4 }}>• {q}</div>)}</div>
-        <button onClick={() => copyText(questionsText(row.item, row.staffQuestions))} style={{ width: "100%", marginTop: 10, padding: "11px 14px", borderRadius: 12, border: "1px solid #e5e7eb", background: "#fff", color: "#374151", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Copy Questions</button>
+        <div style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", marginBottom: 6 }}>Ask staff</div>
+        <div style={{ display: "grid", gap: 4 }}>{row.staffQuestions.slice(0, 3).map((q, i) => <div key={i} style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.4 }}>• {q}</div>)}</div>
+        <button onClick={() => copyText(questionsText(row.item, row.staffQuestions))} style={{ width: "100%", marginTop: 10, padding: "11px 14px", borderRadius: 12, border: "1px solid var(--c-border)", background: "var(--c-card)", color: "var(--c-text)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Copy Questions</button>
       </div>
     );
   }
@@ -341,15 +341,15 @@ function StaffBlock({ row }: { row: Row }) {
 
     if (alreadyReported) {
       return (
-        <div style={{ marginTop: 8, fontSize: 11, color: "#6b7280", fontWeight: 600 }}>
-          {alreadyReported === "safe" ? "✓ You reported this safe" : "⚠ You reported a reaction"} · <button onClick={() => { const n = new Map(myReports); n.delete(key); setMyReports(n); }} style={{ background: "none", border: "none", color: "#9ca3af", fontSize: 11, cursor: "pointer", padding: 0 }}>Undo</button>
+        <div style={{ marginTop: 8, fontSize: 11, color: "var(--c-sub)", fontWeight: 600 }}>
+          {alreadyReported === "safe" ? "✓ You reported this safe" : "⚠ You reported a reaction"} · <button onClick={() => { const n = new Map(myReports); n.delete(key); setMyReports(n); }} style={{ background: "none", border: "none", color: "var(--c-sub)", fontSize: 11, cursor: "pointer", padding: 0 }}>Undo</button>
         </div>
       );
     }
 
     return (
       <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Did you eat this?</span>
+        <span style={{ fontSize: 11, color: "var(--c-sub)", fontWeight: 600 }}>Did you eat this?</span>
         <button
           onClick={() => report("safe")}
           style={{ padding: "5px 10px", borderRadius: 999, border: "1px solid #bbf7d0", background: "#f0fdf4", color: "#15803d", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
@@ -374,8 +374,8 @@ function StaffBlock({ row }: { row: Row }) {
     const desc = parts.length > 1 ? parts.slice(1).join("—").trim() : null;
     return (
       <div>
-        <div style={{ fontWeight: 800, fontSize: 14, color: "#111", lineHeight: 1.3 }}>{name}</div>
-        {desc && <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2, lineHeight: 1.4 }}>{desc}</div>}
+        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", lineHeight: 1.3 }}>{name}</div>
+        {desc && <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2, lineHeight: 1.4 }}>{desc}</div>}
       </div>
     );
   }
@@ -407,8 +407,8 @@ function StaffBlock({ row }: { row: Row }) {
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: meta.bg, border: `1px solid ${meta.border}`, display: "grid", placeItems: "center", fontSize: 14, fontWeight: 900, color: meta.textColor }}>{meta.mark}</div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 15, color: "#111" }}>{meta.label} <span style={{ fontWeight: 600, color: "#6b7280" }}>({rows.length})</span></div>
-            <div style={{ fontSize: 11, color: "#9ca3af" }}>{meta.subtitle}</div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: "var(--c-text)" }}>{meta.label} <span style={{ fontWeight: 600, color: "var(--c-sub)" }}>({rows.length})</span></div>
+            <div style={{ fontSize: 11, color: "var(--c-sub)" }}>{meta.subtitle}</div>
           </div>
         </div>
         <div style={{ display: "grid", gap: 10 }}>
@@ -432,7 +432,7 @@ function StaffBlock({ row }: { row: Row }) {
                 </>
               )}
               {tone === "safe" && r.hits.length > 0 && (
-                <div style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>Scanned for: {r.hits.slice(0, 4).join(", ")}{r.hits.length > 4 ? "…" : ""}</div>
+                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 6 }}>Scanned for: {r.hits.slice(0, 4).join(", ")}{r.hits.length > 4 ? "…" : ""}</div>
               )}
               {tone !== "safe" && <StaffBlock row={r} />}
               {tone === "ask" && <LearnBlock row={r} />}
@@ -761,7 +761,7 @@ function StaffBlock({ row }: { row: Row }) {
                     {loadedRestaurant ? loadedRestaurant : "Scan Results"} — {menuItems.length} items
                   </div>
                   {communityScores.size > 0 && (
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6b7280" }}>👥 Community data</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-sub)" }}>👥 Community data</div>
                   )}
                 </div>
                 <div style={{ height: 8, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex" }}>
@@ -799,7 +799,7 @@ function SummaryPill({ count, label, color, bg }: { count: number; label: string
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 999, background: bg }}>
       <span style={{ fontWeight: 800, fontSize: 13, color }}>{count}</span>
-      <span style={{ fontSize: 12, color: "#9ca3af" }}>{label}</span>
+      <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{label}</span>
     </div>
   );
 }
