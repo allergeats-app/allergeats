@@ -8,6 +8,7 @@ import type { LayoutOption } from "@/app/restaurants/types";
 
 export function RestaurantsHeader({
   locationLabel, locationMode, resultsSource,
+  onLocationPress,
   query, setQuery,
   activeFilterCount, showFilterDrawer, setShowFilterDrawer,
   layout, setLayout,
@@ -16,6 +17,7 @@ export function RestaurantsHeader({
   locationLabel: string;
   locationMode: "precise" | "approximate" | "cached" | "unavailable";
   resultsSource: "live" | "mock";
+  onLocationPress: () => void;
   query: string; setQuery: (q: string) => void;
   activeFilterCount: number; showFilterDrawer: boolean; setShowFilterDrawer: (v: boolean) => void;
   layout: LayoutOption; setLayout: (l: LayoutOption) => void;
@@ -46,16 +48,31 @@ export function RestaurantsHeader({
         {/* Row 1 — location · logo · [search] [filters] [settings] */}
         {!searchOpen ? (
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36 }}>
-            <span style={{
-              position: "absolute", left: 0,
-              fontSize: 11, color: "#9ca3af",
-              maxWidth: "30%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>
-              {locationLabel}
-              {resultsSource === "mock"      && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample</span>}
-              {resultsSource === "live" && locationMode === "cached"      && <span style={{ color: "#f59e0b", fontWeight: 600 }}> · Saved</span>}
-              {resultsSource === "live" && locationMode === "approximate" && <span style={{ color: "#f59e0b", fontWeight: 600 }}> · Approx.</span>}
-            </span>
+            <button
+              type="button"
+              onClick={onLocationPress}
+              aria-label="Change location"
+              style={{
+                position: "absolute", left: 0,
+                display: "flex", alignItems: "center", gap: 4,
+                background: "none", border: "none", padding: "4px 0",
+                cursor: "pointer", maxWidth: "35%",
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span style={{
+                fontSize: 11, color: "#9ca3af",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {locationLabel}
+                {resultsSource === "mock"      && <span style={{ color: "#f59e0b", fontWeight: 700 }}> · Sample</span>}
+                {resultsSource === "live" && locationMode === "cached"      && <span style={{ color: "#f59e0b", fontWeight: 600 }}> · Saved</span>}
+                {resultsSource === "live" && locationMode === "approximate" && <span style={{ color: "#f59e0b", fontWeight: 600 }}> · Approx.</span>}
+              </span>
+            </button>
             <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
               <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
             </Link>

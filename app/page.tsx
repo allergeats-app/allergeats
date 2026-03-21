@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
+import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
 import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
@@ -14,6 +15,7 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import { AllergySelector } from "@/components/AllergySelector";
 import { RestaurantsHeader } from "@/components/RestaurantsHeader";
 import { RestaurantsFilterDrawer } from "@/components/RestaurantsFilterDrawer";
+import { LocationPickerSheet } from "@/components/LocationPickerSheet";
 import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 import type { SortOption, LayoutOption, TypeFilter } from "./restaurants/types";
@@ -142,7 +144,8 @@ function HomeContent() {
   const [onlyWithMenu, setOnlyWithMenu] = useState(true);
   const [onlySaved, setOnlySaved]       = useState(false);
   const [radiusMiles, setRadiusMiles]   = useState(10);
-  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [showFilterDrawer, setShowFilterDrawer]   = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   // Safe initialization — no browser APIs during render
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
@@ -155,8 +158,9 @@ function HomeContent() {
   const [resultsSource, setResultsSource]   = useState<"live" | "mock">("live");
   const [layout, setLayout]                 = useState<LayoutOption>("list");
   const [userLocation, setUserLocation]     = useState<Coordinates | null>(null);
-  const [searchCenter, setSearchCenter]     = useState<{ lat: number; lng: number } | null>(null);
+  const [searchCenter, setSearchCenter]     = useState<{ lat: number; lng: number; label?: string } | null>(null);
 
+  const { isDark } = useTheme();
   const { user, firstName, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
   const { isFavorite } = useFavorites();
   const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -224,9 +228,9 @@ function HomeContent() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       const a = data.address ?? {};
-      return a.neighbourhood ?? a.suburb ?? a.city_district ?? a.city ?? a.town ?? a.village ?? `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
+      return a.neighbourhood ?? a.suburb ?? a.city_district ?? a.city ?? a.town ?? a.village ?? "Nearby";
     } catch {
-      return `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
+      return "Nearby";
     }
   }
 
@@ -242,12 +246,17 @@ function HomeContent() {
         let accuracy: number | undefined;
 
         if (searchCenter) {
-          // User manually panned the map — search that area, not current location
           lat = searchCenter.lat;
           lng = searchCenter.lng;
           setLocationMode("precise");
-          setLocationLabel("Searching this area");
-          reverseGeocode(lat, lng).then((name) => { if (!cancelled) setLocationLabel(`Map · ${name}`); });
+          if (searchCenter.label) {
+            // User explicitly picked a location by name — use it directly
+            if (!cancelled) setLocationLabel(searchCenter.label);
+          } else {
+            // Map pan — geocode to get a name
+            setLocationLabel("Searching this area");
+            reverseGeocode(lat, lng).then((name) => { if (!cancelled) setLocationLabel(name); });
+          }
         } else {
           // Preflight: if the user has already denied location, skip the GPS wait entirely.
           // "prompt" and "unsupported" still proceed — we let the browser handle those naturally.
@@ -375,6 +384,16 @@ function HomeContent() {
   const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
 
+  function handleSelectLocation(lat: number, lng: number, label: string) {
+    setSearchCenter({ lat, lng, label });
+    setLocationLabel(label);
+  }
+
+  function handleUseCurrentLocation() {
+    setSearchCenter(null);
+    setLocationLabel("Locating…");
+  }
+
   return (
     <main className="safe-pb" style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif" }}>
 
@@ -383,6 +402,7 @@ function HomeContent() {
         locationLabel={locationLabel}
         locationMode={locationMode}
         resultsSource={resultsSource}
+        onLocationPress={() => setShowLocationPicker(true)}
         query={query}
         setQuery={setQuery}
         activeFilterCount={activeFilterCount}
@@ -491,6 +511,12 @@ function HomeContent() {
         onReset={resetFilters}
       />
 
+      <LocationPickerSheet
+        open={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        onSelectLocation={handleSelectLocation}
+        onUseCurrentLocation={handleUseCurrentLocation}
+      />
 
       {/* ── 5 & 6. Best Match + full results ─────────────────────────────── */}
       <div className={`rp-results rp-results--${layout}`}>
@@ -554,6 +580,7 @@ function HomeContent() {
             userLat={userLocation?.lat}
             userLng={userLocation?.lng}
             onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
+            isDark={isDark}
           />
         ) : (
           <>
