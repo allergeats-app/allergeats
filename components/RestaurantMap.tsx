@@ -29,8 +29,10 @@ function makeMarkerHtml(r: ScoredRestaurant, dark: boolean): string {
   const label     = safePct != null ? `${safePct}%` : "–";
   const shortName = r.name.length > 15 ? r.name.slice(0, 14) + "…" : r.name;
 
+  // transform: translate(-50%, -50%) centers the pill on the coordinate point
   return `<div style="
-    display:flex;align-items:center;gap:5px;
+    transform:translate(-50%,-50%);
+    display:inline-flex;align-items:center;gap:5px;
     padding:5px 10px 5px 7px;border-radius:999px;
     background:${bg};border:2px solid ${color};
     box-shadow:0 2px 12px rgba(0,0,0,${dark ? "0.55" : "0.16"});
@@ -150,13 +152,13 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
 
       // CartoDB tiles — Voyager (light) or DarkMatter (dark)
       const tileUrl = isDark
-        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png";
 
       L.tileLayer(tileUrl, {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: "abcd",
-        maxZoom: 20,
+        maxZoom: 19,
       }).addTo(map);
 
       // User location — pulsing blue dot
@@ -183,7 +185,9 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
         const icon = L.divIcon({
           html: makeMarkerHtml(r, isDark),
           className: "",
-          iconAnchor: [0, 0],
+          iconSize:    [0, 0],   // zero so the anchor point IS the coordinate
+          iconAnchor:  [0, 0],   // pill is then centered via CSS transform
+          popupAnchor: [0, -18], // popup appears above the pill
         });
 
         L.marker([r.lat, r.lng], { icon })

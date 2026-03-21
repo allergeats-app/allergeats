@@ -159,6 +159,7 @@ function HomeContent() {
   const [layout, setLayout]                 = useState<LayoutOption>("list");
   const [userLocation, setUserLocation]     = useState<Coordinates | null>(null);
   const [searchCenter, setSearchCenter]     = useState<{ lat: number; lng: number; label?: string } | null>(null);
+  const [locationRefresh, setLocationRefresh] = useState(0);
 
   const { isDark } = useTheme();
   const { user, firstName, allergens: authAllergens, loading: authLoading, saveAllergens } = useAuth();
@@ -318,7 +319,7 @@ function HomeContent() {
 
     load();
     return () => { cancelled = true; };
-  }, [radiusMiles, searchCenter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [radiusMiles, searchCenter, locationRefresh]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const restaurants = useMemo(() =>
     rawRestaurants.map((r) => scoreRestaurant(r, localAllergens)),
@@ -392,6 +393,7 @@ function HomeContent() {
   function handleUseCurrentLocation() {
     setSearchCenter(null);
     setLocationLabel("Locating…");
+    setLocationRefresh((n) => n + 1); // force load effect to re-run even if searchCenter was already null
   }
 
   return (
