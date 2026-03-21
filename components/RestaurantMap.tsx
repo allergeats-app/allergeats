@@ -121,18 +121,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
     (async () => {
       const L = (await import("leaflet")).default;
 
-      // Inject Leaflet CSS and wait for it to load before initializing the map.
-      // Without awaiting, Leaflet's tile grid math runs before CSS applies → grey tiles.
-      await new Promise<void>((resolve) => {
-        if (document.getElementById("leaflet-css")) { resolve(); return; }
-        const link = document.createElement("link");
-        link.id   = "leaflet-css";
-        link.rel  = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        link.onload  = () => resolve();
-        link.onerror = () => resolve(); // continue even if CDN fails
-        document.head.appendChild(link);
-      });
+      // Leaflet CSS is bundled via layout.tsx import — no CDN injection needed.
       if (!document.getElementById("leaflet-popup-css")) {
         const style = document.createElement("style");
         style.id        = "leaflet-popup-css";
@@ -229,18 +218,12 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
   }, []);
 
   return (
-    <div style={{
-      position: "relative",
-      borderRadius: 20,
-      overflow: "hidden",
-      border: `1px solid ${isDark ? "#3a3a3c" : "#e5e7eb"}`,
-      boxShadow: "0 4px 24px rgba(0,0,0,0.1)",
-    }}>
+    <div style={{ position: "relative", overflow: "hidden" }}>
       <div
         ref={containerRef}
         style={{
           width: "100%",
-          height: "calc(100vh - 200px)",
+          height: "calc(100dvh - 96px)",
           minHeight: 440,
         }}
       />

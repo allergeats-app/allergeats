@@ -54,7 +54,7 @@ textarea {
   padding: 16px 16px 0;
 }
 .rp-results--list { max-width: 600px; }
-.rp-results--map  { max-width: 100%; }
+.rp-results--map  { max-width: 100%; padding: 0; }
 .rp-results--grid { max-width: 600px; }
 
 .rp-grid {

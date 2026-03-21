@@ -417,7 +417,7 @@ function HomeContent() {
         radiusMiles={radiusMiles}
       />
 
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
+      {layout !== "map" && <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
 
         {/* ── Welcome greeting (signed-in users only) ───────────────────── */}
         {user && firstName && (
@@ -489,7 +489,7 @@ function HomeContent() {
           </CameraScanButton>
         </div>
 
-      </div>
+      </div>}
 
       <RestaurantsFilterDrawer
         open={showFilterDrawer}
