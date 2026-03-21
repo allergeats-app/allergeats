@@ -1,7 +1,7 @@
 import type { Confidence } from "@/lib/types";
 
 const CONFIG: Record<Confidence, { bg: string; text: string; border: string }> = {
-  High:   { bg: "#fff1f0", text: "#c0392b", border: "#f3c5c0" },
+  High:   { bg: "#eff6ff", text: "#1d4ed8", border: "#bfdbfe" },
   Medium: { bg: "#fff7db", text: "#8a6700", border: "#f4dd8d" },
   Low:    { bg: "#f5f5f5", text: "#6b7280", border: "#e5e7eb" },
 };

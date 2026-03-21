@@ -18,6 +18,7 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
 import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
+import { useTheme } from "@/lib/themeContext";
 import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
 import type {
   RestaurantMenuAnalysis,
@@ -1104,9 +1105,11 @@ function SectionHeader({ label, count }: { label: string; count?: number }) {
 }
 
 function BestOptionCard({ rec }: { rec: SafeOrderRecommendation }) {
+  const { isDark } = useTheme();
   return (
     <div style={{
-      background: "#f0fdf4", border: "1px solid #bbf7d0",
+      background: isDark ? "var(--c-card)" : "#f0fdf4",
+      border: isDark ? "1px solid #166534" : "1px solid #bbf7d0",
       borderRadius: 14, padding: "12px 14px",
       display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
     }}>
@@ -1119,14 +1122,16 @@ function BestOptionCard({ rec }: { rec: SafeOrderRecommendation }) {
           {rec.explanation}
         </div>
         {rec.askNotes.length > 0 && (
-          <div style={{ fontSize: 13, color: "#854d0e", marginTop: 5 }}>
+          <div style={{ fontSize: 13, color: isDark ? "#86efac" : "#854d0e", marginTop: 5 }}>
             Ask: {rec.askNotes[0]}
           </div>
         )}
       </div>
       <span style={{
         flexShrink: 0, padding: "4px 12px", borderRadius: 999,
-        background: "#dcfce7", color: "#15803d", fontSize: 13, fontWeight: 700,
+        background: isDark ? "#14532d" : "#dcfce7",
+        color: isDark ? "#86efac" : "#15803d",
+        fontSize: 13, fontWeight: 700,
       }}>
         {rec.reasonLabel}
       </span>

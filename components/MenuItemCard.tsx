@@ -144,41 +144,8 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
             </div>
           )}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+        <div style={{ flexShrink: 0 }}>
           <RiskBadge risk={item.risk} />
-          {canOrder && onToggleOrder !== undefined && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onToggleOrder(); }}
-              aria-label={inOrder ? "Remove from order" : "Add to order"}
-              style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: "7px 13px", borderRadius: 999,
-                border: `1.5px solid ${inOrder ? orderColor : "var(--c-border)"}`,
-                background: inOrder ? orderColor : "transparent",
-                color: inOrder ? "#fff" : orderColor,
-                fontSize: 13, fontWeight: 800,
-                cursor: "pointer", transition: "all 0.15s",
-                minHeight: 36,
-              }}
-            >
-              {inOrder ? (
-                <>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  Added
-                </>
-              ) : (
-                <>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                  </svg>
-                  Add
-                </>
-              )}
-            </button>
-          )}
         </div>
       </div>
 
@@ -218,27 +185,61 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         );
       })()}
 
-      {/* Confidence + expand toggle */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Confidence + add + expand toggle */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         <ConfidenceBadge confidence={item.confidence} />
-        {item.staffQuestions.length > 0 && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-              color: "var(--c-sub)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "12px 0 12px 14px",
-              margin: "-12px 0 -12px -14px",
-              minHeight: 44,
-            }}
-          >
-            {expanded ? "Hide questions" : "What to ask →"}
-          </button>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {canOrder && onToggleOrder !== undefined && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onToggleOrder(); }}
+              aria-label={inOrder ? "Remove from order" : "Add to order"}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "5px 12px", borderRadius: 999,
+                border: `1.5px solid ${inOrder ? orderColor : "var(--c-border)"}`,
+                background: inOrder ? orderColor : "transparent",
+                color: inOrder ? "#fff" : orderColor,
+                fontSize: 13, fontWeight: 800,
+                cursor: "pointer", transition: "all 0.15s",
+              }}
+            >
+              {inOrder ? (
+                <>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Added
+                </>
+              ) : (
+                <>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Add
+                </>
+              )}
+            </button>
+          )}
+          {item.staffQuestions.length > 0 && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: "var(--c-sub)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "12px 0 12px 14px",
+                margin: "-12px 0 -12px -14px",
+                minHeight: 44,
+              }}
+            >
+              {expanded ? "Hide questions" : "What to ask →"}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Staff questions */}
