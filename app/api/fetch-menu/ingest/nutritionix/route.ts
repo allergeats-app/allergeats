@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 
 const TIMEOUT_MS = 10_000;
 
+// 30 searches per minute per IP
+const INGEST_WINDOW_MS = 60_000;
+const INGEST_MAX_REQ   = 30;
+
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), INGEST_WINDOW_MS, INGEST_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
   const appId  = process.env.NUTRITIONIX_APP_ID;
   const appKey = process.env.NUTRITIONIX_APP_KEY;
 

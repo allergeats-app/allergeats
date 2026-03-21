@@ -14,12 +14,24 @@
  * Returns image bytes with a 24h cache header, or 404 if no photo found /
  * key not configured.
  */
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
+// 30 photo requests per minute per IP
+const PHOTO_WINDOW_MS = 60_000;
+const PHOTO_MAX_REQ   = 30;
+/** Timeout for each Google Places API call. */
+const FETCH_TIMEOUT_MS = 10_000;
+
 export async function GET(req: Request) {
+  if (isRateLimited(getClientIp(req), PHOTO_WINDOW_MS, PHOTO_MAX_REQ)) {
+    return new Response("Too many requests", { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const placeId = searchParams.get("placeId");
   const name    = searchParams.get("name") ?? "";
-  const lat     = searchParams.get("lat");
-  const lng     = searchParams.get("lng");
+  const latRaw  = searchParams.get("lat");
+  const lngRaw  = searchParams.get("lng");
 
   const NO_CACHE = { headers: { "Cache-Control": "no-store" } };
 
@@ -32,6 +44,22 @@ export async function GET(req: Request) {
     return new Response(null, { status: 400, ...NO_CACHE });
   }
 
+  // Validate lat/lng — must be numeric and in valid range before embedding in URL
+  let lat: string | null = null;
+  let lng: string | null = null;
+  if (latRaw && lngRaw) {
+    const latNum = parseFloat(latRaw);
+    const lngNum = parseFloat(lngRaw);
+    if (
+      isNaN(latNum) || latNum < -90  || latNum > 90  ||
+      isNaN(lngNum) || lngNum < -180 || lngNum > 180
+    ) {
+      return new Response(null, { status: 400, ...NO_CACHE });
+    }
+    lat = String(latNum);
+    lng = String(lngNum);
+  }
+
   try {
     let photoRef: string | undefined;
 
@@ -40,7 +68,7 @@ export async function GET(req: Request) {
       const detailRes = await fetch(
         `https://maps.googleapis.com/maps/api/place/details/json` +
         `?place_id=${encodeURIComponent(placeId)}&fields=photos&key=${key}`,
-        { next: { revalidate: 3600 } },
+        { next: { revalidate: 3600 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
       );
       if (detailRes.ok) {
         const detail = await detailRes.json();
@@ -52,7 +80,7 @@ export async function GET(req: Request) {
       const findRes = await fetch(
         `https://maps.googleapis.com/maps/api/place/findplacefromtext/json` +
         `?input=${encodeURIComponent(name)}&inputtype=textquery&fields=photos${bias}&key=${key}`,
-        { next: { revalidate: 3600 } },
+        { next: { revalidate: 3600 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
       );
       if (findRes.ok) {
         const findData = await findRes.json();
@@ -66,6 +94,7 @@ export async function GET(req: Request) {
     const photoRes = await fetch(
       `https://maps.googleapis.com/maps/api/place/photo` +
       `?maxwidth=600&photo_reference=${photoRef}&key=${key}`,
+      { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     );
 
     if (!photoRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
