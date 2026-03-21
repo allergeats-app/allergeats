@@ -57,6 +57,13 @@ export function scoreMenuItem(
     ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
     : [...analyzed.matchedAllergens];
 
+  // When official allergen data overrides the risk to "avoid", the text-engine explanation
+  // will say "No allergens detected" (it found nothing in the item name). Replace it with
+  // an accurate explanation based on the official allergen list.
+  const explanation: string = officialHits.length > 0 && analyzed.risk !== "avoid"
+    ? `Contains ${officialHits.join(", ")} — avoid.`
+    : analyzed.explanation;
+
   // Per-item sourceConfidence from the ingestion adapter takes precedence over the
   // engine's own confidence estimate. This lets a single well-documented item inside
   // a medium-confidence scrape (e.g. one that listed official allergens inline) be
@@ -83,7 +90,7 @@ export function scoreMenuItem(
         .map((s) => s.reason)
     )],
     triggerTerms:   [...new Set(analyzed.signals.map((s) => s.trigger))],
-    explanation:    analyzed.explanation,
+    explanation,
     staffQuestions: analyzed.staffQuestions,
     userAllergenHits,
     sectionIndex:   item.sectionIndex,
