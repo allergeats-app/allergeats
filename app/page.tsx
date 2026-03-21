@@ -345,8 +345,8 @@ function HomeContent() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     let list = restaurants.filter((r) => matchesType(r, typeFilter));
-    if (onlySaved)    list = list.filter((r) => isFavorite(r.id));
-    if (onlyWithMenu) list = list.filter((r) => r.scoredItems.length > 0);
+    if (onlySaved)                         list = list.filter((r) => isFavorite(r.id));
+    if (onlyWithMenu && layout !== "map")  list = list.filter((r) => r.scoredItems.length > 0);
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
     switch (sort) {
@@ -380,7 +380,7 @@ function HomeContent() {
         break;
     }
     return list;
-  }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite]);
+  }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite, layout]);
 
   const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
