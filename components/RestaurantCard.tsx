@@ -36,6 +36,10 @@ function coverForRestaurant(cuisine: string, name: string): { bg: string } {
 export function RestaurantCard({ restaurant: r, compact = false }: Props) {
   const { summary } = r;
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
+  // Top safe items to preview on the card (up to 3, non-compact only)
+  const safeItemNames = !compact
+    ? r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name)
+    : [];
   const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
   const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
   const cover = coverForRestaurant(r.cuisine, r.name);
@@ -153,17 +157,33 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
                 <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />
               </div>
               {!compact && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-                  <div style={{ display: "flex", gap: 14 }}>
-                    <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
-                    <Stat count={summary.ask}        label="Ask"   color="#d97706" />
-                    <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                    <div style={{ display: "flex", gap: 14 }}>
+                      <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
+                      <Stat count={summary.ask}        label="Ask"   color="#d97706" />
+                      <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{tierLabel}</span>
+                    </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{tierLabel}</span>
-                  </div>
-                </div>
+                  {safeItemNames.length > 0 && (
+                    <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {safeItemNames.map((name) => (
+                        <span key={name} style={{
+                          fontSize: 11, fontWeight: 700,
+                          color: "#15803d", background: "#f0fdf4",
+                          border: "1px solid #bbf7d0",
+                          padding: "3px 9px", borderRadius: 999,
+                        }}>
+                          ✓ {name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
               {compact && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>

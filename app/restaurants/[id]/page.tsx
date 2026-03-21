@@ -93,7 +93,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   const [restaurant, setRestaurant]       = useState<Restaurant | null>(null);
   const [userAllergens, setUserAllergens] = useState<AllergenId[]>([]);
   const [notFound, setNotFound]           = useState(false);
-  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("all");
+  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("likely-safe");
   const [photoFailed, setPhotoFailed]     = useState(false);
   const [questionsCopied, setQuestionsCopied] = useState(false);
   // Incremented after each feedback submission — forces memory re-application
@@ -478,9 +478,9 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
                 {/* ── 2. Quick stats row ── */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-                  <StatPill count={summary.likelySafe} label="Safe"  color="#15803d" bg="#f0fdf4" />
-                  <StatPill count={summary.ask}        label="Ask"   color="#854d0e" bg="#fefce8" />
-                  <StatPill count={summary.avoid}      label="Avoid" color="#b91c1c" bg="#fff1f0" />
+                  <StatPill count={summary.likelySafe} label="Safe"  color="#15803d" bg="#f0fdf4" active={riskFilter === "likely-safe"} onClick={() => { setRiskFilter("likely-safe"); document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatPill count={summary.ask}        label="Ask"   color="#854d0e" bg="#fefce8" active={riskFilter === "ask"}         onClick={() => { setRiskFilter("ask");          document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatPill count={summary.avoid}      label="Avoid" color="#b91c1c" bg="#fff1f0" active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                 </div>
 
                 {/* Coverage trust signal */}
@@ -600,7 +600,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
         {/* ── 5. Full menu ── */}
         {!hasNoMenu && (
-          <section>
+          <section id="full-menu">
             <SectionHeader label="Full Menu" count={summary.total} />
 
             {/* Sticky risk filter chips */}
@@ -718,15 +718,27 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
 
 // ── Helper components ─────────────────────────────────────────────────────────
 
-function StatPill({ count, label, color, bg }: { count: number; label: string; color: string; bg: string }) {
+function StatPill({ count, label, color, bg, active, onClick }: {
+  count: number; label: string; color: string; bg: string;
+  active?: boolean; onClick?: () => void;
+}) {
   return (
-    <div style={{
-      flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-      padding: "10px 8px", borderRadius: 12, background: bg,
-    }}>
+    <button
+      type="button"
+      onClick={onClick}
+      title={`Show ${label.toLowerCase()} items`}
+      style={{
+        flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+        padding: "10px 8px", borderRadius: 12, background: bg,
+        border: active ? `2px solid ${color}` : "2px solid transparent",
+        cursor: onClick ? "pointer" : "default",
+        transition: "border-color 0.15s",
+      }}
+    >
       <span style={{ fontWeight: 900, fontSize: 22, color, lineHeight: 1 }}>{count}</span>
       <span style={{ fontSize: 11, color, opacity: 0.8, marginTop: 3, fontWeight: 600 }}>{label}</span>
-    </div>
+      {onClick && <span style={{ fontSize: 9, color, opacity: 0.55, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
+    </button>
   );
 }
 
