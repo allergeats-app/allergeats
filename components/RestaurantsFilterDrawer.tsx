@@ -15,14 +15,21 @@ const SORT_CHIPS = [
 ];
 
 const TYPE_CHIPS: { value: TypeFilter; label: string }[] = [
-  { value: "all",        label: "All" },
-  { value: "casual",     label: "Casual Dining" },
-  { value: "steakhouse", label: "Steakhouse" },
-  { value: "burgers",    label: "Burgers" },
-  { value: "mexican",    label: "Mexican" },
-  { value: "chicken",    label: "Chicken" },
-  { value: "coffee",     label: "Coffee & Café" },
-  { value: "sandwiches", label: "Sandwiches" },
+  { value: "all",         label: "All" },
+  { value: "casual",      label: "Casual Dining" },
+  { value: "fine-dining", label: "Fine Dining" },
+  { value: "steakhouse",  label: "Steakhouse" },
+  { value: "seafood",     label: "Seafood" },
+  { value: "italian",     label: "Italian" },
+  { value: "asian",       label: "Asian" },
+  { value: "mexican",     label: "Mexican" },
+  { value: "burgers",     label: "Burgers" },
+  { value: "chicken",     label: "Chicken" },
+  { value: "pizza",       label: "Pizza" },
+  { value: "breakfast",   label: "Breakfast" },
+  { value: "sandwiches",  label: "Sandwiches" },
+  { value: "coffee",      label: "Coffee & Café" },
+  { value: "sports-bar",  label: "Sports Bar" },
 ];
 
 // ── Internal primitives ──────────────────────────────────────────────────────

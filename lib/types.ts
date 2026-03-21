@@ -106,7 +106,7 @@ export type RestaurantSafetySummary = {
 };
 
 // ─── Restaurant category tags (structured, used for filtering) ───────────────
-export type RestaurantTag = "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches" | "casual" | "steakhouse";
+export type RestaurantTag = "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches" | "casual" | "steakhouse" | "fine-dining" | "seafood" | "italian" | "pizza" | "breakfast" | "sports-bar" | "asian";
 
 // ─── Restaurant ─────────────────────────────────────────────────────────────
 export type Restaurant = {
