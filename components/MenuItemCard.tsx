@@ -6,6 +6,7 @@ import { RiskBadge } from "./RiskBadge";
 import { ConfidenceBadge } from "./ConfidenceBadge";
 import { submitFeedback } from "@/lib/learning/learningEngine";
 import type { FeedbackType } from "@/lib/learning/types";
+import { useTheme } from "@/lib/themeContext";
 
 const ALLERGEN_LABEL: Record<string, string> = {
   dairy: "Dairy", egg: "Egg", wheat: "Wheat", gluten: "Gluten",
@@ -17,17 +18,17 @@ function aLabel(id: string): string {
   return ALLERGEN_LABEL[id] ?? id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-const RISK_BG: Record<string, string> = {
-  "avoid":       "#fff1f0",
-  "ask":         "#fff7db",
-  "likely-safe": "#f0fdf4",
-  "unknown":     "#f9fafb",
+const RISK_BG: Record<string, { light: string; dark: string }> = {
+  "avoid":       { light: "#fff1f0", dark: "#2d0f0f" },
+  "ask":         { light: "#fff7db", dark: "#2a1f00" },
+  "likely-safe": { light: "#f0fdf4", dark: "#0a2414" },
+  "unknown":     { light: "#f9fafb", dark: "var(--c-card)" },
 };
-const RISK_BORDER: Record<string, string> = {
-  "avoid":       "#f3c5c0",
-  "ask":         "#f4dd8d",
-  "likely-safe": "#bbf7d0",
-  "unknown":     "#e5e7eb",
+const RISK_BORDER: Record<string, { light: string; dark: string }> = {
+  "avoid":       { light: "#f3c5c0", dark: "#7f1d1d" },
+  "ask":         { light: "#f4dd8d", dark: "#78350f" },
+  "likely-safe": { light: "#bbf7d0", dark: "#14532d" },
+  "unknown":     { light: "#e5e7eb", dark: "var(--c-border)" },
 };
 
 type FeedbackOption = {
@@ -47,14 +48,17 @@ type Props = {
 };
 
 export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onToggleOrder }: Props) {
+  const { isDark } = useTheme();
   const canOrder = item.risk === "likely-safe" || item.risk === "ask";
   const orderColor = item.risk === "likely-safe" ? "#15803d" : "#854d0e";
   const [expanded, setExpanded]           = useState(false);
   const [copied, setCopied]               = useState(false);
   const [feedbackState, setFeedbackState] = useState<"idle" | "open" | "done">("idle");
 
-  const bg     = RISK_BG[item.risk]     ?? "#f9fafb";
-  const border = RISK_BORDER[item.risk] ?? "#e5e7eb";
+  const riskBg     = RISK_BG[item.risk]     ?? { light: "#f9fafb", dark: "var(--c-card)" };
+  const riskBorder = RISK_BORDER[item.risk] ?? { light: "#e5e7eb", dark: "var(--c-border)" };
+  const bg     = isDark ? riskBg.dark     : riskBg.light;
+  const border = isDark ? riskBorder.dark : riskBorder.light;
 
   async function copyQuestions() {
     const text = item.staffQuestions.map((q) => `• ${q}`).join("\n");
@@ -137,7 +141,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: 17, lineHeight: 1.3, color: "#111" }}>{item.name}</div>
+          <div style={{ fontWeight: 800, fontSize: 17, lineHeight: 1.3, color: "var(--c-text)" }}>{item.name}</div>
           {item.description && (
             <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
               {item.description}
@@ -150,7 +154,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       </div>
 
       {/* Explanation */}
-      <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}>{item.explanation}</div>
+      <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.6 }}>{item.explanation}</div>
 
       {/* User's allergens — shown prominently */}
       {item.userAllergenHits.length > 0 && (
@@ -250,7 +254,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
           </div>
           <div style={{ display: "grid", gap: 8 }}>
             {item.staffQuestions.slice(0, 4).map((q, i) => (
-              <div key={i} style={{ fontSize: 14, color: "#374151", lineHeight: 1.55 }}>• {q}</div>
+              <div key={i} style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.55 }}>• {q}</div>
             ))}
           </div>
           <button
@@ -260,9 +264,9 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
               width: "100%",
               padding: "13px 14px",
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
-              background: "#fff",
-              color: "#374151",
+              border: "1px solid var(--c-border)",
+              background: "var(--c-card)",
+              color: "var(--c-text)",
               fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",
@@ -324,8 +328,8 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                   onClick={() => handleFeedback(opt)}
                   style={{
                     width: "100%", padding: "13px 14px", borderRadius: 12,
-                    border: "1px solid #e5e7eb", background: "#fff",
-                    color: "#374151", fontSize: 14, fontWeight: 600,
+                    border: "1px solid var(--c-border)", background: "var(--c-card)",
+                    color: "var(--c-text)", fontSize: 14, fontWeight: 600,
                     cursor: "pointer", textAlign: "left", minHeight: 48,
                   }}
                 >

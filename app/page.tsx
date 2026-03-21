@@ -14,7 +14,6 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import { AllergySelector } from "@/components/AllergySelector";
 import { RestaurantsHeader } from "@/components/RestaurantsHeader";
 import { RestaurantsFilterDrawer } from "@/components/RestaurantsFilterDrawer";
-import { HowItWorksSheet } from "@/components/HowItWorksSheet";
 import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 import type { SortOption, LayoutOption, TypeFilter } from "./restaurants/types";
@@ -144,7 +143,6 @@ function HomeContent() {
   const [onlySaved, setOnlySaved]       = useState(false);
   const [radiusMiles, setRadiusMiles]   = useState(10);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-  const [showHowItWorks, setShowHowItWorks]     = useState(false);
 
   // Safe initialization — no browser APIs during render
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
@@ -376,11 +374,9 @@ function HomeContent() {
 
   const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
-  const openHowItWorks    = useCallback(() => { trackEvent("how_it_works_opened"); setShowHowItWorks(true); }, []);
-  const closeHowItWorks   = useCallback(() => setShowHowItWorks(false), []);
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 80 }}>
+    <main className="safe-pb" style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif" }}>
 
       {/* ── 1. Sticky header ─────────────────────────────────────────────── */}
       <RestaurantsHeader
@@ -397,7 +393,6 @@ function HomeContent() {
         loading={loading}
         filteredCount={filtered.length}
         radiusMiles={radiusMiles}
-        onHowItWorks={openHowItWorks}
       />
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
@@ -455,31 +450,14 @@ function HomeContent() {
           )}
         </div>
 
-        {/* ── 3. Trust strip ───────────────────────────────────────────── */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 16,
-          padding: "10px 4px", marginTop: 2,
-        }}>
-          {[
-            { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, label: "Personalized to your allergies" },
-            { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, label: "Powered by menu data" },
-            { icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>, label: "Safer picks highlighted" },
-          ].map(({ icon, label }) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--c-sub)", fontSize: 11, fontWeight: 600 }}>
-              {icon}
-              {label}
-            </div>
-          ))}
-        </div>
-
-        {/* ── 4. Quick actions ─────────────────────────────────────────── */}
-        <div style={{ display: "flex", gap: 8, marginTop: 4, marginBottom: 4 }}>
+        {/* ── 3. Quick actions ─────────────────────────────────────────── */}
+        <div style={{ marginTop: 4, marginBottom: 4 }}>
           <CameraScanButton style={{
-            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-            padding: "12px 0", borderRadius: 14,
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+            padding: "13px 0", borderRadius: 14,
             background: "#eb1700", color: "#fff",
             border: "none", cursor: "pointer",
-            fontSize: 13, fontWeight: 800,
+            fontSize: 14, fontWeight: 800,
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -487,25 +465,6 @@ function HomeContent() {
             </svg>
             Scan a Menu
           </CameraScanButton>
-          <button
-            type="button"
-            onClick={() => { const next = layout === "map" ? "list" : "map"; if (next === "map") trackEvent("map_view_opened"); setLayout(next); }}
-            style={{
-              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-              padding: "12px 0", borderRadius: 14,
-              background: layout === "map" ? "#fef2f2" : "var(--c-card)",
-              border: `1.5px solid ${layout === "map" ? "#eb1700" : "var(--c-border)"}`,
-              color: layout === "map" ? "#eb1700" : "var(--c-sub)",
-              cursor: "pointer", fontSize: 13, fontWeight: 800,
-              transition: "all 0.15s",
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
-              <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
-            </svg>
-            Map View
-          </button>
         </div>
 
       </div>
@@ -532,7 +491,6 @@ function HomeContent() {
         onReset={resetFilters}
       />
 
-      <HowItWorksSheet open={showHowItWorks} onClose={closeHowItWorks} />
 
       {/* ── 5 & 6. Best Match + full results ─────────────────────────────── */}
       <div className={`rp-results rp-results--${layout}`}>

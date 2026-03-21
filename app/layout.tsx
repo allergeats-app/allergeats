@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/authContext";
@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "AllergEats — Eat safely with food allergies",
@@ -38,7 +44,7 @@ export default function RootLayout({
             </ErrorBoundary>
             <footer style={{
               textAlign: "center",
-              padding: "20px 20px 28px",
+              padding: "20px 20px max(28px, calc(16px + env(safe-area-inset-bottom)))",
               fontSize: 13,
               color: "var(--c-sub)",
               lineHeight: 1.6,

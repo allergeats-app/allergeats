@@ -69,6 +69,18 @@ textarea {
   .rp-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* ── Mobile: tap press feedback ─────────────────────────────────────────── */
+button:active,
+a:active,
+[role="button"]:active {
+  opacity: 0.72;
+}
+
+/* ── Safe-area bottom padding (iPhone notch / home indicator) ────────────── */
+.safe-pb {
+  padding-bottom: max(80px, calc(60px + env(safe-area-inset-bottom)));
+}
+
 /* ── Skeleton shimmer ────────────────────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: -400px 0; }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
 import { coverageTier, coverageTierLabel, coverageTierColor } from "@/lib/scoring";
 import { fitLevel, fitBadge, fitExplanation } from "@/lib/fitLevel";
@@ -34,6 +35,7 @@ function coverForRestaurant(cuisine: string, name: string): { bg: string } {
 
 
 export function RestaurantCard({ restaurant: r, compact = false }: Props) {
+  const { isDark } = useTheme();
   const { summary } = r;
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
   // Top safe items to preview on the card (up to 3, non-compact only)
@@ -175,8 +177,9 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
                       {safeItemNames.map((name) => (
                         <span key={name} style={{
                           fontSize: 13, fontWeight: 700,
-                          color: "#15803d", background: "#f0fdf4",
-                          border: "1px solid #bbf7d0",
+                          color: isDark ? "#86efac" : "#15803d",
+                          background: isDark ? "#0a2414" : "#f0fdf4",
+                          border: `1px solid ${isDark ? "#14532d" : "#bbf7d0"}`,
                           padding: "4px 10px", borderRadius: 999,
                         }}>
                           ✓ {name}
