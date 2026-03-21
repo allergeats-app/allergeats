@@ -54,6 +54,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "name is required" }, { status: 400 });
   }
 
+  if (
+    (input.lat !== undefined && (isNaN(input.lat) || input.lat < -90  || input.lat > 90))  ||
+    (input.lng !== undefined && (isNaN(input.lng) || input.lng < -180 || input.lng > 180))
+  ) {
+    return NextResponse.json({ error: "Invalid coordinates" }, { status: 400 });
+  }
+
   try {
     const result = await getRestaurantImage(input);
     return NextResponse.json(result, {

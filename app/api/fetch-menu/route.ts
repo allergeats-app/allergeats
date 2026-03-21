@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { ingestFromHtml, toRawMenuItems } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
 import { persistMenu } from "@/lib/db/persistMenu";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
+// 10 fetches per minute per IP — prevents use as a free web proxy
+const FETCH_WINDOW_MS = 60_000;
+const FETCH_MAX_REQ   = 10;
 
 /** Max response body size we'll read from an external menu URL (5 MB). */
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
@@ -9,6 +14,10 @@ const MAX_BODY_BYTES = 5 * 1024 * 1024;
 const FETCH_TIMEOUT_MS = 30_000;
 
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), FETCH_WINDOW_MS, FETCH_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
+  }
+
   try {
     const body = (await req.json()) as {
       url?: string;

@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ingestFromText } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
+// 5 scans per minute per IP — Anthropic calls are expensive
+const SCAN_WINDOW_MS  = 60_000;
+const SCAN_MAX_REQ    = 5;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -28,6 +33,10 @@ const ALLOWED_MEDIA_TYPES = new Set([
 ]);
 
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), SCAN_WINDOW_MS, SCAN_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("image") as File | null;

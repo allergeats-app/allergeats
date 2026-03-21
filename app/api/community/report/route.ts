@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
+// 30 reports per minute per IP
+const REPORT_WINDOW_MS = 60_000;
+const REPORT_MAX_REQ   = 30;
 
 function getDb() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -23,6 +28,10 @@ function normalizeRestaurant(name: string | undefined): string | null {
 }
 
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), REPORT_WINDOW_MS, REPORT_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const db = getDb();
   if (!db) return NextResponse.json({ error: "Not configured" }, { status: 503 });
 
@@ -48,6 +57,14 @@ export async function POST(req: Request) {
   const VALID_OUTCOMES = new Set(["safe", "reaction", "uncertain"]);
   if (!VALID_OUTCOMES.has(outcome)) {
     return NextResponse.json({ error: "Invalid outcome value" }, { status: 400 });
+  }
+
+  const VALID_ALLERGENS = new Set([
+    "dairy", "egg", "soy", "wheat", "gluten", "fish", "shellfish",
+    "nuts", "peanut", "tree-nut", "sesame", "corn", "mustard", "legumes", "oats",
+  ]);
+  if (!VALID_ALLERGENS.has(allergen)) {
+    return NextResponse.json({ error: "Invalid allergen value" }, { status: 400 });
   }
 
   // Cap field lengths to prevent oversized inserts

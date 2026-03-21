@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
+// 60 reads per minute per IP
+const SCORES_WINDOW_MS = 60_000;
+const SCORES_MAX_REQ   = 60;
 
 function getDb() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -36,6 +41,10 @@ export type CommunityScore = {
  * Returns community scores for each (dish, allergen) pair.
  */
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), SCORES_WINDOW_MS, SCORES_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const db = getDb();
   if (!db) return NextResponse.json({ scores: [] });
 

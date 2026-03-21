@@ -15,6 +15,8 @@
  * Returns 500 only on genuine upstream failures.
  */
 
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
 export type PlaceResult = {
   placeId:   string;
   name:      string;
@@ -52,24 +54,9 @@ const PAGE_DELAY_MS = 1500;
 /** Timeout for each Google Places API fetch. */
 const FETCH_TIMEOUT_MS = 40_000;
 
-// ─── In-memory rate limiter ───────────────────────────────────────────────────
-// Limits each IP to MAX_REQUESTS_PER_WINDOW calls per WINDOW_MS.
-// Uses a simple sliding-window counter stored in a module-level Map.
-// Resets automatically as entries expire — no external dependency needed.
+// ─── Rate limiting ────────────────────────────────────────────────────────────
 const WINDOW_MS = 60_000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 20; // 20 calls/min per IP (5 searches × 4 keywords)
-const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now - entry.windowStart > WINDOW_MS) {
-    rateLimitMap.set(ip, { count: 1, windowStart: now });
-    return false;
-  }
-  entry.count++;
-  return entry.count > MAX_REQUESTS_PER_WINDOW;
-}
 
 function toPlaceResult(r: NearbySearchResult): PlaceResult {
   return {
@@ -84,8 +71,7 @@ function toPlaceResult(r: NearbySearchResult): PlaceResult {
 }
 
 export async function POST(req: Request) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isRateLimited(ip)) {
+  if (isRateLimited(getClientIp(req), WINDOW_MS, MAX_REQUESTS_PER_WINDOW)) {
     return new Response("Too many requests", { status: 429 });
   }
 

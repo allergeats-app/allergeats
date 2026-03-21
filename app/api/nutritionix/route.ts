@@ -54,8 +54,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "brand and items are required" }, { status: 400 });
   }
 
+  if (typeof brand !== "string" || brand.length > 200) {
+    return NextResponse.json({ error: "Invalid brand value" }, { status: 400 });
+  }
+
   if (items.length > 500) {
     return NextResponse.json({ error: "Too many items (max 500)" }, { status: 400 });
+  }
+
+  if (items.some((item) => typeof item.name !== "string" || item.name.length > 300)) {
+    return NextResponse.json({ error: "Item name too long (max 300 characters)" }, { status: 400 });
   }
 
   const headers = {
