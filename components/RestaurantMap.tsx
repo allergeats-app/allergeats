@@ -121,14 +121,18 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
     (async () => {
       const L = (await import("leaflet")).default;
 
-      // Inject Leaflet CSS + custom popup CSS
-      if (!document.getElementById("leaflet-css")) {
+      // Inject Leaflet CSS and wait for it to load before initializing the map.
+      // Without awaiting, Leaflet's tile grid math runs before CSS applies → grey tiles.
+      await new Promise<void>((resolve) => {
+        if (document.getElementById("leaflet-css")) { resolve(); return; }
         const link = document.createElement("link");
         link.id   = "leaflet-css";
         link.rel  = "stylesheet";
         link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+        link.onload  = () => resolve();
+        link.onerror = () => resolve(); // continue even if CDN fails
         document.head.appendChild(link);
-      }
+      });
       if (!document.getElementById("leaflet-popup-css")) {
         const style = document.createElement("style");
         style.id        = "leaflet-popup-css";
@@ -195,10 +199,15 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
           .bindPopup(makePopupHtml(r), { maxWidth: 260 });
       }
 
-      // Recalculate tile coverage after layout settles (fixes grey tiles on desktop)
+      // Recalculate tile coverage after layout settles (fixes grey tiles on desktop).
+      // Call twice: rAF catches the first paint, setTimeout catches slower CSS/font loads.
+      map.invalidateSize();
       requestAnimationFrame(() => {
         if (!cancelled) map.invalidateSize();
       });
+      setTimeout(() => {
+        if (!cancelled) map.invalidateSize();
+      }, 400);
 
       // Show "Search this area" after panning
       map.on("moveend", () => {
