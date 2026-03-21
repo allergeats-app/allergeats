@@ -139,12 +139,22 @@ const PREP_PATTERNS: PrepPattern[] = [
   },
 ];
 
+/** Escape a string for use in a RegExp */
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Test for whole-word match to avoid false positives from partial-word substrings */
+function matchesWord(text: string, term: string): boolean {
+  return new RegExp(`\\b${escapeRe(term)}\\b`).test(text);
+}
+
 /** Returns preparation-risk signals (weight 2 = "prep") for a normalized item string */
 export function getPrepSignals(normalized: string, userAllergens: AllergenId[]): RiskSignal[] {
   const signals: RiskSignal[] = [];
 
   for (const pattern of PREP_PATTERNS) {
-    const matchedTerm = pattern.terms.find((t) => normalized.includes(t));
+    const matchedTerm = pattern.terms.find((t) => matchesWord(normalized, t));
     if (!matchedTerm) continue;
     for (const allergen of pattern.allergens) {
       if (!userAllergens.includes(allergen)) continue;

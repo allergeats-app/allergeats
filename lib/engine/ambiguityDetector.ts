@@ -79,6 +79,16 @@ const AMBIGUITY_PATTERNS: AmbiguityPattern[] = [
   },
 ];
 
+/** Escape a string for use in a RegExp */
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Test for whole-word match to avoid "nut" matching inside "minute", "peanut", etc. */
+function matchesWord(text: string, term: string): boolean {
+  return new RegExp(`\\b${escapeRe(term)}\\b`).test(text);
+}
+
 /** Returns ambiguity signals (weight 1) for allergens in user's profile we can't rule out */
 export function getAmbiguitySignals(
   normalized: string,
@@ -87,7 +97,7 @@ export function getAmbiguitySignals(
   const signals: RiskSignal[] = [];
 
   for (const pattern of AMBIGUITY_PATTERNS) {
-    const matchedTerm = pattern.terms.find((t) => normalized.includes(t));
+    const matchedTerm = pattern.terms.find((t) => matchesWord(normalized, t));
     if (!matchedTerm) continue;
     for (const allergen of pattern.allergens) {
       if (!userAllergens.includes(allergen)) continue;

@@ -15,16 +15,28 @@ import { generateStaffQuestions } from "./questionGenerator";
 import { parseMenuLines } from "./menuParser";
 import { normalizeText } from "./ocrNormalizer";
 
+/** Escape a string for use in a RegExp */
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Vocab entries pre-sorted longest-first with their word-boundary regexes compiled once.
+ * Using \b word boundaries prevents "nut" matching inside "minute", "peanut", etc.
+ */
+const SORTED_VOCAB = [...ALLERGEN_VOCABULARY]
+  .sort((a, b) => b.term.length - a.term.length)
+  .map((entry) => {
+    const normalized = normalizeText(entry.term);
+    return { entry, re: new RegExp(`\\b${escapeRe(normalized)}\\b`) };
+  });
+
 /** Run all vocabulary-based detection layers on a normalized text string */
 function detectVocabSignals(normalized: string, userAllergens: AllergenId[]): RiskSignal[] {
   const signals: RiskSignal[] = [];
 
-  // Sort vocab entries longest-first to prefer specific matches (e.g. "peanut butter" before "peanut")
-  const sorted = [...ALLERGEN_VOCABULARY].sort((a, b) => b.term.length - a.term.length);
-
-  for (const entry of sorted) {
-    const term = normalizeText(entry.term);
-    if (!normalized.includes(term)) continue;
+  for (const { entry, re } of SORTED_VOCAB) {
+    if (!re.test(normalized)) continue;
     for (const allergen of entry.allergens) {
       if (!userAllergens.includes(allergen)) continue;
       signals.push({
@@ -36,6 +48,7 @@ function detectVocabSignals(normalized: string, userAllergens: AllergenId[]): Ri
       });
     }
   }
+
 
   return signals;
 }
