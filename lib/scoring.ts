@@ -51,18 +51,29 @@ export function scoreMenuItem(
   const officialAllergens: AllergenId[] = (item.allergens ?? []) as AllergenId[];
   const officialHits = officialAllergens.filter((a) => userAllergens.includes(a));
 
-  const risk: Risk = officialHits.length > 0 ? "avoid" : mapRisk(analyzed.risk);
+  // For official sourceType, the allergen list is ground-truth — trust it completely.
+  // Don't let cuisine/dish inference override a verified clean ingredient list.
+  const isOfficialData = srcType === "official";
+  const risk: Risk = officialHits.length > 0
+    ? "avoid"
+    : isOfficialData
+      ? "likely-safe"
+      : mapRisk(analyzed.risk);
   const allDetected: string[] = [...new Set([...analyzed.allDetectedAllergens, ...officialAllergens])];
   const userAllergenHits: string[] = officialHits.length > 0
     ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
-    : [...analyzed.matchedAllergens];
+    : isOfficialData
+      ? []
+      : [...analyzed.matchedAllergens];
 
   // When official allergen data overrides the risk to "avoid", the text-engine explanation
   // will say "No allergens detected" (it found nothing in the item name). Replace it with
   // an accurate explanation based on the official allergen list.
   const explanation: string = officialHits.length > 0 && analyzed.risk !== "avoid"
     ? `Contains ${officialHits.join(", ")} — avoid.`
-    : analyzed.explanation;
+    : isOfficialData && officialHits.length === 0
+      ? "No allergens from your profile detected in official ingredient data."
+      : analyzed.explanation;
 
   // Per-item sourceConfidence from the ingestion adapter takes precedence over the
   // engine's own confidence estimate. This lets a single well-documented item inside
@@ -83,6 +94,9 @@ export function scoreMenuItem(
     detectedAllergens: allDetected,
     inferredAllergens: analyzed.signals
       .filter((s) => ["dish", "sauce", "cuisine", "prep"].includes(s.source))
+      // For official items, don't surface cuisine/dish inferences for allergens in the user's
+      // profile — the official list is authoritative for those; only show inferred non-profile allergens.
+      .filter((s) => !isOfficialData || !userAllergens.includes(s.allergen))
       .map((s) => s.allergen),
     inferredReasons: [...new Set(
       analyzed.signals
@@ -91,7 +105,9 @@ export function scoreMenuItem(
     )],
     triggerTerms:   [...new Set(analyzed.signals.map((s) => s.trigger))],
     explanation,
-    staffQuestions: analyzed.staffQuestions,
+    // For official items with no allergen hits, suppress questions generated from
+    // cuisine/dish inference — they'd be false positives on a verified clean ingredient.
+    staffQuestions: isOfficialData && officialHits.length === 0 ? [] : analyzed.staffQuestions,
     userAllergenHits,
     sectionIndex:   item.sectionIndex,
     sourceSignals:  item.sourceSignals,
