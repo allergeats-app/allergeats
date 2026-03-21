@@ -373,7 +373,12 @@ export class LiveLocationProvider implements LocationProvider {
 
     const promise = this._fetchFromOverpass(lat, lng, radius);
     inFlight.set(cacheKey, promise);
-    promise.finally(() => inFlight.delete(cacheKey));
+    // Remove from map on completion — on rejection, remove immediately so the
+    // next caller retries rather than receiving a cached rejected promise.
+    promise.then(
+      () => inFlight.delete(cacheKey),
+      () => inFlight.delete(cacheKey),
+    );
     return promise;
   }
 

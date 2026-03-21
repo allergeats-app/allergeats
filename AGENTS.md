@@ -153,11 +153,10 @@ type LearnedRule = { id: string; item: string; normalizedItem: string; outcome: 
 
 | Key | Shape | Notes |
 |-----|-------|-------|
-| `allegeats_allergies` | `string` | Comma-separated, e.g. `"dairy, egg, nuts"` |
+| `allegeats_profile_allergens` | `AllergenId[]` | JSON array of allergen IDs, e.g. `["dairy","egg"]` |
 | `allegeats_theme` | `"dark" \| "light"` | Used by scan page |
 | `allegeats_saved_scans` | `SavedScan[]` | Capped at 50 entries |
 | `allegeats_learned_rules` | `LearnedRule[]` | No size cap |
-| `allegeats_profile` | `AllergenId[]` | New profile system (JSON array) |
 
 **Do not rename or restructure these keys** without migrating existing stored data.
 

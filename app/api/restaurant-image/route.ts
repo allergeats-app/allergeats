@@ -30,9 +30,8 @@ export async function POST(req: Request) {
       },
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
-    console.error("[/api/restaurant-image] POST error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error("[/api/restaurant-image] POST error:", err);
+    return NextResponse.json({ error: "Failed to fetch restaurant image" }, { status: 500 });
   }
 }
 
@@ -71,7 +70,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error("[/api/restaurant-image] GET error:", err);
+    return NextResponse.json({ error: "Failed to fetch restaurant image" }, { status: 500 });
   }
 }

@@ -98,7 +98,7 @@ All state is stored in `localStorage` under these keys:
 
 | Key | Contents |
 |-----|----------|
-| `allegeats_allergies` | User's allergy string (comma-separated) |
+| `allegeats_profile_allergens` | User's selected allergen IDs (JSON array) |
 | `allegeats_theme` | `"dark"` or `"light"` |
 | `allegeats_saved_scans` | Array of `SavedScan` objects (max 50) |
 | `allegeats_learned_rules` | Array of `LearnedRule` objects |
