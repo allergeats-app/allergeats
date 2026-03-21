@@ -195,6 +195,11 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
           .bindPopup(makePopupHtml(r), { maxWidth: 260 });
       }
 
+      // Recalculate tile coverage after layout settles (fixes grey tiles on desktop)
+      requestAnimationFrame(() => {
+        if (!cancelled) map.invalidateSize();
+      });
+
       // Show "Search this area" after panning
       map.on("moveend", () => {
         const center = map.getCenter();
@@ -215,17 +220,19 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
   }, []);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{
+      position: "relative",
+      borderRadius: 20,
+      overflow: "hidden",
+      border: `1px solid ${isDark ? "#3a3a3c" : "#e5e7eb"}`,
+      boxShadow: "0 4px 24px rgba(0,0,0,0.1)",
+    }}>
       <div
         ref={containerRef}
         style={{
           width: "100%",
           height: "calc(100vh - 200px)",
           minHeight: 440,
-          borderRadius: 20,
-          overflow: "hidden",
-          border: `1px solid ${isDark ? "#3a3a3c" : "#e5e7eb"}`,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.1)",
         }}
       />
 
