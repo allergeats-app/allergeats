@@ -100,6 +100,9 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
   const [showDrinks, setShowDrinks]   = useState(false);
+  const [orderedItemIds, setOrderedItemIds] = useState<Set<string>>(new Set());
+  const [showOrderSheet, setShowOrderSheet] = useState(false);
+  const [orderCopied, setOrderCopied]       = useState(false);
 
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -251,6 +254,11 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     [vm],
   );
 
+  const orderedItems = useMemo(
+    () => allItems.filter((i) => orderedItemIds.has(i.id)),
+    [allItems, orderedItemIds],
+  );
+
   const filteredItems = useMemo(
     () => (riskFilter === "all" ? allItems : allItems.filter((i) => i.risk === riskFilter)),
     [allItems, riskFilter],
@@ -323,11 +331,42 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
     setTimeout(() => setQuestionsCopied(false), 2000);
   }
 
+  function toggleOrderItem(itemId: string) {
+    setOrderedItemIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  }
+
+  async function copyOrderToClipboard() {
+    const safeItems = orderedItems.filter((i) => i.risk === "likely-safe");
+    const askItems  = orderedItems.filter((i) => i.risk === "ask");
+    const questions = [...new Set(askItems.flatMap((i) => i.staffQuestions))];
+    let text = `My order at ${restaurant!.name}:\n\n`;
+    safeItems.forEach((i) => { text += `✓ ${i.name}\n`; });
+    askItems.forEach((i)  => { text += `? ${i.name}\n`; });
+    if (questions.length > 0) {
+      text += `\nQuestions for staff:\n`;
+      questions.slice(0, 6).forEach((q) => { text += `• ${q}\n`; });
+    }
+    await navigator.clipboard.writeText(text.trim()).catch(() => {});
+    setOrderCopied(true);
+    setTimeout(() => setOrderCopied(false), 2500);
+  }
+
   // Shared item renderer — wraps MenuItemCard with the feedback row
   function renderItem(item: AnalyzedMenuItem) {
     return (
       <div key={item.id}>
-        <MenuItemCard item={item} restaurantId={restaurant!.id} restaurantName={restaurant!.name} />
+        <MenuItemCard
+          item={item}
+          restaurantId={restaurant!.id}
+          restaurantName={restaurant!.name}
+          inOrder={orderedItemIds.has(item.id)}
+          onToggleOrder={() => toggleOrderItem(item.id)}
+        />
         <FeedbackRow
           item={item}
           userAllergens={userAllergens}
@@ -340,7 +379,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 60 }}>
+    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: orderedItemIds.size > 0 ? 140 : 60 }}>
 
       {/* ── Sticky header ── */}
       <div style={{
@@ -804,6 +843,216 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
         </div>
 
       </div>
+
+      {/* ── Order bar ── */}
+      {orderedItemIds.size > 0 && (
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 198,
+          background: "var(--c-card)", borderTop: "1px solid var(--c-border)",
+          padding: "10px 16px 28px",
+          boxShadow: "0 -2px 20px rgba(0,0,0,0.1)",
+        }}>
+          <button
+            type="button"
+            onClick={() => setShowOrderSheet(true)}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "13px 16px", borderRadius: 14,
+              background: "#eb1700", border: "none", cursor: "pointer",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 26, height: 26, borderRadius: 7,
+                background: "rgba(255,255,255,0.25)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <span style={{ fontSize: 12, fontWeight: 900, color: "#fff" }}>{orderedItemIds.size}</span>
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 800, color: "#fff" }}>View your order</span>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>
+              {orderedItems.every((i) => i.risk === "likely-safe")
+                ? "All safe"
+                : `${orderedItems.filter((i) => i.risk === "ask").length} need confirmation`}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* ── Order sheet ── */}
+      <div
+        aria-hidden="true"
+        onClick={() => setShowOrderSheet(false)}
+        style={{
+          position: "fixed", inset: 0, zIndex: 199,
+          background: "rgba(0,0,0,0.45)", backdropFilter: "blur(3px)",
+          opacity: showOrderSheet ? 1 : 0,
+          pointerEvents: showOrderSheet ? "auto" : "none",
+          transition: "opacity 0.28s ease",
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Your Order"
+        style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: "var(--c-card)",
+          borderTopLeftRadius: 28, borderTopRightRadius: 28,
+          boxShadow: "0 -16px 56px rgba(0,0,0,0.2)",
+          transform: showOrderSheet ? "translateY(0)" : "translateY(100%)",
+          transition: showOrderSheet
+            ? "transform 0.38s cubic-bezier(0.22,1,0.36,1)"
+            : "transform 0.28s cubic-bezier(0.4,0,1,1)",
+          maxHeight: "85vh",
+          display: "flex", flexDirection: "column",
+        }}
+      >
+        {/* Handle */}
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 14 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 999, background: "var(--c-border)" }} />
+        </div>
+
+        {/* Sheet header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 20px 16px",
+          borderBottom: "1px solid var(--c-border)",
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)" }}>Your Order</div>
+            <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{restaurant!.name}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowOrderSheet(false)}
+            aria-label="Close"
+            style={{
+              width: 32, height: 32, borderRadius: 999,
+              background: "var(--c-muted)", border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "var(--c-sub)",
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div style={{ overflowY: "auto", flex: 1, padding: "16px 20px 40px" }}>
+
+          {orderedItems.length === 0 ? (
+            <div style={{ padding: "32px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 13 }}>
+              Tap + on any menu item to add it to your order
+            </div>
+          ) : (
+            <>
+              {/* Order item list */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+                {orderedItems.map((item) => {
+                  const meta = RISK_META[item.risk];
+                  return (
+                    <div key={item.id} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                      padding: "10px 14px", borderRadius: 12,
+                      background: meta.bg, border: `1px solid ${meta.border}`,
+                    }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {item.name}
+                        </div>
+                        {item.category && (
+                          <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>{item.category}</div>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                        <span style={{ fontSize: 12, fontWeight: 900, color: meta.color }}>{meta.mark}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleOrderItem(item.id)}
+                          aria-label="Remove from order"
+                          style={{
+                            width: 24, height: 24, borderRadius: 999,
+                            background: "var(--c-muted)", border: "none",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            cursor: "pointer", color: "var(--c-sub)",
+                          }}
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Staff questions for "ask" items */}
+              {(() => {
+                const askQuestions = [...new Set(
+                  orderedItems.filter((i) => i.risk === "ask").flatMap((i) => i.staffQuestions)
+                )];
+                if (askQuestions.length === 0) return null;
+                return (
+                  <div style={{
+                    padding: "12px 14px", borderRadius: 12,
+                    background: "#fff7db", border: "1px solid #f4dd8d",
+                    marginBottom: 16,
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: "#854d0e", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+                      Ask staff before ordering
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {askQuestions.slice(0, 6).map((q, i) => (
+                        <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.5 }}>• {q}</div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => { setOrderedItemIds(new Set()); setShowOrderSheet(false); }}
+                  style={{
+                    flex: "0 0 auto", padding: "0 16px", height: 50,
+                    background: "transparent", border: "1.5px solid var(--c-border)",
+                    borderRadius: 13, fontSize: 13, fontWeight: 700,
+                    color: "var(--c-sub)", cursor: "pointer",
+                  }}
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={copyOrderToClipboard}
+                  style={{
+                    flex: 1, height: 50, borderRadius: 13,
+                    background: "var(--c-text)", color: "var(--c-bg)",
+                    border: "none", fontSize: 14, fontWeight: 800,
+                    cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                  {orderCopied ? "Copied!" : "Copy order + questions"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
     </main>
   );
 }

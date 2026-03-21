@@ -41,9 +41,14 @@ type Props = {
   /** When provided, enables the feedback UI for this item */
   restaurantId?: string;
   restaurantName?: string;
+  /** Order builder — whether this item is currently in the order */
+  inOrder?: boolean;
+  onToggleOrder?: () => void;
 };
 
-export function MenuItemCard({ item, restaurantId, restaurantName }: Props) {
+export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onToggleOrder }: Props) {
+  const canOrder = item.risk === "likely-safe" || item.risk === "ask";
+  const orderColor = item.risk === "likely-safe" ? "#15803d" : "#854d0e";
   const [expanded, setExpanded]           = useState(false);
   const [copied, setCopied]               = useState(false);
   const [feedbackState, setFeedbackState] = useState<"idle" | "open" | "done">("idle");
@@ -131,7 +136,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName }: Props) {
     >
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, fontSize: 15, lineHeight: 1.3, color: "#111" }}>{item.name}</div>
           {item.description && (
             <div style={{ fontSize: 12, color: "#6b7280", marginTop: 3, lineHeight: 1.4 }}>
@@ -139,7 +144,41 @@ export function MenuItemCard({ item, restaurantId, restaurantName }: Props) {
             </div>
           )}
         </div>
-        <RiskBadge risk={item.risk} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+          <RiskBadge risk={item.risk} />
+          {canOrder && onToggleOrder !== undefined && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onToggleOrder(); }}
+              aria-label={inOrder ? "Remove from order" : "Add to order"}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "4px 9px", borderRadius: 999,
+                border: `1.5px solid ${inOrder ? orderColor : "var(--c-border)"}`,
+                background: inOrder ? orderColor : "transparent",
+                color: inOrder ? "#fff" : orderColor,
+                fontSize: 11, fontWeight: 800,
+                cursor: "pointer", transition: "all 0.15s",
+              }}
+            >
+              {inOrder ? (
+                <>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Added
+                </>
+              ) : (
+                <>
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Add
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Explanation */}
