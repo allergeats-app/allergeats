@@ -38,8 +38,8 @@ export default function RootLayout({
             </ErrorBoundary>
             <footer style={{
               textAlign: "center",
-              padding: "16px 20px 24px",
-              fontSize: 11,
+              padding: "20px 20px 28px",
+              fontSize: 13,
               color: "var(--c-sub)",
               lineHeight: 1.6,
             }}>

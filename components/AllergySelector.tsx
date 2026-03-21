@@ -34,15 +34,16 @@ export function AllergySelector({ selected, onChange, limit }: Props) {
             key={id}
             onClick={() => toggle(id)}
             style={{
-              padding: "9px 13px",
+              padding: "11px 16px",
               borderRadius: 999,
               border: `1.5px solid ${active ? "transparent" : "var(--c-border)"}`,
               background: active ? "#eb1700" : "var(--c-muted)",
               color: active ? "#fff" : "var(--c-text)",
-              fontSize: 13,
+              fontSize: 15,
               fontWeight: 700,
               cursor: "pointer",
               transition: "background 0.15s, color 0.15s",
+              minHeight: 44,
             }}
           >
             {label}
@@ -54,14 +55,15 @@ export function AllergySelector({ selected, onChange, limit }: Props) {
         <button
           onClick={() => setExpanded((v) => !v)}
           style={{
-            padding: "9px 13px",
+            padding: "11px 16px",
             borderRadius: 999,
             border: "1.5px dashed var(--c-border)",
             background: "transparent",
             color: "var(--c-sub)",
-            fontSize: 13,
+            fontSize: 15,
             fontWeight: 700,
             cursor: "pointer",
+            minHeight: 44,
           }}
         >
           {expanded ? "Show Less" : "+ Add More"}

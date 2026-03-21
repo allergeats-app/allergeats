@@ -130,22 +130,22 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
         </div>
 
         {/* Card body */}
-        <div style={{ padding: compact ? "10px 12px 12px" : "14px 16px 16px" }}>
+        <div style={{ padding: compact ? "12px 14px 14px" : "16px 18px 18px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: compact ? 6 : 4 }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 900, fontSize: compact ? 13 : 17, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
-              <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
+              <div style={{ fontWeight: 900, fontSize: compact ? 15 : 19, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+              <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>{r.cuisine}</div>
               {!compact && r.address && (
-                <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", opacity: 0.75 }}>
+                <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {r.address}
                 </div>
               )}
             </div>
-            {!compact && <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>See menu fit →</div>}
+            {!compact && <div style={{ fontSize: 15, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>See menu fit →</div>}
           </div>
 
           {!compact && (
-            <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 10, lineHeight: 1.4 }}>
+            <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 12, lineHeight: 1.5 }}>
               {explanation}
             </div>
           )}
@@ -165,19 +165,19 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
                       <Stat count={summary.ask}        label="Ask"   color="#d97706" />
                       <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{tierLabel}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
+                      <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{tierLabel}</span>
                     </div>
                   </div>
                   {safeItemNames.length > 0 && (
                     <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
                       {safeItemNames.map((name) => (
                         <span key={name} style={{
-                          fontSize: 11, fontWeight: 700,
+                          fontSize: 13, fontWeight: 700,
                           color: "#15803d", background: "#f0fdf4",
                           border: "1px solid #bbf7d0",
-                          padding: "3px 9px", borderRadius: 999,
+                          padding: "4px 10px", borderRadius: 999,
                         }}>
                           ✓ {name}
                         </span>
@@ -222,9 +222,9 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
 
 function Stat({ count, label, color }: { count: number; label: string; color: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-      <span style={{ fontSize: 13, fontWeight: 800, color }}>{count}</span>
-      <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{label}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+      <span style={{ fontSize: 15, fontWeight: 800, color }}>{count}</span>
+      <span style={{ fontSize: 14, color: "var(--c-sub)" }}>{label}</span>
     </div>
   );
 }

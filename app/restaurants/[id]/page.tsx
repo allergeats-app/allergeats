@@ -388,7 +388,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
         borderBottom: "1px solid var(--c-border)", padding: "12px 16px",
       }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}>← Restaurants</Link>
+          <Link href="/" style={{ fontSize: 15, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none", padding: "8px 0", minHeight: 44, display: "flex", alignItems: "center" }}>← Restaurants</Link>
           <SettingsButton />
         </div>
       </div>
@@ -438,8 +438,8 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
           <div style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 900, fontSize: 20, color: "var(--c-text)", lineHeight: 1.2 }}>{hero.restaurantName}</div>
-                <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>
+                <div style={{ fontWeight: 900, fontSize: 22, color: "var(--c-text)", lineHeight: 1.2 }}>{hero.restaurantName}</div>
+                <div style={{ fontSize: 15, color: "var(--c-sub)", marginTop: 4 }}>
                   {hero.cuisine}{hero.distance != null && ` · ${hero.distance} mi`}
                 </div>
               </div>
@@ -447,7 +447,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                 onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier }); toggleFavorite(restaurant.id); }}
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
-                  flexShrink: 0, width: 40, height: 40, borderRadius: 999,
+                  flexShrink: 0, width: 48, height: 48, borderRadius: 999,
                   background: favorited ? "#eb1700" : "var(--c-muted)",
                   border: `1.5px solid ${favorited ? "#eb1700" : "var(--c-border)"}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -461,7 +461,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             </div>
 
             {!hasNoMenu && (
-              <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 15, color: "var(--c-sub)", marginBottom: 18, lineHeight: 1.6 }}>
                 {hero.fitExplanation}
               </div>
             )}
@@ -524,9 +524,9 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                 </div>
 
                 {/* Coverage trust signal */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{coverage.coverageLine}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{coverage.coverageLine}</span>
                 </div>
               </>
             )}
@@ -543,13 +543,13 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                 borderRadius: 14, padding: "14px 16px",
                 display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
               }}>
-                <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.6 }}>
                   Set your allergies to see which dishes are safe for you.
                 </div>
                 <Link href="/allergies" style={{
-                  flexShrink: 0, padding: "8px 14px", borderRadius: 10,
+                  flexShrink: 0, padding: "11px 18px", borderRadius: 12,
                   background: "#eb1700", color: "#fff",
-                  fontSize: 13, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
+                  fontSize: 15, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
                 }}>
                   Set Allergies
                 </Link>
@@ -583,12 +583,12 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
                 {whyThisWorks.map((bullet, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ color: badge.color, fontWeight: 900, fontSize: 13, lineHeight: "1.5", flexShrink: 0 }}>·</span>
-                    <span style={{ fontSize: 13, color: "var(--c-text)", lineHeight: 1.5 }}>{bullet}</span>
+                    <span style={{ color: badge.color, fontWeight: 900, fontSize: 15, lineHeight: "1.5", flexShrink: 0 }}>·</span>
+                    <span style={{ fontSize: 15, color: "var(--c-text)", lineHeight: 1.6 }}>{bullet}</span>
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: 11, color: "var(--c-sub)", lineHeight: 1.4 }}>
+              <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
                 {coverage.trustSignal} · Always confirm with staff before ordering.
               </div>
             </div>
@@ -606,18 +606,18 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 12 }}>
                 {aggregatedStaffQuestions.map((q, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ color: "#854d0e", fontWeight: 700, fontSize: 13, lineHeight: "1.5", flexShrink: 0 }}>•</span>
-                    <span style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}>{q}</span>
+                    <span style={{ color: "#854d0e", fontWeight: 700, fontSize: 15, lineHeight: "1.6", flexShrink: 0 }}>•</span>
+                    <span style={{ fontSize: 15, color: "#374151", lineHeight: 1.6 }}>{q}</span>
                   </div>
                 ))}
               </div>
               <button
                 onClick={copyQuestions}
                 style={{
-                  width: "100%", padding: "10px 12px", borderRadius: 10,
+                  width: "100%", padding: "13px 16px", borderRadius: 12,
                   border: "1px solid #f4dd8d", background: "#fff",
-                  color: "#374151", fontSize: 13, fontWeight: 700,
-                  cursor: "pointer",
+                  color: "#374151", fontSize: 15, fontWeight: 700,
+                  cursor: "pointer", minHeight: 48,
                 }}
               >
                 {questionsCopied ? "Copied!" : "Copy all questions"}
@@ -656,12 +656,12 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
                 {RISK_CHIPS.map((c) => (
                   <button key={c.value} onClick={() => setRiskFilter(c.value)} style={{
-                    padding: "8px 14px", borderRadius: 999,
+                    padding: "11px 18px", borderRadius: 999,
                     border: `1.5px solid ${riskFilter === c.value ? "#eb1700" : "var(--c-border)"}`,
                     background: riskFilter === c.value ? "#eb1700" : "var(--c-card)",
                     color: riskFilter === c.value ? "#fff" : "var(--c-text)",
-                    fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
-                    cursor: "pointer", flexShrink: 0,
+                    fontSize: 15, fontWeight: 700, whiteSpace: "nowrap",
+                    cursor: "pointer", flexShrink: 0, minHeight: 44,
                   }}>
                     {c.label}
                   </button>
@@ -684,11 +684,11 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                       if (!items?.length) return null;
                       return (
                         <div key={section.sectionName}>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-                            <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{section.sectionName}</span>
-                            <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length}</span>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 12 }}>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{section.sectionName}</span>
+                            <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length}</span>
                             {section.safeCount > 0 && riskFilter === "all" && (
-                              <span style={{ fontSize: 11, color: "#15803d", fontWeight: 700 }}>{section.safeCount} safe</span>
+                              <span style={{ fontSize: 13, color: "#15803d", fontWeight: 700 }}>{section.safeCount} safe</span>
                             )}
                           </div>
                           <div style={{ display: "grid", gap: 8 }}>
@@ -728,9 +728,9 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                             if (!items?.length) return null;
                             return (
                               <div key={section.sectionName}>
-                                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-                                  <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{section.sectionName}</span>
-                                  <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length}</span>
+                                <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 12 }}>
+                                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{section.sectionName}</span>
+                                  <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length}</span>
                                 </div>
                                 <div style={{ display: "grid", gap: 8 }}>
                                   {items.map(renderItem)}
@@ -764,16 +764,16 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                         <div key={risk}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                             <div style={{
-                              width: 30, height: 30, borderRadius: 9,
+                              width: 36, height: 36, borderRadius: 10,
                               background: meta.bg, border: `1px solid ${meta.border}`,
                               display: "grid", placeItems: "center",
-                              fontSize: 12, fontWeight: 900, color: meta.color, flexShrink: 0,
+                              fontSize: 14, fontWeight: 900, color: meta.color, flexShrink: 0,
                             }}>
                               {meta.mark}
                             </div>
                             <div>
-                              <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)" }}>{meta.label}</div>
-                              <div style={{ fontSize: 11, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
+                              <div style={{ fontWeight: 800, fontSize: 16, color: "var(--c-text)" }}>{meta.label}</div>
+                              <div style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
                             </div>
                           </div>
                           <div style={{ display: "grid", gap: 8 }}>
@@ -824,19 +824,19 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
           background: "var(--c-card)", border: "1px solid var(--c-border)",
           borderRadius: 18,
         }}>
-          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", marginBottom: 6 }}>
+          <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 8 }}>
             {hasNoMenu ? "Scan this restaurant's menu" : "Don't see your order?"}
           </div>
-          <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5, marginBottom: 14 }}>
+          <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.6, marginBottom: 16 }}>
             {hasNoMenu
               ? "Take a photo of the menu and we'll analyze it for your allergy profile."
               : "Scan the physical menu for a fresh analysis based on today's items."}
           </div>
           <CameraScanButton style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-            padding: "12px 20px", borderRadius: 14,
+            padding: "14px 24px", borderRadius: 14,
             background: "#eb1700", color: "#fff",
-            fontSize: 14, fontWeight: 800, border: "none", cursor: "pointer",
+            fontSize: 16, fontWeight: 800, border: "none", cursor: "pointer", minHeight: 52,
           }}>
             Scan Menu →
           </CameraScanButton>
@@ -869,7 +869,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
               }}>
                 <span style={{ fontSize: 12, fontWeight: 900, color: "#fff" }}>{orderedItemIds.size}</span>
               </div>
-              <span style={{ fontSize: 14, fontWeight: 800, color: "#fff" }}>View your order</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>View your order</span>
             </div>
             <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>
               {orderedItems.every((i) => i.risk === "likely-safe")
@@ -922,15 +922,15 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
           flexShrink: 0,
         }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)" }}>Your Order</div>
-            <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{restaurant!.name}</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)" }}>Your Order</div>
+            <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 3 }}>{restaurant!.name}</div>
           </div>
           <button
             type="button"
             onClick={() => setShowOrderSheet(false)}
             aria-label="Close"
             style={{
-              width: 32, height: 32, borderRadius: 999,
+              width: 44, height: 44, borderRadius: 999,
               background: "var(--c-muted)", border: "none",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", color: "var(--c-sub)",
@@ -962,27 +962,27 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
                       background: meta.bg, border: `1px solid ${meta.border}`,
                     }}>
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <div style={{ fontWeight: 800, fontSize: 16, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {item.name}
                         </div>
                         {item.category && (
-                          <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 1 }}>{item.category}</div>
+                          <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2 }}>{item.category}</div>
                         )}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                        <span style={{ fontSize: 12, fontWeight: 900, color: meta.color }}>{meta.mark}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                        <span style={{ fontSize: 14, fontWeight: 900, color: meta.color }}>{meta.mark}</span>
                         <button
                           type="button"
                           onClick={() => toggleOrderItem(item.id)}
                           aria-label="Remove from order"
                           style={{
-                            width: 24, height: 24, borderRadius: 999,
+                            width: 36, height: 36, borderRadius: 999,
                             background: "var(--c-muted)", border: "none",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             cursor: "pointer", color: "var(--c-sub)",
                           }}
                         >
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
                             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                           </svg>
                         </button>
@@ -1076,9 +1076,9 @@ function StatPill({ count, label, color, bg, active, onClick }: {
         transition: "border-color 0.15s",
       }}
     >
-      <span style={{ fontWeight: 900, fontSize: 22, color, lineHeight: 1 }}>{count}</span>
-      <span style={{ fontSize: 11, color, opacity: 0.8, marginTop: 3, fontWeight: 600 }}>{label}</span>
-      {onClick && <span style={{ fontSize: 9, color, opacity: 0.55, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
+      <span style={{ fontWeight: 900, fontSize: 24, color, lineHeight: 1 }}>{count}</span>
+      <span style={{ fontSize: 13, color, opacity: 0.85, marginTop: 3, fontWeight: 700 }}>{label}</span>
+      {onClick && <span style={{ fontSize: 11, color, opacity: 0.6, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
     </button>
   );
 }
@@ -1096,9 +1096,9 @@ function isDrinkSection(name: string): boolean {
 
 function SectionHeader({ label, count }: { label: string; count?: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "0 0 12px" }}>
-      <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
-      {count != null && <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{count}</span>}
+    <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "0 0 14px" }}>
+      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
+      {count != null && <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{count}</span>}
     </div>
   );
 }
@@ -1111,22 +1111,22 @@ function BestOptionCard({ rec }: { rec: SafeOrderRecommendation }) {
       display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
     }}>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", lineHeight: 1.3 }}>{rec.item.name}</div>
+        <div style={{ fontWeight: 800, fontSize: 16, color: "var(--c-text)", lineHeight: 1.3 }}>{rec.item.name}</div>
         {rec.item.category && (
-          <div style={{ fontSize: 11, color: "var(--c-sub)", marginTop: 2 }}>{rec.item.category}</div>
+          <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>{rec.item.category}</div>
         )}
-        <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
           {rec.explanation}
         </div>
         {rec.askNotes.length > 0 && (
-          <div style={{ fontSize: 11, color: "#854d0e", marginTop: 4 }}>
+          <div style={{ fontSize: 13, color: "#854d0e", marginTop: 5 }}>
             Ask: {rec.askNotes[0]}
           </div>
         )}
       </div>
       <span style={{
-        flexShrink: 0, padding: "3px 10px", borderRadius: 999,
-        background: "#dcfce7", color: "#15803d", fontSize: 11, fontWeight: 700,
+        flexShrink: 0, padding: "4px 12px", borderRadius: 999,
+        background: "#dcfce7", color: "#15803d", fontSize: 13, fontWeight: 700,
       }}>
         {rec.reasonLabel}
       </span>
@@ -1143,10 +1143,10 @@ function MemoryInsightCard({ insight }: { insight: MemoryInsight }) {
       display: "flex", alignItems: "flex-start", gap: 12,
     }}>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, color: "var(--c-text)", lineHeight: 1.3 }}>
+        <div style={{ fontWeight: 700, fontSize: 15, color: "var(--c-text)", lineHeight: 1.3 }}>
           {insight.title}
         </div>
-        <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 3, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
           {insight.description}
         </div>
       </div>
@@ -1155,7 +1155,7 @@ function MemoryInsightCard({ insight }: { insight: MemoryInsight }) {
         background: `${insight.badgeColor}20`,
         color: insight.badgeColor,
         border: `1px solid ${insight.badgeColor}40`,
-        fontSize: 10, fontWeight: 700, whiteSpace: "nowrap",
+        fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
       }}>
         {insight.badgeLabel}
       </span>
@@ -1182,7 +1182,7 @@ function FeedbackRow({
 
   if (submitted) {
     return (
-      <div style={{ fontSize: 11, color: "#15803d", padding: "3px 4px 6px", textAlign: "right" }}>
+      <div style={{ fontSize: 13, color: "#15803d", padding: "6px 4px 8px", textAlign: "right" }}>
         Thanks for your report ✓
       </div>
     );
@@ -1195,7 +1195,7 @@ function FeedbackRow({
           onClick={() => setExpanded(true)}
           style={{
             background: "none", border: "none", cursor: "pointer",
-            fontSize: 11, color: "var(--c-sub)", padding: "3px 4px 6px",
+            fontSize: 13, color: "var(--c-sub)", padding: "8px 4px", minHeight: 40,
           }}
         >
           Report
@@ -1209,14 +1209,14 @@ function FeedbackRow({
 
   return (
     <div style={{
-      background: "var(--c-muted)", borderRadius: "0 0 10px 10px",
-      padding: "8px 12px 10px", marginTop: -2,
+      background: "var(--c-muted)", borderRadius: "0 0 12px 12px",
+      padding: "12px 14px 14px", marginTop: -2,
       border: "1px solid var(--c-border)", borderTop: "none",
     }}>
-      <div style={{ fontSize: 11, color: "var(--c-sub)", marginBottom: 7, fontWeight: 600 }}>
+      <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 10, fontWeight: 600 }}>
         What happened with <strong style={{ color: "var(--c-text)" }}>{item.name}</strong>?
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {QUICK_FEEDBACK.map((opt) => (
           <button
             key={opt.type}
@@ -1230,10 +1230,10 @@ function FeedbackRow({
               setSubmitted(true);
             }}
             style={{
-              padding: "5px 11px", borderRadius: 8,
+              padding: "9px 14px", borderRadius: 10,
               border: "1px solid var(--c-border)",
               background: "var(--c-card)", color: "var(--c-text)",
-              fontSize: 11, fontWeight: 600, cursor: "pointer",
+              fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: 44,
             }}
           >
             {opt.label}
@@ -1243,7 +1243,7 @@ function FeedbackRow({
           onClick={() => setExpanded(false)}
           style={{
             background: "none", border: "none", cursor: "pointer",
-            fontSize: 11, color: "var(--c-sub)", padding: "5px 6px",
+            fontSize: 13, color: "var(--c-sub)", padding: "9px 8px", minHeight: 44,
           }}
         >
           Cancel

@@ -129,17 +129,17 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         background: bg,
         border: `1px solid ${border}`,
         borderRadius: 18,
-        padding: 14,
+        padding: 18,
         display: "grid",
-        gap: 8,
+        gap: 10,
       }}
     >
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: 15, lineHeight: 1.3, color: "#111" }}>{item.name}</div>
+          <div style={{ fontWeight: 800, fontSize: 17, lineHeight: 1.3, color: "#111" }}>{item.name}</div>
           {item.description && (
-            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 3, lineHeight: 1.4 }}>
+            <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
               {item.description}
             </div>
           )}
@@ -152,13 +152,14 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
               onClick={(e) => { e.stopPropagation(); onToggleOrder(); }}
               aria-label={inOrder ? "Remove from order" : "Add to order"}
               style={{
-                display: "flex", alignItems: "center", gap: 4,
-                padding: "4px 9px", borderRadius: 999,
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "7px 13px", borderRadius: 999,
                 border: `1.5px solid ${inOrder ? orderColor : "var(--c-border)"}`,
                 background: inOrder ? orderColor : "transparent",
                 color: inOrder ? "#fff" : orderColor,
-                fontSize: 11, fontWeight: 800,
+                fontSize: 13, fontWeight: 800,
                 cursor: "pointer", transition: "all 0.15s",
+                minHeight: 36,
               }}
             >
               {inOrder ? (
@@ -182,14 +183,14 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       </div>
 
       {/* Explanation */}
-      <div style={{ fontSize: 12, color: "#374151", lineHeight: 1.5 }}>{item.explanation}</div>
+      <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}>{item.explanation}</div>
 
       {/* User's allergens — shown prominently */}
       {item.userAllergenHits.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 5 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af" }}>Contains:</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)" }}>Contains:</span>
           {item.userAllergenHits.map((a) => (
-            <span key={a} style={{ padding: "3px 9px", borderRadius: 999, background: "#fde8e8", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: 11, fontWeight: 800 }}>
+            <span key={a} style={{ padding: "5px 11px", borderRadius: 999, background: "#fde8e8", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: 13, fontWeight: 800 }}>
               {aLabel(a)}
             </span>
           ))}
@@ -204,12 +205,12 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         return (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
             {others.map((a) => (
-              <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#f3f4f6", color: "#6b7280", fontSize: 11, fontWeight: 600 }}>
+              <span key={a} style={{ padding: "4px 10px", borderRadius: 999, background: "#f3f4f6", color: "var(--c-sub)", fontSize: 13, fontWeight: 600 }}>
                 {aLabel(a)}
               </span>
             ))}
             {otherInferred.map((a) => (
-              <span key={a} style={{ padding: "3px 8px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 11, fontWeight: 600 }}>
+              <span key={a} style={{ padding: "4px 10px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 13, fontWeight: 600 }}>
                 ~{aLabel(a)}
               </span>
             ))}
@@ -224,14 +225,15 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
           <button
             onClick={() => setExpanded((v) => !v)}
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: 700,
-              color: "#6b7280",
+              color: "var(--c-sub)",
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "10px 0 10px 12px",
-              margin: "-10px 0 -10px -12px",
+              padding: "12px 0 12px 14px",
+              margin: "-12px 0 -12px -14px",
+              minHeight: 44,
             }}
           >
             {expanded ? "Hide questions" : "What to ask →"}
@@ -242,27 +244,28 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       {/* Staff questions */}
       {expanded && item.staffQuestions.length > 0 && (
         <div style={{ marginTop: 4, padding: 12, background: "rgba(255,255,255,0.6)", borderRadius: 12, border: "1px solid rgba(0,0,0,0.07)" }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: "#6b7280", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: "var(--c-sub)", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Ask staff
           </div>
-          <div style={{ display: "grid", gap: 6 }}>
+          <div style={{ display: "grid", gap: 8 }}>
             {item.staffQuestions.slice(0, 4).map((q, i) => (
-              <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.45 }}>• {q}</div>
+              <div key={i} style={{ fontSize: 14, color: "#374151", lineHeight: 1.55 }}>• {q}</div>
             ))}
           </div>
           <button
             onClick={copyQuestions}
             style={{
-              marginTop: 10,
+              marginTop: 12,
               width: "100%",
-              padding: "10px 12px",
+              padding: "13px 14px",
               borderRadius: 12,
               border: "1px solid #e5e7eb",
               background: "#fff",
               color: "#374151",
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: 700,
               cursor: "pointer",
+              minHeight: 48,
             }}
           >
             {copied ? "Copied!" : "Copy questions"}
@@ -279,15 +282,15 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         }}>
           {feedbackState === "idle" ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600 }}>Was this right?</span>
-              <div style={{ display: "flex", gap: 6 }}>
+              <span style={{ fontSize: 13, color: "var(--c-sub)", fontWeight: 600 }}>Was this right?</span>
+              <div style={{ display: "flex", gap: 8 }}>
                 <button
                   onClick={handleConfirm}
                   title="Yes, correct"
                   style={{
-                    width: 32, height: 32, borderRadius: 999,
-                    border: "1px solid #d1fae5", background: "#f0fdf4",
-                    fontSize: 14, cursor: "pointer",
+                    width: 44, height: 44, borderRadius: 999,
+                    border: "1.5px solid #d1fae5", background: "#f0fdf4",
+                    fontSize: 16, cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#15803d",
                   }}
@@ -298,9 +301,9 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                   onClick={() => setFeedbackState("open")}
                   title="No, something's wrong"
                   style={{
-                    width: 32, height: 32, borderRadius: 999,
-                    border: "1px solid #fecaca", background: "#fff1f0",
-                    fontSize: 14, cursor: "pointer",
+                    width: 44, height: 44, borderRadius: 999,
+                    border: "1.5px solid #fecaca", background: "#fff1f0",
+                    fontSize: 16, cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#b91c1c",
                   }}
@@ -311,7 +314,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
             </div>
           ) : (
             <div style={{ display: "grid", gap: 6 }}>
-              <div style={{ fontSize: 11, color: "#6b7280", fontWeight: 700, marginBottom: 2 }}>
+              <div style={{ fontSize: 13, color: "var(--c-sub)", fontWeight: 700, marginBottom: 4 }}>
                 What was wrong?
               </div>
               {feedbackOptions.map((opt) => (
@@ -319,10 +322,10 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                   key={opt.type}
                   onClick={() => handleFeedback(opt)}
                   style={{
-                    width: "100%", padding: "9px 12px", borderRadius: 10,
+                    width: "100%", padding: "13px 14px", borderRadius: 12,
                     border: "1px solid #e5e7eb", background: "#fff",
-                    color: "#374151", fontSize: 12, fontWeight: 600,
-                    cursor: "pointer", textAlign: "left",
+                    color: "#374151", fontSize: 14, fontWeight: 600,
+                    cursor: "pointer", textAlign: "left", minHeight: 48,
                   }}
                 >
                   {opt.label}
@@ -332,8 +335,8 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                 onClick={() => setFeedbackState("idle")}
                 style={{
                   background: "none", border: "none",
-                  fontSize: 11, color: "#9ca3af", cursor: "pointer",
-                  padding: "4px 0", textAlign: "left",
+                  fontSize: 13, color: "var(--c-sub)", cursor: "pointer",
+                  padding: "8px 0", textAlign: "left", minHeight: 40,
                 }}
               >
                 Cancel
@@ -348,7 +351,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         <div style={{
           marginTop: 4, paddingTop: 10,
           borderTop: "1px solid rgba(0,0,0,0.06)",
-          fontSize: 11, color: "#15803d", fontWeight: 700,
+          fontSize: 13, color: "#15803d", fontWeight: 700,
         }}>
           Thanks — we&apos;ll use this to improve.
         </div>

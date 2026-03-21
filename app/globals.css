@@ -6,7 +6,7 @@
   --c-card:   #ffffff;
   --c-border: #e5e7eb;
   --c-text:   #111111;
-  --c-sub:    #6b7280;
+  --c-sub:    #4b5563;   /* was #6b7280 — darker for better contrast */
   --c-input:  #fafafa;
   --c-muted:  #f9fafb;
   --c-hdr:    rgba(247,247,247,0.95);
@@ -20,6 +20,8 @@ body {
   background: var(--c-bg);
   color: var(--c-text);
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
   /* Remove iOS grey flash on tap */
   -webkit-tap-highlight-color: transparent;
 }

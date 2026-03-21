@@ -48,9 +48,9 @@ type Props = {
 
 export function RiskBadge({ risk, size = "sm" }: Props) {
   const { label, bg, text, border, icon } = CONFIG[risk];
-  const padding = size === "md" ? "6px 12px" : "4px 9px";
-  const fontSize = size === "md" ? 13 : 11;
-  const gap = size === "md" ? 5 : 4;
+  const padding = size === "md" ? "8px 16px" : "6px 12px";
+  const fontSize = size === "md" ? 15 : 13;
+  const gap = size === "md" ? 6 : 5;
 
   return (
     <span
