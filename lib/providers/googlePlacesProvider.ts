@@ -24,13 +24,20 @@ import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
 import type { LocationProvider, Coordinates }         from "./locationProvider";
 import { LiveLocationProvider }                       from "./locationProvider";
 import { MOCK_RESTAURANTS }                           from "@/lib/mockRestaurants";
-import { upsertRestaurant }                           from "@/lib/registry";
+import { upsertRestaurant, beginRegistryBatch, endRegistryBatch } from "@/lib/registry";
 import type { PlaceResult }                           from "@/app/api/places-nearby/route";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Client-side sessionStorage cache TTL — 30 min reduces Google Places API spend. */
 const PLACES_CACHE_TTL_MS = 30 * 60 * 1000;
+
+/**
+ * Minimum Google results before skipping the Overpass supplemental fetch.
+ * Dense cities (NYC, Chicago, LA) return 60-100 Google results — no need to
+ * also hit Overpass and parse potentially thousands of OSM nodes.
+ */
+const MIN_GOOGLE_FOR_OVERPASS = 15;
 
 // ─── Client-side sessionStorage cache ────────────────────────────────────────
 // Mirrors the Overpass cache pattern to avoid redundant API calls when the user
@@ -154,12 +161,13 @@ export class GooglePlacesLocationProvider implements LocationProvider {
   ): Promise<Restaurant[]> {
     const cacheKey = placesCacheKey(lat, lng, radiusMiles);
 
-    // Return cached result immediately (Overpass has its own 5-min cache so it's fast too)
+    // Return cached result immediately
     const cached = readPlacesCache(cacheKey);
     if (cached) {
-      const overpassResults = await this._overpass
-        .searchRestaurants(lat, lng, radiusMiles, accuracy)
-        .catch(() => [] as Restaurant[]);
+      // Skip Overpass for dense areas — avoids parsing thousands of OSM nodes
+      const overpassResults = cached.length < MIN_GOOGLE_FOR_OVERPASS
+        ? await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[])
+        : [];
       return this._mergeResults(lat, lng, cached, overpassResults)
         .filter((r) => r.distance == null || r.distance <= radiusMiles * 1.2);
     }
@@ -242,17 +250,16 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
     }
 
-    // Always merge Google + Overpass.
-    // Google over-represents chain branches (10 nearby Subways all pass the
-    // threshold but show zero diversity). Overpass fills in independent
-    // restaurants and provides the variety users actually want.
-    // _mergeResults deduplicates by name, so chains present in both sources
-    // appear only once with Google's richer data taking precedence.
     if (googlePlaces.length === 0) {
       return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
     }
 
-    const overpassResults = await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[]);
+    // Only fetch Overpass when Google returns few results (small towns, rural areas).
+    // Dense cities like NYC return 60-100 Google results — running Overpass on top
+    // would parse thousands of OSM nodes and freeze the main thread.
+    const overpassResults = googlePlaces.length < MIN_GOOGLE_FOR_OVERPASS
+      ? await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[])
+      : [];
     const merged = this._mergeResults(lat, lng, googlePlaces, overpassResults);
     // Hard-filter: drop anything outside the search radius (guards against a
     // bad IP-geolocated user position returning distant restaurants).
@@ -267,6 +274,9 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     // but are different restaurants and must each appear as a card.
     const seen    = new Set<string>();
     const results: Restaurant[] = [];
+
+    // Batch all registry upserts so we load+save localStorage once, not once per restaurant.
+    beginRegistryBatch();
 
     for (const p of places) {
       if (seen.has(p.placeId)) continue;
@@ -318,6 +328,7 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       }
     }
 
+    endRegistryBatch();
     return results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
   }
 

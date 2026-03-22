@@ -25,6 +25,24 @@ import { computeSignals, findMatch } from "./deduplication";
 
 const REGISTRY_KEY = "allegeats_registry";
 
+// ─── In-memory write buffer ───────────────────────────────────────────────────
+// Prevents the O(n²) pattern of loading+saving the entire registry on every
+// upsertRestaurant() call when processing a batch of restaurant results.
+// Usage: beginRegistryBatch() → many upsertRestaurant() → endRegistryBatch()
+
+let _batchRegistry: CanonicalRestaurant[] | null = null;
+
+/** Load the registry once and buffer all writes in memory. */
+export function beginRegistryBatch(): void {
+  _batchRegistry = loadRegistry();
+}
+
+/** Flush the buffered registry to localStorage and clear the buffer. */
+export function endRegistryBatch(): void {
+  if (_batchRegistry) saveRegistry(_batchRegistry);
+  _batchRegistry = null;
+}
+
 // ─── ID generation ────────────────────────────────────────────────────────────
 
 /**
@@ -58,6 +76,7 @@ function escalateConfidence(existing: SourceConfidence, incoming: SourceConfiden
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
 function loadRegistry(): CanonicalRestaurant[] {
+  if (_batchRegistry) return _batchRegistry;
   if (typeof localStorage === "undefined") return [];
   try {
     const raw = localStorage.getItem(REGISTRY_KEY);
@@ -68,6 +87,7 @@ function loadRegistry(): CanonicalRestaurant[] {
 }
 
 function saveRegistry(records: CanonicalRestaurant[]): void {
+  if (_batchRegistry) { _batchRegistry = records; return; } // defer flush to endRegistryBatch()
   if (typeof localStorage === "undefined") return;
   try {
     localStorage.setItem(REGISTRY_KEY, JSON.stringify(records));

@@ -34,7 +34,7 @@
 
 import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
-import { upsertRestaurant } from "@/lib/registry";
+import { upsertRestaurant, beginRegistryBatch, endRegistryBatch } from "@/lib/registry";
 
 export type Coordinates = {
   lat: number;
@@ -395,7 +395,7 @@ export class LiveLocationProvider implements LocationProvider {
   way["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
   way["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
 );
-out body center;`;
+out body center 100;`;
 
     const data     = await fetchOverpass(query);
     const elements: OverpassElement[] = data.elements ?? [];
@@ -403,6 +403,7 @@ out body center;`;
     const seen    = new Set<string>();
     const results: Restaurant[] = [];
 
+    beginRegistryBatch();
     for (const el of elements) {
       const name = el.tags?.name;
       if (!name) continue;
@@ -467,6 +468,7 @@ out body center;`;
       }
     }
 
+    endRegistryBatch();
     const sorted = results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
     writeOverpassCache(cacheKey, sorted);
     return sorted;

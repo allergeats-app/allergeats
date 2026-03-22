@@ -35,4 +35,6 @@ export {
   getByRegistryId,
   getAllRecords,
   pruneStaleRecords,
+  beginRegistryBatch,
+  endRegistryBatch,
 } from "./registry";
