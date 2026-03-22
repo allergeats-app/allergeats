@@ -133,10 +133,12 @@ export async function POST(req: Request) {
     let body: object;
 
     if (keyword) {
-      // Text Search — keyword-scoped to the circle for category diversity
+      // Text Search — keyword-scoped to the circle for category diversity.
+      // DISTANCE ranking ensures physically closest matches, not globally famous chains.
       url  = TEXT_URL;
       body = {
-        textQuery:    keyword,
+        textQuery:      keyword,
+        rankPreference: "DISTANCE",
         locationBias: {
           circle: {
             center: { latitude: lat, longitude: lng },
@@ -147,16 +149,20 @@ export async function POST(req: Request) {
         languageCode:   "en",
       };
     } else {
-      // Nearby Search — broad restaurant discovery
+      // Nearby Search — broad restaurant discovery.
+      // DISTANCE ranking: return the 20 *closest* places, not the 20 most globally
+      // prominent. Without this, NYC returns mostly Starbucks (very high review counts).
+      // "cafe" excluded here — coffee shops are fetched via keyword search instead,
+      // so they don't crowd out food restaurants in the broad pass.
       url  = NEARBY_URL;
       body = {
         includedPrimaryTypes: [
           "restaurant",
           "fast_food_restaurant",
-          "cafe",
           "bar",
           "meal_takeaway",
         ],
+        rankPreference: "DISTANCE",
         locationRestriction: {
           circle: {
             center: { latitude: lat, longitude: lng },

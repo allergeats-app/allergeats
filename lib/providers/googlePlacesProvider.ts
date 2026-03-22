@@ -201,7 +201,9 @@ export class GooglePlacesLocationProvider implements LocationProvider {
         //   fine dining        → upscale restaurants
         //   steakhouse         → Ruth's Chris, LongHorn, etc.
         //   winery restaurant  → Cooper's Hawk, etc.
-        const keywords = ["casual dining", "fine dining", "steakhouse", "winery restaurant"];
+        // "cafe" is a keyword search (not in the broad Nearby types) so coffee shops
+        // appear in results without crowding out food restaurants.
+        const keywords = ["casual dining", "fine dining", "steakhouse", "cafe coffee"];
         const [mainRes, ...keywordResponses] = await Promise.all([
           fetch("/api/places-nearby", {
             method:  "POST",
@@ -275,60 +277,61 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     const seen    = new Set<string>();
     const results: Restaurant[] = [];
 
-    // Batch all registry upserts so we load+save localStorage once, not once per restaurant.
     beginRegistryBatch();
+    try {
+      for (const p of places) {
+        if (seen.has(p.placeId)) continue;
+        seen.add(p.placeId);
 
-    for (const p of places) {
-      if (seen.has(p.placeId)) continue;
-      seen.add(p.placeId);
+        const distance = Math.round(haversineDistance(userLat, userLng, p.lat, p.lng) * 10) / 10;
+        const mock     = findMockMatch(p.name);
 
-      const distance = Math.round(haversineDistance(userLat, userLng, p.lat, p.lng) * 10) / 10;
-      const mock     = findMockMatch(p.name);
-
-      const canonical = upsertRestaurant({
-        displayName: p.name,
-        address:     p.address || undefined,
-        lat:         p.lat,
-        lng:         p.lng,
-        phone:       p.phone,
-        website:     p.website,
-        googlePlaceId: p.placeId,
-        sourceType:  "google_places",
-        confidence:  "high",
-      });
-
-      if (mock) {
-        results.push({
-          ...mock,
-          id:            canonical.registryId,
-          address:       p.address || mock.address,
-          lat:           p.lat,
-          lng:           p.lng,
-          distance,
+        const canonical = upsertRestaurant({
+          displayName: p.name,
+          address:     p.address || undefined,
+          lat:         p.lat,
+          lng:         p.lng,
+          phone:       p.phone,
+          website:     p.website,
           googlePlaceId: p.placeId,
-          menuIsGenericChainTemplate: true,
+          sourceType:  "google_places",
+          confidence:  "high",
         });
-      } else {
-        const cuisine = cuisineFromTypes(p.types);
-        results.push({
-          id:            canonical.registryId,
-          name:          p.name,
-          cuisine,
-          tags:          tagsFromTypes(p.types),
-          address:       p.address,
-          lat:           p.lat,
-          lng:           p.lng,
-          distance,
-          phone:         p.phone,
-          website:       p.website,
-          googlePlaceId: p.placeId,
-          sourceType:    "scraped" as SourceType,
-          menuItems:     [],
-        });
+
+        if (mock) {
+          results.push({
+            ...mock,
+            id:            canonical.registryId,
+            address:       p.address || mock.address,
+            lat:           p.lat,
+            lng:           p.lng,
+            distance,
+            googlePlaceId: p.placeId,
+            menuIsGenericChainTemplate: true,
+          });
+        } else {
+          const cuisine = cuisineFromTypes(p.types);
+          results.push({
+            id:            canonical.registryId,
+            name:          p.name,
+            cuisine,
+            tags:          tagsFromTypes(p.types),
+            address:       p.address,
+            lat:           p.lat,
+            lng:           p.lng,
+            distance,
+            phone:         p.phone,
+            website:       p.website,
+            googlePlaceId: p.placeId,
+            sourceType:    "scraped" as SourceType,
+            menuItems:     [],
+          });
+        }
       }
+    } finally {
+      endRegistryBatch();
     }
 
-    endRegistryBatch();
     return results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
   }
 

@@ -404,6 +404,7 @@ out body center 100;`;
     const results: Restaurant[] = [];
 
     beginRegistryBatch();
+    try {
     for (const el of elements) {
       const name = el.tags?.name;
       if (!name) continue;
@@ -468,7 +469,9 @@ out body center 100;`;
       }
     }
 
-    endRegistryBatch();
+    } finally {
+      endRegistryBatch();
+    }
     const sorted = results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
     writeOverpassCache(cacheKey, sorted);
     return sorted;
