@@ -386,16 +386,18 @@ function HomeContent() {
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
 
   function handleSelectLocation(lat: number, lng: number, label: string) {
-    // Clear old results immediately so stale location data never shows under a new location
+    // Batch all state changes together: loading=true prevents the empty-state flash
+    // that would otherwise appear between clearing results and the load effect starting.
     setRawRestaurants([]);
+    setLoading(true);
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     setSearchCenter({ lat, lng, label });
     setLocationLabel(label);
   }
 
   function handleUseCurrentLocation() {
-    // Clear old results immediately so stale location data never shows under a new location
     setRawRestaurants([]);
+    setLoading(true);
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     setSearchCenter(null);
     setLocationLabel("Locating…");
