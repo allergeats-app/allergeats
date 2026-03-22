@@ -102,9 +102,9 @@ function SkeletonCard({ featured = false }: { featured?: boolean }) {
       boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
     }}>
       {/* Cover */}
-      <div className="skeleton" style={{ height: featured ? 110 : 80, borderRadius: 0 }} />
+      <div className="skeleton" style={{ height: 110, borderRadius: 0 }} />
       {/* Body */}
-      <div style={{ padding: featured ? "14px 16px 16px" : "10px 12px 12px" }}>
+      <div style={{ padding: "16px 18px 18px" }}>
         <div className="skeleton" style={{ height: featured ? 18 : 14, width: "60%", marginBottom: 8 }} />
         <div className="skeleton" style={{ height: 11, width: "35%", marginBottom: featured ? 14 : 10 }} />
         <div className="skeleton" style={{ height: 5, width: "100%", borderRadius: 999, marginBottom: featured ? 10 : 0 }} />

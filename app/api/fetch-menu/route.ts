@@ -27,6 +27,8 @@ export async function POST(req: Request) {
     const { url, restaurantId, restaurantName } = body;
 
     if (!url) return NextResponse.json({ error: "Missing url" }, { status: 400 });
+    if (typeof url !== "string" || url.length > 2048)
+      return NextResponse.json({ error: "Invalid url" }, { status: 400 });
 
     let parsed: URL;
     try {

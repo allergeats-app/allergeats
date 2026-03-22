@@ -32,6 +32,7 @@ import { useRestaurantMemory } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackParams } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackType } from "@/lib/learning/types";
 import type { Restaurant, Risk, AllergenId } from "@/lib/types";
+import { coverGradient } from "@/lib/coverGradient";
 
 type RiskFilter = "all" | Risk;
 
@@ -52,27 +53,6 @@ const QUICK_FEEDBACK: { type: FeedbackType; label: string }[] = [
   { type: "needs-staff-confirmation", label: "Ask staff ?" },
 ];
 
-function coverGradient(cuisine: string, name: string): string {
-  const c = cuisine.toLowerCase();
-  const n = name.toLowerCase();
-  if (n.includes("mcdonald") || c.includes("burger") || n.includes("burger"))
-    return "linear-gradient(135deg, #fde68a 0%, #fca5a5 100%)";
-  if (c.includes("mexican") || c.includes("tex-mex") || n.includes("chipotle"))
-    return "linear-gradient(135deg, #fed7aa 0%, #fde68a 100%)";
-  if (c.includes("chicken") || n.includes("chick-fil") || n.includes("popeyes"))
-    return "linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%)";
-  if (c.includes("coffee") || c.includes("café") || c.includes("cafe") || c.includes("bakery"))
-    return "linear-gradient(135deg, #d6d3d1 0%, #a8a29e 100%)";
-  if (c.includes("pizza"))
-    return "linear-gradient(135deg, #fca5a5 0%, #fb923c 100%)";
-  if (c.includes("sandwich") || c.includes("sub") || n.includes("subway"))
-    return "linear-gradient(135deg, #bbf7d0 0%, #6ee7b7 100%)";
-  if (c.includes("asian") || c.includes("chinese") || c.includes("sushi") || c.includes("japanese"))
-    return "linear-gradient(135deg, #fde68a 0%, #86efac 100%)";
-  if (c.includes("italian") || c.includes("pasta"))
-    return "linear-gradient(135deg, #fca5a5 0%, #fde68a 100%)";
-  return "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)";
-}
 
 function findRestaurant(id: string): Restaurant | undefined {
   try {
@@ -306,8 +286,12 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   const hasNoMenu    = summary.total === 0;
   const noAllergens  = userAllergens.length === 0;
 
-  const photoSrc = !photoFailed && restaurant.lat != null && restaurant.lng != null
-    ? `/api/places-photo?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
+  const photoSrc = !photoFailed
+    ? restaurant.googlePlaceId
+      ? `/api/places-photo?placeId=${encodeURIComponent(restaurant.googlePlaceId)}`
+      : restaurant.lat != null && restaurant.lng != null
+        ? `/api/places-photo?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
+        : null
     : null;
 
   const RISK_CHIPS: { value: RiskFilter; label: string }[] = [

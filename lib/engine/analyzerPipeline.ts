@@ -97,6 +97,7 @@ function analyzeDish(
   const scored = scoreItem(signals, userAllergens, sourceType);
 
   // Collect ALL detected allergens (not just user's profile) for informational display
+  // (e.g. "also contains shellfish" even if the user only set peanut allergy).
   const ALL_ALLERGENS: AllergenId[] = [
     "dairy", "egg", "wheat", "gluten", "soy", "peanut", "tree-nut",
     "sesame", "fish", "shellfish", "mustard", "corn", "legumes", "oats",

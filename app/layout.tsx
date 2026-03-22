@@ -40,18 +40,18 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <FavoritesProvider>
-            <ErrorBoundary>
-            {children}
-            </ErrorBoundary>
-            <footer style={{
-              textAlign: "center",
-              padding: "20px 20px max(28px, calc(16px + env(safe-area-inset-bottom)))",
-              fontSize: 13,
-              color: "var(--c-sub)",
-              lineHeight: 1.6,
-            }}>
-              Always confirm with staff before ordering. AllergEats is a decision-support tool, not medical advice.
-            </footer>
+              <ErrorBoundary>
+                {children}
+                <footer style={{
+                  textAlign: "center",
+                  padding: "20px 20px max(28px, calc(16px + env(safe-area-inset-bottom)))",
+                  fontSize: 13,
+                  color: "var(--c-sub)",
+                  lineHeight: 1.6,
+                }}>
+                  Always confirm with staff before ordering. AllergEats is a decision-support tool, not medical advice.
+                </footer>
+              </ErrorBoundary>
             </FavoritesProvider>
           </AuthProvider>
         </ThemeProvider>
