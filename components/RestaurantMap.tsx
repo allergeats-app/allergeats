@@ -109,19 +109,24 @@ const POPUP_STYLES = `
 `;
 
 export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isDark = false }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef       = useRef<import("leaflet").Map | null>(null);
-  const originRef    = useRef<{ lat: number; lng: number } | null>(null);
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const mapRef         = useRef<import("leaflet").Map | null>(null);
+  const markerGroupRef = useRef<import("leaflet").LayerGroup | null>(null);
+  const LRef           = useRef<typeof import("leaflet") | null>(null);
+  const originRef      = useRef<{ lat: number; lng: number } | null>(null);
+  const didFitRef      = useRef(false);
   const [pendingSearch, setPendingSearch] = useState<{ lat: number; lng: number } | null>(null);
+  const [menuOnly, setMenuOnly] = useState(false);
 
+  // ── Map init (once on mount) ──────────────────────────────────────────────
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     let cancelled = false;
 
     (async () => {
       const L = (await import("leaflet")).default;
+      LRef.current = L;
 
-      // Leaflet CSS is bundled via layout.tsx import — no CDN injection needed.
       if (!document.getElementById("leaflet-popup-css")) {
         const style = document.createElement("style");
         style.id        = "leaflet-popup-css";
@@ -140,10 +145,8 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
       );
       mapRef.current = map;
 
-      // Zoom control bottom-right (less intrusive)
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      // CartoDB tiles — Voyager (light) or DarkMatter (dark)
       const tileUrl = isDark
         ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
         : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png";
@@ -171,34 +174,13 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
           .bindPopup("<strong style='font-family:Inter,Arial,sans-serif'>You are here</strong>");
       }
 
-      // Restaurant markers
-      for (const r of restaurants) {
-        if (r.lat == null || r.lng == null) continue;
+      // Marker layer group — updated reactively in the effect below
+      markerGroupRef.current = L.layerGroup().addTo(map);
 
-        const icon = L.divIcon({
-          html: makeMarkerHtml(r, isDark),
-          className: "",
-          iconSize:    [0, 0],   // zero so the anchor point IS the coordinate
-          iconAnchor:  [0, 0],   // pill is then centered via CSS transform
-          popupAnchor: [0, -18], // popup appears above the pill
-        });
-
-        L.marker([r.lat, r.lng], { icon })
-          .addTo(map)
-          .bindPopup(makePopupHtml(r), { maxWidth: 260 });
-      }
-
-      // Recalculate tile coverage after layout settles (fixes grey tiles on desktop).
-      // Call twice: rAF catches the first paint, setTimeout catches slower CSS/font loads.
       map.invalidateSize();
-      requestAnimationFrame(() => {
-        if (!cancelled) map.invalidateSize();
-      });
-      setTimeout(() => {
-        if (!cancelled) map.invalidateSize();
-      }, 400);
+      requestAnimationFrame(() => { if (!cancelled) map.invalidateSize(); });
+      setTimeout(()           => { if (!cancelled) map.invalidateSize(); }, 400);
 
-      // Show "Search this area" after panning
       map.on("moveend", () => {
         const center = map.getCenter();
         const origin = originRef.current;
@@ -217,17 +199,59 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Marker update (restaurants list or menuOnly filter changes) ───────────
+  useEffect(() => {
+    const L     = LRef.current;
+    const group = markerGroupRef.current;
+    const map   = mapRef.current;
+    if (!L || !group || !map) return;
+
+    group.clearLayers();
+
+    const visible = menuOnly
+      ? restaurants.filter((r) => r.scoredItems.length > 0)
+      : restaurants;
+
+    const coords: [number, number][] = [];
+
+    for (const r of visible) {
+      if (r.lat == null || r.lng == null) continue;
+      coords.push([r.lat, r.lng]);
+
+      const icon = L.divIcon({
+        html:        makeMarkerHtml(r, isDark),
+        className:   "",
+        iconSize:    [0, 0],
+        iconAnchor:  [0, 0],
+        popupAnchor: [0, -18],
+      });
+
+      L.marker([r.lat, r.lng], { icon })
+        .addTo(group)
+        .bindPopup(makePopupHtml(r), { maxWidth: 260 });
+    }
+
+    // Auto-fit on first load only — don't fight the user's panning after that
+    if (!didFitRef.current && coords.length > 1) {
+      try {
+        map.fitBounds(L.latLngBounds(coords), { padding: [48, 48], maxZoom: 15 });
+      } catch { /* ignore */ }
+      didFitRef.current = true;
+    }
+  }, [restaurants, menuOnly, isDark]);
+
+  const menuCount = restaurants.filter((r) => r.scoredItems.length > 0).length;
+  const chipBg    = isDark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.92)";
+  const chipText  = isDark ? "#f2f2f7" : "#374151";
+
   return (
     <div style={{ position: "relative", overflow: "hidden" }}>
       <div
         ref={containerRef}
-        style={{
-          width: "100%",
-          height: "calc(100dvh - 96px)",
-          minHeight: 440,
-        }}
+        style={{ width: "100%", height: "calc(100dvh - 96px)", minHeight: 440 }}
       />
 
+      {/* Search this area */}
       {pendingSearch && onSearchArea && (
         <div style={{
           position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)",
@@ -257,6 +281,68 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
           </button>
         </div>
       )}
+
+      {/* Menu filter chips */}
+      <div style={{
+        position: "absolute", top: 14, left: 14,
+        zIndex: 1000, display: "flex", gap: 6,
+      }}>
+        <button
+          onClick={() => setMenuOnly(false)}
+          aria-pressed={!menuOnly}
+          style={{
+            padding: "7px 13px", borderRadius: 999,
+            background: !menuOnly ? (isDark ? "#f2f2f7" : "#111827") : chipBg,
+            color:      !menuOnly ? (isDark ? "#111827" : "#fff")    : chipText,
+            border: "none",
+            fontSize: 12, fontWeight: 700, cursor: "pointer",
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          All · {restaurants.length}
+        </button>
+        <button
+          onClick={() => setMenuOnly(true)}
+          aria-pressed={menuOnly}
+          style={{
+            padding: "7px 13px", borderRadius: 999,
+            background: menuOnly ? "#eb1700" : chipBg,
+            color:      menuOnly ? "#fff"    : chipText,
+            border: "none",
+            fontSize: 12, fontWeight: 700, cursor: "pointer",
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+            whiteSpace: "nowrap",
+            opacity: menuCount === 0 ? 0.5 : 1,
+          }}
+        >
+          Has Menu · {menuCount}
+        </button>
+      </div>
+
+      {/* Safety legend */}
+      <div style={{
+        position: "absolute", bottom: 54, left: 14,
+        zIndex: 1000,
+        background: chipBg, backdropFilter: "blur(8px)",
+        borderRadius: 10, padding: "6px 10px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+        display: "flex", flexDirection: "column", gap: 3,
+      }}>
+        {([
+          { color: "#22c55e", label: "≥70% safe" },
+          { color: "#f59e0b", label: "40–69%" },
+          { color: "#ef4444", label: "<40%" },
+          { color: "#9ca3af", label: "No data" },
+        ] as const).map(({ color, label }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+            <span style={{ fontSize: 10, fontWeight: 600, color: chipText, lineHeight: 1 }}>{label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
