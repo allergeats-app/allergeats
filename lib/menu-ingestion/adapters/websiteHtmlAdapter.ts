@@ -24,7 +24,7 @@
  *   to get structured sections instead of a flat list.
  */
 
-import type { MenuIngestionAdapter, NormalizedMenu, NormalizedMenuItem, IngestionMeta } from "../types";
+import type { MenuIngestionAdapter, NormalizedMenu, IngestionMeta } from "../types";
 import {
   buildMenuShell, buildSection, buildItem,
   extractPrice, stripPrice,

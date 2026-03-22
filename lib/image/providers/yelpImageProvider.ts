@@ -9,7 +9,7 @@
 // Docs: https://docs.developer.yelp.com/reference/v3_business_search
 
 import type { RestaurantImageInput, ProviderCandidate } from "../types";
-import { scoreMatch, MATCH_THRESHOLD, normalizePhone } from "../imageMatcher";
+import { scoreMatch, MATCH_THRESHOLD } from "../imageMatcher";
 
 const YELP_BASE = "https://api.yelp.com/v3";
 const FETCH_TIMEOUT_MS = 10_000;

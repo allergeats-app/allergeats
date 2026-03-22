@@ -72,6 +72,7 @@ export function useRestaurantMemory(
   }, [restaurantId, allItems]);
 
   // Load on mount and whenever restaurantId or items change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { refresh(); }, [refresh]);
 
   const submitFeedback = useCallback(

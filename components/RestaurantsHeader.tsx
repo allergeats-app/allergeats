@@ -20,7 +20,7 @@ export function RestaurantsHeader({
   query, setQuery,
   activeFilterCount, showFilterDrawer, setShowFilterDrawer,
   layout, setLayout,
-  loading, filteredCount, radiusMiles,
+  loading, filteredCount,
 }: {
   locationLabel: string;
   locationMode: "precise" | "approximate" | "cached" | "unavailable";
@@ -29,7 +29,7 @@ export function RestaurantsHeader({
   query: string; setQuery: (q: string) => void;
   activeFilterCount: number; showFilterDrawer: boolean; setShowFilterDrawer: (v: boolean) => void;
   layout: LayoutOption; setLayout: (l: LayoutOption) => void;
-  loading: boolean; filteredCount: number; radiusMiles: number;
+  loading: boolean; filteredCount: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 

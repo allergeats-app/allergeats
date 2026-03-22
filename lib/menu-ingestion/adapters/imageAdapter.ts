@@ -37,7 +37,6 @@ import { buildMenuShell, buildSection } from "./base";
 export class ImageAdapter implements MenuIngestionAdapter<string> {
   readonly sourceType = "image" as const;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async ingest(_imageInput: string, meta: IngestionMeta): Promise<NormalizedMenu> {
     const menu = buildMenuShell("image", meta);
 

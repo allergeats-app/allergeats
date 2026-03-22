@@ -55,10 +55,6 @@ type ToastTokenResponse = {
   expires_in: number;
 };
 
-type ToastModifier = {
-  guid: string;
-  name: string;
-};
 
 type ToastMenuItem = {
   guid: string;

@@ -485,6 +485,7 @@ export class MockLocationProvider implements LocationProvider {
     return getRealLocation();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async searchRestaurants(lat: number, lng: number, radiusMiles: number, _accuracy?: number): Promise<Restaurant[]> {
     return MOCK_RESTAURANTS.map((r) => ({
       ...r,

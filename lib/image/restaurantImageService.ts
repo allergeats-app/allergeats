@@ -79,14 +79,12 @@ export async function getRestaurantImage(
   ];
 
   let winner: ProviderCandidate | null = null;
-  let winnerName = "";
 
   for (const provider of providers) {
     try {
       const candidate = await provider.fn(input);
       if (candidate?.imageUrl) {
         winner = candidate;
-        winnerName = provider.name;
         console.log(
           `${label}: ✓ ${provider.name} won ` +
           `(confidence=${candidate.confidence}, score=${candidate.score})`

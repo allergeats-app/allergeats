@@ -424,7 +424,6 @@ function HomeContent() {
         setLayout={setLayout}
         loading={loading}
         filteredCount={filtered.length}
-        radiusMiles={radiusMiles}
       />
 
       {layout !== "map" && <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>

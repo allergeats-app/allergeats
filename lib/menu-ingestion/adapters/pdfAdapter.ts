@@ -33,7 +33,6 @@ import { buildMenuShell, buildSection } from "./base";
 export class PdfAdapter implements MenuIngestionAdapter<string> {
   readonly sourceType = "pdf" as const;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async ingest(_pdfBase64: string, meta: IngestionMeta): Promise<NormalizedMenu> {
     const menu = buildMenuShell("pdf", meta);
 

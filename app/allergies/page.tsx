@@ -22,7 +22,7 @@ export default function AllergiesPage() {
 
   useEffect(() => {
     if (!loading && allergens.length > 0 && selected.length === 0) {
-      setSelected(allergens);
+      setSelected(allergens);          // eslint-disable-line react-hooks/set-state-in-effect
       setSavedSelection(allergens);
     }
   }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps

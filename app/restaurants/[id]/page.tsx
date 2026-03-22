@@ -110,7 +110,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
   // ── Load restaurant + base analysis ────────────────────────────────────────
   useEffect(() => {
     const found = findRestaurant(id);
-    if (!found) { setNotFound(true); return; } // eslint-disable-line react-hooks/set-state-in-effect
+    if (!found) { setNotFound(true); return; }
 
     const allergens = loadProfileAllergens();
     setUserAllergens(allergens);
@@ -277,14 +277,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
       ));
     }
     return map;
-  }, [vm, hasCategories, riskFilter, allItems]);
-
-  const byRisk = useMemo<Record<Risk, typeof allItems>>(() => {
-    const groups: Record<Risk, typeof allItems> = { avoid: [], ask: [], "likely-safe": [], unknown: [] };
-    if (hasCategories) return groups;
-    for (const item of filteredItems) groups[item.risk].push(item);
-    return groups;
-  }, [filteredItems, hasCategories]);
+  }, [vm, hasCategories, riskFilter]);
 
   // ── Guards ──────────────────────────────────────────────────────────────────
   if (notFound) {
@@ -410,6 +403,7 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ id:
             position: "relative", overflow: "hidden",
           }}>
             {photoSrc && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={photoSrc}
                 alt={hero.restaurantName}

@@ -29,7 +29,7 @@ export default function ProfilePage() {
   }, [loading, user, router]);
 
   useEffect(() => {
-    setFirstEdit(firstName);
+    setFirstEdit(firstName); // eslint-disable-line react-hooks/set-state-in-effect
     setLastEdit(lastName);
   }, [firstName, lastName]);
 

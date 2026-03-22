@@ -266,7 +266,7 @@ export default function ScanPage() {
       }
     }
     return { safe, ask, avoid };
-  }, [menuItems, avoidAllergens, selectedAllergens, learnedRules, menuSource, selectedMenu]);
+  }, [menuItems, avoidAllergens, selectedAllergens, learnedRules, menuSource, selectedMenu]); // eslint-disable-line react-hooks/exhaustive-deps
 
 function StaffBlock({ row }: { row: Row }) {
     return (
@@ -596,6 +596,7 @@ function StaffBlock({ row }: { row: Row }) {
               </button>
               {photoPreview && isScanning && (
                 <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid var(--c-border)" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={photoPreview} alt="Menu preview" style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
                 </div>
               )}

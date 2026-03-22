@@ -20,7 +20,7 @@
  *   "Burgers"          (short title line → section, if followed by items)
  */
 
-import type { MenuIngestionAdapter, NormalizedMenu, NormalizedMenuItem, IngestionMeta } from "../types";
+import type { MenuIngestionAdapter, NormalizedMenu, IngestionMeta } from "../types";
 import {
   buildMenuShell, buildSection, buildItem,
   extractPrice, stripPrice,

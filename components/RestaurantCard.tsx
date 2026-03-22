@@ -78,6 +78,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
         {/* Cover image area — cuisine gradient is always the base; photo fades in on load */}
         <div style={{ height: compact ? 80 : 110, background: cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
           {photoSrc && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={photoSrc}
               alt={r.name}

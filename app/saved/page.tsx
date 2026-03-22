@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { SettingsButton } from "@/components/SettingsButton";
 import { useFavorites, type FavoriteMeta } from "@/lib/favoritesContext";
@@ -91,13 +91,8 @@ function ScanCard({ entry }: { entry: ScanEntry }) {
 
 function SavedContent() {
   const { favorites, favoritesMeta } = useFavorites();
-  const [recentViews, setRecentViews]   = useState<RecentView[]>([]);
-  const [scanHistory, setScanHistory]   = useState<ScanEntry[]>([]);
-
-  useEffect(() => {
-    setRecentViews(getRecentlyViewed());
-    setScanHistory(getScanHistory());
-  }, []);
+  const [recentViews]   = useState<RecentView[]>(() => getRecentlyViewed());
+  const [scanHistory]   = useState<ScanEntry[]>(() => getScanHistory());
 
   // "Your Usual Safe Spots" = restaurants that are both favorited AND recently viewed
   const usualSpots = recentViews.filter((v) => favorites.has(v.id));

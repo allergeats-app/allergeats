@@ -18,7 +18,7 @@
 
 import type { CanonicalRestaurant, RestaurantCandidate, RegistrySourceRef } from "./types";
 import type { SourceConfidence } from "@/lib/menu-ingestion/types";
-import { normalizeName, normalizeAddress, extractDomain } from "./normalize";
+import { extractDomain } from "./normalize";
 import { computeSignals, findMatch } from "./deduplication";
 
 // ─── Constants ────────────────────────────────────────────────────────────────

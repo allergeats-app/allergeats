@@ -41,7 +41,6 @@ const QUEUE_KEY = "allegeats_crawl_queue";
  * (2^n hours, capped). Restaurants are NOT permanently excluded — they continue
  * to be re-tried once the backoff window expires.
  */
-const MAX_FAILURES_FOR_WEEKLY_BACKOFF = 7; // 2^7 h = 128h > 7-day cap → weekly retries
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
 

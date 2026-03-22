@@ -69,7 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       saved === "dark" || saved === "light" || saved === "system" ? saved : "system";
     const dark = resolve(initial);
     setModeState(initial);      // eslint-disable-line react-hooks/set-state-in-effect
-    setIsDark(dark);            // eslint-disable-line react-hooks/set-state-in-effect
+    setIsDark(dark);
     applyVars(dark);
   }, [resolve]);
 
