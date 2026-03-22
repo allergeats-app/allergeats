@@ -7,6 +7,9 @@ type Props = {
   restaurants: ScoredRestaurant[];
   userLat?: number;
   userLng?: number;
+  /** The active search center (may differ from GPS position). When this changes, the map re-centers. */
+  centerLat?: number;
+  centerLng?: number;
   onSearchArea?: (lat: number, lng: number) => void;
   isDark?: boolean;
 };
@@ -108,7 +111,7 @@ const POPUP_STYLES = `
   }
 `;
 
-export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isDark = false }: Props) {
+export function RestaurantMap({ restaurants, userLat, userLng, centerLat, centerLng, onSearchArea, isDark = false }: Props) {
   const containerRef   = useRef<HTMLDivElement>(null);
   const mapRef         = useRef<import("leaflet").Map | null>(null);
   const markerGroupRef = useRef<import("leaflet").LayerGroup | null>(null);
@@ -198,6 +201,16 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Re-center map when search location changes ────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || centerLat == null || centerLng == null) return;
+    originRef.current = { lat: centerLat, lng: centerLng };
+    didFitRef.current = false;
+    setPendingSearch(null);
+    map.setView([centerLat, centerLng], 14);
+  }, [centerLat, centerLng]);
 
   // ── Marker update (restaurants list or menuOnly filter changes) ───────────
   useEffect(() => {

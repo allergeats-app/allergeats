@@ -574,6 +574,8 @@ function HomeContent() {
             restaurants={filtered}
             userLat={userLocation?.lat}
             userLng={userLocation?.lng}
+            centerLat={searchCenter?.lat ?? userLocation?.lat}
+            centerLng={searchCenter?.lng ?? userLocation?.lng}
             onSearchArea={(lat, lng) => setSearchCenter({ lat, lng })}
             isDark={isDark}
           />

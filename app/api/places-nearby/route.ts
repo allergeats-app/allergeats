@@ -133,13 +133,14 @@ export async function POST(req: Request) {
     let body: object;
 
     if (keyword) {
-      // Text Search — keyword-scoped to the circle for category diversity.
-      // DISTANCE ranking ensures physically closest matches, not globally famous chains.
+      // Text Search — keyword finds the best category match *within* the area.
+      // locationRestriction (hard cap) keeps results inside the radius.
+      // Default RELEVANCE ranking returns the best/most-reviewed match, not just
+      // the closest chain — DISTANCE here caused Chipotle to dominate NYC.
       url  = TEXT_URL;
       body = {
-        textQuery:      keyword,
-        rankPreference: "DISTANCE",
-        locationBias: {
+        textQuery: keyword,
+        locationRestriction: {
           circle: {
             center: { latitude: lat, longitude: lng },
             radius,
