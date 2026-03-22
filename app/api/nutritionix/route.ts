@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 
 const BASE = "https://trackapi.nutritionix.com/v2";
+
+// 20 requests per minute per IP — proxies a paid external API
+const NUTRITIONIX_WINDOW_MS = 60_000;
+const NUTRITIONIX_MAX_REQ   = 20;
 
 export type NutritionixFood = {
   food_name: string;
@@ -35,6 +40,10 @@ type RequestBody = {
  * Returns: { foods: NutritionixFood[] }
  */
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), NUTRITIONIX_WINDOW_MS, NUTRITIONIX_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
+  }
+
   const appId  = process.env.NUTRITIONIX_APP_ID;
   const appKey = process.env.NUTRITIONIX_APP_KEY;
 

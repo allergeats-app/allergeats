@@ -11,8 +11,17 @@
 import { NextResponse } from "next/server";
 import { getRestaurantImage } from "@/lib/image/restaurantImageService";
 import type { RestaurantImageInput } from "@/lib/image/types";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+
+// 30 requests per minute per IP — proxies external image APIs (Google, Yelp)
+const IMAGE_WINDOW_MS = 60_000;
+const IMAGE_MAX_REQ   = 30;
 
 export async function POST(req: Request) {
+  if (isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
+  }
+
   try {
     const body = await req.json() as RestaurantImageInput;
     if (!body?.name) {
@@ -36,6 +45,10 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  if (isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
+    return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const input: RestaurantImageInput = {
     name:    searchParams.get("name")    ?? "",
