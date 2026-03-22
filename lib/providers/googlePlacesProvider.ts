@@ -39,6 +39,10 @@ const PLACES_CACHE_TTL_MS = 30 * 60 * 1000;
  */
 const MIN_GOOGLE_FOR_OVERPASS = 15;
 
+/** Max locations of any single chain shown per search — prevents Starbucks/McDonald's
+ *  from filling all slots in dense cities regardless of proximity ranking. */
+const MAX_PER_CHAIN = 4;
+
 // ─── Client-side sessionStorage cache ────────────────────────────────────────
 // Mirrors the Overpass cache pattern to avoid redundant API calls when the user
 // moves only slightly or re-mounts the page within the same session.
@@ -271,16 +275,22 @@ export class GooglePlacesLocationProvider implements LocationProvider {
   // ─── Mapping ────────────────────────────────────────────────────────────────
 
   private _mapPlaces(userLat: number, userLng: number, places: PlaceResult[]): Restaurant[] {
-    // Dedup by placeId — each Google place_id is a distinct physical location.
-    // Name-based dedup was wrong: 10 nearby Subway locations all share a name
-    // but are different restaurants and must each appear as a card.
-    const seen    = new Set<string>();
+    const seen       = new Set<string>();
+    const chainCount = new Map<string, number>(); // chain name → slot count
     const results: Restaurant[] = [];
 
     beginRegistryBatch();
     try {
       for (const p of places) {
         if (seen.has(p.placeId)) continue;
+
+        // Cap any single chain at MAX_PER_CHAIN results so dense cities (NYC, Chicago)
+        // don't end up showing 20 Starbucks / 15 McDonald's with no variety.
+        const chain = dedupKey(p.name);
+        const count = chainCount.get(chain) ?? 0;
+        if (count >= MAX_PER_CHAIN) continue;
+        chainCount.set(chain, count + 1);
+
         seen.add(p.placeId);
 
         const distance = Math.round(haversineDistance(userLat, userLng, p.lat, p.lng) * 10) / 10;
