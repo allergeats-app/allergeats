@@ -28,7 +28,7 @@ const SORTED_VOCAB = [...ALLERGEN_VOCABULARY]
   .sort((a, b) => b.term.length - a.term.length)
   .map((entry) => {
     const normalized = normalizeText(entry.term);
-    return { entry, re: new RegExp(`\\b${escapeRe(normalized)}\\b`) };
+    return { entry, re: new RegExp(`\\b${escapeRe(normalized)}s?\\b`) };
   });
 
 /** Run all vocabulary-based detection layers on a normalized text string */
