@@ -224,7 +224,7 @@ function HomeContent() {
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        { headers: { "Accept-Language": "en" } }
+        { headers: { "Accept-Language": "en", "User-Agent": "AllergEats/1.0" } }
       );
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -386,11 +386,17 @@ function HomeContent() {
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
 
   function handleSelectLocation(lat: number, lng: number, label: string) {
+    // Clear old results immediately so stale location data never shows under a new location
+    setRawRestaurants([]);
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     setSearchCenter({ lat, lng, label });
     setLocationLabel(label);
   }
 
   function handleUseCurrentLocation() {
+    // Clear old results immediately so stale location data never shows under a new location
+    setRawRestaurants([]);
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     setSearchCenter(null);
     setLocationLabel("Locating…");
     setLocationRefresh((n) => n + 1); // force load effect to re-run even if searchCenter was already null
