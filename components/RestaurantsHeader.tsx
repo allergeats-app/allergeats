@@ -77,6 +77,24 @@ export function RestaurantsHeader({
               <Image src="/logo.png" alt="AllergEats" width={160} height={40} style={{ width: "auto", height: 32 }} priority />
             </Link>
             <div style={{ position: "absolute", right: 0, display: "flex", alignItems: "center", gap: 6 }}>
+              {/* Scan icon */}
+              <Link
+                href="/scan"
+                aria-label="Scan a menu"
+                style={{
+                  width: 36, height: 36, borderRadius: 999,
+                  background: "var(--c-card)",
+                  border: "1px solid var(--c-border)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+                  color: "currentColor",
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </Link>
               {/* Search icon */}
               <button
                 type="button"
