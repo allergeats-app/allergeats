@@ -397,7 +397,7 @@ function HomeContent() {
   }
 
   return (
-    <main className="safe-pb" style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif" }}>
+    <main className={layout !== "map" ? "safe-pb" : undefined} style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif" }}>
 
       {/* ── 1. Sticky header ─────────────────────────────────────────────── */}
       <RestaurantsHeader

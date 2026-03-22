@@ -245,7 +245,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, onSearchArea, isD
   const chipText  = isDark ? "#f2f2f7" : "#374151";
 
   return (
-    <div style={{ position: "relative", overflow: "hidden" }}>
+    <div style={{ position: "relative", overflow: "hidden", isolation: "isolate" }}>
       <div
         ref={containerRef}
         style={{ width: "100%", height: "calc(100dvh - 96px)", minHeight: 440 }}
