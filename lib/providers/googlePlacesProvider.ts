@@ -70,25 +70,48 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Map Google Places type strings → RestaurantTag[] */
+/**
+ * Map Google Places API v1 type strings → RestaurantTag[].
+ * v1 uses snake_case types like "steakhouse", "seafood_restaurant",
+ * "italian_restaurant", "fast_food_restaurant", etc.
+ */
 function tagsFromTypes(types: string[]): RestaurantTag[] {
-  const tags: RestaurantTag[] = [];
-  if (types.some((t) => /burger|american/.test(t)))         tags.push("burgers");
-  if (types.some((t) => /mexican|taco/.test(t)))            tags.push("mexican");
-  if (types.some((t) => /chicken|wings/.test(t)))           tags.push("chicken");
-  if (types.some((t) => /coffee|cafe|bakery/.test(t)))      tags.push("coffee");
-  if (types.some((t) => /sandwich|pizza|italian/.test(t)))  tags.push("sandwiches");
-  return tags;
+  const tags = new Set<RestaurantTag>();
+  for (const t of types) {
+    if (/burger|hamburger|american_restaurant/.test(t))                       tags.add("burgers");
+    if (/mexican|taco/.test(t))                                               tags.add("mexican");
+    if (/chicken|wing|fried_chicken/.test(t))                                 tags.add("chicken");
+    if (/coffee|cafe|bakery|tea_house/.test(t))                               tags.add("coffee");
+    if (/sandwich|sub_sandwich/.test(t))                                      tags.add("sandwiches");
+    if (/pizza/.test(t))                                                      tags.add("pizza");
+    if (/italian/.test(t))                                                    tags.add("italian");
+    if (/seafood|fish_and_chips/.test(t))                                     tags.add("seafood");
+    if (/steak/.test(t))                                                      tags.add("steakhouse");
+    if (/chinese|japanese|thai|vietnamese|korean|sushi|ramen|asian/.test(t))  tags.add("asian");
+    if (/breakfast|brunch/.test(t))                                           tags.add("breakfast");
+    if (/sports_bar/.test(t))                                                 tags.add("sports-bar");
+    if (/fine_dining|upscale/.test(t))                                        tags.add("fine-dining");
+    if (/bar|pub|grill|casual_dining/.test(t))                                tags.add("casual");
+  }
+  return [...tags];
 }
 
-/** Format the primary cuisine label from Google types */
+/**
+ * Format the primary cuisine label from Google Places v1 types.
+ * Strips "_restaurant" suffix so "fast_food_restaurant" → "Fast Food".
+ */
 function cuisineFromTypes(types: string[]): string {
-  const preferred = types.find((t) => t !== "restaurant" && t !== "food" && t !== "point_of_interest" && t !== "establishment");
+  const SKIP = new Set([
+    "restaurant", "food", "food_and_drink",
+    "point_of_interest", "establishment",
+    "meal_takeaway", "meal_delivery",
+  ]);
+  const preferred = types.find((t) => !SKIP.has(t));
   if (!preferred) return "Restaurant";
   return preferred
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+    .replace(/_restaurant$/, "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function findMockMatch(name: string): Restaurant | undefined {
@@ -109,6 +132,11 @@ function dedupKey(name: string): string {
     .trim();
 }
 
+// ─── In-flight dedup ─────────────────────────────────────────────────────────
+// Same pattern as LiveLocationProvider — prevents duplicate parallel requests
+// when the component remounts or the effect fires twice in dev StrictMode.
+const inFlight = new Map<string, Promise<Restaurant[]>>();
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export class GooglePlacesLocationProvider implements LocationProvider {
@@ -124,17 +152,41 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     radiusMiles: number,
     accuracy?: number,
   ): Promise<Restaurant[]> {
-    const radiusMeters  = Math.round(radiusMiles * 1609.34);
-    const cacheKey     = placesCacheKey(lat, lng, radiusMiles);
+    const cacheKey = placesCacheKey(lat, lng, radiusMiles);
+
+    // Return cached result immediately (Overpass has its own 5-min cache so it's fast too)
+    const cached = readPlacesCache(cacheKey);
+    if (cached) {
+      const overpassResults = await this._overpass
+        .searchRestaurants(lat, lng, radiusMiles, accuracy)
+        .catch(() => [] as Restaurant[]);
+      return this._mergeResults(lat, lng, cached, overpassResults)
+        .filter((r) => r.distance == null || r.distance <= radiusMiles * 1.2);
+    }
+
+    // Dedup concurrent requests for the same cache key
+    const existing = inFlight.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = this._fetchAndMerge(lat, lng, radiusMiles, accuracy, cacheKey);
+    inFlight.set(cacheKey, promise);
+    promise.then(() => inFlight.delete(cacheKey), () => inFlight.delete(cacheKey));
+    return promise;
+  }
+
+  private async _fetchAndMerge(
+    lat: number,
+    lng: number,
+    radiusMiles: number,
+    accuracy: number | undefined,
+    cacheKey: string,
+  ): Promise<Restaurant[]> {
+    const radiusMeters = Math.round(radiusMiles * 1609.34);
 
     let googlePlaces: PlaceResult[] = [];
     let googleFailed = false;
 
-    const cached = readPlacesCache(cacheKey);
-    if (cached) {
-      googlePlaces = cached;
-    } else {
-      try {
+    try {
         // Run all searches in parallel to overcome prominence-ranking bias.
         // Each keyword targets a category that fast-food chains suppress:
         //   casual dining      → Chili's, Applebee's, Outback
@@ -147,14 +199,14 @@ export class GooglePlacesLocationProvider implements LocationProvider {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
             body:    JSON.stringify({ lat, lng, radiusMeters }),
-            signal:  AbortSignal.timeout(35_000),
+            signal:  AbortSignal.timeout(20_000),
           }),
           ...keywords.map((keyword) =>
             fetch("/api/places-nearby", {
               method:  "POST",
               headers: { "Content-Type": "application/json" },
               body:    JSON.stringify({ lat, lng, radiusMeters, keyword }),
-              signal:  AbortSignal.timeout(35_000),
+              signal:  AbortSignal.timeout(20_000),
             })
           ),
         ]);
@@ -181,9 +233,8 @@ export class GooglePlacesLocationProvider implements LocationProvider {
         }
 
         if (googlePlaces.length > 0) writePlacesCache(cacheKey, googlePlaces);
-      } catch {
-        googleFailed = true;
-      }
+    } catch {
+      googleFailed = true;
     }
 
     // Full failure — go straight to Overpass
