@@ -187,13 +187,13 @@ export function RestaurantsHeader({
 
           {/* Layout toggle */}
           <div style={{ display: "flex", gap: 3 }} role="group" aria-label="View layout">
-            {(["list", "grid", "map"] as LayoutOption[]).map((l) => (
+            {(["list", "map"] as LayoutOption[]).map((l) => (
               <button
                 key={l}
                 type="button"
                 onClick={() => setLayout(l)}
                 aria-pressed={layout === l}
-                aria-label={l === "list" ? "List view" : l === "grid" ? "Grid view" : "Map view"}
+                aria-label={l === "list" ? "List view" : "Map view"}
                 style={{
                   width: 28, height: 28, borderRadius: 7, border: "1.5px solid",
                   borderColor: layout === l ? "#eb1700" : "var(--c-border)",
@@ -206,11 +206,6 @@ export function RestaurantsHeader({
                 {l === "list" ? (
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
                     <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-                  </svg>
-                ) : l === "grid" ? (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
                   </svg>
                 ) : (
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

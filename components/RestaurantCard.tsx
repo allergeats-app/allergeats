@@ -9,7 +9,7 @@ import { fitLevel, fitBadge, fitExplanation } from "@/lib/fitLevel";
 import type { ScoredRestaurant } from "@/lib/types";
 import { trackEvent } from "@/lib/analytics";
 
-type Props = { restaurant: ScoredRestaurant; compact?: boolean };
+type Props = { restaurant: ScoredRestaurant };
 
 function coverForRestaurant(cuisine: string, name: string): { bg: string } {
   const c = cuisine.toLowerCase();
@@ -34,14 +34,11 @@ function coverForRestaurant(cuisine: string, name: string): { bg: string } {
 }
 
 
-export function RestaurantCard({ restaurant: r, compact = false }: Props) {
+export function RestaurantCard({ restaurant: r }: Props) {
   const { isDark } = useTheme();
   const { summary } = r;
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
-  // Top safe items to preview on the card (up to 3, non-compact only)
-  const safeItemNames = !compact
-    ? r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name)
-    : [];
+  const safeItemNames = r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name);
   const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
   const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
   const cover = coverForRestaurant(r.cuisine, r.name);
@@ -76,7 +73,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
         {/* Cover image area — cuisine gradient is always the base; photo fades in on load */}
-        <div style={{ height: compact ? 80 : 110, background: cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{ height: 110, background: cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
           {photoSrc && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -96,7 +93,7 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
             textAlign: "center", lineHeight: 1.2,
           }}>
             {level}
-            {!compact && summary.total >= 5 && (
+            {summary.total >= 5 && (
               <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.8, marginTop: 1 }}>
                 {Math.round(safePercent)}% safe
               </div>
@@ -133,25 +130,23 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
         </div>
 
         {/* Card body */}
-        <div style={{ padding: compact ? "12px 14px 14px" : "16px 18px 18px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: compact ? 6 : 4 }}>
+        <div style={{ padding: "16px 18px 18px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 900, fontSize: compact ? 15 : 19, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+              <div style={{ fontWeight: 900, fontSize: 19, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
               <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>{r.cuisine}</div>
-              {!compact && r.address && (
+              {r.address && (
                 <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {r.address}
                 </div>
               )}
             </div>
-            {!compact && <div style={{ fontSize: 15, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>See menu fit →</div>}
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>See menu fit →</div>
           </div>
 
-          {!compact && (
-            <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 12, lineHeight: 1.5 }}>
-              {explanation}
-            </div>
-          )}
+          <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 12, lineHeight: 1.5 }}>
+            {explanation}
+          </div>
 
           {summary.total > 0 ? (
             <div>
@@ -160,62 +155,36 @@ export function RestaurantCard({ restaurant: r, compact = false }: Props) {
                 <div style={{ width: `${askPercent}%`, background: "#f59e0b" }} />
                 <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />
               </div>
-              {!compact && (
-                <>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-                    <div style={{ display: "flex", gap: 14 }}>
-                      <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
-                      <Stat count={summary.ask}        label="Ask"   color="#d97706" />
-                      <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                      <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{tierLabel}</span>
-                    </div>
-                  </div>
-                  {safeItemNames.length > 0 && (
-                    <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                      {safeItemNames.map((name) => (
-                        <span key={name} style={{
-                          fontSize: 13, fontWeight: 700,
-                          color: isDark ? "#86efac" : "#15803d",
-                          background: isDark ? "#0a2414" : "#f0fdf4",
-                          border: `1px solid ${isDark ? "#14532d" : "#bbf7d0"}`,
-                          padding: "4px 10px", borderRadius: 999,
-                        }}>
-                          ✓ {name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-              {compact && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <Stat count={summary.likelySafe} label="✓" color="#16a34a" />
-                    <Stat count={summary.avoid}      label="✗" color="#dc2626" />
-                  </div>
-                  <div style={{
-                    fontSize: 11, fontWeight: 700,
-                    color: badge.color, background: badge.bg,
-                    padding: "2px 8px", borderRadius: 999,
-                  }}>
-                    {level}
-                  </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                <div style={{ display: "flex", gap: 14 }}>
+                  <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
+                  <Stat count={summary.ask}        label="Ask"   color="#d97706" />
+                  <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{tierLabel}</span>
+                </div>
+              </div>
+              {safeItemNames.length > 0 && (
+                <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {safeItemNames.map((name) => (
+                    <span key={name} style={{
+                      fontSize: 13, fontWeight: 700,
+                      color: isDark ? "#86efac" : "#15803d",
+                      background: isDark ? "#0a2414" : "#f0fdf4",
+                      border: `1px solid ${isDark ? "#14532d" : "#bbf7d0"}`,
+                      padding: "4px 10px", borderRadius: 999,
+                    }}>
+                      ✓ {name}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 12, color: "var(--c-sub)" }}>
-                {compact ? "No menu data" : "Menu not analyzed yet — tap to scan"}
-              </div>
-              {compact && (
-                <div style={{ fontSize: 11, fontWeight: 700, color: badge.color, background: badge.bg, padding: "2px 8px", borderRadius: 999 }}>
-                  {level}
-                </div>
-              )}
+            <div style={{ fontSize: 12, color: "var(--c-sub)" }}>
+              Menu not analyzed yet — tap to scan
             </div>
           )}
         </div>

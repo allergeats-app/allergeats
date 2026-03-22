@@ -606,7 +606,7 @@ function HomeContent() {
                 }}>
                   #1 Match
                 </div>
-                <RestaurantCard restaurant={filtered[0]} compact={false} />
+                <RestaurantCard restaurant={filtered[0]} />
               </div>
             </div>
 
@@ -616,9 +616,9 @@ function HomeContent() {
                 <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "20px 0 10px" }}>
                   {searchCenter ? "More in This Area" : "More Nearby"}
                 </div>
-                <div className={layout === "grid" ? "rp-grid" : undefined} style={{ display: "grid", gap: 12 }}>
+                <div style={{ display: "grid", gap: 12 }}>
                   {filtered.slice(1).map((r) => (
-                    <RestaurantCard key={r.id} restaurant={r} compact={layout === "grid"} />
+                    <RestaurantCard key={r.id} restaurant={r} />
                   ))}
                 </div>
               </>
