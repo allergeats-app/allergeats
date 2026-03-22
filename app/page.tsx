@@ -310,8 +310,10 @@ function HomeContent() {
           if (!cancelled) setResultsSource("mock");
         }
 
-        try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw)); } catch { /* ignore */ }
-        if (!cancelled) setRawRestaurants(raw);
+        if (!cancelled) {
+          try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw)); } catch { /* ignore */ }
+          setRawRestaurants(raw);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
