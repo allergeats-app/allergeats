@@ -9,6 +9,7 @@ import { fitLevel, fitBadge, fitExplanation } from "@/lib/fitLevel";
 import type { ScoredRestaurant } from "@/lib/types";
 import { trackEvent } from "@/lib/analytics";
 import { coverGradient } from "@/lib/coverGradient";
+import { chainLogoUrl } from "@/lib/chainLogos";
 
 type Props = { restaurant: ScoredRestaurant };
 
@@ -32,10 +33,18 @@ export function RestaurantCard({ restaurant: r }: Props) {
   const [photoLoaded, setPhotoLoaded] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(r.id);
+
+  // Logo-first: use Clearbit brand logo for known chains (no API key needed).
+  // Fall back to Google Places photo for OSM-matched restaurants with real coordinates.
+  const logoUrl  = chainLogoUrl(r.name);
+  const isLogo   = !!logoUrl && !photoFailed;
   const photoSrc = !photoFailed
-    ? r.googlePlaceId
-      ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
-      : `/api/places-photo?name=${encodeURIComponent(r.name)}${r.lat != null && r.lng != null ? `&lat=${r.lat}&lng=${r.lng}` : ""}`
+    ? logoUrl
+      ?? (r.googlePlaceId
+        ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
+        : r.lat != null && r.lng != null
+          ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
+          : null)
     : null;
 
   return (
@@ -59,7 +68,7 @@ export function RestaurantCard({ restaurant: r }: Props) {
               onLoad={() => setPhotoLoaded(true)}
               onError={() => setPhotoFailed(true)}
               loading="lazy"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: photoLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: isLogo ? "contain" : "cover", padding: isLogo ? "18px 28px" : 0, opacity: photoLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
             />
           )}
           <div style={{
