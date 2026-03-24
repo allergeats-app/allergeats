@@ -134,7 +134,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "cfa-grilled",     name: "Grilled Chicken Sandwich",          category: "Sandwiches", sourceType: "official", allergens: ["dairy","wheat","soy"] },
       { id: "cfa-grilled-dlx", name: "Grilled Chicken Club Sandwich",     category: "Sandwiches", sourceType: "official", allergens: ["dairy","wheat","soy"] },
       { id: "cfa-wrap-cool",   name: "Grilled Cool Wrap",                 category: "Wraps",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
-      { id: "cfa-wrap-spicy",  name: "Spicy Southwest Salad",             category: "Salads",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","nuts"] },
+      { id: "cfa-wrap-spicy",  name: "Spicy Southwest Salad",             category: "Salads",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","tree-nut"] },
       // Nuggets & Strips
       { id: "cfa-nuggets",     name: "Chick-fil-A Nuggets (8 pc)",        category: "Chicken",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
       { id: "cfa-grilled-nug", name: "Grilled Nuggets (8 pc)",            category: "Chicken",    sourceType: "official", allergens: ["dairy","soy"] },
@@ -142,21 +142,21 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "cfa-minis",       name: "Chick-n-Minis (4 pc)",              category: "Breakfast",  sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
       // Sides
       { id: "cfa-fries",       name: "Waffle Potato Fries",               category: "Sides",      sourceType: "official", allergens: [] },
-      { id: "cfa-fries-sup",   name: "Waffle Potato Fries (Superfood)",   category: "Sides",      sourceType: "official", allergens: ["dairy","nuts"] },
+      { id: "cfa-fries-sup",   name: "Waffle Potato Fries (Superfood)",   category: "Sides",      sourceType: "official", allergens: ["dairy","tree-nut"] },
       { id: "cfa-mac",         name: "Mac & Cheese",                      category: "Sides",      sourceType: "official", allergens: ["dairy","egg","wheat"] },
       { id: "cfa-soup",        name: "Chicken Noodle Soup",               category: "Sides",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
       { id: "cfa-coleslaw",    name: "Cole Slaw",                         category: "Sides",      sourceType: "official", allergens: ["egg"] },
       { id: "cfa-fruit",       name: "Fruit Cup",                         category: "Sides",      sourceType: "official", allergens: [] },
-      { id: "cfa-kale",        name: "Kale Crunch Side",                  category: "Sides",      sourceType: "official", allergens: ["dairy","egg","nuts"] },
+      { id: "cfa-kale",        name: "Kale Crunch Side",                  category: "Sides",      sourceType: "official", allergens: ["dairy","egg","tree-nut"] },
       // Salads
-      { id: "cfa-market-sal",  name: "Market Salad",                      category: "Salads",     sourceType: "official", allergens: ["dairy","nuts"] },
+      { id: "cfa-market-sal",  name: "Market Salad",                      category: "Salads",     sourceType: "official", allergens: ["dairy","tree-nut"] },
       { id: "cfa-cobb-sal",    name: "Cobb Salad (no chicken)",           category: "Salads",     sourceType: "official", allergens: ["dairy","egg"] },
       // Desserts & Drinks
       { id: "cfa-shake-choc",  name: "Chocolate Milkshake",               category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
       { id: "cfa-shake-van",   name: "Vanilla Milkshake",                 category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
       { id: "cfa-shake-straw", name: "Strawberry Milkshake",              category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
       { id: "cfa-icedream",    name: "Icedream Cone",                     category: "Desserts",   sourceType: "official", allergens: ["dairy"] },
-      { id: "cfa-brownie",     name: "Chocolate Fudge Brownie",           category: "Desserts",   sourceType: "official", allergens: ["dairy","egg","wheat","soy","nuts"] },
+      { id: "cfa-brownie",     name: "Chocolate Fudge Brownie",           category: "Desserts",   sourceType: "official", allergens: ["dairy","egg","wheat","soy","tree-nut"] },
       { id: "cfa-lemonade",    name: "Freshly Squeezed Lemonade",         category: "Beverages",  sourceType: "official", allergens: [] },
       { id: "cfa-tea",         name: "Iced Tea (Unsweetened)",            category: "Beverages",  sourceType: "official", allergens: [] },
     ],
@@ -201,13 +201,13 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "sbux-choccroiss", name: "Chocolate Croissant",               category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
       { id: "sbux-scone",      name: "Blueberry Scone",                   category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg"] },
       { id: "sbux-muffin",     name: "Blueberry Muffin",                  category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
-      { id: "sbux-banana-bread",name: "Banana Nut Bread",                 category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy","nuts"] },
+      { id: "sbux-banana-bread",name: "Banana Nut Bread",                 category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy","tree-nut"] },
       { id: "sbux-chocchunk",  name: "Chocolate Chunk Cookie",            category: "Bakery",     sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
       // Food
       { id: "sbux-eggwich",    name: "Bacon, Gouda & Egg Sandwich",       category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat"] },
       { id: "sbux-egg-turkey", name: "Turkey Bacon & Egg White Sandwich", category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat"] },
-      { id: "sbux-oatmeal",    name: "Rolled & Steel-Cut Oatmeal",        category: "Hot Breakfast",sourceType: "official", allergens: ["nuts"] },
-      { id: "sbux-bistro-box", name: "Protein Box (Egg & Cheese)",        category: "Snacks",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","nuts"] },
+      { id: "sbux-oatmeal",    name: "Rolled & Steel-Cut Oatmeal",        category: "Hot Breakfast",sourceType: "official", allergens: ["tree-nut"] },
+      { id: "sbux-bistro-box", name: "Protein Box (Egg & Cheese)",        category: "Snacks",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","tree-nut"] },
     ],
   },
 
@@ -466,7 +466,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       // Salads
       { id: "pan-caesar",        name: "Caesar Salad",                       category: "Salads",     sourceType: "official", allergens: ["dairy","egg","fish","wheat"] },
       { id: "pan-goddess-cobb",  name: "Green Goddess Cobb Salad",           category: "Salads",     sourceType: "official", allergens: ["dairy","egg"] },
-      { id: "pan-fuji-apple",    name: "Fuji Apple Salad",                   category: "Salads",     sourceType: "official", allergens: ["nuts","dairy","egg","wheat"] },
+      { id: "pan-fuji-apple",    name: "Fuji Apple Salad",                   category: "Salads",     sourceType: "official", allergens: ["tree-nut","dairy","egg","wheat"] },
       { id: "pan-greek",         name: "Greek Salad",                        category: "Salads",     sourceType: "official", allergens: ["dairy"] },
       // Breads & Bagels
       { id: "pan-sourdough",     name: "Sourdough Bread (slice)",            category: "Bakery",     sourceType: "official", allergens: ["wheat","soy"] },
@@ -1477,7 +1477,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "canes-fingers",       name: "Chicken Fingers",                  category: "Chicken",    sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
       { id: "canes-box-combo",     name: "Box Combo",                        category: "Combos",     sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
       { id: "canes-3-finger",      name: "3 Finger Combo",                   category: "Combos",     sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
-      { id: "canes-sauce",         name: "Cane's Sauce",                     category: "Sauces",     sourceType: "official", allergens: ["egg","soy","wheat"] },
+      { id: "canes-sauce",         name: "Cane's Sauce",                     category: "Sauces",     sourceType: "official", allergens: ["egg","soy"] },
       { id: "canes-fries",         name: "Crinkle Fries",                    category: "Sides",      sourceType: "official", allergens: ["soy"] },
       { id: "canes-coleslaw",      name: "Coleslaw",                         category: "Sides",      sourceType: "official", allergens: ["egg","dairy"] },
       { id: "canes-toast",         name: "Texas Toast",                      category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
@@ -1500,7 +1500,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     menuItems: [
       { id: "sonic-cheeseburger",  name: "Classic Cheeseburger",             category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","sesame","soy"] },
       { id: "sonic-super-sonic",   name: "SuperSONIC Double Cheeseburger",   category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","sesame","soy"] },
-      { id: "sonic-footlong",      name: "Footlong Chili Cheese Coney",      category: "Hot Dogs",   sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "sonic-footlong",      name: "Footlong Chili Cheese Coney",      category: "Hot Dogs",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
       { id: "sonic-corn-dog",      name: "Corn Dog",                         category: "Hot Dogs",   sourceType: "official", allergens: ["wheat","egg","soy"] },
       { id: "sonic-ckn-sandwich",  name: "Chicken Sandwich",                 category: "Chicken",    sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
       { id: "sonic-mozz-sticks",   name: "Mozzarella Sticks",                category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
