@@ -90,6 +90,10 @@ export type ScoredMenuItem = {
   staffQuestions: string[];
   /** Allergens from this item that match the user's own allergy profile */
   userAllergenHits: string[];
+  /** Maps each user-profile allergen to the best signal reason explaining its source */
+  allergenSources?: Partial<Record<string, string>>;
+  /** Actionable substitution suggestions for the matched allergens */
+  substitutions?: string[];
   /** Section position from the original NormalizedMenu (0-based). Undefined for legacy items. */
   sectionIndex?: number;
   /** Evidence trail from the ingestion adapter — surfaced in UI / debug tooling. */

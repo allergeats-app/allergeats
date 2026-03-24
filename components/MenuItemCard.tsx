@@ -189,6 +189,27 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         );
       })()}
 
+      {/* Substitution suggestions */}
+      {item.substitutions && item.substitutions.length > 0 && (
+        <div style={{
+          padding: "10px 13px",
+          borderRadius: 10,
+          background: isDark ? "rgba(255,255,255,0.05)" : "#f0f9ff",
+          border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#bae6fd"}`,
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: isDark ? "#7dd3fc" : "#0369a1", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+            Could try instead
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {item.substitutions.map((s, i) => (
+              <div key={i} style={{ fontSize: 13, color: isDark ? "#e0f2fe" : "#0c4a6e", lineHeight: 1.5 }}>
+                · {s}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Confidence + add + expand toggle */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         <ConfidenceBadge confidence={item.confidence} />

@@ -57,6 +57,16 @@ function sourceToConfidence(sourceType?: SourceType): ConfidenceLevel {
   }
 }
 
+const ALLERGEN_LABEL: Partial<Record<AllergenId, string>> = {
+  dairy: "Dairy", egg: "Egg", wheat: "Wheat", gluten: "Gluten",
+  soy: "Soy", peanut: "Peanut", "tree-nut": "Tree nuts",
+  sesame: "Sesame", fish: "Fish", shellfish: "Shellfish",
+  mustard: "Mustard", corn: "Corn", legumes: "Legumes", oats: "Oats",
+};
+function allergenLabel(id: AllergenId): string {
+  return ALLERGEN_LABEL[id] ?? id.replace(/-/g, " ");
+}
+
 /** Produce a concise human-readable explanation */
 function buildExplanation(
   risk: RiskLevel,
@@ -64,26 +74,88 @@ function buildExplanation(
   matchedAllergens: AllergenId[]
 ): string {
   if (risk === "avoid") {
-    const reasons = prioritizeForExplanation(signals)
-      .filter((s) => matchedAllergens.includes(s.allergen) && s.weight >= 3)
-      .slice(0, 2)
-      .map((s) => s.reason);
-    return reasons.length
-      ? reasons.join(". ")
-      : `Contains ${matchedAllergens.join(", ")} — avoid.`;
+    // Group allergens by their best signal reason — avoids repeating the same sentence
+    const reasonToAllergens = new Map<string, AllergenId[]>();
+    for (const allergen of matchedAllergens) {
+      const signal = prioritizeForExplanation(
+        signals.filter((s) => s.allergen === allergen && s.weight >= 3)
+      )[0];
+      if (!signal) continue;
+      const group = reasonToAllergens.get(signal.reason) ?? [];
+      group.push(allergen);
+      reasonToAllergens.set(signal.reason, group);
+    }
+    const parts = [...reasonToAllergens.entries()].slice(0, 3).map(([reason, allergens]) => {
+      const labels = allergens.map(allergenLabel).join(", ");
+      return `${labels}: ${reason}`;
+    });
+    return parts.length
+      ? parts.join(". ") + "."
+      : `Contains ${matchedAllergens.map(allergenLabel).join(", ")} — avoid.`;
   }
 
   if (risk === "ask") {
-    const reasons = prioritizeForExplanation(signals)
-      .filter((s) => matchedAllergens.includes(s.allergen))
-      .slice(0, 2)
-      .map((s) => s.reason);
-    return reasons.length
-      ? reasons.join(". ") + " — confirm with staff."
+    // Same grouping — deduplicate reasons, prepend allergen labels
+    const reasonToAllergens = new Map<string, AllergenId[]>();
+    for (const allergen of matchedAllergens) {
+      const signal = prioritizeForExplanation(
+        signals.filter((s) => s.allergen === allergen)
+      )[0];
+      if (!signal) continue;
+      const group = reasonToAllergens.get(signal.reason) ?? [];
+      group.push(allergen);
+      reasonToAllergens.set(signal.reason, group);
+    }
+    const parts = [...reasonToAllergens.entries()].slice(0, 2).map(([reason]) => reason);
+    return parts.length
+      ? parts.join(". ") + " — confirm with staff."
       : "Possible allergen presence — confirm with staff.";
   }
 
   return "No allergens detected for your profile. Always mention your allergy when ordering.";
+}
+
+/**
+ * Priority order for per-allergen source attribution.
+ * Prefers explicit ingredient mentions (direct/synonym/memory) over
+ * dish-level inferences — "Contains shrimp" is clearer than "Contains pad thai".
+ */
+const ATTRIBUTION_PRIORITY: Record<SignalSource, number> = {
+  memory:          0,
+  direct:          1,
+  synonym:         2,
+  "dish-common":   3,
+  "dish-possible": 4,
+  sauce:           5,
+  dish:            6,
+  prep:            7,
+  cuisine:         8,
+  ambiguity:       9,
+};
+
+function prioritizeForAttribution(signals: RiskSignal[]): RiskSignal[] {
+  return [...signals].sort(
+    (a, b) => ATTRIBUTION_PRIORITY[a.source] - ATTRIBUTION_PRIORITY[b.source]
+  );
+}
+
+/**
+ * Returns a map of allergen → best signal reason for per-allergen UI chips.
+ * Uses attribution priority (direct signals first) so "Contains shrimp" is
+ * shown over "Contains pad thai" when the ingredient is explicitly named.
+ */
+export function getAllergenSources(
+  signals: RiskSignal[],
+  allergens: AllergenId[]
+): Partial<Record<AllergenId, string>> {
+  const result: Partial<Record<AllergenId, string>> = {};
+  for (const allergen of allergens) {
+    const signal = prioritizeForAttribution(
+      signals.filter((s) => s.allergen === allergen)
+    )[0];
+    if (signal) result[allergen] = signal.reason;
+  }
+  return result;
 }
 
 /**

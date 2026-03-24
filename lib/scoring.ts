@@ -4,6 +4,8 @@
  */
 
 import { analyzeLine } from "./engine/analyzerPipeline";
+import { getAllergenSources } from "./engine/riskScorer";
+import { getSubstitutions } from "./engine/substitutionSuggester";
 import type {
   RawMenuItem,
   ScoredMenuItem,
@@ -109,6 +111,8 @@ export function scoreMenuItem(
     // cuisine/dish inference — they'd be false positives on a verified clean ingredient.
     staffQuestions: isOfficialData && officialHits.length === 0 ? [] : analyzed.staffQuestions,
     userAllergenHits,
+    allergenSources: getAllergenSources(analyzed.signals, userAllergenHits as AllergenId[]),
+    substitutions:  risk !== "likely-safe" ? getSubstitutions(userAllergenHits as AllergenId[], analyzed.signals.length > 0 ? text.toLowerCase() : "") : [],
     sectionIndex:   item.sectionIndex,
     sourceSignals:  item.sourceSignals,
   };
