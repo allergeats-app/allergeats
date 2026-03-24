@@ -17,6 +17,30 @@ import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 const IMAGE_WINDOW_MS = 60_000;
 const IMAGE_MAX_REQ   = 30;
 
+/**
+ * Returns true when the URL targets a private/internal network address.
+ * websiteImageProvider fetches the URL server-side, so we must block SSRF targets
+ * (loopback, RFC1918 ranges, AWS link-local metadata, etc.) the same way fetch-menu does.
+ */
+function isSsrfBlocked(rawUrl: string): boolean {
+  let parsed: URL;
+  try { parsed = new URL(rawUrl); } catch { return true; }
+  if (!["http:", "https:"].includes(parsed.protocol)) return true;
+  const h = parsed.hostname.toLowerCase();
+  return (
+    h === "localhost"                                    ||
+    /^127\./.test(h)                                    ||
+    /^0\.0\.0\.0/.test(h)                               ||
+    /^::1$/.test(h)                                     ||
+    /^169\.254\./.test(h)                               || // link-local / AWS metadata
+    /^10\./.test(h)                                     || // RFC1918
+    /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)            || // RFC1918
+    /^192\.168\./.test(h)                               || // RFC1918
+    /^fc00:/i.test(h)                                   || // IPv6 unique local
+    /^fe80:/i.test(h)                                      // IPv6 link-local
+  );
+}
+
 export async function POST(req: Request) {
   if (isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
@@ -24,8 +48,13 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json() as RestaurantImageInput;
-    if (!body?.name) {
-      return NextResponse.json({ error: "name is required" }, { status: 400 });
+    if (!body?.name || typeof body.name !== "string" || body.name.length > 300) {
+      return NextResponse.json({ error: "name is required (max 300 chars)" }, { status: 400 });
+    }
+
+    // Guard against SSRF: websiteImageProvider fetches input.website server-side
+    if (body.website && isSsrfBlocked(body.website)) {
+      return NextResponse.json({ error: "Invalid website URL" }, { status: 400 });
     }
 
     const forceRefresh = req.headers.get("x-force-refresh") === "1";
@@ -62,8 +91,8 @@ export async function GET(req: Request) {
     lng:     searchParams.get("lng")     ? parseFloat(searchParams.get("lng")!) : undefined,
   };
 
-  if (!input.name) {
-    return NextResponse.json({ error: "name is required" }, { status: 400 });
+  if (!input.name || input.name.length > 300) {
+    return NextResponse.json({ error: "name is required (max 300 chars)" }, { status: 400 });
   }
 
   if (
@@ -71,6 +100,11 @@ export async function GET(req: Request) {
     (input.lng !== undefined && (isNaN(input.lng) || input.lng < -180 || input.lng > 180))
   ) {
     return NextResponse.json({ error: "Invalid coordinates" }, { status: 400 });
+  }
+
+  // Guard against SSRF: websiteImageProvider fetches input.website server-side
+  if (input.website && isSsrfBlocked(input.website)) {
+    return NextResponse.json({ error: "Invalid website URL" }, { status: 400 });
   }
 
   try {
