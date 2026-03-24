@@ -35,9 +35,7 @@ export function RestaurantCard({ restaurant: r }: Props) {
   const photoSrc = !photoFailed
     ? r.googlePlaceId
       ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
-      : r.lat != null && r.lng != null
-        ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
-        : null
+      : `/api/places-photo?name=${encodeURIComponent(r.name)}${r.lat != null && r.lng != null ? `&lat=${r.lat}&lng=${r.lng}` : ""}`
     : null;
 
   return (
