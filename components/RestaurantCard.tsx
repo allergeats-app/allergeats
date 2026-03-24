@@ -34,18 +34,20 @@ export function RestaurantCard({ restaurant: r }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(r.id);
 
-  // Logo-first: use Clearbit brand logo for known chains (no API key needed).
-  // Fall back to Google Places photo for OSM-matched restaurants with real coordinates.
-  const logoUrl  = chainLogoUrl(r.name);
-  const isLogo   = !!logoUrl && !photoFailed;
+  // Image priority:
+  //   1. r.imageUrl   — pre-enriched URL from the image enrichment pipeline
+  //   2. chainLogoUrl — Wikipedia photo via /api/wiki-thumb (free, no API key)
+  //   3. places-photo — Google Places proxy (requires API key, best for OSM restaurants)
+  const wikiUrl  = chainLogoUrl(r.name);
   const photoSrc = !photoFailed
-    ? logoUrl
-      ?? (r.googlePlaceId
-        ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
-        : r.lat != null && r.lng != null
-          ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
-          : null)
+    ? (r.imageUrl ?? wikiUrl
+        ?? (r.googlePlaceId
+          ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
+          : r.lat != null && r.lng != null
+            ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
+            : null))
     : null;
+  const isLogo = false; // Wikipedia images are photos — always use cover
 
   return (
     <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
