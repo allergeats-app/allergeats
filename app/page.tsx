@@ -6,7 +6,7 @@ import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
 import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
-import { locationProvider, MockLocationProvider, checkLocationPermission } from "@/lib/providers/locationProvider";
+import { locationProvider, MockLocationProvider, checkLocationPermission, loadLastLocation } from "@/lib/providers/locationProvider";
 import type { Coordinates } from "@/lib/providers/locationProvider";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
@@ -136,11 +136,31 @@ function HomeContent() {
             return;
           }
 
+          // Fast-path: show cached location + results immediately while GPS resolves.
+          // This prevents a blank screen on first load when GPS takes 1–3 s.
+          const cachedPos = loadLastLocation();
+          if (cachedPos && !cancelled) {
+            setUserLocation({ ...cachedPos, source: "cached" });
+            setLocationMode("cached");
+            reverseGeocode(cachedPos.lat, cachedPos.lng)
+              .then((name) => { if (!cancelled) setLocationLabel(name); });
+            // Kick off a restaurant search with the cached position — hits sessionStorage
+            // or Overpass cache so it returns almost immediately.
+            locationProvider
+              .searchRestaurants(cachedPos.lat, cachedPos.lng, radiusMiles, cachedPos.accuracy)
+              .then((cachedRaw) => {
+                if (!cancelled) { setRawRestaurants(cachedRaw); setLoading(false); }
+              })
+              .catch(() => {});
+          }
+
+          // Fetch fresh GPS (parallel GPS+network, resolves in ~1–3 s).
+          // Runs concurrently with the cached search above.
           const position = await locationProvider.getUserLocation();
 
           if (!position) {
-            // GPS + network both failed and no cache — don't silently fake a location
-            if (!cancelled) {
+            // Both failed and no valid cache — nothing we can show
+            if (!cancelled && !cachedPos) {
               setLocationMode("unavailable");
               setLocationLabel("Location unavailable");
               setLoading(false);
@@ -154,7 +174,6 @@ function HomeContent() {
 
           if (!cancelled) {
             setUserLocation(position);
-            // Derive display mode from source + accuracy
             const mode: "precise" | "approximate" | "cached" =
               position.source === "cached"                        ? "cached"      :
               (accuracy != null && accuracy <= 100)               ? "precise"     :

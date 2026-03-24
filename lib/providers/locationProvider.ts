@@ -134,7 +134,7 @@ function saveLastLocation(c: Coordinates): void {
   } catch { /* ignore quota errors */ }
 }
 
-function loadLastLocation(): Coordinates | null {
+export function loadLastLocation(): Coordinates | null {
   if (typeof localStorage === "undefined") return null;
   try {
     const raw = localStorage.getItem(LAST_LOCATION_KEY);
@@ -307,33 +307,45 @@ function fromPosition(pos: GeolocationPosition, source: "gps" | "network"): Coor
 }
 
 function getRealLocation(): Promise<Coordinates | null> {
-  if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(null);
+  if (typeof navigator === "undefined" || !navigator.geolocation) {
+    const cached = loadLastLocation();
+    return Promise.resolve(cached ? { ...cached, source: "cached" as const } : null);
+  }
 
   return new Promise((resolve) => {
-    let resolved = false;
-    function done(c: Coordinates | null) {
-      if (resolved) return;
-      resolved = true;
-      if (c) saveLastLocation(c); // persist for next session / fallback
+    let settled = false;
+    let failures = 0;
+
+    function succeed(c: Coordinates) {
+      if (settled) return;
+      settled = true;
+      saveLastLocation(c);
       resolve(c);
     }
 
-    // Try high-accuracy (GPS) with a 10s window (6s was too short indoors)
+    function fail() {
+      if (settled) return;
+      failures++;
+      if (failures >= 2) {
+        // Both GPS and network failed — fall back to cached position
+        settled = true;
+        const cached = loadLastLocation();
+        resolve(cached ? { ...cached, source: "cached" as const } : null);
+      }
+    }
+
+    // Fire GPS and network simultaneously — take whichever resolves first.
+    // GPS typically resolves in 1–3 s outdoors; network < 1 s indoors.
+    // Old sequential approach (10 s + 10 s) could take 20 s in the worst case.
     navigator.geolocation.getCurrentPosition(
-      (pos) => done(fromPosition(pos, "gps")),
-      () => {
-        // High-accuracy failed — fall back to network/IP location
-        navigator.geolocation.getCurrentPosition(
-          (pos) => done(fromPosition(pos, "network")),
-          () => {
-            // Both failed — use last-known location if fresh enough
-            const cached = loadLastLocation();
-            done(cached ? { ...cached, source: "cached" } : null);
-          },
-          { timeout: 10000, enableHighAccuracy: false },
-        );
-      },
-      { timeout: 10000, enableHighAccuracy: true },
+      (pos) => succeed(fromPosition(pos, "gps")),
+      fail,
+      { timeout: 6000, enableHighAccuracy: true },
+    );
+    navigator.geolocation.getCurrentPosition(
+      (pos) => succeed(fromPosition(pos, "network")),
+      fail,
+      { timeout: 8000, enableHighAccuracy: false },
     );
   });
 }

@@ -38,6 +38,7 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
   const [results, setResults]     = useState<NominatimResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [error, setError]         = useState<string | null>(null);
+  const [locating, setLocating]   = useState(false);
   const inputRef  = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -100,8 +101,35 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
   }
 
   function handleCurrentLocation() {
-    onUseCurrentLocation();
-    handleClose();
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      onUseCurrentLocation();
+      handleClose();
+      return;
+    }
+
+    setLocating(true);
+    setError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        onSelectLocation(pos.coords.latitude, pos.coords.longitude, "Current Location");
+        handleClose();
+      },
+      (err) => {
+        setLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setError("Location access blocked. Enable it in your browser settings.");
+        } else {
+          // Timeout or unavailable — hand off to parent which uses cached location
+          onUseCurrentLocation();
+          handleClose();
+        }
+      },
+      // maximumAge: use a fix up to 30 s old for instant response;
+      // fall back to a fresh fix if nothing cached.
+      { timeout: 8000, enableHighAccuracy: true, maximumAge: 30000 },
+    );
   }
 
   return (
@@ -174,19 +202,28 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
           <button
             type="button"
             onClick={handleCurrentLocation}
+            disabled={locating}
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: 12,
               padding: "13px 16px", borderRadius: 16, marginBottom: 16,
-              background: "#fef2f2", border: "1.5px solid #eb1700",
+              background: locating ? "#fff5f5" : "#fef2f2",
+              border: "1.5px solid #eb1700",
               color: "#eb1700", fontSize: 14, fontWeight: 800,
-              cursor: "pointer", textAlign: "left",
+              cursor: locating ? "default" : "pointer", textAlign: "left",
+              opacity: locating ? 0.8 : 1,
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-            </svg>
-            Use My Current Location
+            {locating ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true" style={{ animation: "spin 0.9s linear infinite", flexShrink: 0 }}>
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            )}
+            {locating ? "Finding your location…" : "Use My Current Location"}
           </button>
 
           {/* Divider */}
