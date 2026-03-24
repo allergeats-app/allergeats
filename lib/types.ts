@@ -110,7 +110,13 @@ export type RestaurantSafetySummary = {
 };
 
 // ─── Restaurant category tags (structured, used for filtering) ───────────────
-export type RestaurantTag = "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches" | "casual" | "steakhouse" | "fine-dining" | "seafood" | "italian" | "pizza" | "breakfast" | "sports-bar" | "asian";
+export type RestaurantTag =
+  | "burgers" | "mexican" | "chicken" | "coffee" | "sandwiches" | "casual"
+  | "steakhouse" | "fine-dining" | "seafood" | "italian" | "pizza" | "breakfast"
+  | "sports-bar" | "asian" | "chinese" | "fast-food" | "fast-casual" | "wings"
+  | "noodles" | "pasta" | "bar" | "craft-beer" | "southern" | "comfort-food"
+  | "brunch" | "pancakes" | "american" | "drive-in" | "roast-beef" | "texas"
+  | "ice-cream" | "custard" | "cheesecake" | "24-hour" | "burritos" | "tacos";
 
 // ─── Restaurant ─────────────────────────────────────────────────────────────
 export type Restaurant = {
