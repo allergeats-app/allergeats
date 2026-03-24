@@ -1601,4 +1601,270 @@ export const DISH_ONTOLOGY: DishEntry[] = [
       { ingredient: "dairy", allergen: "dairy", confidence: "possible", reason: "Creamy coleslaw may contain sour cream or buttermilk" },
     ],
   },
+
+  // ─── APPETIZERS & STARTERS ─────────────────────────────────────────────────
+
+  {
+    canonical: "bloomin onion",
+    variants:  ["bloomin onion", "bloomin' onion", "cactus blossom", "awesome blossom",
+                "awesome blossom petals", "blooming onion"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "batter",        allergen: "wheat", confidence: "common",   reason: "The onion is coated in a seasoned wheat flour batter before deep frying" },
+      { ingredient: "egg wash",      allergen: "egg",   confidence: "common",   reason: "Egg wash is used to adhere the batter to the onion petals" },
+      { ingredient: "dipping sauce", allergen: "egg",   confidence: "common",   reason: "The signature dipping sauce is a spiced mayo — egg-based" },
+      { ingredient: "dipping sauce", allergen: "dairy", confidence: "possible", reason: "Some dipping sauce variants include cream or sour cream" },
+    ],
+  },
+
+  {
+    canonical: "chicken nuggets",
+    variants:  ["chicken nugget", "chicken nuggets", "mcnuggets", "chicken bites",
+                "popcorn chicken", "chicken poppers"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "wheat breading", allergen: "wheat", confidence: "common",   reason: "Chicken nuggets are coated in seasoned wheat flour and breadcrumbs" },
+      { ingredient: "egg wash",       allergen: "egg",   confidence: "common",   reason: "Egg wash binds the breading to the chicken" },
+      { ingredient: "soy oil",        allergen: "soy",   confidence: "possible", reason: "Fast-food fryers commonly use soybean oil; nugget batter may contain soy" },
+    ],
+  },
+
+  {
+    canonical: "calamari",
+    variants:  ["calamari", "fried calamari", "fried squid", "calamari rings", "squid rings"],
+    category:  "side",
+    cuisine:   "Mediterranean",
+    ingredients: [
+      { ingredient: "squid",        allergen: "shellfish", confidence: "common",   reason: "Calamari is made from squid — a mollusk (shellfish)" },
+      { ingredient: "wheat batter", allergen: "wheat",     confidence: "common",   reason: "Calamari rings are coated in wheat flour batter before frying" },
+      { ingredient: "egg",          allergen: "egg",       confidence: "possible", reason: "Some batters include egg for texture" },
+    ],
+  },
+
+  {
+    canonical: "shrimp cocktail",
+    variants:  ["shrimp cocktail", "prawn cocktail", "cocktail shrimp"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "shrimp",            allergen: "shellfish", confidence: "common", reason: "Shrimp cocktail is boiled shrimp — a shellfish" },
+      { ingredient: "cocktail sauce",    allergen: "fish",      confidence: "possible", reason: "Some cocktail sauces contain Worcestershire, which has anchovies" },
+    ],
+  },
+
+  {
+    canonical: "loaded potato skins",
+    variants:  ["potato skins", "loaded potato skins", "potato skin"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "cheese",     allergen: "dairy", confidence: "common",   reason: "Potato skins are loaded with shredded cheddar cheese" },
+      { ingredient: "sour cream", allergen: "dairy", confidence: "common",   reason: "Served with a side of sour cream for dipping" },
+    ],
+  },
+
+  {
+    canonical: "rattlesnake bites",
+    variants:  ["rattlesnake bites", "rattlesnake bite", "jalapeño bites", "jalapeno bites",
+                "pepper bites", "jalapeño poppers", "jalapeno poppers"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "cheese filling", allergen: "dairy", confidence: "common",   reason: "Rattlesnake bites / jalapeño bites are stuffed with cream cheese or cheddar" },
+      { ingredient: "batter",         allergen: "wheat", confidence: "common",   reason: "Coated in a seasoned wheat flour breading before frying" },
+      { ingredient: "egg wash",       allergen: "egg",   confidence: "common",   reason: "Egg wash is used to adhere the breading" },
+    ],
+  },
+
+  {
+    canonical: "beer pretzels",
+    variants:  ["beer pretzels", "soft pretzel", "soft pretzels", "pretzel bites",
+                "beer pretzels and beer cheese", "pretzels and beer cheese dip"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "wheat dough",  allergen: "wheat",  confidence: "common",   reason: "Pretzels are made from wheat dough" },
+      { ingredient: "beer cheese",  allergen: "dairy",  confidence: "common",   reason: "Beer cheese dip is a melted cheese sauce — contains dairy" },
+      { ingredient: "beer",         allergen: "gluten", confidence: "common",   reason: "Beer in the dip or dough contains barley — a gluten source" },
+      { ingredient: "egg",          allergen: "egg",    confidence: "possible", reason: "Some pretzel doughs include egg" },
+    ],
+  },
+
+  // ─── SOUPS ──────────────────────────────────────────────────────────────────
+
+  {
+    canonical: "broccoli cheddar soup",
+    variants:  ["broccoli cheddar soup", "broccoli cheese soup", "cheddar broccoli soup",
+                "cream of broccoli"],
+    category:  "soup",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "cheddar cheese", allergen: "dairy", confidence: "common",   reason: "Broccoli cheddar soup is a cream-based cheese soup" },
+      { ingredient: "cream / milk",   allergen: "dairy", confidence: "common",   reason: "The soup base is heavy cream or whole milk" },
+      { ingredient: "wheat flour",    allergen: "wheat", confidence: "common",   reason: "Roux thickener made from butter and wheat flour" },
+    ],
+  },
+
+  {
+    canonical: "creamy tomato soup",
+    variants:  ["creamy tomato soup", "tomato bisque", "tomato cream soup", "tomato soup"],
+    category:  "soup",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "cream",       allergen: "dairy", confidence: "common",   reason: "Creamy tomato soup is finished with heavy cream" },
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "possible", reason: "Some versions are thickened with a wheat flour roux" },
+    ],
+  },
+
+  // ─── SALADS ──────────────────────────────────────────────────────────────────
+
+  {
+    canonical: "cobb salad",
+    variants:  ["cobb salad", "classic cobb"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "hard-boiled egg", allergen: "egg",   confidence: "common",   reason: "Cobb salad always includes sliced hard-boiled egg" },
+      { ingredient: "blue cheese",     allergen: "dairy", confidence: "common",   reason: "Cobb salad is topped with crumbled blue cheese" },
+      { ingredient: "ranch or blue cheese dressing", allergen: "egg", confidence: "common", reason: "Classic dressings for cobb salad are mayo/egg-based" },
+      { ingredient: "ranch or blue cheese dressing", allergen: "dairy", confidence: "common", reason: "Dressings contain dairy (buttermilk, blue cheese, sour cream)" },
+    ],
+  },
+
+  {
+    canonical: "asian chicken salad",
+    variants:  ["asian chicken salad", "oriental chicken salad", "chinese chicken salad",
+                "crispy chicken salad", "mandarin chicken salad"],
+    category:  "dish",
+    cuisine:   "Asian-American",
+    ingredients: [
+      { ingredient: "sesame dressing",  allergen: "sesame",  confidence: "common",   reason: "The dressing is sesame oil and soy sauce based" },
+      { ingredient: "soy sauce",        allergen: "soy",     confidence: "common",   reason: "Asian salad dressing uses soy sauce" },
+      { ingredient: "soy sauce",        allergen: "wheat",   confidence: "common",   reason: "Standard soy sauce contains wheat" },
+      { ingredient: "wonton strips",    allergen: "wheat",   confidence: "common",   reason: "Topped with crispy wonton strips — wheat based" },
+      { ingredient: "almonds",          allergen: "tree-nut", confidence: "possible", reason: "Many versions include slivered almonds or candied almonds" },
+    ],
+  },
+
+  // ─── AMERICAN MAINS ─────────────────────────────────────────────────────────
+
+  {
+    canonical: "baby back ribs",
+    variants:  ["baby back ribs", "baby back rib", "fall off the bone ribs", "bbq ribs",
+                "pork ribs", "spare ribs"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bbq sauce",  allergen: "soy",   confidence: "possible", reason: "Many commercial BBQ sauces contain soy sauce or soy-based flavoring" },
+      { ingredient: "bbq sauce",  allergen: "wheat", confidence: "possible", reason: "Some BBQ sauces are thickened with wheat-based Worcestershire sauce" },
+    ],
+  },
+
+  {
+    canonical: "country fried steak",
+    variants:  ["country fried steak", "chicken fried steak", "country-fried steak"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "breading",     allergen: "wheat", confidence: "common",   reason: "Steak is dredged in seasoned wheat flour and breadcrumbs" },
+      { ingredient: "egg wash",     allergen: "egg",   confidence: "common",   reason: "Egg wash is used to adhere the breading" },
+      { ingredient: "cream gravy",  allergen: "dairy", confidence: "common",   reason: "Served with a white cream gravy made with milk" },
+      { ingredient: "cream gravy",  allergen: "wheat", confidence: "common",   reason: "White gravy is thickened with wheat flour roux" },
+    ],
+  },
+
+  // ─── BREAKFAST MAINS ────────────────────────────────────────────────────────
+
+  {
+    canonical: "hash browns",
+    variants:  ["hash browns", "hashbrown", "hashbrowns", "hash brown patty"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "soy oil",     allergen: "soy",   confidence: "possible", reason: "Hash browns are typically fried in soybean oil at fast-food chains" },
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "possible", reason: "Some hash brown patties contain wheat flour as a binder" },
+    ],
+  },
+
+  {
+    canonical: "sausage biscuit",
+    variants:  ["sausage biscuit", "sausage egg biscuit", "biscuit sandwich", "breakfast biscuit"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "biscuit",       allergen: "wheat", confidence: "common",   reason: "Biscuits are made from wheat flour and buttermilk" },
+      { ingredient: "buttermilk",    allergen: "dairy", confidence: "common",   reason: "Southern biscuits use butter and buttermilk" },
+      { ingredient: "butter",        allergen: "dairy", confidence: "common",   reason: "Biscuit dough is made with butter or shortening" },
+      { ingredient: "egg",           allergen: "egg",   confidence: "possible", reason: "Versions with egg contain a fried or folded egg" },
+    ],
+  },
+
+  // ─── LOADED & BAKED ITEMS ───────────────────────────────────────────────────
+
+  {
+    canonical: "loaded baked potato",
+    variants:  ["loaded baked potato", "baked potato", "loaded potato", "twice baked potato"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "sour cream",  allergen: "dairy", confidence: "common",   reason: "Loaded baked potatoes are topped with sour cream" },
+      { ingredient: "cheese",      allergen: "dairy", confidence: "common",   reason: "Topped with shredded cheddar cheese" },
+      { ingredient: "butter",      allergen: "dairy", confidence: "common",   reason: "Butter is a classic baked potato topping" },
+    ],
+  },
+
+  {
+    canonical: "creamed spinach",
+    variants:  ["creamed spinach", "cream of spinach"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "heavy cream",  allergen: "dairy", confidence: "common",   reason: "Creamed spinach is made with a cream or béchamel sauce" },
+      { ingredient: "butter",       allergen: "dairy", confidence: "common",   reason: "Cream sauce starts with a butter roux" },
+      { ingredient: "wheat flour",  allergen: "wheat", confidence: "common",   reason: "Béchamel base uses wheat flour as a thickener" },
+    ],
+  },
+
+  {
+    canonical: "potatoes au gratin",
+    variants:  ["potatoes au gratin", "au gratin potatoes", "gratin dauphinois",
+                "scalloped potatoes", "potato gratin"],
+    category:  "side",
+    cuisine:   "French",
+    ingredients: [
+      { ingredient: "cream",   allergen: "dairy", confidence: "common",   reason: "Au gratin potatoes are baked in a cream sauce" },
+      { ingredient: "cheese",  allergen: "dairy", confidence: "common",   reason: "Topped with a layer of melted cheese (typically gruyère or cheddar)" },
+    ],
+  },
+
+  // ─── DESSERTS & BEVERAGES ───────────────────────────────────────────────────
+
+  {
+    canonical: "milkshake",
+    variants:  ["milkshake", "milk shake", "shake", "chocolate shake", "vanilla shake",
+                "strawberry shake", "oreo shake", "thick shake"],
+    category:  "dessert",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "ice cream",  allergen: "dairy", confidence: "common",   reason: "Milkshakes are blended ice cream — dairy based" },
+      { ingredient: "milk",       allergen: "dairy", confidence: "common",   reason: "Milk is the liquid base of a milkshake" },
+      { ingredient: "cookie mix-ins", allergen: "wheat", confidence: "possible", reason: "Oreo, cookie dough, or brownie shakes contain wheat-based cookie pieces" },
+      { ingredient: "egg",            allergen: "egg",   confidence: "possible", reason: "Some thick shakes are made with egg-containing custard ice cream" },
+    ],
+  },
+
+  {
+    canonical: "beer battered fish",
+    variants:  ["beer battered fish", "beer battered cod", "beer battered halibut",
+                "beer battered fish and chips", "beer-battered fish"],
+    category:  "dish",
+    cuisine:   "British",
+    ingredients: [
+      { ingredient: "fish",         allergen: "fish",   confidence: "common",   reason: "Beer-battered fish is made with white fish (cod, halibut, pollock)" },
+      { ingredient: "wheat flour",  allergen: "wheat",  confidence: "common",   reason: "Beer batter is made from wheat flour" },
+      { ingredient: "beer",         allergen: "gluten", confidence: "common",   reason: "Beer in the batter contains barley — a gluten source" },
+    ],
+  },
 ];
