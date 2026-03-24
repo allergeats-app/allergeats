@@ -8,6 +8,7 @@ import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider, checkLocationPermission, loadLastLocation } from "@/lib/providers/locationProvider";
 import type { Coordinates } from "@/lib/providers/locationProvider";
+import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -23,6 +24,13 @@ import type { SortOption, LayoutOption, TypeFilter } from "./restaurants/types";
 import { trackEvent } from "@/lib/analytics";
 
 const SESSION_KEY = "allegeats_live_restaurants";
+
+/** Ensure all 50 chain templates are always present, even when OSM coverage is sparse. */
+function withAllChains(list: Restaurant[]): Restaurant[] {
+  const names = new Set(list.filter((r) => r.menuItems.length > 0).map((r) => r.name.toLowerCase()));
+  const missing = MOCK_RESTAURANTS.filter((m) => !names.has(m.name.toLowerCase()));
+  return missing.length ? [...list, ...missing] : list;
+}
 
 function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: TypeFilter): boolean {
   if (type === "all") return true;
@@ -71,7 +79,7 @@ function HomeContent() {
     try {
       const cached = sessionStorage.getItem(SESSION_KEY);
       if (cached) {
-        setRawRestaurants(JSON.parse(cached) as Restaurant[]);
+        setRawRestaurants(withAllChains(JSON.parse(cached) as Restaurant[]));
         setLoading(false);
       }
     } catch { /* ignore */ }
@@ -149,7 +157,7 @@ function HomeContent() {
             locationProvider
               .searchRestaurants(cachedPos.lat, cachedPos.lng, radiusMiles, cachedPos.accuracy)
               .then((cachedRaw) => {
-                if (!cancelled) { setRawRestaurants(cachedRaw); setLoading(false); }
+                if (!cancelled) { setRawRestaurants(withAllChains(cachedRaw)); setLoading(false); }
               })
               .catch(() => {});
           }
@@ -195,6 +203,7 @@ function HomeContent() {
         }
 
         if (!cancelled) {
+          raw = withAllChains(raw);
           try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw)); } catch { /* ignore */ }
           setRawRestaurants(raw);
         }
