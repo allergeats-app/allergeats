@@ -1087,7 +1087,7 @@ const DRINK_KEYWORDS = [
 
 function isDrinkSection(name: string): boolean {
   const lower = name.toLowerCase();
-  return DRINK_KEYWORDS.some((k) => lower.includes(k));
+  return DRINK_KEYWORDS.some((k) => new RegExp(`\\b${k}s?\\b`).test(lower));
 }
 
 function SectionHeader({ label, count }: { label: string; count?: number }) {

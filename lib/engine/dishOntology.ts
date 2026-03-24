@@ -424,8 +424,9 @@ export const DISH_ONTOLOGY: DishEntry[] = [
     category:  "dish",
     cuisine:   "Thai",
     ingredients: [
-      { ingredient: "peanuts",       allergen: "peanut",   confidence: "common",   reason: "Massaman curry contains whole roasted peanuts" },
-      { ingredient: "coconut milk",  allergen: "tree-nut", confidence: "possible", reason: "Coconut milk is not a tree-nut allergen by FDA rules, but some people react to it" },
+      { ingredient: "peanuts",       allergen: "peanut",    confidence: "common",   reason: "Massaman curry contains whole roasted peanuts" },
+      { ingredient: "shrimp paste",  allergen: "shellfish", confidence: "possible", reason: "Massaman curry paste typically contains shrimp paste" },
+      { ingredient: "coconut milk",  allergen: "tree-nut",  confidence: "possible", reason: "Coconut milk is not a tree-nut allergen by FDA rules, but some people react to it" },
     ],
   },
 
@@ -1280,6 +1281,77 @@ export const DISH_ONTOLOGY: DishEntry[] = [
       { ingredient: "evaporated milk",   allergen: "dairy", confidence: "common", reason: "Evaporated milk is one of the three milk soak components" },
       { ingredient: "eggs",              allergen: "egg",   confidence: "common", reason: "The sponge cake base uses eggs" },
       { ingredient: "wheat flour",       allergen: "wheat", confidence: "common", reason: "The sponge cake base uses wheat flour" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // THAI CURRIES & SOUTHEAST ASIAN SOUPS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "Thai green curry",
+    variants:  ["green curry"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "green curry paste", allergen: "shellfish", confidence: "common",   reason: "Thai green curry paste is made with shrimp paste (kapi)" },
+      { ingredient: "fish sauce",        allergen: "fish",       confidence: "common",   reason: "Green curry is seasoned with fish sauce" },
+    ],
+  },
+
+  {
+    canonical: "Thai red curry",
+    variants:  ["red curry"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "red curry paste", allergen: "shellfish", confidence: "common",   reason: "Thai red curry paste is made with shrimp paste (kapi)" },
+      { ingredient: "fish sauce",      allergen: "fish",       confidence: "common",   reason: "Red curry is seasoned with fish sauce" },
+    ],
+  },
+
+  {
+    canonical: "Thai yellow curry",
+    variants:  ["yellow curry"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "yellow curry paste", allergen: "shellfish", confidence: "common",   reason: "Thai yellow curry paste is made with shrimp paste (kapi)" },
+      { ingredient: "fish sauce",         allergen: "fish",       confidence: "common",   reason: "Yellow curry is seasoned with fish sauce" },
+    ],
+  },
+
+  {
+    canonical: "Panang curry",
+    variants:  ["panang curry", "phanaeng curry"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "panang curry paste", allergen: "shellfish", confidence: "common",   reason: "Panang curry paste is made with shrimp paste" },
+      { ingredient: "peanuts",            allergen: "peanut",    confidence: "common",   reason: "Panang curry is characterised by ground peanuts in the paste" },
+      { ingredient: "fish sauce",         allergen: "fish",       confidence: "common",   reason: "Panang curry is seasoned with fish sauce" },
+    ],
+  },
+
+  {
+    canonical: "tom yum",
+    variants:  ["tom yum", "tom yam", "tom yum goong"],
+    category:  "soup",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "fish sauce",  allergen: "fish",      confidence: "common",   reason: "Tom yum uses fish sauce as its primary seasoning" },
+      { ingredient: "shrimp",      allergen: "shellfish", confidence: "possible", reason: "Tom yum is commonly made with shrimp (tom yum goong)" },
+    ],
+  },
+
+  {
+    canonical: "laksa",
+    variants:  ["laksa"],
+    category:  "soup",
+    cuisine:   "Southeast Asian",
+    ingredients: [
+      { ingredient: "shrimp paste", allergen: "shellfish", confidence: "common",   reason: "Laksa broth base is built on shrimp paste" },
+      { ingredient: "fish sauce",   allergen: "fish",      confidence: "possible", reason: "Laksa broth is often seasoned with fish sauce" },
     ],
   },
 ];

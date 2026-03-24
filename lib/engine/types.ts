@@ -60,10 +60,11 @@ export type ConfidenceLevel = "high" | "medium" | "low";
 
 /** A parsed dish/item ready for analysis */
 export type ParsedDish = {
-  raw: string;          // original text
-  name: string;         // best-guess dish name (first line / bold)
-  description: string;  // remaining description text (may be empty)
-  normalized: string;   // lowercased, cleaned, OCR-corrected
+  raw: string;           // original text
+  name: string;          // best-guess dish name (first line / bold)
+  description: string;   // remaining description text (may be empty)
+  normalized: string;    // lowercased, cleaned, OCR-corrected
+  sectionTag?: string;   // menu section heading this item falls under (e.g. "vegan", "gluten free")
 };
 
 /** Full result for one analyzed menu item */

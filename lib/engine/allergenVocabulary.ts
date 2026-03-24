@@ -520,4 +520,76 @@ export const ALLERGEN_VOCABULARY: VocabEntry[] = [
   { term: "chicken parmesan",allergens: ["dairy", "wheat", "gluten", "egg"],  source: "dish", note: "Breaded chicken (wheat+egg) baked with tomato sauce and mozzarella" },
   { term: "chicken parm",    allergens: ["dairy", "wheat", "gluten", "egg"],  source: "dish" },
   { term: "eggplant parm",   allergens: ["dairy", "wheat", "gluten", "egg"],  source: "dish", note: "Breaded eggplant with tomato sauce and mozzarella" },
+
+  // ─── ADDITIONAL TERMS ──────────────────────────────────────────────────────
+
+  // DAIRY — Spanish/Latin terms common on menus
+  { term: "crema",           allergens: ["dairy"],                            source: "direct",  note: "Mexican crema — dairy-based soured cream topping" },
+  { term: "dulce de leche",  allergens: ["dairy"],                            source: "direct",  note: "Caramelized milk sauce (Latin American)" },
+  { term: "leche",           allergens: ["dairy"],                            source: "synonym", note: "Spanish: milk" },
+
+  // DAIRY + EGG — dessert shorthand that appears without full dish name
+  { term: "mousse",          allergens: ["dairy", "egg"],                     source: "dish",    note: "Mousse is typically whipped cream and egg-white based" },
+  { term: "brulee",          allergens: ["dairy", "egg"],                     source: "dish",    note: "Brûlée refers to crème brûlée — a cream and egg-yolk custard" },
+  { term: "brûlée",          allergens: ["dairy", "egg"],                     source: "dish" },
+
+  // EGG
+  { term: "kewpie",          allergens: ["egg"],                              source: "direct",  note: "Japanese mayo brand — egg-based" },
+
+  // WHEAT / GLUTEN — common breads and pastas not yet in vocabulary
+  { term: "flatbread",       allergens: ["wheat", "gluten"],                  source: "direct" },
+  { term: "lavash",          allergens: ["wheat", "gluten"],                  source: "direct",  note: "Thin Armenian/Middle Eastern flatbread" },
+  { term: "breadstick",      allergens: ["wheat", "gluten"],                  source: "direct" },
+  { term: "tortellini",      allergens: ["wheat", "gluten", "egg", "dairy"],  source: "dish",    note: "Fresh egg pasta rings stuffed with cheese" },
+
+  // SHELLFISH — Thai curry pastes all contain shrimp paste; key soups
+  { term: "green curry",     allergens: ["shellfish"],                        source: "dish",    note: "Thai green curry paste is made with shrimp paste" },
+  { term: "red curry",       allergens: ["shellfish"],                        source: "dish",    note: "Thai red curry paste is made with shrimp paste" },
+  { term: "yellow curry",    allergens: ["shellfish"],                        source: "dish",    note: "Thai yellow curry paste is made with shrimp paste" },
+  { term: "panang curry",    allergens: ["shellfish"],                        source: "dish",    note: "Panang curry paste is made with shrimp paste" },
+  { term: "tom yum",         allergens: ["fish", "shellfish"],                source: "dish",    note: "Thai hot-sour soup with fish sauce and often shrimp" },
+  { term: "tom yam",         allergens: ["fish", "shellfish"],                source: "dish" },
+  { term: "laksa",           allergens: ["shellfish", "fish"],                source: "dish",    note: "SE Asian noodle soup with shrimp paste and fish" },
+
+  // TREE NUT — sauces increasingly common on modern menus
+  { term: "romesco",         allergens: ["tree-nut"],                         source: "sauce",   note: "Spanish sauce made from roasted almonds and hazelnuts" },
+  { term: "dukkah",          allergens: ["tree-nut", "sesame"],               source: "dish",    note: "Middle Eastern nut and sesame spice blend" },
+
+  // CORN
+  { term: "cornbread",       allergens: ["corn", "wheat", "gluten", "egg", "dairy"], source: "dish", note: "Uses cornmeal, wheat flour, eggs, and buttermilk" },
+  { term: "pozole",          allergens: ["corn"],                             source: "dish",    note: "Mexican hominy (corn) soup" },
+
+  // ─── DRINKS ────────────────────────────────────────────────────────────────
+  // Real allergen signals for beverages commonly found on restaurant menus.
+  // Note: "cream soda", "cream ale", "egg cream", "bass ale/beer/lager" are
+  // handled as safe-term overrides in analyzerPipeline.ts — no vocab entry needed.
+
+  // Shellfish
+  { term: "clamato",         allergens: ["shellfish"],                        source: "direct",  note: "Tomato-clam cocktail mixer — shellfish present" },
+  { term: "bloody caesar",   allergens: ["shellfish"],                        source: "dish",    note: "Canadian cocktail made with Clamato (clam juice)" },
+
+  // Dairy
+  { term: "irish cream",     allergens: ["dairy"],                            source: "direct",  note: "Cream liqueur (e.g. Baileys) — contains fresh cream" },
+  { term: "baileys",         allergens: ["dairy"],                            source: "direct",  note: "Irish cream liqueur — contains dairy" },
+  { term: "creamer",         allergens: ["dairy"],                            source: "direct",  note: "Dairy creamer — may be milk or cream based" },
+  { term: "coffee creamer",  allergens: ["dairy"],                            source: "direct" },
+  { term: "milk tea",        allergens: ["dairy"],                            source: "dish",    note: "Bubble tea / milk tea — contains dairy or condensed milk" },
+  { term: "chai latte",      allergens: ["dairy"],                            source: "dish",    note: "Steamed milk base" },
+  { term: "hot chocolate",   allergens: ["dairy"],                            source: "dish",    note: "Typically made with milk" },
+  { term: "white russian",   allergens: ["dairy"],                            source: "dish",    note: "Vodka cocktail with heavy cream" },
+  { term: "mudslide",        allergens: ["dairy"],                            source: "dish",    note: "Contains Irish cream liqueur and/or ice cream" },
+
+  // Egg
+  { term: "eggnog",          allergens: ["egg", "dairy"],                     source: "direct",  note: "Traditional drink made with eggs and milk/cream" },
+  { term: "pisco sour",      allergens: ["egg"],                              source: "dish",    note: "Contains raw egg white for frothy texture" },
+  { term: "whiskey sour",    allergens: ["egg"],                              source: "dish",    note: "Often made with egg white — confirm when ordering" },
+  { term: "clover club",     allergens: ["egg"],                              source: "dish",    note: "Classic cocktail made with egg white" },
+
+  // Nut
+  { term: "amaretto",        allergens: ["tree-nut"],                         source: "direct",  note: "Almond-flavored liqueur" },
+  { term: "frangelico",      allergens: ["tree-nut"],                         source: "direct",  note: "Hazelnut liqueur" },
+  { term: "orgeat",          allergens: ["tree-nut"],                         source: "direct",  note: "Almond syrup used in mai tai and other cocktails" },
+  { term: "almond milk",     allergens: ["tree-nut"],                         source: "direct" },
+  { term: "oat milk",        allergens: ["oats"],                             source: "direct" },
+  { term: "soy milk",        allergens: ["soy"],                              source: "direct" },
 ];

@@ -66,6 +66,202 @@ function deduplicateSignals(signals: RiskSignal[]): RiskSignal[] {
   return [...map.values()];
 }
 
+// ─── NEGATION DETECTION ──────────────────────────────────────────────────────
+// Removes signals for allergens that are explicitly excluded in the item text
+// (e.g. "dairy-free burger", "no butter", items in a VEGAN menu section).
+// Ambiguity and memory signals are never suppressed — they represent uncertainty
+// that exists regardless of allergen-exclusion claims (cross-contamination, etc.).
+
+/**
+ * Maps each allergen to the common words used to describe it when negating on menus.
+ * e.g. "no dairy", "dairy-free", "without milk" → negate "dairy" signals.
+ */
+const ALLERGEN_NEGATION_WORDS: Partial<Record<AllergenId, string[]>> = {
+  dairy:      ["dairy", "milk", "lactose"],
+  egg:        ["egg"],
+  wheat:      ["wheat", "gluten"],
+  gluten:     ["gluten", "wheat"],
+  soy:        ["soy", "soya"],
+  peanut:     ["peanut"],
+  "tree-nut": ["nut"],
+  sesame:     ["sesame"],
+  fish:       ["fish"],
+  shellfish:  ["shellfish", "seafood"],
+  corn:       ["corn"],
+  oats:       ["oat"],
+};
+
+/**
+ * Returns the set of allergens explicitly excluded in the text.
+ * Checks both item text and (optionally) the menu section heading.
+ * Patterns matched:
+ *   "X free" / "X-free"   — e.g. "dairy free", "gluten-free"
+ *   "free of X"            — e.g. "free of nuts"
+ *   "no/without/omit X"    — e.g. "no butter", "without dairy"
+ */
+function getNegatedAllergens(normalized: string, sectionTag?: string): Set<AllergenId> {
+  const combined = sectionTag ? `${normalized} ${sectionTag}` : normalized;
+  const negated  = new Set<AllergenId>();
+
+  for (const [allergen, words] of Object.entries(ALLERGEN_NEGATION_WORDS) as [AllergenId, string[]][]) {
+    for (const word of words) {
+      const esc = escapeRe(word);
+      if (new RegExp(`\\b${esc}s?[\\s-]free\\b`).test(combined))                                                         { negated.add(allergen); break; }
+      if (new RegExp(`\\bfree\\s+of\\s+${esc}s?\\b`).test(combined))                                                     { negated.add(allergen); break; }
+      if (new RegExp(`\\b(?:no|not|without|hold|remove|omit|skip)\\b(?:\\s+\\w+){0,3}\\s+${esc}s?\\b`).test(combined)) { negated.add(allergen); break; }
+    }
+  }
+
+  return negated;
+}
+
+/**
+ * Returns true if a specific trigger term is negated in the text.
+ * Handles ingredient-level negation: "no anchovies", "without butter".
+ */
+function isTriggerNegated(normalized: string, trigger: string): boolean {
+  const esc = escapeRe(trigger);
+  return new RegExp(
+    `\\b(?:no|not|without|hold|remove|omit|skip)\\b(?:\\s+\\w+){0,3}\\s+${esc}(?:s|es)?\\b`
+  ).test(normalized);
+}
+
+/** Remove signals for allergens/triggers explicitly excluded in the text */
+function filterNegatedSignals(
+  signals:          RiskSignal[],
+  normalized:       string,
+  negatedAllergens: Set<AllergenId>
+): RiskSignal[] {
+  return signals.filter((s) => {
+    // Ambiguity/memory signals represent uncertainty — never suppress them
+    if (s.source === "ambiguity" || s.source === "memory") return true;
+    if (negatedAllergens.has(s.allergen)) return false;
+    if (isTriggerNegated(normalized, s.trigger)) return false;
+    return true;
+  });
+}
+
+// ─── SAFE TERM OVERRIDES ─────────────────────────────────────────────────────
+// Multi-word phrases where an allergen-adjacent word is NOT an allergen indicator.
+// e.g. "cream soda" contains no dairy; "egg cream" (NYC drink) contains no egg;
+// "bass ale" is a beer brand, not a fish dish.
+// When a safe phrase is detected, signals whose trigger appears in that phrase
+// and whose allergen is listed are suppressed.
+
+type SafeTermOverride = {
+  phrase:    string;
+  allergens: AllergenId[];
+};
+
+const SAFE_TERM_OVERRIDES: SafeTermOverride[] = [
+  { phrase: "cream soda",  allergens: ["dairy"] },
+  { phrase: "cream ale",   allergens: ["dairy"] },
+  { phrase: "egg cream",   allergens: ["egg"]   },  // NYC drink: seltzer + choc syrup + milk; no egg
+  { phrase: "bass ale",    allergens: ["fish"]  },
+  { phrase: "bass beer",   allergens: ["fish"]  },
+  { phrase: "bass lager",  allergens: ["fish"]  },
+  { phrase: "bass pale",   allergens: ["fish"]  },
+];
+
+/** Remove signals that are false positives for well-known drink / idiom phrases. */
+function filterSafeTermSignals(signals: RiskSignal[], normalized: string): RiskSignal[] {
+  const active = SAFE_TERM_OVERRIDES.filter(({ phrase }) =>
+    new RegExp(`\\b${escapeRe(phrase)}\\b`).test(normalized)
+  );
+  if (active.length === 0) return signals;
+
+  return signals.filter((signal) => {
+    // Memory signals always take priority — never suppress
+    if (signal.source === "memory") return true;
+    for (const { phrase, allergens } of active) {
+      if (
+        allergens.includes(signal.allergen) &&
+        phrase.includes(signal.trigger.toLowerCase())
+      ) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
+// ─── CONTAINS-LABEL PARSING ──────────────────────────────────────────────────
+// Menus sometimes include explicit allergen disclosures:
+//   "Contains: wheat, eggs, milk"
+//   "Allergens: gluten, sesame"
+//   "Made with: butter, cream, eggs"
+// These are the highest-quality signal we can get — emit weight-5 direct signals.
+
+/** Maps tokens found in allergen/ingredient labels to their AllergenId */
+const LABEL_ALLERGEN_MAP: Readonly<Record<string, AllergenId>> = {
+  wheat:        "wheat",
+  flour:        "wheat",
+  gluten:       "gluten",
+  dairy:        "dairy",
+  milk:         "dairy",
+  lactose:      "dairy",
+  cream:        "dairy",
+  egg:          "egg",
+  eggs:         "egg",
+  soy:          "soy",
+  soya:         "soy",
+  soybeans:     "soy",
+  peanut:       "peanut",
+  peanuts:      "peanut",
+  "tree nut":   "tree-nut",
+  "tree nuts":  "tree-nut",
+  nuts:         "tree-nut",
+  almond:       "tree-nut",
+  almonds:      "tree-nut",
+  cashew:       "tree-nut",
+  cashews:      "tree-nut",
+  walnut:       "tree-nut",
+  walnuts:      "tree-nut",
+  pecan:        "tree-nut",
+  pecans:       "tree-nut",
+  sesame:       "sesame",
+  fish:         "fish",
+  shellfish:    "shellfish",
+  shrimp:       "shellfish",
+  crab:         "shellfish",
+  lobster:      "shellfish",
+  mustard:      "mustard",
+  corn:         "corn",
+  maize:        "corn",
+  oat:          "oats",
+  oats:         "oats",
+  legumes:      "legumes",
+} as const;
+
+const CONTAINS_LABEL_RE = /\b(?:contains?|allergens?|made\s+with|includes?|ingredients?)\s*[:]\s*([^.();\n]{3,120})/gi;
+
+/**
+ * Detects structured allergen/ingredient labels and emits weight-5 direct signals.
+ * Much higher confidence than vocabulary matching because these are explicit disclosures.
+ */
+function detectContainsLabelSignals(normalized: string, userAllergens: AllergenId[]): RiskSignal[] {
+  const signals: RiskSignal[] = [];
+  const re = new RegExp(CONTAINS_LABEL_RE.source, "gi");
+  let match: RegExpExecArray | null;
+
+  while ((match = re.exec(normalized)) !== null) {
+    const items = match[1].split(/[,;&]+/).map((s) => s.trim()).filter(Boolean);
+    for (const item of items) {
+      const allergen = LABEL_ALLERGEN_MAP[item];
+      if (!allergen || !userAllergens.includes(allergen)) continue;
+      signals.push({
+        allergen,
+        source:  "direct",
+        weight:  5,
+        trigger: item,
+        reason:  `Explicitly listed in allergen/ingredient label`,
+      });
+    }
+  }
+
+  return signals;
+}
+
 /** Analyze a single parsed dish */
 function analyzeDish(
   dish: ParsedDish,
@@ -74,6 +270,9 @@ function analyzeDish(
   sourceType?: SourceType
 ): AnalyzedItem {
   const allSignals: RiskSignal[] = [];
+
+  // Layer 0: explicit "contains: ..." / "allergens: ..." labels — weight-5 direct signals
+  allSignals.push(...detectContainsLabelSignals(dish.normalized, userAllergens));
 
   // Layer 1 + 2: direct ingredients + synonyms + dish/sauce inference (via vocab)
   allSignals.push(...detectVocabSignals(dish.normalized, userAllergens));
@@ -84,14 +283,21 @@ function analyzeDish(
   // Layer 4: preparation method risks
   allSignals.push(...getPrepSignals(dish.normalized, userAllergens));
 
-  // Layer 5: cuisine context (only add if not already covered by vocab signals)
-  const cuisineSignals = getCuisineSignals(cuisineContext, userAllergens);
+  // Layer 5: cuisine context — also use section tag as a cuisine hint
+  const contextStr = [cuisineContext, dish.sectionTag ?? ""].filter(Boolean).join(" ");
+  const cuisineSignals = getCuisineSignals(contextStr, userAllergens);
   allSignals.push(...cuisineSignals);
 
   // Layer 6: ambiguity detection
   allSignals.push(...getAmbiguitySignals(dish.normalized, userAllergens));
 
-  const signals = deduplicateSignals(allSignals);
+  // Layer 7: negation filtering — remove signals for allergens explicitly excluded
+  // ("dairy-free burger", "no butter", vegan/nut-free section headers)
+  const negatedAllergens = getNegatedAllergens(dish.normalized, dish.sectionTag);
+  const negationFiltered = filterNegatedSignals(allSignals, dish.normalized, negatedAllergens);
+  const safeFiltered     = filterSafeTermSignals(negationFiltered, dish.normalized);
+
+  const signals = deduplicateSignals(safeFiltered);
 
   // Score the item
   const scored = scoreItem(signals, userAllergens, sourceType);

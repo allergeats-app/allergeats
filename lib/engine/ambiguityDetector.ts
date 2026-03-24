@@ -77,6 +77,26 @@ const AMBIGUITY_PATTERNS: AmbiguityPattern[] = [
     allergens: ["wheat", "gluten"],
     reason: "Cross-contamination is possible even on gluten-free items — confirm kitchen practices",
   },
+  {
+    terms: ["non-dairy", "non dairy", "nondairy"],
+    allergens: ["soy", "tree-nut"],
+    reason: "Non-dairy substitutes are typically soy or nut-based — confirm what's used",
+  },
+  {
+    terms: ["plant based", "plant-based", "plant protein", "plant based protein"],
+    allergens: ["soy", "tree-nut"],
+    reason: "Plant-based proteins and dairy substitutes are often soy or nut-derived — confirm",
+  },
+  {
+    terms: ["vegan cheese", "dairy free cheese", "dairy-free cheese"],
+    allergens: ["soy", "tree-nut"],
+    reason: "Vegan cheese is typically cashew, almond, or soy-based",
+  },
+  {
+    terms: ["meat substitute", "meat alternative", "plant based meat", "plant-based meat"],
+    allergens: ["soy", "wheat", "gluten"],
+    reason: "Meat substitutes (Beyond, Impossible, etc.) are typically soy or wheat/gluten based",
+  },
 ];
 
 /** Escape a string for use in a RegExp */

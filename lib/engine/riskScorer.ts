@@ -7,7 +7,7 @@
 //   weight 1-2  → prep/cuisine/ambiguity = ASK (possible but not certain)
 //   no signals  → SAFE
 
-import type { AllergenId, RiskLevel, ConfidenceLevel, RiskSignal } from "./types";
+import type { AllergenId, RiskLevel, ConfidenceLevel, RiskSignal, SignalSource } from "./types";
 import type { SourceType } from "@/lib/types";
 
 type ScoreResult = {
@@ -16,6 +16,31 @@ type ScoreResult = {
   matchedAllergens: AllergenId[];
   explanation: string;
 };
+
+/**
+ * Preferred source order for explanation text.
+ * Ontology and sauce signals have the most informative reasons
+ * (they describe the ingredient chain, not just the raw term).
+ * Memory signals are always shown first — they're verified by real user experience.
+ */
+const EXPLANATION_PRIORITY: Record<SignalSource, number> = {
+  memory:          0,
+  "dish-common":   1,
+  sauce:           2,
+  dish:            3,
+  "dish-possible": 4,
+  direct:          5,
+  synonym:         6,
+  prep:            7,
+  cuisine:         8,
+  ambiguity:       9,
+};
+
+function prioritizeForExplanation(signals: RiskSignal[]): RiskSignal[] {
+  return [...signals].sort(
+    (a, b) => EXPLANATION_PRIORITY[a.source] - EXPLANATION_PRIORITY[b.source]
+  );
+}
 
 /** Map source data quality to confidence */
 function sourceToConfidence(sourceType?: SourceType): ConfidenceLevel {
@@ -39,7 +64,7 @@ function buildExplanation(
   matchedAllergens: AllergenId[]
 ): string {
   if (risk === "avoid") {
-    const reasons = signals
+    const reasons = prioritizeForExplanation(signals)
       .filter((s) => matchedAllergens.includes(s.allergen) && s.weight >= 3)
       .slice(0, 2)
       .map((s) => s.reason);
@@ -49,7 +74,7 @@ function buildExplanation(
   }
 
   if (risk === "ask") {
-    const reasons = signals
+    const reasons = prioritizeForExplanation(signals)
       .filter((s) => matchedAllergens.includes(s.allergen))
       .slice(0, 2)
       .map((s) => s.reason);

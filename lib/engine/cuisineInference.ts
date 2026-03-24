@@ -122,6 +122,16 @@ const CUISINE_PATTERNS: CuisinePattern[] = [
   },
 ];
 
+/** Escape a string for use in a RegExp */
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Match a cuisine keyword with word boundaries to avoid "pho" matching "photography" */
+function matchesCuisine(text: string, keyword: string): boolean {
+  return new RegExp(`\\b${escapeRe(keyword)}\\b`).test(text);
+}
+
 /** Returns cuisine-context signals (weight 2 = "cuisine") for a given menu context */
 export function getCuisineSignals(
   cuisineOrName: string,
@@ -131,7 +141,7 @@ export function getCuisineSignals(
   const signals: RiskSignal[] = [];
 
   for (const pattern of CUISINE_PATTERNS) {
-    const matched = pattern.match.find((m) => lower.includes(m));
+    const matched = pattern.match.find((m) => matchesCuisine(lower, m));
     if (!matched) continue;
     for (const s of pattern.signals) {
       if (!userAllergens.includes(s.allergen)) continue;

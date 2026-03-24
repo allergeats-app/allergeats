@@ -137,6 +137,31 @@ const PREP_PATTERNS: PrepPattern[] = [
     allergens: ["dairy", "wheat", "gluten", "egg"],
     reason: "Parmigiana involves a breadcrumb + egg coating, baked with cheese and tomato sauce",
   },
+  {
+    terms: ["dredged", "dredge"],
+    allergens: ["wheat", "gluten", "egg"],
+    reason: "Dredging coats food in flour and often egg before pan-frying",
+  },
+  {
+    terms: ["floured", "lightly floured"],
+    allergens: ["wheat", "gluten"],
+    reason: "Floured items have a wheat flour coating before cooking",
+  },
+  {
+    terms: ["dusted", "flour dusted", "dust with flour"],
+    allergens: ["wheat", "gluten"],
+    reason: "Flour-dusted items carry a light wheat coating",
+  },
+  {
+    terms: ["basted", "butter basted"],
+    allergens: ["dairy"],
+    reason: "Basting is typically done with butter — a dairy product",
+  },
+  {
+    terms: ["coated", "hand coated"],
+    allergens: ["wheat", "gluten", "egg"],
+    reason: "Coated items typically use a flour or breadcrumb and egg coating",
+  },
 ];
 
 /** Escape a string for use in a RegExp */
