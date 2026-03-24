@@ -29,7 +29,8 @@ export interface DishIngredient {
 
 export type DishCategory =
   | "sauce" | "dressing" | "dish" | "soup" | "bread"
-  | "pastry" | "dessert" | "condiment" | "side";
+  | "pastry" | "dessert" | "condiment" | "side"
+  | "sandwich" | "breakfast" | "pizza" | "pasta";
 
 export interface DishEntry {
   canonical:   string;           // authoritative name used in reasoning
@@ -1352,6 +1353,252 @@ export const DISH_ONTOLOGY: DishEntry[] = [
     ingredients: [
       { ingredient: "shrimp paste", allergen: "shellfish", confidence: "common",   reason: "Laksa broth base is built on shrimp paste" },
       { ingredient: "fish sauce",   allergen: "fish",      confidence: "possible", reason: "Laksa broth is often seasoned with fish sauce" },
+    ],
+  },
+
+  // ─── SANDWICHES & BURGERS ──────────────────────────────────────────────────
+
+  {
+    canonical: "chicken sandwich",
+    variants:  ["chicken sandwich", "crispy chicken sandwich", "classic chicken sandwich",
+                "spicy chicken sandwich", "chicken club", "chicken burger"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bun",          allergen: "wheat",  confidence: "common",   reason: "Served on a wheat bun" },
+      { ingredient: "breading",     allergen: "wheat",  confidence: "common",   reason: "Chicken patty is coated in seasoned wheat flour" },
+      { ingredient: "egg wash",     allergen: "egg",    confidence: "common",   reason: "Egg wash is used to adhere the breading to the chicken" },
+      { ingredient: "mayo / sauce", allergen: "egg",    confidence: "common",   reason: "Standard sandwich sauces (mayo, aioli, ranch) are egg-based" },
+      { ingredient: "cheese",       allergen: "dairy",  confidence: "possible", reason: "Cheese is a common topping — ask to omit if dairy-free" },
+      { ingredient: "soy oil",      allergen: "soy",    confidence: "possible", reason: "Many fast-casual fryers use soybean oil; marinade may contain soy" },
+    ],
+  },
+
+  {
+    canonical: "burger",
+    variants:  ["burger", "cheeseburger", "hamburger", "smash burger", "double burger",
+                "bacon burger", "mushroom burger", "veggie burger"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bun",        allergen: "wheat",   confidence: "common",   reason: "Burger buns contain wheat flour" },
+      { ingredient: "sesame bun", allergen: "sesame",  confidence: "common",   reason: "Classic burger buns are topped with sesame seeds" },
+      { ingredient: "cheese",     allergen: "dairy",   confidence: "common",   reason: "Cheeseburgers include melted cheese — request no cheese to avoid dairy" },
+      { ingredient: "mayo",       allergen: "egg",     confidence: "possible", reason: "Mayo and special sauces are egg-based" },
+      { ingredient: "butter",     allergen: "dairy",   confidence: "possible", reason: "Buns are often toasted in butter" },
+    ],
+  },
+
+  {
+    canonical: "fish sandwich",
+    variants:  ["fish sandwich", "fish burger", "crispy fish sandwich", "fish fillet sandwich",
+                "filet o fish", "fish filet"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "fish patty",  allergen: "fish",   confidence: "common",   reason: "Contains a breaded fish fillet (typically pollock or cod)" },
+      { ingredient: "bun",         allergen: "wheat",  confidence: "common",   reason: "Served on a wheat bun" },
+      { ingredient: "breading",    allergen: "wheat",  confidence: "common",   reason: "Fish fillet is coated in wheat breading" },
+      { ingredient: "tartar sauce",allergen: "egg",    confidence: "common",   reason: "Tartar sauce is mayo-based — contains egg" },
+      { ingredient: "cheese",      allergen: "dairy",  confidence: "possible", reason: "Some versions include a slice of cheese" },
+    ],
+  },
+
+  {
+    canonical: "BLT",
+    variants:  ["blt", "blt sandwich", "bacon lettuce tomato"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bread",  allergen: "wheat",  confidence: "common",   reason: "Served on toasted wheat bread" },
+      { ingredient: "mayo",   allergen: "egg",    confidence: "common",   reason: "Mayo spread is egg-based" },
+    ],
+  },
+
+  {
+    canonical: "turkey sandwich",
+    variants:  ["turkey sandwich", "turkey club", "turkey wrap", "turkey sub", "turkey melt"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bread",  allergen: "wheat",  confidence: "common",   reason: "Served on wheat bread, roll, or wrap" },
+      { ingredient: "mayo",   allergen: "egg",    confidence: "common",   reason: "Mayo spread is egg-based" },
+      { ingredient: "cheese", allergen: "dairy",  confidence: "possible", reason: "Turkey clubs and melts typically include cheese" },
+    ],
+  },
+
+  {
+    canonical: "grilled cheese",
+    variants:  ["grilled cheese", "grilled cheese sandwich", "toasted cheese"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bread",   allergen: "wheat",  confidence: "common", reason: "Made with wheat bread" },
+      { ingredient: "cheese",  allergen: "dairy",  confidence: "common", reason: "Grilled cheese is filled with melted cheese" },
+      { ingredient: "butter",  allergen: "dairy",  confidence: "common", reason: "Bread is buttered on the outside before grilling" },
+    ],
+  },
+
+  {
+    canonical: "hot dog",
+    variants:  ["hot dog", "hotdog", "frank", "frankfurter", "corn dog"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bun",      allergen: "wheat", confidence: "common",   reason: "Hot dog buns contain wheat flour" },
+      { ingredient: "batter",   allergen: "wheat", confidence: "common",   reason: "Corn dog batter is made with wheat and/or cornmeal" },
+      { ingredient: "egg",      allergen: "egg",   confidence: "possible", reason: "Corn dog batter typically includes egg" },
+      { ingredient: "mustard",  allergen: "mustard", confidence: "possible", reason: "Mustard is a common condiment on hot dogs" },
+    ],
+  },
+
+  // ─── BREAKFAST ITEMS ───────────────────────────────────────────────────────
+
+  {
+    canonical: "pancakes",
+    variants:  ["pancake", "pancakes", "flapjacks", "hotcakes", "buttermilk pancakes"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "common", reason: "Pancake batter is made with wheat flour" },
+      { ingredient: "egg",         allergen: "egg",   confidence: "common", reason: "Eggs are in the batter for structure" },
+      { ingredient: "buttermilk",  allergen: "dairy", confidence: "common", reason: "Buttermilk pancakes use dairy in the batter" },
+      { ingredient: "butter",      allergen: "dairy", confidence: "common", reason: "Cooked in butter and typically served with butter" },
+    ],
+  },
+
+  {
+    canonical: "waffles",
+    variants:  ["waffle", "waffles", "belgian waffle", "chicken and waffles"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "common", reason: "Waffle batter is made with wheat flour" },
+      { ingredient: "egg",         allergen: "egg",   confidence: "common", reason: "Eggs are in the batter for structure and crispness" },
+      { ingredient: "butter/milk", allergen: "dairy", confidence: "common", reason: "Waffle batter contains milk and butter" },
+    ],
+  },
+
+  {
+    canonical: "french toast",
+    variants:  ["french toast", "eggy bread"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bread",  allergen: "wheat", confidence: "common", reason: "Made with wheat bread" },
+      { ingredient: "egg",    allergen: "egg",   confidence: "common", reason: "Bread is soaked in an egg custard before cooking" },
+      { ingredient: "milk",   allergen: "dairy", confidence: "common", reason: "Custard mixture contains milk or cream" },
+    ],
+  },
+
+  {
+    canonical: "omelette",
+    variants:  ["omelette", "omelet", "western omelette", "denver omelette", "veggie omelette"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "eggs",   allergen: "egg",   confidence: "common",   reason: "An omelette is made entirely from eggs" },
+      { ingredient: "cheese", allergen: "dairy", confidence: "common",   reason: "Most omelettes include melted cheese" },
+      { ingredient: "butter", allergen: "dairy", confidence: "possible", reason: "Cooked in butter" },
+    ],
+  },
+
+  {
+    canonical: "eggs benedict",
+    variants:  ["eggs benedict", "egg benedict", "eggs florentine"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "eggs",         allergen: "egg",   confidence: "common", reason: "Poached eggs are the main component" },
+      { ingredient: "hollandaise",  allergen: "egg",   confidence: "common", reason: "Hollandaise sauce is an egg-yolk emulsion" },
+      { ingredient: "hollandaise",  allergen: "dairy", confidence: "common", reason: "Hollandaise sauce is made with butter" },
+      { ingredient: "english muffin", allergen: "wheat", confidence: "common", reason: "Served on a wheat English muffin" },
+    ],
+  },
+
+  // ─── PIZZA & PASTA ─────────────────────────────────────────────────────────
+
+  {
+    canonical: "margherita pizza",
+    variants:  ["margherita", "margherita pizza", "cheese pizza", "plain pizza"],
+    category:  "pizza",
+    cuisine:   "Italian",
+    ingredients: [
+      { ingredient: "dough",        allergen: "wheat",  confidence: "common", reason: "Pizza dough is made with wheat flour" },
+      { ingredient: "mozzarella",   allergen: "dairy",  confidence: "common", reason: "Topped with mozzarella cheese" },
+    ],
+  },
+
+  {
+    canonical: "pepperoni pizza",
+    variants:  ["pepperoni pizza", "pepperoni"],
+    category:  "pizza",
+    cuisine:   "Italian",
+    ingredients: [
+      { ingredient: "dough",      allergen: "wheat", confidence: "common", reason: "Pizza dough is made with wheat flour" },
+      { ingredient: "cheese",     allergen: "dairy", confidence: "common", reason: "Topped with mozzarella cheese" },
+      { ingredient: "pepperoni",  allergen: "soy",   confidence: "possible", reason: "Pepperoni may contain soy fillers" },
+    ],
+  },
+
+  {
+    canonical: "carbonara",
+    variants:  ["carbonara", "pasta carbonara", "spaghetti carbonara"],
+    category:  "pasta",
+    cuisine:   "Italian",
+    ingredients: [
+      { ingredient: "pasta",     allergen: "wheat",  confidence: "common", reason: "Made with wheat pasta" },
+      { ingredient: "egg yolks", allergen: "egg",    confidence: "common", reason: "Carbonara sauce is an egg-yolk emulsion — no cream used in the authentic version" },
+      { ingredient: "pecorino",  allergen: "dairy",  confidence: "common", reason: "Topped with pecorino Romano or parmesan" },
+    ],
+  },
+
+  // ─── SIDES & APPETIZERS ────────────────────────────────────────────────────
+
+  {
+    canonical: "french fries",
+    variants:  ["french fries", "fries", "waffle fries", "steak fries", "shoestring fries",
+                "curly fries", "seasoned fries"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "soy oil",  allergen: "soy",  confidence: "possible", reason: "Many commercial fryers use soybean oil — cross-contact risk" },
+      { ingredient: "seasoning", allergen: "wheat", confidence: "possible", reason: "Seasoned fries sometimes contain wheat-based flavoring or coating" },
+    ],
+  },
+
+  {
+    canonical: "onion rings",
+    variants:  ["onion rings", "onion ring"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "batter",   allergen: "wheat", confidence: "common",   reason: "Onion rings are dipped in wheat flour batter" },
+      { ingredient: "egg",      allergen: "egg",   confidence: "possible", reason: "Batter may include egg for crispness" },
+      { ingredient: "buttermilk", allergen: "dairy", confidence: "possible", reason: "Some batters use buttermilk" },
+    ],
+  },
+
+  {
+    canonical: "mac and cheese",
+    variants:  ["mac and cheese", "macaroni and cheese", "mac & cheese", "mac n cheese"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "pasta",  allergen: "wheat", confidence: "common", reason: "Macaroni is a wheat pasta" },
+      { ingredient: "cheese sauce", allergen: "dairy", confidence: "common", reason: "The sauce is made from cheese, butter, and milk" },
+      { ingredient: "egg",    allergen: "egg",   confidence: "possible", reason: "Some baked mac and cheese recipes use egg as a binder" },
+    ],
+  },
+
+  {
+    canonical: "coleslaw",
+    variants:  ["coleslaw", "cole slaw", "slaw"],
+    category:  "side",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "mayo",  allergen: "egg",   confidence: "common",   reason: "Classic coleslaw dressing is mayo-based — contains egg" },
+      { ingredient: "dairy", allergen: "dairy", confidence: "possible", reason: "Creamy coleslaw may contain sour cream or buttermilk" },
     ],
   },
 ];

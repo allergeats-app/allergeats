@@ -68,14 +68,31 @@ export function scoreMenuItem(
       ? []
       : [...analyzed.matchedAllergens];
 
-  // When official allergen data overrides the risk to "avoid", the text-engine explanation
-  // will say "No allergens detected" (it found nothing in the item name). Replace it with
-  // an accurate explanation based on the official allergen list.
-  const explanation: string = officialHits.length > 0 && analyzed.risk !== "avoid"
-    ? `Contains ${officialHits.join(", ")} — avoid.`
-    : isOfficialData && officialHits.length === 0
-      ? "No allergens from your profile detected in official ingredient data."
+  // Build explanation for this item.
+  // Engine explanation covers allergens it detected with high confidence (weight ≥ 3).
+  // For official items, also surface per-allergen notes for verified allergens that the
+  // engine only flagged as "possible" (weight 1-2) — e.g. soy from fryer oil on a sandwich.
+  let explanation: string;
+  if (isOfficialData && officialHits.length === 0) {
+    explanation = "No allergens from your profile detected in official ingredient data.";
+  } else if (officialHits.length > 0 && analyzed.risk !== "avoid") {
+    // Engine found nothing/ask, but official data confirms allergens — generic fallback
+    explanation = `Contains ${officialHits.map((a) => a).join(", ")} — listed in official allergen data.`;
+  } else {
+    // Engine said avoid — use its per-allergen explanation.
+    // Supplement with any officially-confirmed allergens the engine only inferred as possible.
+    const engineCovered = new Set(analyzed.matchedAllergens);
+    const uncovered = officialHits.filter((a) => !engineCovered.has(a));
+    const supplement = uncovered.map((a) => {
+      const signal = analyzed.signals.find((s) => s.allergen === a);
+      return signal
+        ? `${a.replace(/-/g, " ")}: ${signal.reason}`
+        : `${a.replace(/-/g, " ")}: confirmed in official allergen data`;
+    });
+    explanation = supplement.length
+      ? [analyzed.explanation.replace(/\.$/, ""), ...supplement].join(". ") + "."
       : analyzed.explanation;
+  }
 
   // Per-item sourceConfidence from the ingestion adapter takes precedence over the
   // engine's own confidence estimate. This lets a single well-documented item inside
