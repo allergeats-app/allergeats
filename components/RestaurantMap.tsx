@@ -23,26 +23,32 @@ function safeColor(r: ScoredRestaurant): string {
 }
 
 function makeMarkerHtml(r: ScoredRestaurant, dark: boolean): string {
-  const color  = safeColor(r);
+  const color = safeColor(r);
+  return `<div style="
+    width:16px;height:16px;border-radius:50%;
+    background:${color};
+    border:2.5px solid ${dark ? "#1c1c1e" : "#fff"};
+    box-shadow:0 1px 8px rgba(0,0,0,${dark ? "0.55" : "0.28"});
+    cursor:pointer;
+  "></div>`;
+}
+
+function makeTooltipHtml(r: ScoredRestaurant, dark: boolean): string {
+  const color   = safeColor(r);
   const safePct = r.summary.total > 0
     ? Math.round((r.summary.likelySafe / r.summary.total) * 100)
     : null;
-  const bg        = dark ? "#1c1c1e" : "#ffffff";
-  const textColor = dark ? "#f2f2f7" : "#111111";
-  const label     = safePct != null ? `${safePct}%` : "–";
-  const shortName = r.name.length > 15 ? r.name.slice(0, 14) + "…" : r.name;
-
-  // transform: translate(-50%, -50%) centers the pill on the coordinate point
+  const bg        = dark ? "rgba(28,28,30,0.96)" : "rgba(255,255,255,0.97)";
+  const textColor = dark ? "#f2f2f7" : "#111";
+  const label     = safePct != null ? `${safePct}% safe` : "No menu data";
   return `<div style="
-    transform:translate(-50%,-50%);
-    display:inline-flex;align-items:center;gap:5px;
-    padding:5px 10px 5px 7px;border-radius:999px;
-    background:${bg};border:2px solid ${color};
-    box-shadow:0 2px 12px rgba(0,0,0,${dark ? "0.55" : "0.16"});
-    font-family:Inter,Arial,sans-serif;white-space:nowrap;cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+    padding:5px 10px;border-radius:999px;
+    background:${bg};
+    box-shadow:0 2px 10px rgba(0,0,0,${dark ? "0.5" : "0.18"});
+    font-family:Inter,Arial,sans-serif;white-space:nowrap;pointer-events:none;
   ">
-    <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-    <span style="font-size:12px;font-weight:700;color:${textColor};">${shortName}</span>
+    <span style="font-size:12px;font-weight:700;color:${textColor};">${r.name}</span>
     <span style="font-size:11px;font-weight:800;color:${color};">${label}</span>
   </div>`;
 }
@@ -96,6 +102,13 @@ function makePopupHtml(r: ScoredRestaurant): string {
 }
 
 const POPUP_STYLES = `
+  .allegeats-tooltip {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .allegeats-tooltip::before { display: none !important; }
   .leaflet-popup-content-wrapper {
     border-radius: 20px !important;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
@@ -234,13 +247,19 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       const icon = L.divIcon({
         html:        makeMarkerHtml(r, isDark),
         className:   "",
-        iconSize:    [0, 0],
-        iconAnchor:  [0, 0],
-        popupAnchor: [0, -18],
+        iconSize:    [16, 16],
+        iconAnchor:  [8, 8],
+        popupAnchor: [0, -12],
       });
 
       L.marker([r.lat, r.lng], { icon })
         .addTo(group)
+        .bindTooltip(makeTooltipHtml(r, isDark), {
+          direction: "top",
+          offset: [0, -10],
+          opacity: 1,
+          className: "allegeats-tooltip",
+        })
         .bindPopup(makePopupHtml(r), { maxWidth: 260 });
     }
 
