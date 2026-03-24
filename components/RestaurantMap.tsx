@@ -133,6 +133,9 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
   const didFitRef      = useRef(false);
   const [pendingSearch, setPendingSearch] = useState<{ lat: number; lng: number } | null>(null);
   const [menuOnly, setMenuOnly] = useState(false);
+  const [satView, setSatView]   = useState(true);
+  const tileLayerRef  = useRef<import("leaflet").TileLayer | null>(null);
+  const labelLayerRef = useRef<import("leaflet").TileLayer | null>(null);
 
   // ── Map init (once on mount) ──────────────────────────────────────────────
   useEffect(() => {
@@ -163,15 +166,17 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      const tileUrl = isDark
-        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
-        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png";
+      // Satellite base layer (default)
+      tileLayerRef.current = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "© Esri, Maxar, Earthstar Geographics", maxZoom: 19 }
+      ).addTo(map);
 
-      L.tileLayer(tileUrl, {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 19,
-      }).addTo(map);
+      // Street-name labels overlay on satellite
+      labelLayerRef.current = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "", maxZoom: 19, opacity: 0.9 }
+      ).addTo(map);
 
       // User location — pulsing blue dot
       if (userLat != null && userLng != null) {
@@ -220,9 +225,9 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
     const map = mapRef.current;
     if (!map || centerLat == null || centerLng == null) return;
     originRef.current = { lat: centerLat, lng: centerLng };
-    didFitRef.current = false;
     setPendingSearch(null);
-    map.setView([centerLat, centerLng], 14);
+    // Keep current zoom so "Search this area" doesn't zoom out
+    map.setView([centerLat, centerLng], map.getZoom());
   }, [centerLat, centerLng]);
 
   // ── Marker update (restaurants list or menuOnly filter changes) ───────────
@@ -271,6 +276,40 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       didFitRef.current = true;
     }
   }, [restaurants, menuOnly, isDark]);
+
+  // ── Swap tile layers when satView changes ─────────────────────────────────
+  useEffect(() => {
+    const L   = LRef.current;
+    const map = mapRef.current;
+    if (!L || !map) return;
+
+    // Remove existing tile layers
+    if (tileLayerRef.current)  { map.removeLayer(tileLayerRef.current);  }
+    if (labelLayerRef.current) { map.removeLayer(labelLayerRef.current); }
+
+    if (satView) {
+      tileLayerRef.current = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "© Esri, Maxar, Earthstar Geographics", maxZoom: 19 }
+      ).addTo(map);
+      labelLayerRef.current = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "", maxZoom: 19, opacity: 0.9 }
+      ).addTo(map);
+    } else {
+      const streetUrl = isDark
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png";
+      tileLayerRef.current = L.tileLayer(streetUrl, {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 19,
+      }).addTo(map);
+      labelLayerRef.current = null;
+    }
+
+    // Markers live in Leaflet's marker pane (z-index 600), always above tile layers.
+  }, [satView, isDark]);
 
   const menuCount = restaurants.filter((r) => r.scoredItems.length > 0).length;
   const chipBg    = isDark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.92)";
@@ -351,6 +390,34 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
           }}
         >
           Has Menu · {menuCount}
+        </button>
+      </div>
+
+      {/* Satellite / Street toggle */}
+      <div style={{ position: "absolute", top: 14, right: 14, zIndex: 1000 }}>
+        <button
+          onClick={() => setSatView((v) => !v)}
+          aria-label={satView ? "Switch to street map" : "Switch to satellite"}
+          style={{
+            padding: "7px 13px", borderRadius: 999,
+            background: chipBg, color: chipText,
+            border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            backdropFilter: "blur(8px)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+            display: "flex", alignItems: "center", gap: 5,
+          }}
+        >
+          {satView ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Street
+            </>
+          ) : (
+            <>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              Satellite
+            </>
+          )}
         </button>
       </div>
 

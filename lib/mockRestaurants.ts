@@ -22,8 +22,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "McDonald's",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 0.4,
     sourceType: "official",
     menuItems: [
@@ -73,8 +71,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Chipotle Mexican Grill",
     cuisine: "Fast Casual · Mexican",
     tags: ["mexican"],
-    lat: 37.7859,
-    lng: -122.4009,
     distance: 0.7,
     sourceType: "official",
     menuItems: [
@@ -118,8 +114,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Chick-fil-A",
     cuisine: "Fast Food · Chicken",
     tags: ["chicken"],
-    lat: 37.7851,
-    lng: -122.4082,
     distance: 1.1,
     sourceType: "official",
     menuItems: [
@@ -165,8 +159,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Starbucks",
     cuisine: "Café · Coffee",
     tags: ["coffee"],
-    lat: 37.7887,
-    lng: -122.4065,
     distance: 0.6,
     sourceType: "official",
     menuItems: [
@@ -213,8 +205,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Shake Shack",
     cuisine: "Burgers · Shakes",
     tags: ["burgers"],
-    lat: 37.8007,
-    lng: -122.4095,
     distance: 2.1,
     sourceType: "official",
     menuItems: [
@@ -255,8 +245,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Subway",
     cuisine: "Fast Casual · Sandwiches",
     tags: ["sandwiches"],
-    lat: 37.7905,
-    lng: -122.3998,
     distance: 0.5,
     sourceType: "official",
     menuItems: [
@@ -324,8 +312,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Taco Bell",
     cuisine: "Fast Food · Mexican",
     tags: ["mexican"],
-    lat: 37.7875,
-    lng: -122.4016,
     distance: 0.8,
     sourceType: "official",
     menuItems: [
@@ -361,8 +347,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Burger King",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
-    lat: 37.7892,
-    lng: -122.4056,
     distance: 0.9,
     sourceType: "official",
     menuItems: [
@@ -401,8 +385,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Wendy's",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
-    lat: 37.7961,
-    lng: -122.4059,
     distance: 1.3,
     sourceType: "official",
     menuItems: [
@@ -437,8 +419,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Panera Bread",
     cuisine: "Fast Casual · Bakery · Café",
     tags: ["coffee", "sandwiches"],
-    lat: 37.7834,
-    lng: -122.4076,
     distance: 1.0,
     sourceType: "official",
     menuItems: [
@@ -479,8 +459,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Dunkin'",
     cuisine: "Café · Donuts · Coffee",
     tags: ["coffee"],
-    lat: 37.7872,
-    lng: -122.3998,
     distance: 0.7,
     sourceType: "official",
     menuItems: [
@@ -516,8 +494,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "In-N-Out Burger",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
-    lat: 37.7830,
-    lng: -122.4090,
     distance: 0.6,
     sourceType: "official",
     menuItems: [
@@ -548,8 +524,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Five Guys",
     cuisine: "Fast Casual · Burgers",
     tags: ["burgers"],
-    lat: 37.7615,
-    lng: -122.4350,
     distance: 1.2,
     sourceType: "official",
     menuItems: [
@@ -580,8 +554,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Popeyes",
     cuisine: "Fast Food · Chicken",
     tags: ["chicken"],
-    lat: 37.7879,
-    lng: -122.4100,
     distance: 0.8,
     sourceType: "official",
     menuItems: [
@@ -611,8 +583,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "KFC",
     cuisine: "Fast Food · Chicken",
     tags: ["chicken"],
-    lat: 37.7840,
-    lng: -122.4010,
     distance: 0.9,
     sourceType: "official",
     menuItems: [
@@ -643,8 +613,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Domino's",
     cuisine: "Pizza",
     tags: ["sandwiches"],
-    lat: 37.7730,
-    lng: -122.4120,
     distance: 1.1,
     sourceType: "official",
     menuItems: [
@@ -682,8 +650,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Jersey Mike's",
     cuisine: "Fast Casual · Sandwiches",
     tags: ["sandwiches"],
-    lat: 37.7892,
-    lng: -122.4060,
     distance: 0.7,
     sourceType: "official",
     menuItems: [
@@ -736,8 +702,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Jimmy John's",
     cuisine: "Fast Casual · Sandwiches",
     tags: ["sandwiches"],
-    lat: 37.7870,
-    lng: -122.4080,
     distance: 0.5,
     sourceType: "official",
     menuItems: [
@@ -784,8 +748,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Chili's Grill & Bar",
     cuisine: "Casual Dining · American",
     tags: ["casual"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 1.0,
     sourceType: "official",
     menuItems: [
@@ -840,8 +802,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Outback Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 1.2,
     sourceType: "official",
     menuItems: [
@@ -892,8 +852,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Applebee's",
     cuisine: "Casual Dining · American",
     tags: ["casual"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 1.5,
     sourceType: "official",
     menuItems: [
@@ -951,8 +909,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Texas Roadhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 1.8,
     sourceType: "official",
     menuItems: [
@@ -1000,8 +956,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "LongHorn Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 2.0,
     sourceType: "official",
     menuItems: [
@@ -1044,8 +998,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "KJs Steakhouse",
     cuisine: "Upscale Casual · Steakhouse",
     tags: ["steakhouse"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 2.2,
     sourceType: "official",
     menuItems: [
@@ -1087,8 +1039,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Ruths Chris Steak House",
     cuisine: "Fine Dining · Steakhouse",
     tags: ["steakhouse", "fine-dining"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 2.5,
     sourceType: "official",
     menuItems: [
@@ -1136,8 +1086,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Coopers Hawk Winery and Restaurant",
     cuisine: "Casual Fine Dining · American",
     tags: ["casual", "fine-dining"],
-    lat: 37.7749,
-    lng: -122.4194,
     distance: 2.8,
     sourceType: "official",
     menuItems: [
@@ -1186,8 +1134,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Olive Garden",
     cuisine: "Casual Dining · Italian",
     tags: ["italian", "pasta", "casual"],
-    lat: 33.4484,
-    lng: -112.0740,
     distance: 1.2,
     sourceType: "official",
     menuItems: [
@@ -1218,8 +1164,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Red Lobster",
     cuisine: "Casual Dining · Seafood",
     tags: ["seafood", "casual"],
-    lat: 25.7617,
-    lng: -80.1918,
     distance: 1.5,
     sourceType: "official",
     menuItems: [
@@ -1247,8 +1191,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "IHOP",
     cuisine: "Casual Dining · Breakfast",
     tags: ["breakfast", "brunch", "pancakes"],
-    lat: 34.0522,
-    lng: -118.2437,
     distance: 0.9,
     sourceType: "official",
     menuItems: [
@@ -1273,8 +1215,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Denny's",
     cuisine: "Casual Dining · American Breakfast",
     tags: ["breakfast", "american", "24-hour"],
-    lat: 36.1699,
-    lng: -115.1398,
     distance: 1.1,
     sourceType: "official",
     menuItems: [
@@ -1299,8 +1239,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "The Cheesecake Factory",
     cuisine: "Casual Dining · American",
     tags: ["american", "casual", "cheesecake"],
-    lat: 37.3382,
-    lng: -121.8863,
     distance: 2.0,
     sourceType: "official",
     menuItems: [
@@ -1331,8 +1269,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Buffalo Wild Wings",
     cuisine: "Casual Dining · Wings & Sports Bar",
     tags: ["wings", "sports-bar", "casual"],
-    lat: 41.8781,
-    lng: -87.6298,
     distance: 1.3,
     sourceType: "official",
     menuItems: [
@@ -1356,8 +1292,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Wingstop",
     cuisine: "Fast Casual · Wings",
     tags: ["wings", "fast-casual"],
-    lat: 32.7767,
-    lng: -96.7970,
     distance: 0.8,
     sourceType: "official",
     menuItems: [
@@ -1379,8 +1313,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Panda Express",
     cuisine: "Fast Casual · Chinese-American",
     tags: ["chinese", "fast-casual", "asian"],
-    lat: 34.0522,
-    lng: -117.7500,
     distance: 0.7,
     sourceType: "official",
     menuItems: [
@@ -1405,8 +1337,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "P.F. Chang's",
     cuisine: "Casual Dining · Asian",
     tags: ["asian", "chinese", "casual"],
-    lat: 33.6595,
-    lng: -117.9988,
     distance: 1.8,
     sourceType: "official",
     menuItems: [
@@ -1433,8 +1363,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Raising Cane's",
     cuisine: "Fast Casual · Chicken",
     tags: ["chicken", "fast-casual"],
-    lat: 30.4515,
-    lng: -91.1871,
     distance: 0.6,
     sourceType: "official",
     menuItems: [
@@ -1456,8 +1384,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Sonic Drive-In",
     cuisine: "Fast Food · American",
     tags: ["fast-food", "american", "drive-in"],
-    lat: 35.4676,
-    lng: -97.5164,
     distance: 1.0,
     sourceType: "official",
     menuItems: [
@@ -1481,8 +1407,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Arby's",
     cuisine: "Fast Food · Roast Beef & Sandwiches",
     tags: ["fast-food", "sandwiches", "roast-beef"],
-    lat: 39.9612,
-    lng: -82.9988,
     distance: 1.4,
     sourceType: "official",
     menuItems: [
@@ -1506,8 +1430,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Whataburger",
     cuisine: "Fast Food · Burgers",
     tags: ["fast-food", "burgers", "texas"],
-    lat: 29.4241,
-    lng: -98.4936,
     distance: 0.5,
     sourceType: "official",
     menuItems: [
@@ -1531,8 +1453,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Dairy Queen",
     cuisine: "Fast Food · Burgers & Ice Cream",
     tags: ["fast-food", "ice-cream", "burgers"],
-    lat: 44.9778,
-    lng: -93.2650,
     distance: 1.2,
     sourceType: "official",
     menuItems: [
@@ -1556,8 +1476,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Pizza Hut",
     cuisine: "Fast Casual · Pizza",
     tags: ["pizza", "fast-casual"],
-    lat: 35.5951,
-    lng: -82.5515,
     distance: 1.1,
     sourceType: "official",
     menuItems: [
@@ -1581,8 +1499,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Papa John's",
     cuisine: "Fast Casual · Pizza",
     tags: ["pizza", "fast-casual"],
-    lat: 38.2527,
-    lng: -85.7585,
     distance: 1.3,
     sourceType: "official",
     menuItems: [
@@ -1605,8 +1521,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Qdoba Mexican Eats",
     cuisine: "Fast Casual · Mexican",
     tags: ["mexican", "fast-casual", "burritos"],
-    lat: 39.7392,
-    lng: -104.9903,
     distance: 0.9,
     sourceType: "official",
     menuItems: [
@@ -1629,8 +1543,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "TGI Fridays",
     cuisine: "Casual Dining · American",
     tags: ["casual", "american", "bar"],
-    lat: 40.7128,
-    lng: -74.0060,
     distance: 1.6,
     sourceType: "official",
     menuItems: [
@@ -1653,8 +1565,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Red Robin",
     cuisine: "Casual Dining · Burgers",
     tags: ["burgers", "casual", "american"],
-    lat: 47.6062,
-    lng: -122.3321,
     distance: 1.7,
     sourceType: "official",
     menuItems: [
@@ -1678,8 +1588,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Cracker Barrel Old Country Store",
     cuisine: "Casual Dining · Southern American",
     tags: ["southern", "breakfast", "comfort-food", "casual"],
-    lat: 36.1627,
-    lng: -86.7816,
     distance: 2.2,
     sourceType: "official",
     menuItems: [
@@ -1703,8 +1611,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Jack in the Box",
     cuisine: "Fast Food · Burgers",
     tags: ["fast-food", "burgers", "tacos"],
-    lat: 32.7157,
-    lng: -117.1611,
     distance: 0.8,
     sourceType: "official",
     menuItems: [
@@ -1727,8 +1633,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Culver's",
     cuisine: "Fast Casual · Burgers & Custard",
     tags: ["burgers", "custard", "fast-casual"],
-    lat: 43.0389,
-    lng: -89.3009,
     distance: 1.0,
     sourceType: "official",
     menuItems: [
@@ -1751,8 +1655,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Noodles & Company",
     cuisine: "Fast Casual · Noodles",
     tags: ["noodles", "pasta", "fast-casual"],
-    lat: 39.9526,
-    lng: -75.1652,
     distance: 0.7,
     sourceType: "official",
     menuItems: [
@@ -1775,8 +1677,6 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     name: "Yard House",
     cuisine: "Casual Dining · American & Craft Beer",
     tags: ["american", "bar", "craft-beer", "casual"],
-    lat: 21.2793,
-    lng: -157.8294,
     distance: 2.1,
     sourceType: "official",
     menuItems: [
