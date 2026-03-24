@@ -485,8 +485,30 @@ out body center 100;`;
       endRegistryBatch();
     }
     const sorted = results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-    writeOverpassCache(cacheKey, sorted);
-    return sorted;
+
+    // Supplement with any chain templates that weren't matched from OSM.
+    // This ensures all 50 MOCK_RESTAURANTS are always browsable even when
+    // the user's local OSM data doesn't include them.
+    const matchedNames = new Set(
+      results
+        .filter((r) => r.menuItems.length > 0)
+        .map((r) => r.name.toLowerCase()),
+    );
+    const unmatched = MOCK_RESTAURANTS.filter(
+      (m) => !matchedNames.has(m.name.toLowerCase()),
+    ).map((m) => ({
+      ...m,
+      // Distance computation if the template has coordinates; otherwise undefined.
+      distance:
+        m.lat != null && m.lng != null
+          ? Math.round(haversineDistance(lat, lng, m.lat, m.lng) * 10) / 10
+          : undefined,
+      menuIsGenericChainTemplate: true,
+    }));
+
+    const combined = [...sorted, ...unmatched];
+    writeOverpassCache(cacheKey, combined);
+    return combined;
   }
 }
 
