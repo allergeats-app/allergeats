@@ -360,6 +360,30 @@ function dedupKey(name: string): string {
     .trim();
 }
 
+// ─── Chain supplement ─────────────────────────────────────────────────────────
+// After an OSM fetch (or cache hit), append any MOCK_RESTAURANTS that weren't
+// already matched from live data. This ensures all 50 chain templates are always
+// browsable, even when local OSM coverage is sparse.
+
+function supplementWithChains(osmResults: Restaurant[], lat: number, lng: number): Restaurant[] {
+  const matchedNames = new Set(
+    osmResults
+      .filter((r) => r.menuItems.length > 0)
+      .map((r) => r.name.toLowerCase()),
+  );
+  const unmatched = MOCK_RESTAURANTS
+    .filter((m) => !matchedNames.has(m.name.toLowerCase()))
+    .map((m) => ({
+      ...m,
+      distance:
+        m.lat != null && m.lng != null
+          ? Math.round(haversineDistance(lat, lng, m.lat, m.lng) * 10) / 10
+          : undefined,
+      menuIsGenericChainTemplate: true,
+    }));
+  return [...osmResults, ...unmatched];
+}
+
 // ─── Live provider (Overpass API) ─────────────────────────────────────────────
 
 export class LiveLocationProvider implements LocationProvider {
@@ -378,10 +402,10 @@ export class LiveLocationProvider implements LocationProvider {
     const cacheKey = overpassCacheKey(lat, lng, radius);
 
     const cached = readOverpassCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return supplementWithChains(cached, lat, lng);
 
     const existing = inFlight.get(cacheKey);
-    if (existing) return existing;
+    if (existing) return existing.then((r) => supplementWithChains(r, lat, lng));
 
     const promise = this._fetchFromOverpass(lat, lng, radius);
     inFlight.set(cacheKey, promise);
@@ -391,7 +415,7 @@ export class LiveLocationProvider implements LocationProvider {
       () => inFlight.delete(cacheKey),
       () => inFlight.delete(cacheKey),
     );
-    return promise;
+    return promise.then((r) => supplementWithChains(r, lat, lng));
   }
 
   private async _fetchFromOverpass(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
@@ -485,30 +509,8 @@ out body center 100;`;
       endRegistryBatch();
     }
     const sorted = results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-
-    // Supplement with any chain templates that weren't matched from OSM.
-    // This ensures all 50 MOCK_RESTAURANTS are always browsable even when
-    // the user's local OSM data doesn't include them.
-    const matchedNames = new Set(
-      results
-        .filter((r) => r.menuItems.length > 0)
-        .map((r) => r.name.toLowerCase()),
-    );
-    const unmatched = MOCK_RESTAURANTS.filter(
-      (m) => !matchedNames.has(m.name.toLowerCase()),
-    ).map((m) => ({
-      ...m,
-      // Distance computation if the template has coordinates; otherwise undefined.
-      distance:
-        m.lat != null && m.lng != null
-          ? Math.round(haversineDistance(lat, lng, m.lat, m.lng) * 10) / 10
-          : undefined,
-      menuIsGenericChainTemplate: true,
-    }));
-
-    const combined = [...sorted, ...unmatched];
-    writeOverpassCache(cacheKey, combined);
-    return combined;
+    writeOverpassCache(cacheKey, sorted);
+    return sorted;
   }
 }
 
