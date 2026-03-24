@@ -156,10 +156,11 @@ export default function AuthPage() {
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
+            <label htmlFor="auth-email" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
               Email
             </label>
             <input
+              id="auth-email"
               type="email"
               required
               value={email}
@@ -175,10 +176,11 @@ export default function AuthPage() {
           </div>
 
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
+            <label htmlFor="auth-password" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
               Password
             </label>
             <input
+              id="auth-password"
               type="password"
               required
               minLength={6}
@@ -197,10 +199,11 @@ export default function AuthPage() {
           {mode === "signup" && (
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
+                <label htmlFor="auth-first-name" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
                   First Name
                 </label>
                 <input
+                  id="auth-first-name"
                   type="text"
                   required
                   value={firstNameVal}
@@ -215,10 +218,11 @@ export default function AuthPage() {
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
+                <label htmlFor="auth-last-name" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 6 }}>
                   Last Name
                 </label>
                 <input
+                  id="auth-last-name"
                   type="text"
                   required
                   value={lastNameVal}

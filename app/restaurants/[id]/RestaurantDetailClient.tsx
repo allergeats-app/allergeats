@@ -111,6 +111,22 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     registerForCrawl(found.id, { sourceUrl: found.website ?? undefined });
     bumpInteraction(found.id);
 
+    // Cache minimal record server-side so generateMetadata can produce
+    // per-restaurant <title> tags for Google Places results.
+    // Fire-and-forget — metadata degrades gracefully if this fails.
+    fetch("/api/restaurants/cache", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id:      found.id,
+        name:    found.name,
+        cuisine: found.cuisine,
+        address: found.address,
+        lat:     found.lat ?? undefined,
+        lng:     found.lng ?? undefined,
+      }),
+    }).catch(() => { /* non-fatal */ });
+
     // Log analysis summary (uses base analysis — before memory overlay)
     const { summary } = analysis;
     const safeP = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;

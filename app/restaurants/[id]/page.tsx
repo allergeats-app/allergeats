@@ -1,19 +1,37 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
+import { supabase } from "@/lib/supabase";
 import { RestaurantDetailClient } from "./RestaurantDetailClient";
 
 type Props = { params: Promise<{ id: string }> };
 
+type CachedRestaurant = { name: string; cuisine: string | null };
+
+async function getRestaurantMeta(id: string): Promise<CachedRestaurant | null> {
+  // 1. Known mock chains — instant, no network call
+  const mock = MOCK_RESTAURANTS.find((r) => r.id === id);
+  if (mock) return { name: mock.name, cuisine: mock.cuisine };
+
+  // 2. Supabase cache — populated on first client-side view
+  try {
+    const { data } = await supabase
+      .from("restaurant_cache")
+      .select("name, cuisine")
+      .eq("id", id)
+      .single();
+    if (data) return data as CachedRestaurant;
+  } catch { /* fall through to generic */ }
+
+  return null;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  const restaurant = await getRestaurantMeta(id);
 
-  // Try to resolve from the known mock restaurant list (server-safe).
-  // Dynamic/live restaurants only exist in the client's localStorage, so
-  // we fall back to a generic template for those IDs.
-  const mock = MOCK_RESTAURANTS.find((r) => r.id === id);
-  const name    = mock?.name    ?? "Restaurant";
-  const cuisine = mock?.cuisine ?? "Restaurant";
+  const name    = restaurant?.name    ?? "Restaurant";
+  const cuisine = restaurant?.cuisine ?? "Restaurant";
 
   return {
     title:       `${name} Allergy Menu | AllergEats`,
@@ -28,17 +46,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RestaurantDetailPage({ params }: Props) {
   const { id } = await params;
+  const restaurant = await getRestaurantMeta(id);
   const mock = MOCK_RESTAURANTS.find((r) => r.id === id);
 
-  const jsonLd = mock
+  const jsonLd = restaurant
     ? {
-        "@context": "https://schema.org",
-        "@type":    "Restaurant",
-        "name":     mock.name,
-        "servesCuisine": mock.cuisine,
-        ...(mock.address ? { "address": mock.address } : {}),
-        ...(mock.phone   ? { "telephone": mock.phone  } : {}),
-        ...(mock.website ? { "url": mock.website       } : {}),
+        "@context":      "https://schema.org",
+        "@type":         "Restaurant",
+        "name":          restaurant.name,
+        "servesCuisine": restaurant.cuisine ?? undefined,
+        ...(mock?.address ? { "address":   mock.address } : {}),
+        ...(mock?.phone   ? { "telephone": mock.phone   } : {}),
+        ...(mock?.website ? { "url":       mock.website } : {}),
         "potentialAction": {
           "@type":  "ViewAction",
           "target": `https://www.allergeats.com/restaurants/${id}`,
