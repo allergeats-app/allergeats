@@ -192,10 +192,12 @@ export default function ProfilePage() {
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <input
+                id="profile-first-name"
                 type="text"
                 value={firstEdit}
                 onChange={(e) => setFirstEdit(e.target.value)}
                 placeholder="First name"
+                aria-label="First name"
                 style={{
                   flex: 1, minWidth: 100, padding: "10px 12px", border: "1px solid var(--c-border)",
                   borderRadius: 10, fontSize: 14, color: "var(--c-text)",
@@ -203,10 +205,12 @@ export default function ProfilePage() {
                 }}
               />
               <input
+                id="profile-last-name"
                 type="text"
                 value={lastEdit}
                 onChange={(e) => setLastEdit(e.target.value)}
                 placeholder="Last name"
+                aria-label="Last name"
                 style={{
                   flex: 1, minWidth: 100, padding: "10px 12px", border: "1px solid var(--c-border)",
                   borderRadius: 10, fontSize: 14, color: "var(--c-text)",

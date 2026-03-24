@@ -34,7 +34,7 @@ function ScanSummaryBar({ safe, ask, avoid, total }: { safe: number; ask: number
 function SectionHeader({ label, count }: { label: string; count?: number }) {
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "28px 0 12px" }}>
-      <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
+      <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>{label}</h2>
       {count != null && <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{count}</span>}
     </div>
   );

@@ -81,7 +81,10 @@ export async function POST(req: Request) {
   // restNorm is sanitized by normalizeRestaurant (alphanumeric + spaces only)
   // so special characters cannot mangle the Supabase filter string.
   if (restNorm) {
-    query = query.or(`rest_normalized.eq.${restNorm},rest_normalized.is.null`);
+    // Double-quote the value so PostgREST handles names that contain spaces correctly.
+    // restNorm is alphanumeric+spaces only (stripped by normalizeRestaurant), so no
+    // quote characters can appear in it — the wrapping quotes are safe.
+    query = query.or(`rest_normalized.eq."${restNorm}",rest_normalized.is.null`);
   }
 
   const { data, error } = await Promise.race([

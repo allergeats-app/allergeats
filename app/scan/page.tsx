@@ -6,7 +6,7 @@ import { recordScan } from "@/lib/scanHistory";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { buildScanInput } from "@/lib/buildScanInput";
-import { useAuth } from "@/lib/authContext";
+import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { analyzeMenu } from "@/lib/engine/analyzerPipeline";
 import { AllergySelector } from "@/components/AllergySelector";
 import { fetchCommunityScores, getCommunitySignal, submitDishReport, normalizeDish } from "@/lib/community";
@@ -40,7 +40,7 @@ function toSourceType(s: MenuSourceKey): SourceType {
 }
 
 export default function ScanPage() {
-  const { allergens: profileAllergens } = useAuth();
+  const { allergens: profileAllergens } = useAllergenProfile();
 
   const [step, setStep]                         = useState<1 | 2 | 3>(1);
   const [activeInput, setActiveInput]           = useState<"preloaded" | "url" | "manual" | null>(null);
@@ -63,7 +63,7 @@ export default function ScanPage() {
   // Track which dishes the user has already reported: "dish_normalized::allergen" → outcome
   const [myReports, setMyReports]               = useState<Map<string, string>>(new Map());
 
-  // Load from auth profile, then localStorage fallback
+  // Pre-fill from unified allergen profile (localStorage + auth, whichever is set)
   useEffect(() => {
     if (profileAllergens.length > 0) {
       setSelectedAllergens(profileAllergens);
