@@ -2,12 +2,20 @@
 // Context-aware substitution suggestions for allergen-flagged dishes.
 // Matches the allergen + keywords from the dish text to produce actionable advice.
 
-import type { AllergenId } from "./types";
+import type { AllergenId, RiskSignal } from "./types";
 
 type SubstitutionRule = {
   allergens: AllergenId[];
-  /** If ANY of these terms appear in the normalized dish text, this rule fires. Empty = always applies as fallback. */
+  /**
+   * If ANY of these terms appear in the normalized dish text, this rule fires.
+   * Empty = treated as fallback (only fires if no context/reason rule matched first).
+   */
   contextTerms: string[];
+  /**
+   * If ANY of these terms appear in a matching signal's reason text, this rule fires.
+   * More precise than contextTerms — "fryer oil" in a reason beats a generic dish name.
+   */
+  reasonTerms?: string[];
   suggestion: string;
 };
 
@@ -65,8 +73,16 @@ const RULES: SubstitutionRule[] = [
     suggestion: "Ask for coconut aminos as a soy-free alternative, or request no sauce" },
   { allergens: ["soy"], contextTerms: ["edamame", "tofu", "tempeh", "miso"],
     suggestion: "Ask if the soy-based ingredient can be omitted" },
+  // fryer oil — matched via signal reason, not just dish name
+  { allergens: ["soy"], contextTerms: ["fries", "fried", "fryer"],
+    reasonTerms: ["fryer", "frying oil", "soybean oil"],
+    suggestion: "Ask if they use a soy-free frying oil (sunflower or canola)" },
+  // marinade / seasoning on proteins
+  { allergens: ["soy"], contextTerms: ["steak", "sirloin", "ribeye", "filet", "brisket", "salmon", "chicken", "pork", "shrimp"],
+    reasonTerms: ["marinade", "seasoning", "soy sauce", "glaze"],
+    suggestion: "Ask if the protein can be prepared without soy-based marinade or seasoning" },
   { allergens: ["soy"], contextTerms: [],
-    suggestion: "Ask if the marinade or sauce can be made without soy" },
+    suggestion: "Ask staff where the soy comes from — it may be in the marinade, sauce, or frying oil" },
 
   // ─── PEANUT ───────────────────────────────────────────────────────────────
   { allergens: ["peanut"], contextTerms: ["pad thai", "satay", "peanut sauce", "gado"],
@@ -117,33 +133,36 @@ const RULES: SubstitutionRule[] = [
 
 /**
  * Returns actionable substitution suggestions for a flagged dish.
- * Rules are matched by allergen + context keywords found in the normalized dish text.
- * At most one suggestion per allergen is returned (the most specific match).
+ * Rules are matched by allergen + context keywords found in the dish text OR
+ * in signal reason text (e.g. "fryer oil" in a reason → soy-free oil suggestion).
+ * At most one suggestion per allergen is returned (most specific match wins).
  *
  * @param matchedAllergens  Allergens from the user's profile that were detected
- * @param normalizedText    Normalized dish name + description (from ocrNormalizer)
+ * @param normalizedText    Normalized dish name + description
+ * @param signals           Risk signals from the detection engine (optional but improves accuracy)
  */
 export function getSubstitutions(
   matchedAllergens: AllergenId[],
   normalizedText: string,
+  signals: RiskSignal[] = [],
 ): string[] {
   const suggestions = new Set<string>();
 
   for (const allergen of matchedAllergens) {
-    // Find rules for this allergen, try context-specific rules first (they have contextTerms)
-    const relevantRules = RULES.filter(
-      (r) => r.allergens.includes(allergen) && r.contextTerms.length > 0
-    );
-    const fallbackRule = RULES.find(
-      (r) => r.allergens.includes(allergen) && r.contextTerms.length === 0
-    );
+    const allergenSignals = signals.filter((s) => s.allergen === allergen);
+    const specificRules   = RULES.filter((r) => r.allergens.includes(allergen) && (r.contextTerms.length > 0 || r.reasonTerms));
+    const fallbackRule    = RULES.find((r) => r.allergens.includes(allergen) && r.contextTerms.length === 0 && !r.reasonTerms);
 
     let matched = false;
-    for (const rule of relevantRules) {
-      if (rule.contextTerms.some((t) => normalizedText.includes(t))) {
+    for (const rule of specificRules) {
+      const textHit   = rule.contextTerms.some((t) => normalizedText.includes(t));
+      const reasonHit = rule.reasonTerms?.some((t) =>
+        allergenSignals.some((s) => s.reason.toLowerCase().includes(t))
+      ) ?? false;
+      if (textHit || reasonHit) {
         suggestions.add(rule.suggestion);
         matched = true;
-        break; // one suggestion per allergen
+        break;
       }
     }
     if (!matched && fallbackRule) {
