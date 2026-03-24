@@ -90,6 +90,7 @@ export function RestaurantCard({ restaurant: r }: Props) {
           )}
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier }); toggleFavorite(r.id, { name: r.name, cuisine: r.cuisine }); }}
+            aria-label={favorited ? `Remove ${r.name} from saved` : `Save ${r.name}`}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
               position: "absolute", bottom: 8, right: 8,

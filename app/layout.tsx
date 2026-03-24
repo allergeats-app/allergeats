@@ -29,6 +29,19 @@ export const metadata: Metadata = {
   description: "Find restaurants and menu items safe for your food allergies.",
 };
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type":    "WebSite",
+  "name":     "AllergEats",
+  "url":      "https://www.allergeats.com",
+  "description": "Find restaurants and menu items safe for your food allergies.",
+  "potentialAction": {
+    "@type":       "SearchAction",
+    "target":      "https://www.allergeats.com/?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,6 +49,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           <AuthProvider>

@@ -81,6 +81,38 @@ a:active,
   padding-bottom: max(80px, calc(60px + env(safe-area-inset-bottom)));
 }
 
+/* ── Screen-reader only utility ─────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Keyboard focus indicators ───────────────────────────────────────────── */
+/*
+  Only shown on keyboard navigation (not mouse clicks).
+  Uses a strong red outline to match the AllergEats brand and pass
+  WCAG 2.1 SC 2.4.7 non-text-contrast requirement.
+*/
+:focus-visible {
+  outline: 2.5px solid #eb1700;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Buttons and links often have border-radius — match it */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  border-radius: 8px;
+}
+
 /* ── Skeleton shimmer ────────────────────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: -400px 0; }

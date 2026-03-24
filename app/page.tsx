@@ -271,6 +271,7 @@ function HomeContent() {
 
   return (
     <main className={layout !== "map" ? "safe-pb" : undefined} style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif" }}>
+      <h1 className="sr-only">AllergEats — Find nearby restaurants safe for your food allergies</h1>
 
       {/* ── 1. Sticky header ─────────────────────────────────────────────── */}
       <RestaurantsHeader
@@ -362,7 +363,7 @@ function HomeContent() {
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
               </svg>
             </div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 6 }}>Location unavailable</div>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 6, margin: "0 0 6px" }}>Location unavailable</h2>
             <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 28, lineHeight: 1.5 }}>
               {locationLabel === "Location blocked"
                 ? "Enable location in your browser settings to find nearby restaurants."
@@ -412,9 +413,9 @@ function HomeContent() {
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
                     Best Match for You
-                  </span>
+                  </h2>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--c-sub)", paddingLeft: 19 }}>
                   {searchCenter
@@ -438,9 +439,9 @@ function HomeContent() {
             {/* ── All Restaurants ─────────────────────────────────── */}
             {filtered.length > 1 && (
               <>
-                <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "20px 0 10px" }}>
+                <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "20px 0 10px" }}>
                   {searchCenter ? "More in This Area" : "More Nearby"}
-                </div>
+                </h2>
                 <div style={{ display: "grid", gap: 12 }}>
                   {filtered.slice(1).map((r) => (
                     <RestaurantCard key={r.id} restaurant={r} />
