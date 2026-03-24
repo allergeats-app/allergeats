@@ -319,7 +319,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
     <div style={{ position: "relative", overflow: "hidden", isolation: "isolate" }}>
       <div
         ref={containerRef}
-        style={{ width: "100%", height: "calc(100dvh - 96px)", minHeight: 440 }}
+        style={{ width: "100%", height: "calc(100dvh - max(96px, calc(88px + env(safe-area-inset-top))))", minHeight: 400 }}
       />
 
       {/* Search this area */}

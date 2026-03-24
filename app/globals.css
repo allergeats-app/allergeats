@@ -16,14 +16,26 @@
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
+html {
+  /* Prevent rubber-band overscroll at the page level — native app feel */
+  overscroll-behavior-y: none;
+  /* Block accidental horizontal scroll from any overflowing child */
+  overflow-x: hidden;
+  height: 100%;
+}
+
 body {
   background: var(--c-bg);
   color: var(--c-text);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Use the loaded Geist Sans, fall back to iOS/Android system fonts */
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 1.5;
+  overflow-x: hidden;
   /* Remove iOS grey flash on tap */
   -webkit-tap-highlight-color: transparent;
+  /* Smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Remove tap flash on interactive elements */

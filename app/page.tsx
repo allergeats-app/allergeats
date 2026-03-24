@@ -298,7 +298,7 @@ function HomeContent() {
   }
 
   return (
-    <main className={layout !== "map" ? "safe-pb" : undefined} style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif" }}>
+    <main className={layout !== "map" ? "safe-pb" : undefined} style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
       <h1 className="sr-only">AllergEats — Find nearby restaurants safe for your food allergies</h1>
 
       {/* ── 1. Sticky header ─────────────────────────────────────────────── */}

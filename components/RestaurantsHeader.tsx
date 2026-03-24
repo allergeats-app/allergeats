@@ -7,7 +7,7 @@ import { SettingsButton } from "@/components/SettingsButton";
 import type { LayoutOption } from "@/app/restaurants/types";
 
 const ICON_BTN: React.CSSProperties = {
-  width: 36, height: 36, borderRadius: 999, flexShrink: 0,
+  width: 44, height: 44, borderRadius: 999, flexShrink: 0,
   background: "var(--c-card)", border: "1px solid var(--c-border)",
   display: "flex", alignItems: "center", justifyContent: "center",
   boxShadow: "0 1px 3px rgba(0,0,0,0.07)", color: "currentColor",
@@ -40,9 +40,14 @@ export function RestaurantsHeader({
   return (
     <div style={{
       position: "sticky", top: 0, zIndex: 50,
-      background: "var(--c-hdr)", backdropFilter: "blur(12px)",
+      background: "var(--c-hdr)", backdropFilter: "blur(16px)",
+      WebkitBackdropFilter: "blur(16px)",
       borderBottom: "1px solid var(--c-border)",
-      padding: "10px 16px 8px",
+      /* Top padding accounts for the notch / Dynamic Island on iPhone */
+      paddingTop: "max(10px, env(safe-area-inset-top))",
+      paddingBottom: 10,
+      paddingLeft: "max(16px, env(safe-area-inset-left))",
+      paddingRight: "max(16px, env(safe-area-inset-right))",
     }}>
       <div style={{ maxWidth: 600, margin: "0 auto", display: "grid", gap: 8 }}>
 
@@ -122,7 +127,7 @@ export function RestaurantsHeader({
               aria-label="Search restaurants"
               style={{
                 width: "100%", boxSizing: "border-box",
-                padding: "8px 28px 8px 32px",
+                padding: "11px 28px 11px 32px",
                 border: `1px solid ${query ? "#eb1700" : "var(--c-border)"}`,
                 borderRadius: 10, fontSize: 13,
                 background: query ? "#fef2f2" : "var(--c-card)",
@@ -195,7 +200,7 @@ export function RestaurantsHeader({
                 aria-pressed={layout === l}
                 aria-label={l === "list" ? "List view" : "Map view"}
                 style={{
-                  width: 28, height: 28, borderRadius: 7, border: "1.5px solid",
+                  width: 44, height: 44, borderRadius: 10, border: "1.5px solid",
                   borderColor: layout === l ? "#eb1700" : "var(--c-border)",
                   background: layout === l ? "#eb1700" : "var(--c-card)",
                   color: layout === l ? "#fff" : "var(--c-sub)",

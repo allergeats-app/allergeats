@@ -65,7 +65,7 @@ export default function RootLayout({
                 {children}
                 <footer style={{
                   textAlign: "center",
-                  padding: "20px 20px max(28px, calc(16px + env(safe-area-inset-bottom)))",
+                  padding: `20px max(20px, env(safe-area-inset-right)) max(28px, calc(16px + env(safe-area-inset-bottom))) max(20px, env(safe-area-inset-left))`,
                   fontSize: 13,
                   color: "var(--c-sub)",
                   lineHeight: 1.6,
