@@ -264,67 +264,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Face ID / Passkey card — only shown on supported devices */}
-        {passkeySupported && (
-          <div
-            style={{
-              background: "var(--c-card)", border: "1px solid var(--c-border)",
-              borderRadius: 20, padding: 20,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 16 }}>
-              Security
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 3 }}>
-                  Face ID / Touch ID
-                </div>
-                <div style={{ fontSize: 13, color: "var(--c-sub)" }}>
-                  {passkeyRegistered
-                    ? "Sign in instantly with your face or fingerprint"
-                    : "Add biometric sign-in for faster, password-free login"}
-                </div>
-              </div>
-
-              <button
-                onClick={passkeyRegistered ? handleRemovePasskey : handleAddPasskey}
-                disabled={passkeyLoading}
-                style={{
-                  padding: "10px 16px",
-                  borderRadius: 12,
-                  border: passkeyRegistered ? "1.5px solid #ef4444" : "none",
-                  background: passkeyRegistered ? "transparent" : "#eb1700",
-                  color: passkeyRegistered ? "#ef4444" : "#fff",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: passkeyLoading ? "not-allowed" : "pointer",
-                  whiteSpace: "nowrap",
-                  minWidth: 80,
-                  transition: "opacity 0.15s",
-                  opacity: passkeyLoading ? 0.5 : 1,
-                }}
-              >
-                {passkeyLoading ? "…" : passkeyRegistered ? "Remove" : "Set Up"}
-              </button>
-            </div>
-
-            {passkeyMsg && (
-              <div
-                style={{
-                  marginTop: 12, padding: "10px 14px", borderRadius: 10, fontSize: 13,
-                  background: passkeyMsg.ok ? "#f0fdf4" : "#fff1f0",
-                  border: `1px solid ${passkeyMsg.ok ? "#bbf7d0" : "#f3c5c0"}`,
-                  color: passkeyMsg.ok ? "#15803d" : "#b91c1c",
-                }}
-              >
-                {passkeyMsg.text}
-              </div>
-            )}
-          </div>
-        )}
 
       </div>
     </main>
