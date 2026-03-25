@@ -99,25 +99,29 @@ export async function GET(req: Request) {
 
     const data = await summaryRes.json();
 
-    // Prefer thumbnail over originalimage — originals can be huge SVGs or multi-MB files.
-    // Bump the pixel width in Wikimedia thumbnail URLs from their default (~320px) to 800px
-    // for sharp display on retina screens without fetching a multi-MB original.
-    let imgUrl: string | undefined = data.thumbnail?.source ?? data.originalimage?.source;
-    if (!imgUrl) return new Response(null, { status: 404 });
+    const originalUrl: string | undefined = data.thumbnail?.source ?? data.originalimage?.source;
+    if (!originalUrl) return new Response(null, { status: 404 });
 
-    // Wikimedia thumbnail URLs contain a width segment like "/320px-filename.ext".
-    // Replace it with 800px for high-DPI clarity.
-    imgUrl = imgUrl.replace(/\/\d+px-/, "/800px-");
+    // Detect logo vs photo before URL manipulation.
+    const isLogo = /\.svg\.png$/i.test(originalUrl) || /[Ll]ogo/.test(originalUrl);
 
-    // Detect logo vs photo so the client can choose the right objectFit.
-    // Logos are SVG-derived (".svg.png") or have "logo"/"Logo" in the path.
-    const isLogo = /\.svg\.png$/i.test(imgUrl) || /[Ll]ogo/.test(imgUrl);
+    // Try progressively smaller sizes until one succeeds.
+    // Wikimedia only serves pre-rendered thumbnail sizes — 800px might not be cached
+    // for every article, so fall back through 640 → 480 → original URL.
+    const candidates = isLogo
+      ? [ originalUrl.replace(/\/\d+px-/, "/640px-"),
+          originalUrl.replace(/\/\d+px-/, "/480px-"),
+          originalUrl ]
+      : [ originalUrl.replace(/\/\d+px-/, "/800px-"),
+          originalUrl.replace(/\/\d+px-/, "/640px-"),
+          originalUrl ];
 
-    // Proxy the image bytes so the client loads from our domain
-    const imgRes = await fetch(imgUrl, {
-      headers: { "User-Agent": "AllergEats/1.0" },
-    });
-    if (!imgRes.ok) return new Response(null, { status: 404 });
+    let imgRes: Response | null = null;
+    for (const url of candidates) {
+      const r = await fetch(url, { headers: { "User-Agent": "AllergEats/1.0" } });
+      if (r.ok) { imgRes = r; break; }
+    }
+    if (!imgRes) return new Response(null, { status: 404 });
 
     const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
     const buffer = await imgRes.arrayBuffer();
