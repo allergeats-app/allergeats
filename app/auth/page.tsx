@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
-import { isPasskeySupported, authenticateWithPasskey, registerPasskey } from "@/lib/passkey";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -18,21 +17,16 @@ export default function AuthPage() {
 
   const REMEMBER_KEY = "allegeats_remembered_email";
 
-  const [mode, setMode]           = useState<Mode>("signin");
-  const [email, setEmail]         = useState("");
-  const [password, setPassword]   = useState("");
-  const [staySignedIn, setStay]   = useState(true);
-  const [error, setError]         = useState<string | null>(null);
-  const [info, setInfo]           = useState<string | null>(null);
-  const [loading, setLoading]     = useState(false);
-  const [passkeySupported, setPasskeySupported] = useState(false);
-  const [passkeyLoading, setPasskeyLoading]     = useState(false);
-  const [oauthLoading, setOauthLoading]         = useState<"google" | null>(null);
-  const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(false);
-  const [passkeyEnrolling, setPasskeyEnrolling]   = useState(false);
+  const [mode, setMode]         = useState<Mode>("signin");
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [staySignedIn, setStay] = useState(true);
+  const [error, setError]       = useState<string | null>(null);
+  const [info, setInfo]         = useState<string | null>(null);
+  const [loading, setLoading]   = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
 
   useEffect(() => { if (user) router.replace("/"); }, [user, router]);
-  useEffect(() => { isPasskeySupported().then(setPasskeySupported); }, []);
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY);
     if (saved) setEmail(saved); // eslint-disable-line react-hooks/set-state-in-effect
@@ -50,20 +44,6 @@ export default function AuthPage() {
     setOauthLoading(provider);
     const err = await signInWithOAuth(provider);
     if (err) { setError(err); setOauthLoading(null); }
-  }
-
-  async function handleFaceId() {
-    if (!email) { setError("Enter your email first, then tap Face ID"); return; }
-    setError(null);
-    setPasskeyLoading(true);
-    const result = await authenticateWithPasskey(email);
-    if ("error" in result) { setError(result.error); setPasskeyLoading(false); return; }
-    const sb = getSupabaseClient();
-    if (!sb) { setError("Auth not configured"); setPasskeyLoading(false); return; }
-    const { error: otpErr } = await sb.auth.verifyOtp({ token_hash: result.tokenHash, type: "magiclink" });
-    setPasskeyLoading(false);
-    if (otpErr) { setError("Face ID sign-in failed — please use your password"); return; }
-    router.push("/");
   }
 
   async function handleForgotPassword(e: React.FormEvent) {
@@ -96,22 +76,11 @@ export default function AuthPage() {
     if (mode === "signin") {
       if (staySignedIn) localStorage.setItem(REMEMBER_KEY, email);
       else localStorage.removeItem(REMEMBER_KEY);
-      // Offer Face ID enrollment on supported devices
-      if (passkeySupported) { setShowPasskeyPrompt(true); return; }
       router.push("/");
     } else {
       setInfo("Check your email to confirm your account, then sign in.");
       switchMode("signin");
     }
-  }
-
-  async function handleEnrollPasskey() {
-    setPasskeyEnrolling(true);
-    const sb = getSupabaseClient();
-    const token = (await sb?.auth.getSession())?.data.session?.access_token;
-    if (token) await registerPasskey(token);
-    setPasskeyEnrolling(false);
-    router.push("/");
   }
 
   const inputStyle: React.CSSProperties = {
@@ -137,41 +106,8 @@ export default function AuthPage() {
         Eat safely with food allergies
       </p>
 
-      {/* Face ID enrollment prompt — shown after successful email sign-in on supported devices */}
-      {showPasskeyPrompt && (
-        <div style={{
-          background: "var(--c-card)", border: "1px solid var(--c-border)",
-          borderRadius: 28, padding: "36px 28px", width: "100%", maxWidth: 400,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08)", textAlign: "center",
-        }}>
-          <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
-          <div style={{ fontWeight: 900, fontSize: 22, color: "var(--c-text)", marginBottom: 10 }}>
-            Enable Face ID?
-          </div>
-          <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.6, marginBottom: 28 }}>
-            Sign in instantly next time using Face ID — no password needed.
-          </div>
-          <div style={{ display: "grid", gap: 10 }}>
-            <button onClick={handleEnrollPasskey} disabled={passkeyEnrolling} style={{
-              padding: "14px 0", borderRadius: 14, border: "none",
-              background: passkeyEnrolling ? "#9ca3af" : "#eb1700", color: "#fff",
-              fontSize: 15, fontWeight: 800, cursor: passkeyEnrolling ? "not-allowed" : "pointer",
-            }}>
-              {passkeyEnrolling ? "Setting up…" : "Enable Face ID"}
-            </button>
-            <button onClick={() => router.push("/")} style={{
-              padding: "14px 0", borderRadius: 14,
-              border: "1.5px solid var(--c-border)", background: "transparent",
-              color: "var(--c-sub)", fontSize: 15, fontWeight: 700, cursor: "pointer",
-            }}>
-              Not now
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Card */}
-      {!showPasskeyPrompt && <div style={{
+      <div style={{
         background: "var(--c-card)", border: "1px solid var(--c-border)",
         borderRadius: 24, padding: "28px 24px", width: "100%", maxWidth: 400,
         boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
@@ -296,41 +232,10 @@ export default function AuthPage() {
               }}>
                 {loading ? "…" : mode === "signin" ? "Sign In" : "Create Account"}
               </button>
-
-              {/* Face ID — sign-in only, device-supported */}
-              {mode === "signin" && passkeySupported && (
-                <>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
-                    <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>or</span>
-                    <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
-                  </div>
-                  <button type="button" onClick={handleFaceId} disabled={passkeyLoading} style={{
-                    padding: "14px 0", borderRadius: 14,
-                    border: "1.5px solid var(--c-border)", background: "var(--c-card)",
-                    color: "var(--c-text)", fontSize: 15, fontWeight: 800,
-                    cursor: passkeyLoading ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                  }}>
-                    {passkeyLoading ? "Verifying…" : (
-                      <>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <circle cx="12" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                          <path d="M7 7c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                          <path d="M6 10c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1H6z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                          <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
-                          <path d="M12 16.5v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        </svg>
-                        Sign In with Face ID
-                      </>
-                    )}
-                  </button>
-                </>
-              )}
             </form>
           </>
         )}
-      </div>}
+      </div>
 
       <Link href="/" style={{ marginTop: 24, fontSize: 13, color: "var(--c-sub)", textDecoration: "none" }}>
         ← Back to home
