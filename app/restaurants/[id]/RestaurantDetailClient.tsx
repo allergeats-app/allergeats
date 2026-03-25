@@ -33,6 +33,7 @@ import type { FeedbackParams } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackType } from "@/lib/learning/types";
 import type { Restaurant, Risk, AllergenId } from "@/lib/types";
 import { coverGradient } from "@/lib/coverGradient";
+import { chainLogoUrl } from "@/lib/chainLogos";
 
 type RiskFilter = "all" | Risk;
 
@@ -76,6 +77,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [notFound, setNotFound]           = useState(false);
   const [riskFilter, setRiskFilter]       = useState<RiskFilter>("likely-safe");
   const [photoFailed, setPhotoFailed]     = useState(false);
+  const [photoLoaded, setPhotoLoaded]     = useState(false);
   const [questionsCopied, setQuestionsCopied] = useState(false);
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
@@ -302,13 +304,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const hasNoMenu    = summary.total === 0;
   const noAllergens  = userAllergens.length === 0;
 
+  const wikiUrl  = chainLogoUrl(restaurant.name);
   const photoSrc = !photoFailed
-    ? restaurant.googlePlaceId
-      ? `/api/places-photo?placeId=${encodeURIComponent(restaurant.googlePlaceId)}`
-      : restaurant.lat != null && restaurant.lng != null
-        ? `/api/places-photo?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
-        : null
+    ? (restaurant.imageUrl ?? wikiUrl
+        ?? (restaurant.googlePlaceId
+          ? `/api/places-photo?placeId=${encodeURIComponent(restaurant.googlePlaceId)}`
+          : restaurant.lat != null && restaurant.lng != null
+            ? `/api/places-photo?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
+            : null))
     : null;
+  const isLogo = photoSrc?.startsWith("/api/wiki-thumb") ?? false;
 
   const RISK_CHIPS: { value: RiskFilter; label: string }[] = [
     { value: "all",         label: `All (${summary.total})` },
@@ -398,18 +403,37 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         }}>
           {/* Cover photo / gradient strip */}
           <div style={{
-            height: 110,
-            background: photoSrc ? "#e5e7eb" : coverGradient(hero.cuisine, hero.restaurantName),
+            height: 148,
+            background: isLogo && photoLoaded ? "#fff" : coverGradient(hero.cuisine, hero.restaurantName),
             position: "relative", overflow: "hidden",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "background 0.3s ease",
           }}>
             {photoSrc && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={photoSrc}
                 alt={hero.restaurantName}
+                onLoad={() => setPhotoLoaded(true)}
                 onError={() => setPhotoFailed(true)}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                loading="lazy"
+                style={{
+                  position: "absolute", inset: 0,
+                  width: "100%", height: "100%",
+                  objectFit: isLogo ? "contain" : "cover",
+                  objectPosition: "center",
+                  padding: isLogo ? "20px 32px" : 0,
+                  opacity: photoLoaded ? 1 : 0,
+                  transition: "opacity 0.4s ease",
+                }}
               />
+            )}
+            {!isLogo && photoLoaded && (
+              <div style={{
+                position: "absolute", inset: 0,
+                background: "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.32) 100%)",
+                pointerEvents: "none",
+              }} />
             )}
             {!hasNoMenu && (
               <div style={{
