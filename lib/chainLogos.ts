@@ -12,8 +12,19 @@ const KNOWN_CHAINS = new Set([
   "buffalo wild wings", "wingstop", "panda express", "p.f. chang's",
   "raising cane's", "sonic drive-in", "sonic", "arby's", "whataburger",
   "dairy queen", "papa john's", "papa johns", "qdoba", "qdoba mexican eats",
-  "tgi fridays", "red robin", "cracker barrel", "jack in the box",
-  "culver's", "noodles & company", "yard house",
+  "tgi fridays", "red robin",
+  "cracker barrel", "cracker barrel old country store",
+  "jack in the box", "culver's", "noodles & company", "yard house",
+  // Additional chains
+  "jersey mike's", "jersey mikes",
+  "jimmy john's", "jimmy johns",
+  "chili's", "chili's grill & bar",
+  "outback steakhouse",
+  "applebee's", "applebees",
+  "texas roadhouse",
+  "longhorn steakhouse",
+  "ruth's chris steak house", "ruths chris steak house",
+  "cooper's hawk winery & restaurants", "coopers hawk winery and restaurant",
 ]);
 
 /**
