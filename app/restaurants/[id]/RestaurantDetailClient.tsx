@@ -467,6 +467,28 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 <div style={{ fontSize: 15, color: "var(--c-sub)", marginTop: 4 }}>
                   {hero.cuisine}{hero.distance != null && ` · ${hero.distance} mi`}
                 </div>
+                {(restaurant.address || (restaurant.lat != null && restaurant.lng != null)) && (() => {
+                  const mapsUrl = restaurant.lat != null && restaurant.lng != null
+                    ? `https://www.google.com/maps/search/?api=1&query=${restaurant.lat},${restaurant.lng}`
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address!)}`;
+                  return (
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        marginTop: 6, fontSize: 13, color: "#eb1700",
+                        fontWeight: 600, textDecoration: "none",
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      {restaurant.address ?? "Get directions"}
+                    </a>
+                  );
+                })()}
               </div>
               <button
                 onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier }); toggleFavorite(restaurant.id); }}
