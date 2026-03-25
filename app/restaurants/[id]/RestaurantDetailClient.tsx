@@ -313,7 +313,13 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             ? `/api/places-photo?name=${encodeURIComponent(restaurant.name)}&lat=${restaurant.lat}&lng=${restaurant.lng}`
             : null))
     : null;
-  const isLogo = (photoSrc?.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc ?? "")) ?? false;
+  const isLogo = (() => {
+    if (!photoSrc) return false;
+    if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
+      return /\.svg\.png/i.test(decodeURIComponent(photoSrc));
+    }
+    return photoSrc.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc);
+  })();
 
   const RISK_CHIPS: { value: RiskFilter; label: string }[] = [
     { value: "all",         label: `All (${summary.total})` },

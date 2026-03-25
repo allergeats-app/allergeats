@@ -50,7 +50,13 @@ export function RestaurantCard({ restaurant: r }: Props) {
 
   // Wiki-thumb images are chain logos — use contain so the full logo is visible.
   // Places photos and pre-enriched images are real photos — use cover.
-  const isLogo = (photoSrc?.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc ?? "")) ?? false;
+  const isLogo = (() => {
+    if (!photoSrc) return false;
+    if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
+      return /\.svg\.png/i.test(decodeURIComponent(photoSrc));
+    }
+    return photoSrc.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc);
+  })();
 
   return (
     <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>

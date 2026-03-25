@@ -85,6 +85,35 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
+
+  // ── Direct URL proxy mode (/api/wiki-thumb?url=https://upload.wikimedia.org/…) ──
+  const directUrl = searchParams.get("url");
+  if (directUrl) {
+    if (!directUrl.startsWith("https://upload.wikimedia.org/")) {
+      return new Response(null, { status: 400 });
+    }
+    try {
+      const imgRes = await fetch(directUrl, {
+        headers: { "User-Agent": "AllergEats/1.0 (food-allergy-app; contact@allegeats.com)" },
+        next: { revalidate: 86400 },
+      });
+      if (!imgRes.ok) return new Response(null, { status: 404 });
+      const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
+      const buffer = await imgRes.arrayBuffer();
+      const isLogoUrl = /\.svg\.png$/i.test(directUrl);
+      return new Response(buffer, {
+        headers: {
+          "Content-Type": contentType,
+          "X-Image-Type": isLogoUrl ? "logo" : "photo",
+          "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+          "Access-Control-Expose-Headers": "X-Image-Type",
+        },
+      });
+    } catch {
+      return new Response(null, { status: 500 });
+    }
+  }
+
   const name = (searchParams.get("name") ?? "").trim();
   if (!name || name.length > 200) return new Response(null, { status: 400 });
 
