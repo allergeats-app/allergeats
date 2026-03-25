@@ -203,6 +203,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "shakeshack",
     name: "Shake Shack",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Shake_Shack_Madison_Square.jpg/640px-Shake_Shack_Madison_Square.jpg",
     cuisine: "Burgers · Shakes",
     tags: ["burgers"],
     distance: 2.1,
@@ -800,6 +801,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "outback",
     name: "Outback Steakhouse",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Outback_Steakhouse.jpg/640px-Outback_Steakhouse.jpg",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
     distance: 1.2,
@@ -907,6 +909,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "texas-roadhouse",
     name: "Texas Roadhouse",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/en/thumb/b/b0/Texas_Roadhouse.svg/640px-Texas_Roadhouse.svg.png",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
     distance: 1.8,
@@ -954,6 +957,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "longhorn-steakhouse",
     name: "LongHorn Steakhouse",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Exterior_of_a_LongHorn_Steakhouse_restaurant_in_Blairsville%2C_Georgia_01.jpg/640px-Exterior_of_a_LongHorn_Steakhouse_restaurant_in_Blairsville%2C_Georgia_01.jpg",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
     distance: 2.0,
@@ -1189,6 +1193,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "ihop",
     name: "IHOP",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/IHOP_logo.svg/640px-IHOP_logo.svg.png",
     cuisine: "Casual Dining · Breakfast",
     tags: ["breakfast", "brunch", "pancakes"],
     distance: 0.9,
@@ -1290,6 +1295,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "wingstop",
     name: "Wingstop",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/en/thumb/0/0f/Wingstop_logo.svg/640px-Wingstop_logo.svg.png",
     cuisine: "Fast Casual · Wings",
     tags: ["wings", "fast-casual"],
     distance: 0.8,
@@ -1361,6 +1367,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "raising-canes",
     name: "Raising Cane's",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Raising_Cane%27s_Chicken_Fingers_logo.svg/640px-Raising_Cane%27s_Chicken_Fingers_logo.svg.png",
     cuisine: "Fast Casual · Chicken",
     tags: ["chicken", "fast-casual"],
     distance: 0.6,
@@ -1382,6 +1389,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "sonic",
     name: "Sonic Drive-In",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/SONIC_New_Logo_2020.svg/640px-SONIC_New_Logo_2020.svg.png",
     cuisine: "Fast Food · American",
     tags: ["fast-food", "american", "drive-in"],
     distance: 1.0,
@@ -1631,6 +1639,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "culvers",
     name: "Culver's",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Culver%27s_headquarters.jpg/640px-Culver%27s_headquarters.jpg",
     cuisine: "Fast Casual · Burgers & Custard",
     tags: ["burgers", "custard", "fast-casual"],
     distance: 1.0,
