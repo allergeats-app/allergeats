@@ -285,9 +285,6 @@ export default function AuthPage() {
         )}
       </div>}
 
-      <Link href="/" style={{ marginTop: 24, fontSize: 13, color: "var(--c-sub)", textDecoration: "none" }}>
-        ← Back to home
-      </Link>
     </main>
   );
 }
