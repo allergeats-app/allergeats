@@ -118,7 +118,7 @@ export default function AuthPage() {
           style={{ width: "auto", height: 56, maxWidth: "80vw", display: "block", margin: "0 auto" }} priority />
       </Link>
       <p style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 28, textAlign: "center" }}>
-        Eat safely with food allergies
+        Eat Out Safely with Food Allergies
       </p>
 
       {/* Face ID enrollment prompt — shown after successful email sign-in */}
