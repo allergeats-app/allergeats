@@ -13,7 +13,6 @@ export default function AuthCallbackPage() {
     if (!sb) { router.replace("/"); return; }
 
     const params = new URLSearchParams(window.location.search);
-    const code   = params.get("code");
     const error  = params.get("error");
 
     if (error) {
@@ -21,40 +20,27 @@ export default function AuthCallbackPage() {
       return;
     }
 
-    if (code) {
-      sb.auth.exchangeCodeForSession(code).then(({ data, error: exchErr }) => {
-        if (exchErr) {
-          console.error("[auth/callback] exchangeCodeForSession error:", exchErr);
-          setErrMsg(exchErr.message);
-          return;
-        }
-        if (data.session) {
+    // detectSessionInUrl:true (set in supabaseClient) automatically calls
+    // exchangeCodeForSession when it sees ?code= in the URL during client init.
+    // We just need to wait for the resulting SIGNED_IN event.
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.replace("/");
+        return;
+      }
+      // Session not ready yet — wait for detectSessionInUrl to finish exchanging
+      const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
+        if (sess) {
+          subscription.unsubscribe();
           router.replace("/");
-        } else {
-          setErrMsg("Session not established — please try signing in again.");
         }
       });
-    } else {
-      // No code — check if a session already exists (e.g. implicit flow via hash)
-      sb.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          router.replace("/");
-        } else {
-          // Listen for the auth state change triggered by the hash fragment
-          const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
-            if (sess) {
-              subscription.unsubscribe();
-              router.replace("/");
-            }
-          });
-          // Timeout fallback
-          setTimeout(() => {
-            subscription.unsubscribe();
-            router.replace("/auth?error=oauth_failed");
-          }, 8000);
-        }
-      });
-    }
+      // Timeout fallback
+      setTimeout(() => {
+        subscription.unsubscribe();
+        setErrMsg("Sign-in timed out — please try again.");
+      }, 10000);
+    });
   }, [router]);
 
   if (errMsg) {
