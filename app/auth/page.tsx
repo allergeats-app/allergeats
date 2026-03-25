@@ -12,7 +12,7 @@ import { getSupabaseClient } from "@/lib/supabaseClient";
 type Mode = "signin" | "signup";
 
 export default function AuthPage() {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, signInWithOAuth, user } = useAuth();
   useTheme();
   const router = useRouter();
 
@@ -30,6 +30,7 @@ export default function AuthPage() {
   const [loading, setLoading]       = useState(false);
   const [passkeySupported, setPasskeySupported] = useState(false);
   const [passkeyLoading, setPasskeyLoading]     = useState(false);
+  const [oauthLoading, setOauthLoading]         = useState<"google" | "apple" | null>(null);
 
   // Already signed in — go home
   useEffect(() => {
@@ -46,6 +47,22 @@ export default function AuthPage() {
     const saved = localStorage.getItem(REMEMBER_KEY);
     if (saved) { setEmail(saved); setRemember(true); } // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
+
+  // Show error from OAuth callback redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    if (err === "oauth_cancelled") setError("Sign-in was cancelled.");
+    else if (err === "oauth_failed") setError("Sign-in failed — please try again.");
+  }, []);
+
+  async function handleOAuth(provider: "google" | "apple") {
+    setError(null);
+    setOauthLoading(provider);
+    const err = await signInWithOAuth(provider);
+    if (err) { setError(err); setOauthLoading(null); }
+    // On success, browser navigates to provider — no state reset needed
+  }
 
   async function handleFaceId() {
     if (!email) { setError("Enter your email first, then tap Face ID"); return; }
@@ -121,6 +138,67 @@ export default function AuthPage() {
           boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
         }}
       >
+        {/* Social SSO buttons */}
+        <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
+          <button
+            type="button"
+            onClick={() => handleOAuth("google")}
+            disabled={oauthLoading !== null}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              padding: "13px 16px", borderRadius: 14,
+              border: "1.5px solid var(--c-border)", background: "var(--c-card)",
+              color: "var(--c-text)", fontSize: 15, fontWeight: 700,
+              cursor: oauthLoading ? "not-allowed" : "pointer",
+              opacity: oauthLoading && oauthLoading !== "google" ? 0.5 : 1,
+              transition: "opacity 0.15s",
+            }}
+          >
+            {oauthLoading === "google" ? "Redirecting…" : (
+              <>
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continue with Google
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleOAuth("apple")}
+            disabled={oauthLoading !== null}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              padding: "13px 16px", borderRadius: 14,
+              border: "none", background: "var(--c-text)",
+              color: "var(--c-bg)", fontSize: 15, fontWeight: 700,
+              cursor: oauthLoading ? "not-allowed" : "pointer",
+              opacity: oauthLoading && oauthLoading !== "apple" ? 0.5 : 1,
+              transition: "opacity 0.15s",
+            }}
+          >
+            {oauthLoading === "apple" ? "Redirecting…" : (
+              <>
+                <svg width="18" height="22" viewBox="0 0 814 1000" aria-hidden="true" fill="currentColor">
+                  <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-150.3-97.8C27.2 781.6 0 668.5 0 561.8c0-207.8 135.5-318.1 269-318.1 70.3 0 128.7 46.1 172.6 46.1 42.8 0 109.3-49 189.3-49 30.3 0 108.2 2.6 168.4 87.3zm-171.2-147.9c-13.7-65.2 16.2-132.8 55.1-174.1 48.8-52.3 133.1-90.5 205.7-90.5 4.5 58.2-16.2 115.1-59.3 156.7-36.4 37-113.1 67.7-201.5 107.9z"/>
+                </svg>
+                Continue with Apple
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+          <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+          <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>or continue with email</span>
+          <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+        </div>
+
         {/* Tab toggle */}
         <div
           style={{

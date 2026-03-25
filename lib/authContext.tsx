@@ -22,6 +22,7 @@ type AuthContextValue = {
   allergens: AllergenId[];
   signIn: (email: string, password: string, staySignedIn: boolean) => Promise<string | null>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<string | null>;
+  signInWithOAuth: (provider: "google" | "apple") => Promise<string | null>;
   signOut: () => Promise<void>;
   saveAllergens: (allergens: AllergenId[]) => Promise<void>;
   saveName: (firstName: string, lastName: string) => Promise<void>;
@@ -128,6 +129,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return error?.message ?? null;
   }
 
+  async function signInWithOAuth(provider: "google" | "apple"): Promise<string | null> {
+    const sb = getSupabaseClient();
+    if (!sb) return "Supabase is not configured.";
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo } });
+    return error?.message ?? null;
+  }
+
   async function signUp(email: string, password: string, first: string, last: string): Promise<string | null> {
     const sb = getSupabaseClient();
     if (!sb) return "Supabase is not configured.";
@@ -169,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, signIn, signUp, signOut, saveAllergens, saveName }}
+      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, signIn, signUp, signInWithOAuth, signOut, saveAllergens, saveName }}
     >
       {children}
     </AuthContext.Provider>
