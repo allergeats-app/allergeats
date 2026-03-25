@@ -30,7 +30,7 @@ export default function AuthPage() {
   const [loading, setLoading]       = useState(false);
   const [passkeySupported, setPasskeySupported] = useState(false);
   const [passkeyLoading, setPasskeyLoading]     = useState(false);
-  const [oauthLoading, setOauthLoading]         = useState<"google" | "apple" | null>(null);
+  const [oauthLoading, setOauthLoading]         = useState<"google" | null>(null);
 
   // Already signed in — go home
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function AuthPage() {
     else if (err === "oauth_failed") setError("Sign-in failed — please try again.");
   }, []);
 
-  async function handleOAuth(provider: "google" | "apple") {
+  async function handleOAuth(provider: "google") {
     setError(null);
     setOauthLoading(provider);
     const err = await signInWithOAuth(provider);
@@ -167,29 +167,6 @@ export default function AuthPage() {
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleOAuth("apple")}
-            disabled={oauthLoading !== null}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              padding: "13px 16px", borderRadius: 14,
-              border: "none", background: "var(--c-text)",
-              color: "var(--c-bg)", fontSize: 15, fontWeight: 700,
-              cursor: oauthLoading ? "not-allowed" : "pointer",
-              opacity: oauthLoading && oauthLoading !== "apple" ? 0.5 : 1,
-              transition: "opacity 0.15s",
-            }}
-          >
-            {oauthLoading === "apple" ? "Redirecting…" : (
-              <>
-                <svg width="18" height="22" viewBox="0 0 814 1000" aria-hidden="true" fill="currentColor">
-                  <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-150.3-97.8C27.2 781.6 0 668.5 0 561.8c0-207.8 135.5-318.1 269-318.1 70.3 0 128.7 46.1 172.6 46.1 42.8 0 109.3-49 189.3-49 30.3 0 108.2 2.6 168.4 87.3zm-171.2-147.9c-13.7-65.2 16.2-132.8 55.1-174.1 48.8-52.3 133.1-90.5 205.7-90.5 4.5 58.2-16.2 115.1-59.3 156.7-36.4 37-113.1 67.7-201.5 107.9z"/>
-                </svg>
-                Continue with Apple
-              </>
-            )}
-          </button>
         </div>
 
         {/* Divider */}
