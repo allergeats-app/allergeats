@@ -30,6 +30,12 @@ const RISK_BORDER: Record<string, { light: string; dark: string }> = {
   "likely-safe": { light: "#bbf7d0", dark: "#14532d" },
   "unknown":     { light: "#e5e7eb", dark: "var(--c-border)" },
 };
+const RISK_LEFT_COLOR: Record<string, string> = {
+  "avoid":       "#ef4444",
+  "ask":         "#f59e0b",
+  "likely-safe": "#22c55e",
+  "unknown":     "#9ca3af",
+};
 
 type FeedbackOption = {
   label: string;
@@ -52,6 +58,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
   const canOrder = item.risk === "likely-safe" || item.risk === "ask";
   const orderColor = item.risk === "likely-safe" ? "#15803d" : "#854d0e";
   const [expanded, setExpanded]           = useState(false);
+  const [detailsOpen, setDetailsOpen]     = useState(false);
   const [copied, setCopied]               = useState(false);
   const [feedbackState, setFeedbackState] = useState<"idle" | "open" | "done">("idle");
 
@@ -127,13 +134,22 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
 
   const showFeedback = !!restaurantId;
 
+  const leftColor = RISK_LEFT_COLOR[item.risk] ?? "#9ca3af";
+  const hasDetails = !!(item.description ||
+    item.detectedAllergens.some((a) => !item.userAllergenHits.includes(a)) ||
+    item.inferredAllergens.some((a) => !item.userAllergenHits.includes(a)) ||
+    (item.substitutions && item.substitutions.length > 0));
+
   return (
     <div
       style={{
         background: bg,
-        border: `1px solid ${border}`,
+        borderTop: `1px solid ${border}`,
+        borderRight: `1px solid ${border}`,
+        borderBottom: `1px solid ${border}`,
+        borderLeft: `4px solid ${leftColor}`,
         borderRadius: 18,
-        padding: 18,
+        padding: "16px 16px 16px 14px",
         display: "grid",
         gap: 10,
       }}
@@ -142,21 +158,16 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, fontSize: 17, lineHeight: 1.3, color: "var(--c-text)" }}>{item.name}</div>
-          {item.description && (
-            <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
-              {item.description}
-            </div>
-          )}
         </div>
         <div style={{ flexShrink: 0 }}>
           <RiskBadge risk={item.risk} />
         </div>
       </div>
 
-      {/* Explanation */}
+      {/* Explanation — always visible */}
       <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.6 }}>{item.explanation}</div>
 
-      {/* User's allergens — shown prominently */}
+      {/* User's allergens — always visible */}
       {item.userAllergenHits.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 5 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)" }}>Contains:</span>
@@ -168,51 +179,81 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         </div>
       )}
 
-      {/* Other allergens not in user's profile */}
-      {(() => {
-        const others = item.detectedAllergens.filter((a) => !item.userAllergenHits.includes(a));
-        const otherInferred = item.inferredAllergens.filter((a) => !item.userAllergenHits.includes(a));
-        if (!others.length && !otherInferred.length) return null;
-        return (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-            {others.map((a) => (
-              <span key={a} style={{ padding: "4px 10px", borderRadius: 999, background: "#f3f4f6", color: "var(--c-sub)", fontSize: 13, fontWeight: 600 }}>
-                {aLabel(a)}
-              </span>
-            ))}
-            {otherInferred.map((a) => (
-              <span key={a} style={{ padding: "4px 10px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 13, fontWeight: 600 }}>
-                ~{aLabel(a)}
-              </span>
-            ))}
-          </div>
-        );
-      })()}
+      {/* Expandable details */}
+      {detailsOpen && (
+        <>
+          {/* Description */}
+          {item.description && (
+            <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.5 }}>
+              {item.description}
+            </div>
+          )}
 
-      {/* Substitution suggestions */}
-      {item.substitutions && item.substitutions.length > 0 && (
-        <div style={{
-          padding: "10px 13px",
-          borderRadius: 10,
-          background: isDark ? "rgba(255,255,255,0.05)" : "#f0f9ff",
-          border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#bae6fd"}`,
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: isDark ? "#7dd3fc" : "#0369a1", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
-            Could try instead
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {item.substitutions.map((s, i) => (
-              <div key={i} style={{ fontSize: 13, color: isDark ? "#e0f2fe" : "#0c4a6e", lineHeight: 1.5 }}>
-                · {s}
+          {/* Other allergens not in user's profile */}
+          {(() => {
+            const others = item.detectedAllergens.filter((a) => !item.userAllergenHits.includes(a));
+            const otherInferred = item.inferredAllergens.filter((a) => !item.userAllergenHits.includes(a));
+            if (!others.length && !otherInferred.length) return null;
+            return (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                {others.map((a) => (
+                  <span key={a} style={{ padding: "4px 10px", borderRadius: 999, background: "#f3f4f6", color: "var(--c-sub)", fontSize: 13, fontWeight: 600 }}>
+                    {aLabel(a)}
+                  </span>
+                ))}
+                {otherInferred.map((a) => (
+                  <span key={a} style={{ padding: "4px 10px", borderRadius: 999, background: "#fef9c3", color: "#854d0e", fontSize: 13, fontWeight: 600 }}>
+                    ~{aLabel(a)}
+                  </span>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            );
+          })()}
+
+          {/* Substitution suggestions */}
+          {item.substitutions && item.substitutions.length > 0 && (
+            <div style={{
+              padding: "10px 13px",
+              borderRadius: 10,
+              background: isDark ? "rgba(255,255,255,0.05)" : "#f0f9ff",
+              border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#bae6fd"}`,
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: isDark ? "#7dd3fc" : "#0369a1", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
+                Could try instead
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {item.substitutions.map((s, i) => (
+                  <div key={i} style={{ fontSize: 13, color: isDark ? "#e0f2fe" : "#0c4a6e", lineHeight: 1.5 }}>
+                    · {s}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Confidence badge */}
+          <ConfidenceBadge confidence={item.confidence} />
+        </>
       )}
 
-      {/* Confidence + add + expand toggle */}
+      {/* Details toggle */}
+      {hasDetails && (
+        <button
+          type="button"
+          onClick={() => setDetailsOpen((v) => !v)}
+          style={{
+            background: "none", border: "none", padding: 0,
+            fontSize: 13, fontWeight: 600, color: "var(--c-sub)",
+            cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 4,
+          }}
+        >
+          {detailsOpen ? "Less ↑" : "Details ↓"}
+        </button>
+      )}
+
+      {/* Add + expand toggle */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <ConfidenceBadge confidence={item.confidence} />
+        <div />
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {canOrder && onToggleOrder !== undefined && (
             <button
