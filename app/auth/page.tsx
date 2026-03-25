@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { isPasskeySupported, registerPasskey } from "@/lib/passkey";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -24,9 +25,13 @@ export default function AuthPage() {
   const [error, setError]       = useState<string | null>(null);
   const [info, setInfo]         = useState<string | null>(null);
   const [loading, setLoading]   = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
+  const [oauthLoading, setOauthLoading]           = useState<"google" | null>(null);
+  const [passkeySupported, setPasskeySupported]   = useState(false);
+  const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(false);
+  const [passkeyEnrolling, setPasskeyEnrolling]   = useState(false);
 
   useEffect(() => { if (user) router.replace("/"); }, [user, router]);
+  useEffect(() => { isPasskeySupported().then(setPasskeySupported); }, []);
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY);
     if (saved) setEmail(saved); // eslint-disable-line react-hooks/set-state-in-effect
@@ -76,11 +81,21 @@ export default function AuthPage() {
     if (mode === "signin") {
       if (staySignedIn) localStorage.setItem(REMEMBER_KEY, email);
       else localStorage.removeItem(REMEMBER_KEY);
+      if (passkeySupported) { setShowPasskeyPrompt(true); return; }
       router.push("/");
     } else {
       setInfo("Check your email to confirm your account, then sign in.");
       switchMode("signin");
     }
+  }
+
+  async function handleEnrollPasskey() {
+    setPasskeyEnrolling(true);
+    const sb = getSupabaseClient();
+    const token = (await sb?.auth.getSession())?.data.session?.access_token;
+    if (token) await registerPasskey(token);
+    setPasskeyEnrolling(false);
+    router.push("/");
   }
 
   const inputStyle: React.CSSProperties = {
@@ -106,8 +121,41 @@ export default function AuthPage() {
         Eat safely with food allergies
       </p>
 
+      {/* Face ID enrollment prompt — shown after successful email sign-in */}
+      {showPasskeyPrompt && (
+        <div style={{
+          background: "var(--c-card)", border: "1px solid var(--c-border)",
+          borderRadius: 28, padding: "36px 28px", width: "100%", maxWidth: 400,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08)", textAlign: "center",
+        }}>
+          <div style={{ fontSize: 52, marginBottom: 16 }}>🔒</div>
+          <div style={{ fontWeight: 900, fontSize: 22, color: "var(--c-text)", marginBottom: 10 }}>
+            Enable Face ID?
+          </div>
+          <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.6, marginBottom: 28 }}>
+            Sign in instantly next time using Face ID — no password needed.
+          </div>
+          <div style={{ display: "grid", gap: 10 }}>
+            <button onClick={handleEnrollPasskey} disabled={passkeyEnrolling} style={{
+              padding: "14px 0", borderRadius: 14, border: "none",
+              background: passkeyEnrolling ? "#9ca3af" : "#eb1700", color: "#fff",
+              fontSize: 15, fontWeight: 800, cursor: passkeyEnrolling ? "not-allowed" : "pointer",
+            }}>
+              {passkeyEnrolling ? "Setting up…" : "Enable Face ID"}
+            </button>
+            <button onClick={() => router.push("/")} style={{
+              padding: "14px 0", borderRadius: 14,
+              border: "1.5px solid var(--c-border)", background: "transparent",
+              color: "var(--c-sub)", fontSize: 15, fontWeight: 700, cursor: "pointer",
+            }}>
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Card */}
-      <div style={{
+      {!showPasskeyPrompt && <div style={{
         background: "var(--c-card)", border: "1px solid var(--c-border)",
         borderRadius: 24, padding: "28px 24px", width: "100%", maxWidth: 400,
         boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
@@ -235,7 +283,7 @@ export default function AuthPage() {
             </form>
           </>
         )}
-      </div>
+      </div>}
 
       <Link href="/" style={{ marginTop: 24, fontSize: 13, color: "var(--c-sub)", textDecoration: "none" }}>
         ← Back to home
