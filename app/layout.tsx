@@ -70,7 +70,7 @@ export default function RootLayout({
                   color: "var(--c-sub)",
                   lineHeight: 1.6,
                 }}>
-                  Always confirm with staff before ordering. AllergEats is a decision-support tool, not medical advice.
+                  Always confirm with staff before ordering.<br />AllergEats is a decision-support tool, not medical advice.
                 </footer>
               </ErrorBoundary>
             </FavoritesProvider>
