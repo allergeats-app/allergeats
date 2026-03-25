@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 
-/**
- * OAuth callback page — handles the redirect from Google/Apple after login.
- * Must be client-side so Supabase can access the PKCE code verifier from localStorage.
- */
 export default function AuthCallbackPage() {
   const router = useRouter();
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const sb = getSupabaseClient();
@@ -25,17 +22,60 @@ export default function AuthCallbackPage() {
     }
 
     if (code) {
-      sb.auth.exchangeCodeForSession(code).then(({ error: exchErr }) => {
-        if (exchErr) router.replace("/auth?error=oauth_failed");
-        else router.replace("/");
+      sb.auth.exchangeCodeForSession(code).then(({ data, error: exchErr }) => {
+        if (exchErr) {
+          console.error("[auth/callback] exchangeCodeForSession error:", exchErr);
+          setErrMsg(exchErr.message);
+          return;
+        }
+        if (data.session) {
+          router.replace("/");
+        } else {
+          setErrMsg("Session not established — please try signing in again.");
+        }
       });
     } else {
-      // Fallback: session may already be set via hash fragment (implicit flow)
+      // No code — check if a session already exists (e.g. implicit flow via hash)
       sb.auth.getSession().then(({ data: { session } }) => {
-        router.replace(session ? "/" : "/auth");
+        if (session) {
+          router.replace("/");
+        } else {
+          // Listen for the auth state change triggered by the hash fragment
+          const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
+            if (sess) {
+              subscription.unsubscribe();
+              router.replace("/");
+            }
+          });
+          // Timeout fallback
+          setTimeout(() => {
+            subscription.unsubscribe();
+            router.replace("/auth?error=oauth_failed");
+          }, 8000);
+        }
       });
     }
   }, [router]);
+
+  if (errMsg) {
+    return (
+      <main style={{
+        minHeight: "100vh", background: "var(--c-bg)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexDirection: "column", gap: 16, padding: "0 24px",
+      }}>
+        <div style={{ fontSize: 15, color: "#b91c1c", textAlign: "center", maxWidth: 340 }}>
+          Sign-in failed: {errMsg}
+        </div>
+        <button onClick={() => router.replace("/auth")} style={{
+          padding: "12px 24px", borderRadius: 12, border: "none",
+          background: "#eb1700", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+        }}>
+          Try again
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main style={{
