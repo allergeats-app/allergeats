@@ -47,7 +47,10 @@ export function RestaurantCard({ restaurant: r }: Props) {
             ? `/api/places-photo?name=${encodeURIComponent(r.name)}&lat=${r.lat}&lng=${r.lng}`
             : null))
     : null;
-  const isLogo = false; // Wikipedia images are photos — always use cover
+
+  // Wiki-thumb images are chain logos — use contain so the full logo is visible.
+  // Places photos and pre-enriched images are real photos — use cover.
+  const isLogo = photoSrc?.startsWith("/api/wiki-thumb") ?? false;
 
   return (
     <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
@@ -61,7 +64,13 @@ export function RestaurantCard({ restaurant: r }: Props) {
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
         {/* Cover image area — cuisine gradient is always the base; photo fades in on load */}
-        <div style={{ height: 110, background: cover.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{
+          height: 148,
+          background: isLogo && photoLoaded ? "#fff" : cover.bg,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "relative", overflow: "hidden",
+          transition: "background 0.3s ease",
+        }}>
           {photoSrc && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -70,8 +79,24 @@ export function RestaurantCard({ restaurant: r }: Props) {
               onLoad={() => setPhotoLoaded(true)}
               onError={() => setPhotoFailed(true)}
               loading="lazy"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: isLogo ? "contain" : "cover", padding: isLogo ? "18px 28px" : 0, opacity: photoLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+              style={{
+                position: "absolute", inset: 0,
+                width: "100%", height: "100%",
+                objectFit: isLogo ? "contain" : "cover",
+                objectPosition: "center",
+                padding: isLogo ? "20px 32px" : 0,
+                opacity: photoLoaded ? 1 : 0,
+                transition: "opacity 0.4s ease",
+              }}
             />
+          )}
+          {/* Gradient scrim on photos so overlaid badges stay legible */}
+          {!isLogo && photoLoaded && (
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.32) 100%)",
+              pointerEvents: "none",
+            }} />
           )}
           <div style={{
             position: "absolute", top: 10, right: 10,

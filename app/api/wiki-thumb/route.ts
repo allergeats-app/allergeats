@@ -98,8 +98,20 @@ export async function GET(req: Request) {
     if (!summaryRes.ok) return new Response(null, { status: 404 });
 
     const data = await summaryRes.json();
-    const imgUrl: string | undefined = data.originalimage?.source ?? data.thumbnail?.source;
+
+    // Prefer thumbnail over originalimage — originals can be huge SVGs or multi-MB files.
+    // Bump the pixel width in Wikimedia thumbnail URLs from their default (~320px) to 800px
+    // for sharp display on retina screens without fetching a multi-MB original.
+    let imgUrl: string | undefined = data.thumbnail?.source ?? data.originalimage?.source;
     if (!imgUrl) return new Response(null, { status: 404 });
+
+    // Wikimedia thumbnail URLs contain a width segment like "/320px-filename.ext".
+    // Replace it with 800px for high-DPI clarity.
+    imgUrl = imgUrl.replace(/\/\d+px-/, "/800px-");
+
+    // Detect logo vs photo so the client can choose the right objectFit.
+    // Logos are SVG-derived (".svg.png") or have "logo"/"Logo" in the path.
+    const isLogo = /\.svg\.png$/i.test(imgUrl) || /[Ll]ogo/.test(imgUrl);
 
     // Proxy the image bytes so the client loads from our domain
     const imgRes = await fetch(imgUrl, {
@@ -113,7 +125,10 @@ export async function GET(req: Request) {
     return new Response(buffer, {
       headers: {
         "Content-Type": contentType,
+        // Tell the card whether to use contain (logo) or cover (photo)
+        "X-Image-Type": isLogo ? "logo" : "photo",
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+        "Access-Control-Expose-Headers": "X-Image-Type",
       },
     });
   } catch {
