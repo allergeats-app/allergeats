@@ -3,7 +3,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient } from "./supabaseClient";
-import type { AllergenId } from "./types";
+import type { AllergenId, AllergenSeverity } from "./types";
+import { loadProfileSeverities, saveProfileSeverities } from "./allergenProfile";
 
 const PROFILE_KEY = "allegeats_profile_allergens";
 const SESSION_ONLY_KEY = "allegeats_session_only";
@@ -20,22 +21,25 @@ type AuthContextValue = {
   displayName: string;
   loading: boolean;
   allergens: AllergenId[];
+  severities: Partial<Record<AllergenId, AllergenSeverity>>;
   signIn: (email: string, password: string, staySignedIn: boolean) => Promise<string | null>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<string | null>;
   signInWithOAuth: (provider: "google") => Promise<string | null>;
   signOut: () => Promise<void>;
   saveAllergens: (allergens: AllergenId[]) => Promise<void>;
+  saveSeverities: (severities: Partial<Record<AllergenId, AllergenSeverity>>) => void;
   saveName: (firstName: string, lastName: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession]     = useState<Session | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [allergens, setAllergens] = useState<AllergenId[]>([]);
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName,  setLastName]  = useState<string>("");
+  const [session, setSession]         = useState<Session | null>(null);
+  const [loading, setLoading]         = useState(true);
+  const [allergens, setAllergens]     = useState<AllergenId[]>([]);
+  const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
+  const [firstName, setFirstName]     = useState<string>("");
+  const [lastName,  setLastName]      = useState<string>("");
 
   function hydrate(sess: Session | null) {
     const meta = sess?.user?.user_metadata ?? {};
@@ -167,6 +171,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch { /* ignore */ }
   }
 
+  function saveSeverities(map: Partial<Record<AllergenId, AllergenSeverity>>): void {
+    setSeverities(map);
+    saveProfileSeverities(map);
+  }
+
   async function saveAllergens(list: AllergenId[]): Promise<void> {
     setAllergens(list);
     try { localStorage.setItem(PROFILE_KEY, JSON.stringify(list)); } catch { /* ignore */ }
@@ -178,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, signIn, signUp, signInWithOAuth, signOut, saveAllergens, saveName }}
+      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, severities, signIn, signUp, signInWithOAuth, signOut, saveAllergens, saveSeverities, saveName }}
     >
       {children}
     </AuthContext.Provider>

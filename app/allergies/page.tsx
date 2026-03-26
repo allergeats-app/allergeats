@@ -6,15 +6,18 @@ import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { AllergySelector } from "@/components/AllergySelector";
 import { ALLERGEN_LIST } from "@/lib/allergenProfile";
-import type { AllergenId } from "@/lib/types";
+import { ShowStaffCard } from "@/components/ShowStaffCard";
+import type { AllergenId, AllergenSeverity } from "@/lib/types";
 
 export default function AllergiesPage() {
-  const { user, loading, allergens, saveAllergens } = useAuth();
+  const { user, loading, allergens, severities, saveAllergens, saveSeverities } = useAuth();
   const router = useRouter();
 
-  const [selected, setSelected]             = useState<AllergenId[]>([]);
-  const [savedSelection, setSavedSelection] = useState<AllergenId[]>([]);
-  const [saved, setSaved]                   = useState(false);
+  const [selected, setSelected]                     = useState<AllergenId[]>([]);
+  const [savedSelection, setSavedSelection]         = useState<AllergenId[]>([]);
+  const [localSeverities, setLocalSeverities]       = useState<Partial<Record<AllergenId, AllergenSeverity>>>({});
+  const [saved, setSaved]                           = useState(false);
+  const [showStaffCard, setShowStaffCard]           = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
@@ -24,13 +27,23 @@ export default function AllergiesPage() {
     if (!loading && allergens.length > 0 && selected.length === 0) {
       setSelected(allergens);          // eslint-disable-line react-hooks/set-state-in-effect
       setSavedSelection(allergens);
+      setLocalSeverities(severities);  // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join();
+  function toggleSeverity(id: AllergenId) {
+    setLocalSeverities((prev) => {
+      const current = prev[id] ?? "anaphylactic";
+      return { ...prev, [id]: current === "anaphylactic" ? "intolerance" : "anaphylactic" };
+    });
+  }
+
+  const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join()
+    || JSON.stringify(localSeverities) !== JSON.stringify(severities);
 
   async function handleSave() {
     await saveAllergens(selected);
+    saveSeverities(localSeverities);
     setSavedSelection([...selected]);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -57,6 +70,13 @@ export default function AllergiesPage() {
         paddingBottom: 48,
       }}
     >
+      {showStaffCard && (
+        <ShowStaffCard
+          allergens={selected}
+          severities={localSeverities}
+          onClose={() => setShowStaffCard(false)}
+        />
+      )}
       {/* Sticky header */}
       <div
         style={{
@@ -105,9 +125,25 @@ export default function AllergiesPage() {
               {saved ? "Saved!" : "Save Allergy Profile"}
             </button>
           )}
+
+          {selected.length > 0 && (
+            <button
+              onClick={() => setShowStaffCard(true)}
+              style={{
+                marginTop: 12, width: "100%", padding: "13px 0",
+                borderRadius: 14, border: "2px solid #eb1700",
+                background: "#fff1f0", color: "#b91c1c",
+                fontSize: 14, fontWeight: 800, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                minHeight: 48,
+              }}
+            >
+              <span style={{ fontSize: 16 }}>🪪</span> Show Allergy Card to Staff
+            </button>
+          )}
         </div>
 
-        {/* Active restrictions */}
+        {/* Active restrictions with severity */}
         {allergenLabels.length > 0 && (
           <div
             style={{
@@ -116,21 +152,51 @@ export default function AllergiesPage() {
               boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
-              Active Restrictions ({allergenLabels.length})
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+              Severity Levels
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {allergenLabels.map((a) => (
-                <div
-                  key={a!.id}
-                  style={{
-                    padding: "7px 12px", borderRadius: 999,
-                    background: "#fff1f0", border: "1px solid #f3c5c0",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#b91c1c" }}>{a!.label}</span>
-                </div>
-              ))}
+            <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 14, lineHeight: 1.5 }}>
+              Tap each allergen to set how serious it is for you. <strong style={{ color: "var(--c-text)" }}>Severe</strong> = anaphylactic risk — the app will always show <em>Avoid</em> (never just &ldquo;Ask&rdquo;) for these.
+            </div>
+            <div style={{ display: "grid", gap: 10 }}>
+              {allergenLabels.map((a) => {
+                const sev = localSeverities[a!.id] ?? "anaphylactic";
+                const isAnaphylactic = sev === "anaphylactic";
+                return (
+                  <div
+                    key={a!.id}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "12px 14px", borderRadius: 14,
+                      background: isAnaphylactic ? "#fff1f0" : "var(--c-muted)",
+                      border: `1.5px solid ${isAnaphylactic ? "#f3c5c0" : "var(--c-border)"}`,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: isAnaphylactic ? "#b91c1c" : "var(--c-text)" }}>
+                        {a!.label}
+                      </span>
+                      {isAnaphylactic && (
+                        <span style={{ fontSize: 10, fontWeight: 900, color: "#b91c1c", background: "#fde8e8", border: "1px solid #fca5a5", borderRadius: 6, padding: "2px 7px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                          Severe
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSeverity(a!.id)}
+                      style={{
+                        padding: "6px 14px", borderRadius: 99, border: "none",
+                        background: isAnaphylactic ? "#b91c1c" : "#6b7280",
+                        color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer",
+                        minHeight: 44, minWidth: 44,
+                      }}
+                    >
+                      {isAnaphylactic ? "Severe" : "Mild"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

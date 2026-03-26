@@ -86,7 +86,7 @@ function HomeContent() {
   const [locationRefresh, setLocationRefresh] = useState(0);
 
   const { isDark } = useTheme();
-  const { user, firstName } = useAuth();
+  const { user, firstName, severities } = useAuth();
   const { isFavorite } = useFavorites();
   const { allergens: localAllergens, saveState, setAllergens: setLocalAllergens } = useAllergenProfile();
 
@@ -233,8 +233,8 @@ function HomeContent() {
   }, [radiusMiles, searchCenter, locationRefresh]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const restaurants = useMemo(() =>
-    rawRestaurants.map((r) => scoreRestaurant(r, localAllergens)),
-    [rawRestaurants, localAllergens]
+    rawRestaurants.map((r) => scoreRestaurant(r, localAllergens, severities)),
+    [rawRestaurants, localAllergens, severities]
   );
 
   function handleAllergenChange(next: AllergenId[]) {

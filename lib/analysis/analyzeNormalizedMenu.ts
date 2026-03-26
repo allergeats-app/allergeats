@@ -181,8 +181,9 @@ export function analyzeNormalizedMenu(
 export function analyzeRestaurant(
   restaurant: Restaurant,
   userAllergens: AllergenId[],
+  severities: Partial<Record<AllergenId, import("@/lib/types").AllergenSeverity>> = {},
 ): RestaurantMenuAnalysis {
-  const scored     = scoreRestaurant(restaurant, userAllergens);
+  const scored     = scoreRestaurant(restaurant, userAllergens, severities);
   const analyzedAt = new Date().toISOString();
   const ingestionSource = legacySourceToIngestionSource(restaurant.sourceType);
   const ingestionConf   = sourceTypeToIngestionConfidence(restaurant.sourceType);

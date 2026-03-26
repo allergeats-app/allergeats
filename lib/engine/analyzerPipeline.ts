@@ -332,6 +332,52 @@ function detectContainsLabelSignals(normalized: string, userAllergens: AllergenI
   return signals;
 }
 
+// ─── MAY-CONTAIN / PRECAUTIONARY LABEL PARSING ───────────────────────────────
+// Detects precautionary allergen disclosures:
+//   "May contain: wheat, soy"
+//   "May contain traces of peanuts"
+//   "Made in a facility that processes dairy"
+//   "Produced on shared equipment with tree nuts"
+// These are important safety signals but weaker than definite "Contains:" labels —
+// they indicate cross-contamination risk, not confirmed ingredient presence.
+
+const MAY_CONTAIN_RE = new RegExp(
+  "\\b(?:" +
+    "may\\s+contain(?:\\s+traces?\\s+of)?|" +
+    "traces?\\s+of|" +
+    "(?:made|produced|processed|manufactured|packaged)\\s+(?:in|on)\\s+(?:a\\s+)?(?:shared\\s+)?(?:facility|equipment|line|plant)\\s+(?:that\\s+)?(?:also\\s+)?(?:process(?:es)?|handles?|uses?|contains?|with)" +
+  ")\\s*:?\\s*([^.;\\n]{2,200})",
+  "gi"
+);
+
+/**
+ * Detects precautionary allergen disclosures and emits weight-2 signals.
+ * Weight-2 maps to "ask" (not "avoid") — cross-contamination risk, not confirmed ingredient.
+ */
+function detectMayContainSignals(normalized: string, userAllergens: AllergenId[]): RiskSignal[] {
+  const signals: RiskSignal[] = [];
+  const re = new RegExp(MAY_CONTAIN_RE.source, "gi");
+  let match: RegExpExecArray | null;
+
+  while ((match = re.exec(normalized)) !== null) {
+    const items = match[1].split(/[,;&]+/).map((s) => s.trim()).filter(Boolean);
+    for (const item of items) {
+      const key = item.toLowerCase().replace(/\s+/g, " ").split(" ").slice(0, 3).join(" ");
+      const allergen = LABEL_ALLERGEN_MAP[key] ?? LABEL_ALLERGEN_MAP[item.toLowerCase()];
+      if (!allergen || !userAllergens.includes(allergen)) continue;
+      signals.push({
+        allergen,
+        source:  "prep",  // reuse prep weight (2) — cross-contamination risk
+        weight:  2,
+        trigger: item,
+        reason:  `May contain (precautionary label) — cross-contamination risk`,
+      });
+    }
+  }
+
+  return signals;
+}
+
 /** Analyze a single parsed dish */
 function analyzeDish(
   dish: ParsedDish,
@@ -341,7 +387,12 @@ function analyzeDish(
 ): AnalyzedItem {
   const allSignals: RiskSignal[] = [];
 
-  // Layer 0: explicit "contains: ..." / "allergens: ..." labels — weight-5 direct signals
+  // Layer 0a: precautionary "may contain..." / "made in a facility with..." labels — weight-2
+  // Collected separately so we can identify allergens that are ONLY precautionary below.
+  const mayContainSignals = detectMayContainSignals(dish.normalized, userAllergens);
+  allSignals.push(...mayContainSignals);
+
+  // Layer 0b: explicit "contains: ..." / "allergens: ..." labels — weight-5 direct signals
   allSignals.push(...detectContainsLabelSignals(dish.normalized, userAllergens));
 
   // Layer 1 + 2: direct ingredients + synonyms + dish/sauce inference (via vocab)
@@ -389,6 +440,19 @@ function analyzeDish(
   const relevantSignals = signals.filter((s) => userAllergens.includes(s.allergen));
   const staffQuestions = generateStaffQuestions(relevantSignals, dish.name);
 
+  // Identify allergens that were detected ONLY via precautionary "may contain" labels.
+  // An allergen is precautionary-only if every surviving signal for it came from mayContainSignals
+  // (i.e. no higher-weight definite signal exists after deduplication).
+  const mayContainAllergenSet = new Set(mayContainSignals.map((s) => s.allergen));
+  const definiteSignalAllergens = new Set(
+    signals
+      .filter((s) => !mayContainSignals.some((m) => m.allergen === s.allergen && m.trigger === s.trigger))
+      .map((s) => s.allergen)
+  );
+  const precautionaryAllergens = scored.matchedAllergens.filter(
+    (a) => mayContainAllergenSet.has(a) && !definiteSignalAllergens.has(a)
+  ) as AllergenId[];
+
   return {
     raw:                  dish.raw,
     name:                 dish.name,
@@ -400,6 +464,7 @@ function analyzeDish(
     allDetectedAllergens: allDetected,
     staffQuestions,
     explanation:          scored.explanation,
+    precautionaryAllergens: precautionaryAllergens.length > 0 ? precautionaryAllergens : undefined,
   };
 }
 

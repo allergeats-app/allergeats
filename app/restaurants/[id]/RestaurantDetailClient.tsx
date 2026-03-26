@@ -16,6 +16,7 @@ import { useFavorites } from "@/lib/favoritesContext";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
+import { ShowStaffCard } from "@/components/ShowStaffCard";
 import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
 import { useTheme } from "@/lib/themeContext";
@@ -31,7 +32,8 @@ import { applyMemoryToAnalysis } from "@/lib/learning/memoryIntegration";
 import { useRestaurantMemory } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackParams } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackType } from "@/lib/learning/types";
-import type { Restaurant, Risk, AllergenId } from "@/lib/types";
+import type { Restaurant, Risk, AllergenId, AllergenSeverity } from "@/lib/types";
+import { loadProfileSeverities } from "@/lib/allergenProfile";
 import { coverGradient } from "@/lib/coverGradient";
 import { chainLogoUrl } from "@/lib/chainLogos";
 
@@ -82,10 +84,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
+  const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
   const [showDrinks, setShowDrinks]   = useState(false);
   const [orderedItemIds, setOrderedItemIds] = useState<Set<string>>(new Set());
   const [showOrderSheet, setShowOrderSheet] = useState(false);
   const [orderCopied, setOrderCopied]       = useState(false);
+  const [showStaffCard, setShowStaffCard]   = useState(false);
 
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -94,10 +98,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     const found = findRestaurant(id);
     if (!found) { setNotFound(true); return; }
 
-    const allergens = loadProfileAllergens();
+    const allergens  = loadProfileAllergens();
+    const sevs       = loadProfileSeverities();
     setUserAllergens(allergens);
+    setSeverities(sevs);
 
-    const analysis = analyzeRestaurant(found, allergens);
+    const analysis = analyzeRestaurant(found, allergens, sevs);
     setBaseAnalysis(analysis);
     setRestaurant(found);
 
@@ -186,7 +192,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
         const enriched  = { ...restaurant, menuItems: items };
         const allergens = loadProfileAllergens();
-        const analysis  = analyzeRestaurant(enriched, allergens);
+        const analysis  = analyzeRestaurant(enriched, allergens, severities);
 
         if (!cancelled) {
           setRestaurant(enriched);
@@ -386,6 +392,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   return (
     <main style={{ minHeight: "100dvh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: orderedItemIds.size > 0 ? 140 : 60 }}>
 
+      {showStaffCard && (
+        <ShowStaffCard
+          allergens={userAllergens}
+          severities={severities}
+          onClose={() => setShowStaffCard(false)}
+        />
+      )}
+
       {/* ── Sticky header ── */}
       <div style={{
         position: "sticky", top: 0, zIndex: 50,
@@ -577,6 +591,24 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{coverage.coverageLine}</span>
                 </div>
               </>
+            )}
+
+            {/* Show Staff Card button — visible whenever user has allergens */}
+            {userAllergens.length > 0 && (
+              <button
+                onClick={() => setShowStaffCard(true)}
+                style={{
+                  marginTop: hasNoMenu ? 0 : 16,
+                  width: "100%", padding: "13px 0",
+                  borderRadius: 14, border: "2px solid #eb1700",
+                  background: "#fff1f0", color: "#b91c1c",
+                  fontSize: 14, fontWeight: 800, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  minHeight: 48,
+                }}
+              >
+                <span style={{ fontSize: 16 }}>🪪</span> Show Allergy Card to Staff
+              </button>
             )}
           </div>
         </div>

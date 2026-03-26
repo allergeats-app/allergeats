@@ -1,4 +1,4 @@
-import type { AllergenId } from "./types";
+import type { AllergenId, AllergenSeverity } from "./types";
 
 export type AllergenMeta = {
   id: AllergenId;
@@ -74,4 +74,32 @@ export function loadProfileAllergens(): AllergenId[] {
 export function saveProfileAllergens(allergens: AllergenId[]): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(allergens));
+}
+
+// ─── Severity storage (separate key — backward compatible) ──────────────────
+
+const SEVERITY_KEY = "allegeats_profile_severities";
+
+export function loadProfileSeverities(): Partial<Record<AllergenId, AllergenSeverity>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(SEVERITY_KEY);
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    const result: Partial<Record<AllergenId, AllergenSeverity>> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      if (VALID_ALLERGEN_IDS.has(k) && (v === "anaphylactic" || v === "intolerance")) {
+        result[k as AllergenId] = v;
+      }
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+export function saveProfileSeverities(severities: Partial<Record<AllergenId, AllergenSeverity>>): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(SEVERITY_KEY, JSON.stringify(severities));
 }

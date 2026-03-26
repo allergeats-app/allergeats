@@ -14,6 +14,14 @@ export type Confidence = "High" | "Medium" | "Low";
 // High confidence does NOT mean likely-safe.
 export type Risk = "likely-safe" | "ask" | "avoid" | "unknown";
 
+// ─── Allergen severity ──────────────────────────────────────────────────────
+/**
+ * How serious is this allergen for the specific user?
+ *   anaphylactic — life-threatening reaction; any contact = avoid
+ *   intolerance   — uncomfortable but not life-threatening; ask is acceptable
+ */
+export type AllergenSeverity = "anaphylactic" | "intolerance";
+
 // ─── Allergen profile ───────────────────────────────────────────────────────
 export type AllergenId =
   | "dairy"
@@ -90,6 +98,16 @@ export type ScoredMenuItem = {
   staffQuestions: string[];
   /** Allergens from this item that match the user's own allergy profile */
   userAllergenHits: string[];
+  /**
+   * Severity of each user-allergen hit — populated when the user has set severity levels.
+   * Anaphylactic hits drive stricter risk thresholds and bolder UI warnings.
+   */
+  severityHits?: Partial<Record<string, AllergenSeverity>>;
+  /**
+   * Whether this item's allergen presence is definitive ("contains X") vs.
+   * precautionary ("may contain X / made in a facility with X").
+   */
+  allergenCertainty?: "definite" | "precautionary";
   /** Maps each user-profile allergen to the best signal reason explaining its source */
   allergenSources?: Partial<Record<string, string>>;
   /** Actionable substitution suggestions for the matched allergens */

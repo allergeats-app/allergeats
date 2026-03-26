@@ -79,6 +79,12 @@ export type AnalyzedItem = {
   allDetectedAllergens: AllergenId[]; // everything found, for display
   staffQuestions: string[];
   explanation: string;
+  /**
+   * Allergens detected ONLY via precautionary language ("may contain", "traces of",
+   * "made in a facility with") — not via direct ingredient detection.
+   * These should be capped at "ask" rather than escalated to "avoid".
+   */
+  precautionaryAllergens?: AllergenId[];
 };
 
 /** Full analysis result for a menu (array of lines / items) */

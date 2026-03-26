@@ -16,6 +16,7 @@ import type {
   Risk,
   Confidence,
   AllergenId,
+  AllergenSeverity,
 } from "./types";
 
 function mapRisk(r: "safe" | "ask" | "avoid"): Risk {
@@ -36,7 +37,8 @@ export function scoreMenuItem(
   item: RawMenuItem,
   restaurantSource: SourceType,
   userAllergens: AllergenId[],
-  cuisineContext = ""
+  cuisineContext = "",
+  severities: Partial<Record<AllergenId, AllergenSeverity>> = {}
 ): ScoredMenuItem {
   const srcType = item.sourceType ?? restaurantSource;
 
@@ -67,6 +69,18 @@ export function scoreMenuItem(
     : isOfficialData
       ? []
       : [...analyzed.matchedAllergens];
+
+  // Build severity map for hits — only for allergens the user flagged as anaphylactic
+  const severityHits: Partial<Record<string, AllergenSeverity>> = {};
+  for (const hit of userAllergenHits) {
+    const sev = severities[hit as AllergenId];
+    if (sev) severityHits[hit] = sev;
+  }
+
+  // Escalate risk: if any hit allergen is anaphylactic, "ask" → "avoid"
+  const hasAnaphylacticHit = userAllergenHits.some(
+    (h) => severities[h as AllergenId] === "anaphylactic"
+  );
 
   // Build explanation for this item.
   // Engine explanation covers allergens it detected with high confidence (weight ≥ 3).
@@ -102,6 +116,23 @@ export function scoreMenuItem(
     ? mapConfidence(item.sourceConfidence)
     : mapConfidence(analyzed.confidence);
 
+  // Determine allergen certainty: "precautionary" if ALL user allergen hits came only
+  // from "may contain" / facility labels — i.e. cross-contamination risk, not confirmed presence.
+  const precautionaryAllergens = analyzed.precautionaryAllergens ?? [];
+  const allHitsPrecautionary =
+    userAllergenHits.length > 0 &&
+    userAllergenHits.every((h) => precautionaryAllergens.includes(h as AllergenId));
+  const allergenCertainty: "definite" | "precautionary" | undefined =
+    userAllergenHits.length === 0 ? undefined : allHitsPrecautionary ? "precautionary" : "definite";
+
+  // Apply severity escalation: anaphylactic "ask" → "avoid"
+  // But never escalate precautionary-only items — "may contain" is always capped at "ask".
+  const canEscalate = !allHitsPrecautionary;
+  const riskAfterPrecautionary: Risk = allHitsPrecautionary && risk === "avoid" ? "ask" : risk;
+  const finalRisk: Risk = canEscalate && hasAnaphylacticHit && riskAfterPrecautionary === "ask"
+    ? "avoid"
+    : riskAfterPrecautionary;
+
   return {
     id:          item.id,
     name:        item.name,
@@ -109,7 +140,9 @@ export function scoreMenuItem(
     category:    item.category,
     sourceType:  srcType,
     confidence,
-    risk,
+    risk: finalRisk,
+    severityHits: Object.keys(severityHits).length > 0 ? severityHits : undefined,
+    allergenCertainty,
     detectedAllergens: allDetected,
     inferredAllergens: analyzed.signals
       .filter((s) => ["dish", "sauce", "cuisine", "prep"].includes(s.source))
@@ -236,11 +269,12 @@ export function bestMatchScore(r: {
  */
 export function scoreRestaurant(
   restaurant: Restaurant,
-  userAllergens: AllergenId[]
+  userAllergens: AllergenId[],
+  severities: Partial<Record<AllergenId, AllergenSeverity>> = {}
 ): ScoredRestaurant {
   const cuisineContext = restaurant.cuisine;
   const scoredItems = restaurant.menuItems.map((item) =>
-    scoreMenuItem(item, restaurant.sourceType, userAllergens, cuisineContext)
+    scoreMenuItem(item, restaurant.sourceType, userAllergens, cuisineContext, severities)
   );
 
   const summary: RestaurantSafetySummary = {

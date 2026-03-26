@@ -170,12 +170,39 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       {/* User's allergens — always visible */}
       {item.userAllergenHits.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 5 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)" }}>Contains:</span>
-          {item.userAllergenHits.map((a) => (
-            <span key={a} style={{ padding: "5px 11px", borderRadius: 999, background: "#fde8e8", border: "1px solid #fca5a5", color: "#b91c1c", fontSize: 13, fontWeight: 800 }}>
-              {aLabel(a)}
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)" }}>
+            {item.allergenCertainty === "precautionary" ? "May contain:" : "Contains:"}
+          </span>
+          {item.userAllergenHits.map((a) => {
+            const isAnaphylactic = item.severityHits?.[a] === "anaphylactic";
+            const isPrecautionary = item.allergenCertainty === "precautionary";
+            return (
+              <span key={a} style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "5px 11px", borderRadius: 999,
+                background: isPrecautionary ? "#fef9c3" : isAnaphylactic ? "#fde8e8" : "#fef3c7",
+                border: `1px solid ${isPrecautionary ? "#fde68a" : isAnaphylactic ? "#fca5a5" : "#fcd34d"}`,
+                color: isPrecautionary ? "#92400e" : isAnaphylactic ? "#b91c1c" : "#92400e",
+                fontSize: 13, fontWeight: 800,
+              }}>
+                {isAnaphylactic && !isPrecautionary && <span style={{ fontSize: 11 }}>⚠</span>}
+                {aLabel(a)}
+                {isAnaphylactic && !isPrecautionary && (
+                  <span style={{ fontSize: 10, fontWeight: 900, background: "#b91c1c", color: "#fff", borderRadius: 4, padding: "1px 5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    SEVERE
+                  </span>
+                )}
+                {isPrecautionary && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#78350f", opacity: 0.8 }}>?</span>
+                )}
+              </span>
+            );
+          })}
+          {item.allergenCertainty === "precautionary" && (
+            <span style={{ fontSize: 12, color: "var(--c-sub)", fontStyle: "italic" }}>
+              cross-contamination risk
             </span>
-          ))}
+          )}
         </div>
       )}
 
