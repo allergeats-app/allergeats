@@ -131,14 +131,19 @@ export default function AllergiesPage() {
               onClick={() => setShowStaffCard(true)}
               style={{
                 marginTop: 12, width: "100%", padding: "13px 0",
-                borderRadius: 14, border: "2px solid #eb1700",
-                background: "#fff1f0", color: "#b91c1c",
+                borderRadius: 14,
+                border: "1px solid #b8962e",
+                background: "linear-gradient(135deg, #f5d060 0%, #e8b923 30%, #fce97a 50%, #d4a017 70%, #f5d060 100%)",
+                backgroundSize: "200% 200%",
+                color: "#5c3d00",
                 fontSize: 14, fontWeight: 800, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 minHeight: 48,
+                boxShadow: "0 1px 4px rgba(180,130,0,0.35), inset 0 1px 0 rgba(255,255,255,0.45)",
+                textShadow: "0 1px 0 rgba(255,255,255,0.3)",
               }}
             >
-              <span style={{ fontSize: 16 }}>🪪</span> Show Allergy Card to Staff
+              Show Allergy Card to Staff
             </button>
           )}
         </div>
