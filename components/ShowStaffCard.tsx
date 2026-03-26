@@ -79,7 +79,14 @@ export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
 
         {/* Alert header */}
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 48, lineHeight: 1, marginBottom: 12 }}>⚠️</div>
+          {/* Warning triangle icon */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="#ef4444" stroke="#ef4444" strokeWidth="0" />
+              <line x1="12" y1="9" x2="12" y2="13" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="12" cy="17" r="1" fill="#fff" />
+            </svg>
+          </div>
           <div style={{
             fontSize: 26, fontWeight: 900, color: "#111", lineHeight: 1.2, marginBottom: 8,
             letterSpacing: "-0.01em",
@@ -106,7 +113,11 @@ export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
               padding: "10px 20px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
             }}>
-              <span style={{ fontSize: 14 }}>🚨</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="#fff" />
+                <line x1="12" y1="9" x2="12" y2="13" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="17" r="1" fill="#ef4444" />
+              </svg>
               <span style={{
                 fontSize: 12, fontWeight: 900, color: "#fff",
                 textTransform: "uppercase", letterSpacing: "0.1em",
@@ -164,7 +175,11 @@ export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
               padding: "10px 20px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
             }}>
-              <span style={{ fontSize: 14 }}>⚠️</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" fill="#fff" />
+                <line x1="12" y1="8" x2="12" y2="12" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="16" r="1" fill="#f59e0b" />
+              </svg>
               <span style={{
                 fontSize: 12, fontWeight: 900, color: "#fff",
                 textTransform: "uppercase", letterSpacing: "0.1em",
