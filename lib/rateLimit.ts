@@ -16,12 +16,14 @@ const map = new Map<string, Entry>();
 let lastPrune = Date.now();
 const PRUNE_EVERY_MS = 5 * 60_000;
 
-function maybePrune(windowMs: number): void {
+function maybePrune(): void {
   const now = Date.now();
   if (now - lastPrune < PRUNE_EVERY_MS) return;
   lastPrune = now;
+  // Use PRUNE_EVERY_MS as the prune threshold so entries from long windows
+  // (e.g. 300s) aren't prematurely evicted by a call from a short window (e.g. 60s).
   for (const [key, entry] of map) {
-    if (now - entry.windowStart > windowMs) map.delete(key);
+    if (now - entry.windowStart > PRUNE_EVERY_MS) map.delete(key);
   }
 }
 
@@ -35,7 +37,7 @@ function maybePrune(windowMs: number): void {
  */
 export function isRateLimited(key: string, windowMs: number, maxRequests: number): boolean {
   const now = Date.now();
-  maybePrune(windowMs);
+  maybePrune();
   const entry = map.get(key);
   if (!entry || now - entry.windowStart > windowMs) {
     map.set(key, { count: 1, windowStart: now });

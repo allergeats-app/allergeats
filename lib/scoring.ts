@@ -162,7 +162,7 @@ export function scoreMenuItem(
     staffQuestions: isOfficialData && officialHits.length === 0 ? [] : analyzed.staffQuestions,
     userAllergenHits,
     allergenSources: getAllergenSources(analyzed.signals, userAllergenHits as AllergenId[]),
-    substitutions:  risk !== "likely-safe" ? getSubstitutions(userAllergenHits as AllergenId[], text.toLowerCase(), analyzed.signals) : [],
+    substitutions:  finalRisk !== "likely-safe" ? getSubstitutions(userAllergenHits as AllergenId[], text.toLowerCase(), analyzed.signals) : [],
     sectionIndex:   item.sectionIndex,
     sourceSignals:  item.sourceSignals,
   };

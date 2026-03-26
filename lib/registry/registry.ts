@@ -130,6 +130,7 @@ function mergeIntoRecord(
     toastGuid:        record.toastGuid        ?? candidate.toastGuid,
     squareLocationId: record.squareLocationId ?? candidate.squareLocationId,
     // Display fields — fill gaps only
+    displayName:      record.displayName ?? candidate.displayName,
     address:          record.address    ?? candidate.address,
     lat:              record.lat        ?? candidate.lat,
     lng:              record.lng        ?? candidate.lng,

@@ -29,7 +29,7 @@ export default function AllergiesPage() {
       setSavedSelection(allergens);
       setLocalSeverities(severities);  // eslint-disable-line react-hooks/set-state-in-effect
     }
-  }, [loading, allergens]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, allergens, severities]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleSeverity(id: AllergenId) {
     setLocalSeverities((prev) => {

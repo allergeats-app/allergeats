@@ -25,10 +25,11 @@ export default function AuthCallbackPage() {
     }
 
     let done = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     function finish(path: string) {
       if (done) return;
       done = true;
-      clearTimeout(timer);
+      if (timer !== null) clearTimeout(timer);
       subscription?.unsubscribe();
       router.replace(path);
     }
@@ -45,7 +46,7 @@ export default function AuthCallbackPage() {
       }
     });
 
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       if (!done) {
         done = true;
         subscription.unsubscribe();
@@ -59,7 +60,7 @@ export default function AuthCallbackPage() {
     }).catch(() => { /* ignore */ });
 
     return () => {
-      clearTimeout(timer);
+      if (timer !== null) clearTimeout(timer);
       if (!done) subscription.unsubscribe();
     };
   }, [router]);
