@@ -198,7 +198,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       // Food
       { id: "sbux-eggwich",    name: "Bacon, Gouda & Egg Sandwich",       category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat"] },
       { id: "sbux-egg-turkey", name: "Turkey Bacon & Egg White Sandwich", category: "Sandwiches", sourceType: "official", allergens: ["dairy","egg","wheat"] },
-      { id: "sbux-oatmeal",    name: "Rolled & Steel-Cut Oatmeal",        category: "Hot Breakfast",sourceType: "official", allergens: ["tree-nut"] },
+      { id: "sbux-oatmeal",    name: "Rolled & Steel-Cut Oatmeal",        category: "Hot Breakfast",sourceType: "official", allergens: ["oats","tree-nut"] },
       { id: "sbux-bistro-box", name: "Protein Box (Egg & Cheese)",        category: "Snacks",     sourceType: "official", allergens: ["dairy","egg","wheat","soy","tree-nut"] },
     ],
   },
@@ -257,7 +257,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       // Breads — pick your base
       { id: "sub-italian",        name: "Italian White Bread",               category: "Breads",      sourceType: "official", allergens: ["wheat","soy"] },
       { id: "sub-multigrain",     name: "Hearty Multigrain Bread",           category: "Breads",      sourceType: "official", allergens: ["wheat","soy","egg"] },
-      { id: "sub-honey-oat",      name: "9-Grain Honey Oat Bread",           category: "Breads",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "sub-honey-oat",      name: "9-Grain Honey Oat Bread",           category: "Breads",      sourceType: "official", allergens: ["oats","wheat","soy"] },
       { id: "sub-herbs-cheese",   name: "Italian Herbs & Cheese Bread",      category: "Breads",      sourceType: "official", allergens: ["wheat","soy","dairy"] },
       { id: "sub-parmesan",       name: "Parmesan Oregano Bread",            category: "Breads",      sourceType: "official", allergens: ["wheat","soy","dairy"] },
       { id: "sub-wrap",           name: "Spinach Wrap",                      category: "Breads",      sourceType: "official", allergens: ["wheat","soy"] },
@@ -295,8 +295,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "sub-v-avocado",      name: "Avocado",                           category: "Vegetables",  sourceType: "official", allergens: [] },
       // Sauces — pick your sauce(s)
       { id: "sub-s-mayo",         name: "Mayonnaise",                        category: "Sauces",      sourceType: "official", allergens: ["egg","soy"] },
-      { id: "sub-s-mustard",      name: "Yellow Mustard",                    category: "Sauces",      sourceType: "official", allergens: [] },
-      { id: "sub-s-honey-must",   name: "Honey Mustard",                     category: "Sauces",      sourceType: "official", allergens: ["egg"] },
+      { id: "sub-s-mustard",      name: "Yellow Mustard",                    category: "Sauces",      sourceType: "official", allergens: ["mustard"] },
+      { id: "sub-s-honey-must",   name: "Honey Mustard",                     category: "Sauces",      sourceType: "official", allergens: ["egg","mustard"] },
       { id: "sub-s-ranch",        name: "Ranch",                             category: "Sauces",      sourceType: "official", allergens: ["dairy","egg","soy"] },
       { id: "sub-s-chipotle",     name: "Chipotle Southwest Sauce",          category: "Sauces",      sourceType: "official", allergens: ["egg","soy"] },
       { id: "sub-s-sweet-onion",  name: "Sweet Onion Sauce",                 category: "Sauces",      sourceType: "official", allergens: [] },
@@ -305,7 +305,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "sub-s-oil-vinegar",  name: "Oil & Vinegar",                     category: "Sauces",      sourceType: "official", allergens: [] },
       // Extras & Sides
       { id: "sub-cookie-choc",    name: "Chocolate Chip Cookie",             category: "Cookies",     sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
-      { id: "sub-cookie-oat",     name: "Oatmeal Raisin Cookie",             category: "Cookies",     sourceType: "official", allergens: ["wheat","soy","dairy","egg"] },
+      { id: "sub-cookie-oat",     name: "Oatmeal Raisin Cookie",             category: "Cookies",     sourceType: "official", allergens: ["oats","wheat","soy","dairy","egg"] },
       { id: "sub-chips",          name: "Lay's Classic Chips",               category: "Sides",       sourceType: "official", allergens: [] },
       { id: "sub-apple",          name: "Apple Slices",                      category: "Sides",       sourceType: "official", allergens: [] },
     ],
@@ -703,7 +703,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "jm-v-banana-pep",    name: "Banana Peppers",                   category: "Toppings",  sourceType: "official", allergens: [] },
       // Sauces — pick your dressing
       { id: "jm-s-mayo",          name: "Mayonnaise",                       category: "Sauces",    sourceType: "official", allergens: ["egg","soy"] },
-      { id: "jm-s-mustard",       name: "Yellow Mustard",                   category: "Sauces",    sourceType: "official", allergens: [] },
+      { id: "jm-s-mustard",       name: "Yellow Mustard",                   category: "Sauces",    sourceType: "official", allergens: ["mustard"] },
       { id: "jm-s-oil-vinegar",   name: "Oil & Vinegar",                    category: "Sauces",    sourceType: "official", allergens: [] },
       { id: "jm-s-balsamic",      name: "Balsamic Glaze",                   category: "Sauces",    sourceType: "official", allergens: [] },
       { id: "jm-s-ranch",         name: "Ranch Dressing",                   category: "Sauces",    sourceType: "official", allergens: ["dairy","egg","soy"] },
@@ -749,8 +749,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "jj-v-sprouts",       name: "Alfalfa Sprouts",                  category: "Toppings",  sourceType: "official", allergens: [] },
       // Condiments
       { id: "jj-s-mayo",          name: "Mayonnaise",                       category: "Condiments", sourceType: "official", allergens: ["egg","soy"] },
-      { id: "jj-s-mustard",       name: "Yellow Mustard",                   category: "Condiments", sourceType: "official", allergens: [] },
-      { id: "jj-s-dijon",         name: "Dijon Mustard",                    category: "Condiments", sourceType: "official", allergens: [] },
+      { id: "jj-s-mustard",       name: "Yellow Mustard",                   category: "Condiments", sourceType: "official", allergens: ["mustard"] },
+      { id: "jj-s-dijon",         name: "Dijon Mustard",                    category: "Condiments", sourceType: "official", allergens: ["mustard"] },
       { id: "jj-s-oil-vinegar",   name: "Oil & Vinegar",                    category: "Condiments", sourceType: "official", allergens: [] },
       // Sides & Desserts
       { id: "jj-chips",           name: "Chips",                            category: "Sides",     sourceType: "official", allergens: [] },
@@ -1619,7 +1619,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "rr-clucks-fries",     name: "Clucks & Fries",                   category: "Chicken",    sourceType: "official", allergens: ["wheat","egg","soy"] },
       { id: "rr-caesar",           name: "Caesar Salad",                     category: "Salads",     sourceType: "official", allergens: ["fish","egg","dairy","wheat"] },
       { id: "rr-monster-shake",    name: "Monster Milkshake",                category: "Desserts",   sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
-      { id: "rr-brownie-sundae",   name: "Brownie Sundae",                   category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "rr-brownie-sundae",   name: "Brownie Sundae",                   category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy","tree-nut"] },
     ],
   },
 
