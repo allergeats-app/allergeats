@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { ScoredMenuItem } from "@/lib/types";
 import { RiskBadge } from "./RiskBadge";
 import { ConfidenceBadge } from "./ConfidenceBadge";
@@ -67,12 +67,12 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
   const bg     = isDark ? riskBg.dark     : riskBg.light;
   const border = isDark ? riskBorder.dark : riskBorder.light;
 
-  async function copyQuestions() {
+  const copyQuestions = useCallback(async () => {
     const text = item.staffQuestions.map((q) => `• ${q}`).join("\n");
     await navigator.clipboard.writeText(text).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }
+  }, [item.staffQuestions]);
 
   // Build correction options based on the current risk level
   const primaryAllergen = item.userAllergenHits[0] ?? item.detectedAllergens[0];
@@ -99,7 +99,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         { label: "Staff confirmed it's safe", type: "staff-confirmed-safe", allergen: primaryAllergen },
       ];
 
-  function handleFeedback(option: FeedbackOption) {
+  const handleFeedback = useCallback((option: FeedbackOption) => {
     if (!restaurantId || !restaurantName) return;
     submitFeedback({
       restaurantId,
@@ -111,9 +111,9 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       originalConfidence: item.confidence,
     });
     setFeedbackState("done");
-  }
+  }, [restaurantId, restaurantName, item.name, item.risk, item.confidence]);
 
-  function handleConfirm() {
+  const handleConfirm = useCallback(() => {
     if (!restaurantId || !restaurantName) return;
     // Positive signal: user confirms the app's prediction was right
     const type: FeedbackType =
@@ -130,7 +130,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       originalConfidence: item.confidence,
     });
     setFeedbackState("done");
-  }
+  }, [restaurantId, restaurantName, item.name, item.risk, item.confidence, primaryAllergen]);
 
   const showFeedback = !!restaurantId;
 

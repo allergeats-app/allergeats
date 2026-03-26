@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
@@ -17,17 +17,18 @@ type Props = { restaurant: ScoredRestaurant };
 export function RestaurantCard({ restaurant: r }: Props) {
   const { isDark } = useTheme();
   const { summary } = r;
-  const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
-  const safeItemNames = r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name);
-  const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
-  const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
-  const cover = { bg: coverGradient(r.cuisine, r.name) };
-  const level = fitLevel(safePercent, summary.avoid, summary.ask, summary.total);
-  const badge = fitBadge(level);
-  const explanation = fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe);
-  const tier = coverageTier(summary.total);
-  const tierLabel = coverageTierLabel(summary.total);
-  const tierColor = coverageTierColor(tier);
+
+  const safePercent  = useMemo(() => summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0, [summary]);
+  const askPercent   = useMemo(() => summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0, [summary]);
+  const avoidPercent = useMemo(() => summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0, [summary]);
+  const safeItemNames = useMemo(() => r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name), [r.scoredItems]);
+  const cover        = useMemo(() => ({ bg: coverGradient(r.cuisine, r.name) }), [r.cuisine, r.name]);
+  const level        = useMemo(() => fitLevel(safePercent, summary.avoid, summary.ask, summary.total), [safePercent, summary]);
+  const badge        = useMemo(() => fitBadge(level), [level]);
+  const explanation  = useMemo(() => fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe), [level, summary]);
+  const tier         = useMemo(() => coverageTier(summary.total), [summary.total]);
+  const tierLabel    = useMemo(() => coverageTierLabel(summary.total), [summary.total]);
+  const tierColor    = useMemo(() => coverageTierColor(tier), [tier]);
 
   const [photoFailed, setPhotoFailed] = useState(false);
   const [photoLoaded, setPhotoLoaded] = useState(false);

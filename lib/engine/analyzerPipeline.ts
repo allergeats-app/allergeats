@@ -194,6 +194,7 @@ function filterSafeTermSignals(signals: RiskSignal[], normalized: string): RiskS
 
 /** Maps tokens found in allergen/ingredient labels to their AllergenId */
 const LABEL_ALLERGEN_MAP: Readonly<Record<string, AllergenId>> = {
+  // Dairy
   wheat:        "wheat",
   flour:        "wheat",
   gluten:       "gluten",
@@ -201,13 +202,31 @@ const LABEL_ALLERGEN_MAP: Readonly<Record<string, AllergenId>> = {
   milk:         "dairy",
   lactose:      "dairy",
   cream:        "dairy",
+  butter:       "dairy",
+  cheese:       "dairy",
+  yogurt:       "dairy",
+  yoghurt:      "dairy",
+  whey:         "dairy",
+  casein:       "dairy",
+  ghee:         "dairy",
+  ricotta:      "dairy",
+  mozzarella:   "dairy",
+  parmesan:     "dairy",
+  feta:         "dairy",
+  "sour cream": "dairy",
+  buttermilk:   "dairy",
+  // Egg
   egg:          "egg",
   eggs:         "egg",
+  // Soy
   soy:          "soy",
   soya:         "soy",
   soybeans:     "soy",
+  tamari:       "soy",
+  // Peanut
   peanut:       "peanut",
   peanuts:      "peanut",
+  // Tree nuts
   "tree nut":   "tree-nut",
   "tree nuts":  "tree-nut",
   nuts:         "tree-nut",
@@ -219,21 +238,72 @@ const LABEL_ALLERGEN_MAP: Readonly<Record<string, AllergenId>> = {
   walnuts:      "tree-nut",
   pecan:        "tree-nut",
   pecans:       "tree-nut",
+  hazelnut:     "tree-nut",
+  hazelnuts:    "tree-nut",
+  pistachio:    "tree-nut",
+  pistachios:   "tree-nut",
+  macadamia:    "tree-nut",
+  macadamias:   "tree-nut",
+  // Sesame
   sesame:       "sesame",
+  tahini:       "sesame",
+  // Fish
   fish:         "fish",
+  anchovy:      "fish",
+  anchovies:    "fish",
+  salmon:       "fish",
+  tuna:         "fish",
+  cod:          "fish",
+  tilapia:      "fish",
+  halibut:      "fish",
+  trout:        "fish",
+  sardine:      "fish",
+  sardines:     "fish",
+  mackerel:     "fish",
+  herring:      "fish",
+  snapper:      "fish",
+  // Shellfish
   shellfish:    "shellfish",
   shrimp:       "shellfish",
+  prawn:        "shellfish",
+  prawns:       "shellfish",
   crab:         "shellfish",
   lobster:      "shellfish",
+  clam:         "shellfish",
+  clams:        "shellfish",
+  oyster:       "shellfish",
+  oysters:      "shellfish",
+  scallop:      "shellfish",
+  scallops:     "shellfish",
+  // Mustard
   mustard:      "mustard",
+  dijon:        "mustard",
+  // Corn
   corn:         "corn",
   maize:        "corn",
+  cornstarch:   "corn",
+  cornmeal:     "corn",
+  polenta:      "corn",
+  grits:        "corn",
+  // Oats
   oat:          "oats",
   oats:         "oats",
+  oatmeal:      "oats",
+  granola:      "oats",
+  muesli:       "oats",
+  "oat milk":   "oats",
+  "oat flour":  "oats",
+  // Legumes
   legumes:      "legumes",
+  chickpea:     "legumes",
+  chickpeas:    "legumes",
+  lentil:       "legumes",
+  lentils:      "legumes",
+  lupin:        "legumes",
+  lupine:       "legumes",
 } as const;
 
-const CONTAINS_LABEL_RE = /\b(?:contains?|allergens?|made\s+with|includes?|ingredients?)\s*[:]\s*([^.();\n]{3,120})/gi;
+const CONTAINS_LABEL_RE = /\b(?:contains?|allergens?|made\s+with|includes?|ingredients?)\s*[:]\s*([^.();\n]{3,300})/gi;
 
 /**
  * Detects structured allergen/ingredient labels and emits weight-5 direct signals.
@@ -247,7 +317,7 @@ function detectContainsLabelSignals(normalized: string, userAllergens: AllergenI
   while ((match = re.exec(normalized)) !== null) {
     const items = match[1].split(/[,;&]+/).map((s) => s.trim()).filter(Boolean);
     for (const item of items) {
-      const allergen = LABEL_ALLERGEN_MAP[item];
+      const allergen = LABEL_ALLERGEN_MAP[item.toLowerCase()];
       if (!allergen || !userAllergens.includes(allergen)) continue;
       signals.push({
         allergen,
