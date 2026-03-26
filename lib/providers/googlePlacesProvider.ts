@@ -56,9 +56,10 @@ function readPlacesCache(key: string): PlaceResult[] | null {
   try {
     const raw = sessionStorage.getItem(key);
     if (!raw) return null;
-    const { ts, results } = JSON.parse(raw) as { ts: number; results: PlaceResult[] };
-    if (Date.now() - ts > PLACES_CACHE_TTL_MS) { sessionStorage.removeItem(key); return null; }
-    return results;
+    const obj = JSON.parse(raw) as { ts?: number; results?: PlaceResult[] };
+    if (!obj.ts || !Array.isArray(obj.results)) return null;
+    if (Date.now() - obj.ts > PLACES_CACHE_TTL_MS) { sessionStorage.removeItem(key); return null; }
+    return obj.results;
   } catch { return null; }
 }
 

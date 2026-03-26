@@ -92,7 +92,7 @@ export function SettingsButton() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 13, fontWeight: 900, flexShrink: 0,
                 }}>
-                  {(displayName || user.email)?.[0].toUpperCase()}
+                  {((displayName || user.email)?.[0] ?? "?").toUpperCase()}
                 </div>
                 <div style={{ minWidth: 0 }}>
                   {displayName && (

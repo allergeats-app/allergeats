@@ -4,7 +4,7 @@ const MAP: Record<string, string[]> = {
   wheat: ["wheat", "flour", "semolina", "breadcrumbs"],
   soy: ["soy", "soybean", "soy lecithin", "soy protein"],
   peanut: ["peanut", "groundnut"],
-  tree_nut: ["almond", "cashew", "pecan", "walnut", "pistachio", "hazelnut"],
+  "tree-nut": ["almond", "cashew", "pecan", "walnut", "pistachio", "hazelnut"],
   sesame: ["sesame", "tahini"],
   fish: ["fish", "salmon", "tuna", "cod"],
   shellfish: ["shrimp", "crab", "lobster", "scallop"]
