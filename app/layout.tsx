@@ -59,7 +59,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Blocking theme script — runs before first paint to prevent light-mode flash on dark-mode devices */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('alegeats_theme');var dark=m==='dark'||(m!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark){var r=document.documentElement;r.style.setProperty('--c-bg','#0f0f0f');r.style.setProperty('--c-card','#1c1c1e');r.style.setProperty('--c-border','#2c2c2e');r.style.setProperty('--c-text','#f2f2f7');r.style.setProperty('--c-sub','#8e8e93');r.style.setProperty('--c-input','#252528');r.style.setProperty('--c-muted','#2c2c2e');r.style.setProperty('--c-hdr','rgba(15,15,15,0.95)');}}catch(e){}})()`}} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var m=localStorage.getItem('alegeats_theme');var dark=m==='dark'||(m!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark){var r=document.documentElement;r.style.setProperty('--c-bg','#0f0f0f');r.style.setProperty('--c-card','#1c1c1e');r.style.setProperty('--c-border','#2c2c2e');r.style.setProperty('--c-text','#f2f2f7');r.style.setProperty('--c-sub','#8e8e93');r.style.setProperty('--c-input','#252528');r.style.setProperty('--c-muted','#2c2c2e');r.style.setProperty('--c-hdr','rgba(15,15,15,0.95)');r.style.setProperty('--c-risk-safe','#34d399');r.style.setProperty('--c-risk-ask','#fbbf24');r.style.setProperty('--c-risk-avoid','#f87171');}}catch(e){}})()`}} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}

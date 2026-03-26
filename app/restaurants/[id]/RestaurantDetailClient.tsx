@@ -42,11 +42,11 @@ type RiskFilter = "all" | Risk;
 const RISK_ORDER: Risk[] = ["avoid", "ask", "likely-safe", "unknown"];
 const SESSION_KEY = "allegeats_live_restaurants";
 
-const RISK_META: Record<Risk, { label: string; mark: string; color: string; bg: string; border: string }> = {
-  "avoid":       { label: "Avoid",       mark: "!", color: "#b91c1c", bg: "#fff1f0", border: "#f3c5c0" },
-  "ask":         { label: "Ask Staff",   mark: "?", color: "#854d0e", bg: "#fff7db", border: "#f4dd8d" },
-  "likely-safe": { label: "Likely Safe", mark: "✓", color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
-  "unknown":     { label: "Unknown",     mark: "–", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" },
+const RISK_META: Record<Risk, { label: string; mark: string; color: string; bg: string; border: string; badgeBg: string }> = {
+  "avoid":       { label: "Avoid",       mark: "!", color: "var(--c-risk-avoid)", bg: "rgba(220,38,38,0.07)",  border: "rgba(220,38,38,0.18)",  badgeBg: "rgba(220,38,38,0.1)"  },
+  "ask":         { label: "Ask Staff",   mark: "?", color: "var(--c-risk-ask)",   bg: "rgba(217,119,6,0.08)",  border: "rgba(217,119,6,0.22)",  badgeBg: "rgba(217,119,6,0.1)"  },
+  "likely-safe": { label: "Likely Safe", mark: "✓", color: "var(--c-risk-safe)",  bg: "rgba(22,163,74,0.07)",  border: "rgba(22,163,74,0.18)",  badgeBg: "rgba(22,163,74,0.1)"  },
+  "unknown":     { label: "Unknown",     mark: "–", color: "var(--c-sub)",         bg: "var(--c-muted)",         border: "var(--c-border)",        badgeBg: "var(--c-muted)"        },
 };
 
 const QUICK_FEEDBACK: { type: FeedbackType; label: string }[] = [
@@ -934,50 +934,66 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
       {orderedItemIds.size > 0 && (
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 198,
-          background: "var(--c-card)", borderTop: "1px solid var(--c-border)",
-          padding: "10px 16px 28px",
-          boxShadow: "0 -2px 20px rgba(0,0,0,0.1)",
+          background: "var(--c-bg)", borderTop: "1px solid var(--c-border)",
+          padding: "10px 16px",
+          paddingBottom: "max(10px, calc(env(safe-area-inset-bottom) + 6px))",
         }}>
           <button
             type="button"
             onClick={() => setShowOrderSheet(true)}
             style={{
-              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "13px 16px", borderRadius: 14,
+              width: "100%", height: 54, borderRadius: 16, padding: "0 6px",
               background: "#eb1700", border: "none", cursor: "pointer",
+              position: "relative", display: "flex", alignItems: "center",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{
-                width: 26, height: 26, borderRadius: 7,
-                background: "rgba(255,255,255,0.25)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <span style={{ fontSize: 12, fontWeight: 900, color: "#fff" }}>{orderedItemIds.size}</span>
-              </div>
-              <span style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>View your order</span>
+            {/* Count badge */}
+            <div style={{
+              position: "absolute", left: 14,
+              width: 30, height: 30, borderRadius: 8,
+              background: "rgba(255,255,255,0.22)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ fontSize: 14, fontWeight: 900, color: "#fff" }}>{orderedItemIds.size}</span>
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>
-              {orderedItems.every((i) => i.risk === "likely-safe")
-                ? "All safe"
-                : `${orderedItems.filter((i) => i.risk === "ask").length} need confirmation`}
+            {/* Label */}
+            <span style={{
+              position: "absolute", left: "50%", transform: "translateX(-50%)",
+              fontSize: 16, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em",
+              whiteSpace: "nowrap",
+            }}>
+              View Order
             </span>
+            {/* Status pill */}
+            <div style={{
+              position: "absolute", right: 14,
+              background: "rgba(255,255,255,0.2)",
+              borderRadius: 999, padding: "4px 10px",
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }}>
+                {orderedItems.every((i) => i.risk === "likely-safe")
+                  ? "All safe ✓"
+                  : `${orderedItems.filter((i) => i.risk === "ask").length} to confirm`}
+              </span>
+            </div>
           </button>
         </div>
       )}
 
-      {/* ── Order sheet ── */}
+      {/* ── Order sheet backdrop ── */}
       <div
         aria-hidden="true"
         onClick={() => setShowOrderSheet(false)}
         style={{
           position: "fixed", inset: 0, zIndex: 199,
-          background: "rgba(0,0,0,0.45)", backdropFilter: "blur(3px)",
+          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)",
           opacity: showOrderSheet ? 1 : 0,
           pointerEvents: showOrderSheet ? "auto" : "none",
-          transition: "opacity 0.28s ease",
+          transition: "opacity 0.25s ease",
         }}
       />
+
+      {/* ── Order sheet ── */}
       <div
         role="dialog"
         aria-modal="true"
@@ -985,101 +1001,197 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
           background: "var(--c-card)",
-          borderTopLeftRadius: 28, borderTopRightRadius: 28,
-          boxShadow: "0 -16px 56px rgba(0,0,0,0.2)",
+          borderTopLeftRadius: 24, borderTopRightRadius: 24,
+          boxShadow: "0 -8px 48px rgba(0,0,0,0.22)",
           transform: showOrderSheet ? "translateY(0)" : "translateY(100%)",
           transition: showOrderSheet
-            ? "transform 0.38s cubic-bezier(0.22,1,0.36,1)"
-            : "transform 0.28s cubic-bezier(0.4,0,1,1)",
-          maxHeight: "min(85dvh, calc(100dvh - 60px))",
+            ? "transform 0.36s cubic-bezier(0.22,1,0.36,1)"
+            : "transform 0.26s cubic-bezier(0.4,0,1,1)",
+          maxHeight: "min(88dvh, calc(100dvh - 52px))",
           display: "flex", flexDirection: "column",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 14 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 999, background: "var(--c-border)" }} />
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 12 }}>
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "var(--c-border)" }} />
         </div>
 
-        {/* Sheet header */}
+        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "14px 20px 16px",
-          borderBottom: "1px solid var(--c-border)",
-          flexShrink: 0,
+          padding: "10px 20px 14px", flexShrink: 0,
         }}>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", margin: 0 }}>Your Order</h2>
-            <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 3 }}>{restaurant!.name}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", margin: 0, letterSpacing: "-0.02em" }}>
+                Your Order
+              </h2>
+              {orderedItems.length > 0 && (
+                <div style={{
+                  background: "#eb1700", borderRadius: 999,
+                  minWidth: 22, height: 22, padding: "0 6px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: "#fff", lineHeight: 1 }}>
+                    {orderedItems.length}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2 }}>{restaurant!.name}</div>
           </div>
           <button
             type="button"
             onClick={() => setShowOrderSheet(false)}
-            aria-label="Close"
+            aria-label="Close order"
             style={{
-              width: 44, height: 44, borderRadius: 999,
+              width: 36, height: 36, borderRadius: 999,
               background: "var(--c-muted)", border: "none",
               display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", color: "var(--c-sub)",
+              cursor: "pointer", color: "var(--c-sub)", flexShrink: 0,
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
 
-        {/* Scrollable content */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "16px 20px 40px" }}>
+        {/* Scrollable body */}
+        <div style={{ overflowY: "auto", flex: 1 }}>
 
           {orderedItems.length === 0 ? (
-            <div style={{ padding: "32px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 13 }}>
-              Tap + on any menu item to add it to your order
+            /* Empty state */
+            <div style={{ padding: "52px 24px 40px", textAlign: "center" }}>
+              <div style={{
+                width: 60, height: 60, borderRadius: 18,
+                background: "var(--c-muted)", border: "1px solid var(--c-border)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 16px",
+              }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--c-sub)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 6 }}>
+                Your order is empty
+              </div>
+              <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.6, maxWidth: 240, margin: "0 auto" }}>
+                Tap + on any menu item to build your order
+              </div>
             </div>
           ) : (
             <>
-              {/* Order item list */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-                {orderedItems.map((item) => {
-                  const meta = RISK_META[item.risk];
-                  return (
-                    <div key={item.id} style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
-                      padding: "10px 14px", borderRadius: 12,
-                      background: meta.bg, border: `1px solid ${meta.border}`,
-                    }}>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 800, fontSize: 16, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {item.name}
+              {/* Items section */}
+              <div style={{ borderTop: "1px solid var(--c-border)" }}>
+                <div style={{ padding: "10px 20px 6px" }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, color: "var(--c-sub)",
+                    textTransform: "uppercase", letterSpacing: "0.1em",
+                  }}>
+                    Your Items · {orderedItems.length}
+                  </span>
+                </div>
+
+                <div style={{ padding: "0 20px" }}>
+                  {orderedItems.map((item, idx) => {
+                    const meta = RISK_META[item.risk];
+                    return (
+                      <div key={item.id} style={{
+                        display: "flex", alignItems: "center", gap: 12,
+                        padding: "13px 0",
+                        borderBottom: idx < orderedItems.length - 1 ? "1px solid var(--c-border)" : "none",
+                      }}>
+                        {/* Safety dot */}
+                        <div style={{
+                          width: 9, height: 9, borderRadius: "50%",
+                          background: meta.color, flexShrink: 0,
+                        }} />
+                        {/* Item info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 15, fontWeight: 700, color: "var(--c-text)",
+                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>
+                            {item.name}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                            {item.category && (
+                              <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{item.category}</span>
+                            )}
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, color: meta.color,
+                              background: meta.badgeBg, borderRadius: 999, padding: "2px 7px",
+                            }}>
+                              {meta.mark} {meta.label}
+                            </span>
+                          </div>
                         </div>
-                        {item.category && (
-                          <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2 }}>{item.category}</div>
-                        )}
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                        <span style={{ fontSize: 14, fontWeight: 900, color: meta.color }}>{meta.mark}</span>
+                        {/* Remove (trash icon) */}
                         <button
                           type="button"
                           onClick={() => toggleOrderItem(item.id)}
-                          aria-label="Remove from order"
+                          aria-label={`Remove ${item.name} from order`}
                           style={{
-                            width: 36, height: 36, borderRadius: 999,
-                            background: "var(--c-muted)", border: "none",
+                            width: 34, height: 34, borderRadius: 999,
+                            background: "var(--c-muted)", border: "1px solid var(--c-border)",
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            cursor: "pointer", color: "var(--c-sub)",
+                            cursor: "pointer", color: "var(--c-sub)", flexShrink: 0,
                           }}
                         >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true">
-                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                            <path d="M9 6V4h6v2"/>
                           </svg>
                         </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Staff questions for "ask" items */}
+              {/* Order summary (DoorDash-style breakdown) */}
+              <div style={{
+                margin: "12px 20px 0",
+                borderRadius: 14, overflow: "hidden",
+                border: "1px solid var(--c-border)",
+              }}>
+                <div style={{
+                  padding: "10px 16px 8px",
+                  background: "var(--c-muted)",
+                  borderBottom: "1px solid var(--c-border)",
+                }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, color: "var(--c-sub)",
+                    textTransform: "uppercase", letterSpacing: "0.1em",
+                  }}>
+                    Order Summary
+                  </span>
+                </div>
+                <div style={{ background: "var(--c-card)", padding: "4px 16px 10px" }}>
+                  {[
+                    { label: "Total items",       value: `${orderedItems.length}`,                                                                          color: "var(--c-text)"       },
+                    ...(orderedItems.filter(i => i.risk === "likely-safe").length > 0 ? [{ label: "Safe to order",      value: `${orderedItems.filter(i => i.risk === "likely-safe").length} ✓`, color: "var(--c-risk-safe)"  }] : []),
+                    ...(orderedItems.filter(i => i.risk === "ask").length > 0         ? [{ label: "Need confirmation",  value: `${orderedItems.filter(i => i.risk === "ask").length} ?`,         color: "var(--c-risk-ask)"   }] : []),
+                    ...(orderedItems.filter(i => i.risk === "avoid").length > 0       ? [{ label: "Contains allergens", value: `${orderedItems.filter(i => i.risk === "avoid").length} !`,        color: "var(--c-risk-avoid)" }] : []),
+                  ].map(({ label, value, color }, i, arr) => (
+                    <div key={label} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "8px 0",
+                      borderBottom: i < arr.length - 1 ? "1px solid var(--c-border)" : "none",
+                    }}>
+                      <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Staff questions (like "Special Instructions" in DoorDash) */}
               {(() => {
                 const askQuestions = [...new Set(
                   orderedItems.filter((i) => i.risk === "ask").flatMap((i) => i.staffQuestions)
@@ -1087,52 +1199,84 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 if (askQuestions.length === 0) return null;
                 return (
                   <div style={{
-                    padding: "12px 14px", borderRadius: 12,
-                    background: "#fff7db", border: "1px solid #f4dd8d",
-                    marginBottom: 16,
+                    margin: "12px 20px 0",
+                    padding: "14px 16px", borderRadius: 14,
+                    background: "rgba(251,191,36,0.1)",
+                    border: "1px solid rgba(251,191,36,0.28)",
                   }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: "#854d0e", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
-                      Ask staff before ordering
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <span style={{
+                        fontSize: 10, fontWeight: 800, color: "#d97706",
+                        textTransform: "uppercase", letterSpacing: "0.1em",
+                      }}>
+                        Ask staff before ordering
+                      </span>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                       {askQuestions.slice(0, 6).map((q, i) => (
-                        <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.5 }}>• {q}</div>
+                        <div key={i} style={{
+                          fontSize: 13, color: "var(--c-text)", lineHeight: 1.5,
+                          display: "flex", gap: 8, alignItems: "flex-start",
+                        }}>
+                          <span style={{ color: "#d97706", fontWeight: 800, flexShrink: 0 }}>•</span>
+                          <span>{q}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
                 );
               })()}
 
-              {/* Actions */}
-              <div style={{ display: "flex", gap: 10 }}>
+              {/* Action buttons */}
+              <div style={{ padding: "16px 20px 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* Primary CTA */}
+                <button
+                  type="button"
+                  onClick={copyOrderToClipboard}
+                  style={{
+                    width: "100%", height: 54, borderRadius: 16,
+                    background: orderCopied ? "#16a34a" : "#eb1700",
+                    color: "#fff", border: "none",
+                    fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em",
+                    cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                    transition: "background 0.2s ease",
+                  }}
+                >
+                  {orderCopied ? (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Copied to clipboard!
+                    </>
+                  ) : (
+                    <>
+                      Copy order to show staff
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                      </svg>
+                    </>
+                  )}
+                </button>
+                {/* Secondary: Clear */}
                 <button
                   type="button"
                   onClick={() => { setOrderedItemIds(new Set()); setShowOrderSheet(false); }}
                   style={{
-                    flex: "0 0 auto", padding: "0 16px", height: 50,
+                    width: "100%", height: 44,
                     background: "transparent", border: "1.5px solid var(--c-border)",
                     borderRadius: 13, fontSize: 13, fontWeight: 700,
                     color: "var(--c-sub)", cursor: "pointer",
                   }}
                 >
-                  Clear
-                </button>
-                <button
-                  type="button"
-                  onClick={copyOrderToClipboard}
-                  style={{
-                    flex: 1, height: 50, borderRadius: 13,
-                    background: "var(--c-text)", color: "var(--c-bg)",
-                    border: "none", fontSize: 14, fontWeight: 800,
-                    cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                  </svg>
-                  {orderCopied ? "Copied!" : "Copy order + questions"}
+                  Clear order
                 </button>
               </div>
             </>
