@@ -58,17 +58,35 @@ export function scoreMenuItem(
   // For official sourceType, the allergen list is ground-truth — trust it completely.
   // Don't let cuisine/dish inference override a verified clean ingredient list.
   const isOfficialData = srcType === "official";
+
+  // Restaurants are only required to disclose FDA major allergens (milk, eggs, fish,
+  // shellfish, tree nuts, peanuts, wheat, soy, sesame). Non-required allergens like
+  // corn, mustard, oats, and legumes may be present but absent from official data.
+  // When official data has no hits but vocabulary directly detects the user's allergen
+  // in the item name/description, escalate to "ask" rather than trusting the empty list.
+  const vocabDirectHits: AllergenId[] = isOfficialData && officialHits.length === 0
+    ? [...new Set(
+        analyzed.signals
+          .filter((s) => (s.source === "direct" || s.source === "synonym") && userAllergens.includes(s.allergen as AllergenId))
+          .map((s) => s.allergen as AllergenId)
+      )]
+    : [];
+
   const risk: Risk = officialHits.length > 0
     ? "avoid"
-    : isOfficialData
-      ? "likely-safe"
-      : mapRisk(analyzed.risk);
+    : isOfficialData && vocabDirectHits.length > 0
+      ? "ask"
+      : isOfficialData
+        ? "likely-safe"
+        : mapRisk(analyzed.risk);
   const allDetected: string[] = [...new Set([...analyzed.allDetectedAllergens, ...officialAllergens])];
   const userAllergenHits: string[] = officialHits.length > 0
     ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
-    : isOfficialData
-      ? []
-      : [...analyzed.matchedAllergens];
+    : isOfficialData && vocabDirectHits.length > 0
+      ? vocabDirectHits
+      : isOfficialData
+        ? []
+        : [...analyzed.matchedAllergens];
 
   // Build severity map for hits — only for allergens the user flagged as anaphylactic
   const severityHits: Partial<Record<string, AllergenSeverity>> = {};
@@ -87,7 +105,10 @@ export function scoreMenuItem(
   // For official items, also surface per-allergen notes for verified allergens that the
   // engine only flagged as "possible" (weight 1-2) — e.g. soy from fryer oil on a sandwich.
   let explanation: string;
-  if (isOfficialData && officialHits.length === 0) {
+  if (isOfficialData && officialHits.length === 0 && vocabDirectHits.length > 0) {
+    const names = vocabDirectHits.map((a) => a.replace(/-/g, " ")).join(", ");
+    explanation = `${names} detected in item name/description — not listed in official allergen data (restaurants aren't required to disclose this allergen). Confirm with staff.`;
+  } else if (isOfficialData && officialHits.length === 0) {
     explanation = "No allergens from your profile detected in official ingredient data.";
   } else if (officialHits.length > 0 && analyzed.risk !== "avoid") {
     // Engine found nothing/ask, but official data confirms allergens — generic fallback
