@@ -125,6 +125,14 @@ a:focus-visible,
   border-radius: 8px;
 }
 
+/* ── Map: cap height on mobile so results remain reachable below ─────────── */
+@media (max-width: 639px) {
+  .restaurant-map-container {
+    height: 60dvh !important;
+    min-height: 280px !important;
+  }
+}
+
 /* ── Spinner ─────────────────────────────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }

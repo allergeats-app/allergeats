@@ -154,12 +154,13 @@ export function RestaurantsFilterDrawer({
           transition: open
             ? "transform 0.38s cubic-bezier(0.22,1,0.36,1)"
             : "transform 0.28s cubic-bezier(0.4,0,1,1)",
-          maxHeight: "90vh",
+          maxHeight: "min(90dvh, calc(100dvh - 60px))",
           display: "flex", flexDirection: "column",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px" }}>
+        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
 
           {/* Drag handle */}
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, marginBottom: 2 }}>

@@ -46,7 +46,7 @@ export default function AuthCallbackPage() {
   if (errMsg) {
     return (
       <main style={{
-        minHeight: "100vh", background: "var(--c-bg)",
+        minHeight: "100dvh", background: "var(--c-bg)",
         display: "flex", alignItems: "center", justifyContent: "center",
         flexDirection: "column", gap: 16, padding: "0 24px",
       }}>
@@ -65,7 +65,7 @@ export default function AuthCallbackPage() {
 
   return (
     <main style={{
-      minHeight: "100vh", background: "var(--c-bg)",
+      minHeight: "100dvh", background: "var(--c-bg)",
       display: "flex", alignItems: "center", justifyContent: "center",
       flexDirection: "column", gap: 16,
     }}>

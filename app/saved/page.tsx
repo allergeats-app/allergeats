@@ -108,7 +108,7 @@ function SavedContent() {
   const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || scanHistory.length > 0;
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--c-bg)", paddingBottom: 80 }}>
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: 80 }}>
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 100,
@@ -234,7 +234,7 @@ function SavedContent() {
 export default function SavedPage() {
   return (
     <Suspense fallback={
-      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
+      <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
         Loading…
       </main>
     }>

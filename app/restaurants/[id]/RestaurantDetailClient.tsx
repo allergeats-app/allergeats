@@ -280,7 +280,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   // ── Guards ──────────────────────────────────────────────────────────────────
   if (notFound) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <EmptyState
           title="Restaurant not found"
           subtitle="This restaurant isn't in our database."
@@ -291,7 +291,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   if (!vm || !restaurant) {
-    return <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
+    return <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
   }
 
   const { hero, summary, coverage, whyThisWorks, aggregatedStaffQuestions, bestOptions } = vm;
@@ -384,7 +384,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: orderedItemIds.size > 0 ? 140 : 60 }}>
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: orderedItemIds.size > 0 ? 140 : 60 }}>
 
       {/* ── Sticky header ── */}
       <div style={{
@@ -953,8 +953,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           transition: showOrderSheet
             ? "transform 0.38s cubic-bezier(0.22,1,0.36,1)"
             : "transform 0.28s cubic-bezier(0.4,0,1,1)",
-          maxHeight: "85vh",
+          maxHeight: "min(85dvh, calc(100dvh - 60px))",
           display: "flex", flexDirection: "column",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {/* Handle */}

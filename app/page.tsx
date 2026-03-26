@@ -37,13 +37,29 @@ function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: 
   return r.tags?.includes(type) ?? false;
 }
 
+function HomePageSkeleton() {
+  return (
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
+      {/* Fake header bar */}
+      <div style={{
+        height: "max(56px, calc(48px + env(safe-area-inset-top)))",
+        background: "var(--c-hdr)",
+        borderBottom: "1px solid var(--c-border)",
+      }} />
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0" }}>
+        <div style={{ display: "grid", gap: 16 }}>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <SkeletonCard key={i} featured />
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function HomePage() {
   return (
-    <Suspense fallback={
-      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
-        Loading…
-      </main>
-    }>
+    <Suspense fallback={<HomePageSkeleton />}>
       <HomeContent />
     </Suspense>
   );

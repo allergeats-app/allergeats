@@ -161,7 +161,7 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
           transition: open
             ? "transform 0.38s cubic-bezier(0.22,1,0.36,1)"
             : "transform 0.28s cubic-bezier(0.4,0,1,1)",
-          maxHeight: "80vh",
+          maxHeight: "min(80dvh, calc(100dvh - 60px))",
           display: "flex", flexDirection: "column",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
@@ -264,9 +264,9 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
                 onClick={() => { setQuery(""); setResults([]); }}
                 aria-label="Clear"
                 style={{
-                  position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-                  width: 20, height: 20, borderRadius: 999,
-                  background: "var(--c-border)", border: "none",
+                  position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
+                  width: 44, height: 44, borderRadius: 999,
+                  background: "transparent", border: "none",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", color: "var(--c-sub)",
                 }}

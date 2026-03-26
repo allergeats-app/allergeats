@@ -7,6 +7,7 @@ import { FavoritesProvider } from "@/lib/favoritesContext";
 import { ThemeProvider } from "@/lib/themeContext";
 import { Analytics } from "@vercel/analytics/next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,11 +23,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#eb1700",
 };
 
 export const metadata: Metadata = {
   title: "AllergEats — Eat safely with food allergies",
   description: "Find restaurants and menu items safe for your food allergies.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AllergEats",
+  },
 };
 
 const websiteJsonLd = {
@@ -62,6 +70,7 @@ export default function RootLayout({
           <AuthProvider>
             <FavoritesProvider>
               <ErrorBoundary>
+                <OfflineBanner />
                 {children}
                 <footer style={{
                   textAlign: "center",

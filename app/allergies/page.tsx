@@ -38,7 +38,7 @@ export default function AllergiesPage() {
 
   if (loading || !user) {
     return (
-      <main style={{ minHeight: "100vh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
+      <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
         Loading…
       </main>
     );
@@ -51,7 +51,7 @@ export default function AllergiesPage() {
   return (
     <main
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
         paddingBottom: 48,

@@ -74,7 +74,7 @@ export default async function RestaurantDetailPage({ params }: Props) {
         />
       )}
       <Suspense fallback={
-        <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--c-bg)", fontSize: 14, color: "#9ca3af" }}>
+        <main style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--c-bg)", fontSize: 14, color: "#9ca3af" }}>
           Loading…
         </main>
       }>

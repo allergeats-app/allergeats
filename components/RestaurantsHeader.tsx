@@ -141,16 +141,23 @@ export function RestaurantsHeader({
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
                 style={{
-                  position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-                  width: 18, height: 18, borderRadius: 999,
-                  background: "#eb1700", border: "none",
+                  position: "absolute", right: 2, top: "50%", transform: "translateY(-50%)",
+                  width: 44, height: 44, borderRadius: 999,
+                  background: "transparent", border: "none",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", color: "#fff",
                 }}
               >
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
+                <span style={{
+                  width: 18, height: 18, borderRadius: 999,
+                  background: "#eb1700",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </span>
               </button>
             )}
           </div>
