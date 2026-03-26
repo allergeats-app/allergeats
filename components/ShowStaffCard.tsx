@@ -11,22 +11,23 @@ type Props = {
 };
 
 export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
-  // Lock body scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Close on Escape key
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const severe  = allergens.filter((a) => (severities[a] ?? "anaphylactic") === "anaphylactic");
-  const mild    = allergens.filter((a) => severities[a] === "intolerance");
+  const severe = allergens.filter((a) => (severities[a] ?? "anaphylactic") === "anaphylactic");
+  const mild   = allergens.filter((a) => severities[a] === "intolerance");
+  // Fallback: no severities set — treat all as severe
+  const showAll = severe.length === 0 && mild.length === 0 && allergens.length > 0;
+  const severeList = showAll ? allergens : severe;
 
   return (
     <div
@@ -35,142 +36,173 @@ export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
       aria-label="Allergy card — show to staff"
       style={{
         position: "fixed", inset: 0, zIndex: 10000,
-        background: "#fff", color: "#111",
+        background: "#fff",
         display: "flex", flexDirection: "column",
-        padding: `max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom))`,
         overflowY: "auto",
+        fontFamily: "Inter, -apple-system, Arial, sans-serif",
       }}
     >
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        aria-label="Close"
-        style={{
-          position: "absolute", top: "max(16px, env(safe-area-inset-top))", right: 16,
-          width: 44, height: 44, borderRadius: 999, border: "1.5px solid #e5e7eb",
-          background: "#f9fafb", display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", fontSize: 18, color: "#374151",
-        }}
-      >
-        ✕
-      </button>
-
-      {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: 32, marginTop: 8 }}>
+      {/* Top bar — branding + close */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: `max(16px, env(safe-area-inset-top)) 20px 12px`,
+        borderBottom: "1px solid #f3f4f6",
+      }}>
         <div style={{
-          display: "inline-block", background: "#eb1700", color: "#fff",
-          fontWeight: 900, fontSize: 13, letterSpacing: "0.08em",
-          textTransform: "uppercase", borderRadius: 8, padding: "5px 14px", marginBottom: 16,
+          background: "#eb1700", color: "#fff",
+          fontWeight: 900, fontSize: 11, letterSpacing: "0.1em",
+          textTransform: "uppercase", borderRadius: 6, padding: "4px 10px",
         }}>
-          AllergEats — Staff Card
+          AllergEats
         </div>
-        <div style={{ fontSize: 22, fontWeight: 900, color: "#111", lineHeight: 1.3 }}>
-          I have food allergies.
-        </div>
-        <div style={{ fontSize: 16, color: "#4b5563", marginTop: 6 }}>
-          Please read carefully before preparing my order.
-        </div>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          style={{
+            width: 44, height: 44, borderRadius: 999,
+            border: "1.5px solid #e5e7eb", background: "#f9fafb",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", fontSize: 16, color: "#6b7280",
+          }}
+        >
+          ✕
+        </button>
       </div>
 
-      {/* Severe / anaphylactic allergens */}
-      {severe.length > 0 && (
-        <div style={{
-          background: "#fff1f0", border: "2px solid #ef4444",
-          borderRadius: 20, padding: "20px 20px 16px", marginBottom: 20,
-        }}>
-          <div style={{
-            fontSize: 11, fontWeight: 900, color: "#b91c1c",
-            textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12,
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ fontSize: 16 }}>⚠️</span> Life-threatening — must avoid completely
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {severe.map((id) => {
-              const meta = ALLERGEN_LIST.find((a) => a.id === id);
-              return (
-                <div key={id} style={{
-                  background: "#b91c1c", color: "#fff",
-                  borderRadius: 12, padding: "12px 20px",
-                  fontSize: 20, fontWeight: 900, lineHeight: 1,
-                }}>
-                  {meta?.label ?? id}
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ marginTop: 14, fontSize: 13, color: "#b91c1c", fontWeight: 600, lineHeight: 1.5 }}>
-            Even trace amounts can cause a severe reaction. Please ensure no cross-contact with shared utensils, surfaces, or fryer oil.
-          </div>
-        </div>
-      )}
-
-      {/* Mild / intolerance allergens */}
-      {mild.length > 0 && (
-        <div style={{
-          background: "#fff7db", border: "1.5px solid #fcd34d",
-          borderRadius: 20, padding: "20px 20px 16px", marginBottom: 20,
-        }}>
-          <div style={{
-            fontSize: 11, fontWeight: 900, color: "#92400e",
-            textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12,
-          }}>
-            Intolerance — please avoid if possible
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {mild.map((id) => {
-              const meta = ALLERGEN_LIST.find((a) => a.id === id);
-              return (
-                <div key={id} style={{
-                  background: "#f59e0b", color: "#fff",
-                  borderRadius: 12, padding: "10px 18px",
-                  fontSize: 18, fontWeight: 800, lineHeight: 1,
-                }}>
-                  {meta?.label ?? id}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* If no severity set but allergens exist, show all */}
-      {severe.length === 0 && mild.length === 0 && allergens.length > 0 && (
-        <div style={{
-          background: "#fff1f0", border: "2px solid #ef4444",
-          borderRadius: 20, padding: "20px 20px 16px", marginBottom: 20,
-        }}>
-          <div style={{
-            fontSize: 11, fontWeight: 900, color: "#b91c1c",
-            textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12,
-          }}>
-            ⚠ Allergic to — please avoid
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {allergens.map((id) => {
-              const meta = ALLERGEN_LIST.find((a) => a.id === id);
-              return (
-                <div key={id} style={{
-                  background: "#b91c1c", color: "#fff",
-                  borderRadius: 12, padding: "12px 20px",
-                  fontSize: 20, fontWeight: 900, lineHeight: 1,
-                }}>
-                  {meta?.label ?? id}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Footer note */}
+      {/* Main content */}
       <div style={{
-        marginTop: "auto", paddingTop: 24,
-        textAlign: "center", fontSize: 12, color: "#9ca3af", lineHeight: 1.6,
+        flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+        padding: "28px 20px max(24px, env(safe-area-inset-bottom))",
+        maxWidth: 480, margin: "0 auto", width: "100%",
+        gap: 24,
       }}>
-        Thank you for your care.
-        <br />
-        If unsure about an ingredient, please check with the kitchen before serving.
+
+        {/* Alert header */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 48, lineHeight: 1, marginBottom: 12 }}>⚠️</div>
+          <div style={{
+            fontSize: 26, fontWeight: 900, color: "#111", lineHeight: 1.2, marginBottom: 8,
+            letterSpacing: "-0.01em",
+          }}>
+            I have food allergies.
+          </div>
+          <div style={{ fontSize: 15, color: "#6b7280", lineHeight: 1.5 }}>
+            Please read before preparing my order.
+          </div>
+        </div>
+
+        {/* Severe / anaphylactic section */}
+        {severeList.length > 0 && (
+          <div style={{
+            width: "100%",
+            background: "#fff1f0",
+            border: "2.5px solid #ef4444",
+            borderRadius: 20,
+            overflow: "hidden",
+          }}>
+            {/* Section label */}
+            <div style={{
+              background: "#ef4444",
+              padding: "10px 20px",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+            }}>
+              <span style={{ fontSize: 14 }}>🚨</span>
+              <span style={{
+                fontSize: 12, fontWeight: 900, color: "#fff",
+                textTransform: "uppercase", letterSpacing: "0.1em",
+              }}>
+                {showAll ? "Must avoid completely" : "Life-threatening — must avoid completely"}
+              </span>
+            </div>
+
+            {/* Allergen pills */}
+            <div style={{
+              padding: "20px 16px 16px",
+              display: "flex", flexWrap: "wrap",
+              gap: 10, justifyContent: "center",
+            }}>
+              {severeList.map((id) => {
+                const meta = ALLERGEN_LIST.find((a) => a.id === id);
+                return (
+                  <div key={id} style={{
+                    background: "#c81e1e", color: "#fff",
+                    borderRadius: 14, padding: "14px 24px",
+                    fontSize: 22, fontWeight: 900, lineHeight: 1,
+                    letterSpacing: "-0.01em",
+                    boxShadow: "0 2px 8px rgba(185,28,28,0.25)",
+                  }}>
+                    {meta?.label ?? id}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Warning text */}
+            <div style={{
+              padding: "0 20px 16px",
+              textAlign: "center", fontSize: 13, color: "#b91c1c",
+              fontWeight: 600, lineHeight: 1.5,
+            }}>
+              Even trace amounts can cause a severe reaction.
+              <br />
+              No cross-contact with shared surfaces, utensils, or fryer oil.
+            </div>
+          </div>
+        )}
+
+        {/* Mild / intolerance section */}
+        {mild.length > 0 && (
+          <div style={{
+            width: "100%",
+            background: "#fffbeb",
+            border: "2px solid #fbbf24",
+            borderRadius: 20,
+            overflow: "hidden",
+          }}>
+            <div style={{
+              background: "#f59e0b",
+              padding: "10px 20px",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+            }}>
+              <span style={{ fontSize: 14 }}>⚠️</span>
+              <span style={{
+                fontSize: 12, fontWeight: 900, color: "#fff",
+                textTransform: "uppercase", letterSpacing: "0.1em",
+              }}>
+                Intolerance — please avoid if possible
+              </span>
+            </div>
+
+            <div style={{
+              padding: "20px 16px 20px",
+              display: "flex", flexWrap: "wrap",
+              gap: 10, justifyContent: "center",
+            }}>
+              {mild.map((id) => {
+                const meta = ALLERGEN_LIST.find((a) => a.id === id);
+                return (
+                  <div key={id} style={{
+                    background: "#d97706", color: "#fff",
+                    borderRadius: 14, padding: "12px 22px",
+                    fontSize: 19, fontWeight: 800, lineHeight: 1,
+                    boxShadow: "0 2px 6px rgba(217,119,6,0.2)",
+                  }}>
+                    {meta?.label ?? id}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{
+          textAlign: "center", fontSize: 13, color: "#9ca3af", lineHeight: 1.6, marginTop: 4,
+        }}>
+          Thank you for your care.
+          <br />
+          If unsure about an ingredient, please check with the kitchen.
+        </div>
       </div>
     </div>
   );
