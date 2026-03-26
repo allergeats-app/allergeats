@@ -721,7 +721,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         {/* ── 5. Full menu ── */}
         {!hasNoMenu && (
           <section id="full-menu">
-            <SectionHeader label="Full Menu" count={summary.total} />
+            <SectionHeader label="Menu" count={summary.total} />
 
             {/* Sticky risk filter chips */}
             <div style={{
@@ -758,20 +758,22 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               return (
                 <>
                   {/* ── Food sections ── */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 32, paddingBottom: 8 }}>
                     {foodSections.map((section) => {
                       const items = bySectionFiltered.get(section.sectionName);
                       if (!items?.length) return null;
                       return (
                         <div key={section.sectionName}>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 12 }}>
-                            <h2 style={{ fontSize: 14, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>{section.sectionName}</h2>
-                            <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length}</span>
-                            {section.safeCount > 0 && riskFilter === "all" && (
-                              <span style={{ fontSize: 13, color: "#15803d", fontWeight: 700 }}>{section.safeCount} safe</span>
-                            )}
+                          <div style={{ marginBottom: 14 }}>
+                            <h2 style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", margin: "0 0 4px", letterSpacing: "-0.01em" }}>{section.sectionName}</h2>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</span>
+                              {section.safeCount > 0 && riskFilter === "all" && (
+                                <span style={{ fontSize: 13, color: "#15803d", fontWeight: 700 }}>· {section.safeCount} safe for you</span>
+                              )}
+                            </div>
                           </div>
-                          <div style={{ display: "grid", gap: 8 }}>
+                          <div style={{ display: "grid", gap: 10 }}>
                             {items.map(renderItem)}
                           </div>
                         </div>
@@ -793,7 +795,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontSize: 16 }}>🥤</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }} aria-hidden="true">
+                            <path d="M8 2h8l1 7H7L8 2z"/><path d="M7 9c0 6 2 11 5 11s5-5 5-11"/>
+                          </svg>
                           <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Drinks</span>
                           <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{drinkItems.length} item{drinkItems.length === 1 ? "" : "s"}</span>
                         </div>
@@ -877,7 +881,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontSize: 16 }}>🥤</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }} aria-hidden="true">
+                            <path d="M8 2h8l1 7H7L8 2z"/><path d="M7 9c0 6 2 11 5 11s5-5 5-11"/>
+                          </svg>
                           <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Drinks</span>
                           <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{drinkItems.length} item{drinkItems.length === 1 ? "" : "s"}</span>
                         </div>
