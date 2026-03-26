@@ -92,7 +92,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "chip-sofritas",    name: "Sofritas (Tofu)",                  category: "Proteins", sourceType: "official", allergens: ["soy"] },
       // Salsas
       { id: "chip-salsa-fresh", name: "Fresh Tomato Salsa",               category: "Salsas",   sourceType: "official", allergens: [] },
-      { id: "chip-salsa-roast", name: "Roasted Chili-Corn Salsa",         category: "Salsas",   sourceType: "official", allergens: [] },
+      { id: "chip-salsa-roast", name: "Roasted Chili-Corn Salsa",         category: "Salsas",   sourceType: "official", allergens: ["corn"] },
       { id: "chip-salsa-green", name: "Tomatillo Green Chili Salsa",      category: "Salsas",   sourceType: "official", allergens: [] },
       { id: "chip-salsa-red",   name: "Tomatillo Red Chili Salsa",        category: "Salsas",   sourceType: "official", allergens: [] },
       // Toppings
@@ -103,8 +103,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "chip-lettuce",     name: "Romaine Lettuce",                  category: "Toppings", sourceType: "official", allergens: [] },
       { id: "chip-fajitas",     name: "Fajita Vegetables",                category: "Toppings", sourceType: "official", allergens: [] },
       // Sides & Drinks
-      { id: "chip-chips",       name: "Chips & Guacamole",                category: "Sides",    sourceType: "official", allergens: [] },
-      { id: "chip-chips-salsa", name: "Chips & Fresh Salsa",              category: "Sides",    sourceType: "official", allergens: [] },
+      { id: "chip-chips",       name: "Chips & Guacamole",                category: "Sides",    sourceType: "official", allergens: ["corn"] },
+      { id: "chip-chips-salsa", name: "Chips & Fresh Salsa",              category: "Sides",    sourceType: "official", allergens: ["corn"] },
       { id: "chip-quesadilla",  name: "Quesadilla (Flour Tortilla)",      category: "Entrees",  sourceType: "official", allergens: ["dairy","wheat","soy"] },
       { id: "chip-kids-quesad", name: "Kids Quesadilla",                  category: "Entrees",  sourceType: "official", allergens: ["dairy","wheat","soy"] },
     ],
@@ -343,7 +343,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "tb-nachos",         name: "Nachos BellGrande",                  category: "Sides",      sourceType: "official", allergens: ["corn","dairy","wheat","soy"] },
       { id: "tb-chips-cheese",   name: "Chips & Nacho Cheese Sauce",         category: "Sides",      sourceType: "official", allergens: ["corn","dairy"] },
       { id: "tb-cinnabon",       name: "Cinnabon Delights (2 pk)",           category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "tb-cinnamon-twists",name: "Cinnamon Twists",                    category: "Desserts",   sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "tb-cinnamon-twists",name: "Cinnamon Twists",                    category: "Desserts",   sourceType: "official", allergens: ["corn","wheat","soy"] },
     ],
   },
 
@@ -1475,7 +1475,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "wb-breakfast-burger", name: "Breakfast Burger",                 category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","sesame","soy"] },
       { id: "wb-honey-bbq-ckn",    name: "Honey BBQ Chicken Strip Sandwich", category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "wb-pancakes",         name: "Pancakes",                         category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "wb-taquito",          name: "Taquito with Cheese",              category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "wb-taquito",          name: "Taquito with Cheese",              category: "Breakfast",  sourceType: "official", allergens: ["corn","wheat","dairy","egg","soy"] },
       { id: "wb-fries",            name: "French Fries",                     category: "Sides",      sourceType: "official", allergens: ["soy"] },
       { id: "wb-onion-rings",      name: "Onion Rings",                      category: "Sides",      sourceType: "official", allergens: ["wheat","soy","egg"] },
       { id: "wb-shake",            name: "Milkshake",                        category: "Desserts",   sourceType: "official", allergens: ["dairy","soy"] },
@@ -1572,7 +1572,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "qdb-burrito-bowl",    name: "Burrito Bowl",                     category: "Bowls",      sourceType: "official", allergens: ["soy"] },
       { id: "qdb-sour-cream",      name: "Sour Cream",                       category: "Toppings",   sourceType: "official", allergens: ["dairy"] },
       { id: "qdb-guac",            name: "Guacamole",                        category: "Toppings",   sourceType: "official", allergens: [] },
-      { id: "qdb-chips",           name: "Tortilla Chips",                   category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "qdb-chips",           name: "Tortilla Chips",                   category: "Sides",      sourceType: "official", allergens: ["corn"] },
     ],
   },
 
@@ -1663,7 +1663,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "jitb-sourdough-jack", name: "Sourdough Jack",                   category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "jitb-ckn-sandwich",   name: "Crispy Chicken Sandwich",          category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "jitb-egg-rolls",      name: "Egg Rolls",                        category: "Appetizers", sourceType: "official", allergens: ["wheat","soy","egg"] },
-      { id: "jitb-tacos",          name: "Tacos",                            category: "Tacos",      sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "jitb-tacos",          name: "Tacos",                            category: "Tacos",      sourceType: "official", allergens: ["corn","wheat","soy","dairy"] },
       { id: "jitb-curly-fries",    name: "Seasoned Curly Fries",             category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
       { id: "jitb-mozz-sticks",    name: "Mozzarella Sticks",                category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "jitb-shake",          name: "Oreo Cookie Ice Cream Shake",      category: "Desserts",   sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
