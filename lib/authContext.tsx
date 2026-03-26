@@ -25,6 +25,7 @@ type AuthContextValue = {
   signIn: (email: string, password: string, staySignedIn: boolean) => Promise<string | null>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<string | null>;
   signInWithOAuth: (provider: "google") => Promise<string | null>;
+  linkIdentity: (provider: "google") => Promise<string | null>;
   signOut: () => Promise<void>;
   saveAllergens: (allergens: AllergenId[]) => Promise<void>;
   saveSeverities: (severities: Partial<Record<AllergenId, AllergenSeverity>>) => void;
@@ -141,6 +142,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return error?.message ?? null;
   }
 
+  async function linkIdentity(provider: "google"): Promise<string | null> {
+    const sb = getSupabaseClient();
+    if (!sb) return "Supabase is not configured.";
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    const { error } = await sb.auth.linkIdentity({ provider, options: { redirectTo } });
+    return error?.message ?? null;
+  }
+
   async function signUp(email: string, password: string, first: string, last: string): Promise<string | null> {
     const sb = getSupabaseClient();
     if (!sb) return "Supabase is not configured.";
@@ -187,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, severities, signIn, signUp, signInWithOAuth, signOut, saveAllergens, saveSeverities, saveName }}
+      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, severities, signIn, signUp, signInWithOAuth, linkIdentity, signOut, saveAllergens, saveSeverities, saveName }}
     >
       {children}
     </AuthContext.Provider>

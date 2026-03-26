@@ -12,35 +12,56 @@ export default function AuthCallbackPage() {
     const sb = getSupabaseClient();
     if (!sb) { router.replace("/"); return; }
 
-    const params = new URLSearchParams(window.location.search);
-    const error  = params.get("error");
+    // Errors can appear in query string (?error=) OR hash (#error=) depending on flow type.
+    const params     = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const error      = params.get("error") || hashParams.get("error");
+    const errorDesc  = params.get("error_description") || hashParams.get("error_description") || "";
 
     if (error) {
-      router.replace("/auth?error=oauth_cancelled");
+      const isEmailConflict = /already.registered|email.*exist|conflict|different.*provider/i.test(errorDesc);
+      router.replace(`/auth?error=${isEmailConflict ? "email_conflict" : "oauth_cancelled"}`);
       return;
     }
 
-    // detectSessionInUrl:true (set in supabaseClient) automatically calls
-    // exchangeCodeForSession when it sees ?code= in the URL during client init.
-    // We just need to wait for the resulting SIGNED_IN event.
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.replace("/");
-        return;
+    let done = false;
+    function finish(path: string) {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      subscription?.unsubscribe();
+      router.replace(path);
+    }
+
+    // Register the listener FIRST before any async work to avoid a race condition:
+    // detectSessionInUrl:true can exchange the code and fire SIGNED_IN before
+    // getSession().then() registers its listener, leaving the page stuck in loading.
+    const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
+      if (sess) {
+        finish("/");
+      } else if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        // Exchange failed — fall back to error
+        finish("/auth?error=oauth_cancelled");
       }
-      // Session not ready yet — wait for detectSessionInUrl to finish exchanging
-      const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
-        if (sess) {
-          subscription.unsubscribe();
-          router.replace("/");
-        }
-      });
-      // Timeout fallback
-      setTimeout(() => {
+    });
+
+    const timer = setTimeout(() => {
+      if (!done) {
+        done = true;
         subscription.unsubscribe();
         setErrMsg("Sign-in timed out — please try again.");
-      }, 10000);
-    });
+      }
+    }, 12000);
+
+    // Also check if session is already present (exchange may have completed synchronously)
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) finish("/");
+    }).catch(() => { /* ignore */ });
+
+    return () => {
+      clearTimeout(timer);
+      if (!done) subscription.unsubscribe();
+    };
   }, [router]);
 
   if (errMsg) {

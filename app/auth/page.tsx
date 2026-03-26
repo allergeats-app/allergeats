@@ -12,7 +12,7 @@ import { isPasskeySupported, registerPasskey } from "@/lib/passkey";
 type Mode = "signin" | "signup" | "forgot";
 
 export default function AuthPage() {
-  const { signIn, signUp, signInWithOAuth, user } = useAuth();
+  const { signIn, signUp, signInWithOAuth, linkIdentity, user } = useAuth();
   useTheme();
   const router = useRouter();
 
@@ -36,10 +36,19 @@ export default function AuthPage() {
     const saved = localStorage.getItem(REMEMBER_KEY);
     if (saved) setEmail(saved); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
+  // Track whether this visit came from a Google email-conflict so we can auto-link after sign-in
+  const [pendingGoogleLink, setPendingGoogleLink] = useState(false);
+
   useEffect(() => {
     const p = new URLSearchParams(window.location.search).get("error");
-    if (p === "oauth_cancelled") setError("Sign-in was cancelled.");
-    else if (p === "oauth_failed") setError("Sign-in failed — please try again.");
+    if (p === "email_conflict") {
+      setPendingGoogleLink(true);
+      setError("This email already has a password account. Sign in below and we\u2019ll link Google automatically.");
+    } else if (p === "oauth_cancelled") {
+      setError("Sign-in was cancelled.");
+    } else if (p === "oauth_failed") {
+      setError("Sign-in failed — please try again.");
+    }
   }, []);
 
   function switchMode(m: Mode) { setMode(m); setError(null); setInfo(null); }
@@ -81,6 +90,12 @@ export default function AuthPage() {
     if (mode === "signin") {
       if (staySignedIn) localStorage.setItem(REMEMBER_KEY, email);
       else localStorage.removeItem(REMEMBER_KEY);
+      // If the user arrived here due to a Google email conflict, link their Google identity now
+      if (pendingGoogleLink) {
+        const linkErr = await linkIdentity("google");
+        // linkIdentity redirects to Google — if it errors just fall through to home
+        if (!linkErr) return; // redirect in progress
+      }
       if (passkeySupported) { setShowPasskeyPrompt(true); return; }
       router.push("/");
     } else {
