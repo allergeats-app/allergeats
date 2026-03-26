@@ -616,7 +616,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         {/* ── 3. Best Options for You ── */}
         {!hasNoMenu && (
           <section style={{ marginBottom: 28 }}>
-            <SectionHeader label="Best Options for You" count={noAllergens ? undefined : bestOptions.length} />
+            <SectionHeader label="Best Options for You" />
             {noAllergens ? (
               <div style={{
                 background: "var(--c-card)", border: "1px solid var(--c-border)",

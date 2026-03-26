@@ -95,17 +95,30 @@ function buildExplanation(item: AnalyzedMenuItem): string {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
+/** Fisher-Yates in-place shuffle. */
+function shuffle<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 /**
- * Generate the top recommended dishes for a user's allergen profile.
+ * Generate 3 randomized recommended dishes for a user's allergen profile.
+ *
+ * Picks from the top-quality candidates (up to 8 by score) and shuffles them
+ * so the selection varies on each page load while still pulling from
+ * the best safe options available.
  *
  * @param analysis     Output of analyzeNormalizedMenu() or analyzeRestaurant()
- * @param maxResults   Maximum number of recommendations to return (default 5)
+ * @param maxResults   Number of recommendations to return (default 3)
  */
 export function generateSafeOrderRecommendations(
   analysis: RestaurantMenuAnalysis,
-  maxResults = 5,
+  maxResults = 3,
 ): SafeOrderRecommendation[] {
-  return analysis.allItems
+  const scored = analysis.allItems
     .filter((item) => {
       if (item.risk !== "likely-safe")                           return false;
       if (item.staffQuestions.length >= 3)                      return false;
@@ -113,7 +126,13 @@ export function generateSafeOrderRecommendations(
       return true;
     })
     .map((item) => ({ item, score: rankItem(item) }))
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score);
+
+  // Pool the top candidates, then shuffle for variety on each page load
+  const candidatePool = scored.slice(0, Math.max(maxResults * 3, 8));
+  shuffle(candidatePool);
+
+  return candidatePool
     .slice(0, maxResults)
     .map(({ item, score }) => ({
       item,
