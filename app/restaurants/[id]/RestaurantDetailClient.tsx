@@ -659,28 +659,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           </section>
         )}
 
-        {/* ── 4. Why this rating ── */}
-        {!hasNoMenu && (
-          <section style={{ marginBottom: 28 }}>
-            <SectionHeader label="Why this rating" />
-            <div style={{
-              background: "var(--c-card)", border: "1px solid var(--c-border)",
-              borderRadius: 16, padding: "14px 16px",
-            }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
-                {whyThisWorks.map((bullet, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ color: badge.color, fontWeight: 900, fontSize: 15, lineHeight: "1.5", flexShrink: 0 }}>·</span>
-                    <span style={{ fontSize: 15, color: "var(--c-text)", lineHeight: 1.6 }}>{bullet}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
-                {coverage.trustSignal} · Always confirm with staff before ordering.
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* ── 4b. Questions to ask staff ── */}
         {!hasNoMenu && aggregatedStaffQuestions.length > 0 && (
@@ -953,29 +931,28 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           </section>
         )}
 
-        {/* ── 6. Scan CTA ── */}
-        <div style={{
-          marginTop: 32, padding: 20,
-          background: "var(--c-card)", border: "1px solid var(--c-border)",
-          borderRadius: 18,
-        }}>
-          <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 8 }}>
-            {hasNoMenu ? "Scan this restaurant's menu" : "Don't see your order?"}
-          </div>
-          <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.6, marginBottom: 16 }}>
-            {hasNoMenu
-              ? "Take a photo of the menu and we'll analyze it for your allergy profile."
-              : "Scan the physical menu for a fresh analysis based on today's items."}
-          </div>
-          <CameraScanButton style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-            padding: "14px 24px", borderRadius: 14,
-            background: "#eb1700", color: "#fff",
-            fontSize: 16, fontWeight: 800, border: "none", cursor: "pointer", minHeight: 52,
-          }}>
-            Scan Menu →
-          </CameraScanButton>
-        </div>
+        {/* ── Why this rating ── */}
+        {!hasNoMenu && (
+          <section style={{ marginTop: 32, marginBottom: 28 }}>
+            <SectionHeader label="Why this rating" />
+            <div style={{
+              background: "var(--c-card)", border: "1px solid var(--c-border)",
+              borderRadius: 16, padding: "14px 16px",
+            }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+                {whyThisWorks.map((bullet, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <span style={{ color: badge.color, fontWeight: 900, fontSize: 15, lineHeight: "1.5", flexShrink: 0 }}>·</span>
+                    <span style={{ fontSize: 15, color: "var(--c-text)", lineHeight: 1.6 }}>{bullet}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                {coverage.trustSignal} · Always confirm with staff before ordering.
+              </div>
+            </div>
+          </section>
+        )}
 
       </div>
 
