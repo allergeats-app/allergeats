@@ -686,6 +686,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["sandwiches"],
     distance: 0.7,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your bread",    category: "Breads",   required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins", required: true,  maxSelect: 1  },
+        { label: "Add cheese",           category: "Cheeses",  required: false, maxSelect: 1  },
+        { label: "Add toppings",         category: "Toppings", required: false, maxSelect: 99 },
+        { label: "Add sauces",           category: "Sauces",   required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
       // Breads — pick your roll
       { id: "jm-b-white",         name: "White Sub Roll",                   category: "Breads",    sourceType: "official", allergens: ["wheat","soy"] },
@@ -1326,15 +1335,41 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["wings", "sports-bar", "casual"],
     distance: 1.3,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your wings",   category: "Wings",    required: true,  maxSelect: 1  },
+        { label: "Choose your sauce",   category: "Sauces",   required: true,  maxSelect: 1  },
+        { label: "Add a side",          category: "Sides",    required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
+      // Wings
       { id: "bww-trad-wings",      name: "Traditional Wings",                category: "Wings",      sourceType: "official", allergens: ["soy","egg"] },
       { id: "bww-boneless-wings",  name: "Boneless Wings",                   category: "Wings",      sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
+      // Sauces
+      { id: "bww-s-mild",          name: "Mild",                             category: "Sauces",     sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "bww-s-medium",        name: "Medium",                           category: "Sauces",     sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "bww-s-hot",           name: "Hot",                              category: "Sauces",     sourceType: "official", allergens: ["soy"] },
+      { id: "bww-s-wild",          name: "Wild",                             category: "Sauces",     sourceType: "official", allergens: ["soy"] },
+      { id: "bww-s-nashville",     name: "Nashville Hot",                    category: "Sauces",     sourceType: "official", allergens: ["soy"] },
+      { id: "bww-s-honey-bbq",     name: "Honey BBQ",                        category: "Sauces",     sourceType: "official", allergens: ["soy"] },
+      { id: "bww-s-asian-zing",    name: "Asian Zing",                       category: "Sauces",     sourceType: "official", allergens: ["soy","wheat"] },
+      { id: "bww-s-parmesan-garlic",name: "Parmesan Garlic",                 category: "Sauces",     sourceType: "official", allergens: ["dairy","egg","soy"] },
+      { id: "bww-s-mango-hab",     name: "Mango Habanero",                   category: "Sauces",     sourceType: "official", allergens: ["soy"] },
+      { id: "bww-s-lemon-pepper",  name: "Lemon Pepper (Dry Rub)",           category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "bww-s-desert-heat",   name: "Desert Heat (Dry Rub)",            category: "Sauces",     sourceType: "official", allergens: [] },
+      // Sides
+      { id: "bww-onion-rings",     name: "Beer-Battered Onion Rings",        category: "Sides",      sourceType: "official", allergens: ["wheat","gluten","egg","dairy"] },
+      { id: "bww-s-fries",         name: "French Fries",                     category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "bww-s-celery",        name: "Celery & Carrots",                 category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "bww-s-ranch",         name: "Ranch Dipping Sauce",              category: "Sides",      sourceType: "official", allergens: ["dairy","egg","soy"] },
+      { id: "bww-s-blue-cheese",   name: "Blue Cheese Dipping Sauce",        category: "Sides",      sourceType: "official", allergens: ["dairy","egg","soy"] },
+      // Other menu items
       { id: "bww-mozz-sticks",     name: "Mozzarella Sticks",                category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "bww-nachos",          name: "Loaded Nachos",                    category: "Appetizers", sourceType: "official", allergens: ["corn","dairy","wheat","soy"] },
       { id: "bww-quesadilla",      name: "Chicken Quesadilla",               category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "bww-burger",          name: "Classic Cheeseburger",             category: "Burgers",    sourceType: "official", allergens: ["wheat","dairy","egg","sesame","soy"] },
       { id: "bww-chicken-wrap",    name: "Buffalo Chicken Wrap",             category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "bww-onion-rings",     name: "Beer-Battered Onion Rings",        category: "Sides",      sourceType: "official", allergens: ["wheat","gluten","egg","dairy"] },
       { id: "bww-ckn-sandwich",    name: "Crispy Chicken Sandwich",          category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "bww-street-tacos",    name: "Street Tacos",                     category: "Tacos",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
     ],
@@ -1350,15 +1385,34 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["wings", "fast-casual"],
     distance: 0.8,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your wings",   category: "Wings",    required: true,  maxSelect: 1  },
+        { label: "Choose your flavor",  category: "Sauces",   required: true,  maxSelect: 1  },
+        { label: "Add a dip & side",    category: "Sides",    required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
+      // Wings & Tenders
       { id: "ws-classic-wings",    name: "Classic Wings",                    category: "Wings",      sourceType: "official", allergens: ["soy"] },
       { id: "ws-boneless-wings",   name: "Boneless Wings",                   category: "Wings",      sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
-      { id: "ws-tenders",          name: "Chicken Tenders",                  category: "Tenders",    sourceType: "official", allergens: ["wheat","egg","soy"] },
+      { id: "ws-tenders",          name: "Chicken Tenders",                  category: "Wings",      sourceType: "official", allergens: ["wheat","egg","soy"] },
+      // Sauces & Dry Rubs
+      { id: "ws-s-original-hot",   name: "Original Hot",                     category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "ws-s-mild",           name: "Mild",                             category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "ws-s-lemon-pepper",   name: "Lemon Pepper (Dry Rub)",           category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "ws-s-cajun",          name: "Cajun (Dry Rub)",                  category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "ws-s-bbq",            name: "Hickory Smoked BBQ",               category: "Sauces",     sourceType: "official", allergens: ["soy"] },
+      { id: "ws-s-garlic-parm",    name: "Garlic Parmesan",                  category: "Sauces",     sourceType: "official", allergens: ["dairy","egg","soy"] },
+      { id: "ws-s-mango-hab",      name: "Mango Habanero",                   category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "ws-s-atomic",         name: "Atomic",                           category: "Sauces",     sourceType: "official", allergens: [] },
+      { id: "ws-s-korean-q",       name: "Spicy Korean Q",                   category: "Sauces",     sourceType: "official", allergens: ["soy","wheat"] },
+      // Sides & Dips
       { id: "ws-cajun-corn",       name: "Cajun Fried Corn",                 category: "Sides",      sourceType: "official", allergens: ["corn","dairy","wheat","soy"] },
       { id: "ws-seasoned-fries",   name: "Seasoned Fries",                   category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
       { id: "ws-voodoo-fries",     name: "Louisiana Voodoo Fries",           category: "Sides",      sourceType: "official", allergens: ["dairy","wheat","soy"] },
-      { id: "ws-ranch",            name: "Ranch Dip",                        category: "Dips",       sourceType: "official", allergens: ["egg","dairy","soy"] },
-      { id: "ws-blue-cheese",      name: "Blue Cheese Dip",                  category: "Dips",       sourceType: "official", allergens: ["dairy","egg","soy"] },
+      { id: "ws-ranch",            name: "Ranch Dip",                        category: "Sides",      sourceType: "official", allergens: ["egg","dairy","soy"] },
+      { id: "ws-blue-cheese",      name: "Blue Cheese Dip",                  category: "Sides",      sourceType: "official", allergens: ["dairy","egg","soy"] },
     ],
   },
 
@@ -1372,7 +1426,20 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["chinese", "fast-casual", "asian"],
     distance: 0.7,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your side",    category: "Sides",    required: true,  maxSelect: 1  },
+        { label: "Choose your entree",  category: "Entrees",  required: true,  maxSelect: 2  },
+      ],
+    },
     menuItems: [
+      // Sides — your plate base
+      { id: "pe-white-rice",       name: "Steamed White Rice",               category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "pe-brown-rice",       name: "Steamed Brown Rice",               category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "pe-chow-mein",        name: "Chow Mein",                        category: "Sides",      sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "pe-fried-rice",       name: "Fried Rice",                       category: "Sides",      sourceType: "official", allergens: ["soy","wheat","egg"] },
+      { id: "pe-super-greens",     name: "Super Greens",                     category: "Sides",      sourceType: "official", allergens: [] },
+      // Entrees
       { id: "pe-orange-chicken",   name: "Orange Chicken",                   category: "Entrees",    sourceType: "official", allergens: ["wheat","egg","soy"] },
       { id: "pe-beijing-beef",     name: "Beijing Beef",                     category: "Entrees",    sourceType: "official", allergens: ["wheat","egg","soy"] },
       { id: "pe-kung-pao",         name: "Kung Pao Chicken",                 category: "Entrees",    sourceType: "official", allergens: ["peanut","soy","wheat","egg"] },
@@ -1380,8 +1447,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "pe-honey-walnut-shr", name: "Honey Walnut Shrimp",              category: "Entrees",    sourceType: "official", allergens: ["shellfish","tree-nut","egg","dairy","soy","wheat"] },
       { id: "pe-string-bean-ckn",  name: "String Bean Chicken Breast",       category: "Entrees",    sourceType: "official", allergens: ["soy","wheat"] },
       { id: "pe-grilled-teriyaki", name: "Grilled Teriyaki Chicken",         category: "Entrees",    sourceType: "official", allergens: ["soy","wheat"] },
-      { id: "pe-chow-mein",        name: "Chow Mein",                        category: "Sides",      sourceType: "official", allergens: ["wheat","soy","egg"] },
-      { id: "pe-fried-rice",       name: "Fried Rice",                       category: "Sides",      sourceType: "official", allergens: ["soy","wheat","egg"] },
+      // Appetizers
       { id: "pe-spring-rolls",     name: "Vegetable Spring Rolls",           category: "Appetizers", sourceType: "official", allergens: ["wheat","soy","egg"] },
       { id: "pe-rangoon",          name: "Cream Cheese Rangoon",             category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
     ],
@@ -1589,16 +1655,48 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["mexican", "fast-casual", "burritos"],
     distance: 0.9,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your base",     category: "Bases",        required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins",     required: true,  maxSelect: 1  },
+        { label: "Add rice & beans",     category: "Rice & Beans", required: false, maxSelect: 99 },
+        { label: "Add a salsa",          category: "Salsas",       required: false, maxSelect: 99 },
+        { label: "Add toppings",         category: "Toppings",     required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
-      { id: "qdb-flour-burrito",   name: "Flour Tortilla Burrito",           category: "Burritos",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "qdb-corn-taco",       name: "Corn Tortilla Tacos",              category: "Tacos",      sourceType: "official", allergens: ["corn"] },
-      { id: "qdb-nachos",          name: "Nachos",                           category: "Nachos",     sourceType: "official", allergens: ["corn","dairy","soy"] },
-      { id: "qdb-queso",           name: "3-Cheese Queso",                   category: "Sauces",     sourceType: "official", allergens: ["dairy","soy"] },
-      { id: "qdb-quesadilla",      name: "Cheese Quesadilla",                category: "Quesadillas",sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "qdb-burrito-bowl",    name: "Burrito Bowl",                     category: "Bowls",      sourceType: "official", allergens: ["soy"] },
-      { id: "qdb-sour-cream",      name: "Sour Cream",                       category: "Toppings",   sourceType: "official", allergens: ["dairy"] },
-      { id: "qdb-guac",            name: "Guacamole",                        category: "Toppings",   sourceType: "official", allergens: [] },
-      { id: "qdb-chips",           name: "Tortilla Chips",                   category: "Sides",      sourceType: "official", allergens: ["corn"] },
+      // Bases — choose your format
+      { id: "qdb-flour-burrito",   name: "Flour Tortilla Burrito",           category: "Bases",        sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "qdb-burrito-bowl",    name: "Burrito Bowl",                     category: "Bases",        sourceType: "official", allergens: [] },
+      { id: "qdb-corn-taco",       name: "Corn Tortilla Tacos",              category: "Bases",        sourceType: "official", allergens: ["corn"] },
+      { id: "qdb-nachos",          name: "Nachos",                           category: "Bases",        sourceType: "official", allergens: ["corn"] },
+      { id: "qdb-quesadilla",      name: "Cheese Quesadilla",                category: "Bases",        sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // Proteins
+      { id: "qdb-p-chicken",       name: "Grilled Chicken",                  category: "Proteins",     sourceType: "official", allergens: [] },
+      { id: "qdb-p-steak",         name: "Carne Asada Steak",                category: "Proteins",     sourceType: "official", allergens: [] },
+      { id: "qdb-p-pork",          name: "Pulled Pork Carnitas",             category: "Proteins",     sourceType: "official", allergens: [] },
+      { id: "qdb-p-beef",          name: "Ground Beef",                      category: "Proteins",     sourceType: "official", allergens: [] },
+      { id: "qdb-p-tinga",         name: "Chicken Tinga",                    category: "Proteins",     sourceType: "official", allergens: ["soy"] },
+      { id: "qdb-p-impossible",    name: "Impossible Fajita Veggies",        category: "Proteins",     sourceType: "official", allergens: ["soy"] },
+      // Rice & Beans
+      { id: "qdb-rice-white",      name: "Cilantro-Lime White Rice",         category: "Rice & Beans", sourceType: "official", allergens: [] },
+      { id: "qdb-rice-brown",      name: "Cilantro-Lime Brown Rice",         category: "Rice & Beans", sourceType: "official", allergens: [] },
+      { id: "qdb-beans-black",     name: "Black Beans",                      category: "Rice & Beans", sourceType: "official", allergens: [] },
+      { id: "qdb-beans-pinto",     name: "Pinto Beans",                      category: "Rice & Beans", sourceType: "official", allergens: [] },
+      // Salsas
+      { id: "qdb-salsa-fresh",     name: "Fresh Salsa",                      category: "Salsas",       sourceType: "official", allergens: [] },
+      { id: "qdb-salsa-verde",     name: "Tomatillo Verde Salsa",            category: "Salsas",       sourceType: "official", allergens: [] },
+      { id: "qdb-salsa-corn",      name: "Corn Salsa",                       category: "Salsas",       sourceType: "official", allergens: ["corn"] },
+      { id: "qdb-queso",           name: "3-Cheese Queso",                   category: "Salsas",       sourceType: "official", allergens: ["dairy","soy"] },
+      // Toppings
+      { id: "qdb-sour-cream",      name: "Sour Cream",                       category: "Toppings",     sourceType: "official", allergens: ["dairy"] },
+      { id: "qdb-guac",            name: "Guacamole",                        category: "Toppings",     sourceType: "official", allergens: [] },
+      { id: "qdb-cheese-blend",    name: "3-Cheese Blend",                   category: "Toppings",     sourceType: "official", allergens: ["dairy"] },
+      { id: "qdb-fajita-veg",      name: "Fajita Vegetables",                category: "Toppings",     sourceType: "official", allergens: [] },
+      { id: "qdb-lettuce",         name: "Shredded Romaine Lettuce",         category: "Toppings",     sourceType: "official", allergens: [] },
+      { id: "qdb-pico",            name: "Pico de Gallo",                    category: "Toppings",     sourceType: "official", allergens: [] },
+      // Sides
+      { id: "qdb-chips",           name: "Tortilla Chips",                   category: "Sides",        sourceType: "official", allergens: ["corn"] },
     ],
   },
 
