@@ -181,9 +181,15 @@ export function scoreMenuItem(
     )],
     triggerTerms:   [...new Set(analyzed.signals.map((s) => s.trigger))],
     explanation,
-    // For official items with no allergen hits, suppress questions generated from
-    // cuisine/dish inference — they'd be false positives on a verified clean ingredient.
-    staffQuestions: isOfficialData && officialHits.length === 0 ? [] : analyzed.staffQuestions,
+    // For official items: suppress all questions when no hits (verified clean).
+    // When there are hits, the item is confirmed to contain the allergen — no need to ask
+    // staff about presence. Suppress dish/cuisine-inferred questions that may reference
+    // allergens not in the official list.
+    staffQuestions: isOfficialData && officialHits.length === 0
+      ? []
+      : isOfficialData && officialHits.length > 0
+        ? []
+        : analyzed.staffQuestions,
     userAllergenHits,
     allergenSources: getAllergenSources(analyzed.signals, userAllergenHits as AllergenId[]),
     substitutions:  finalRisk !== "likely-safe" ? getSubstitutions(userAllergenHits as AllergenId[], text.toLowerCase(), analyzed.signals) : [],
