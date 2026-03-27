@@ -171,10 +171,12 @@ export function RestaurantCard({ restaurant: r }: Props) {
 
           {summary.total > 0 ? (
             <div>
-              <div style={{ height: 7, borderRadius: 999, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)", overflow: "hidden", display: "flex", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)" }}>
-                {safePercent > 0 && <div style={{ width: `${safePercent}%`, background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
-                {askPercent  > 0 && <div style={{ width: `${askPercent}%`,  background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
-                {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
+              <div style={{ height: 8, borderRadius: 999, background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)", overflow: "visible", display: "flex", position: "relative", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.15)" }}>
+                <div style={{ overflow: "hidden", borderRadius: 999, display: "flex", width: "100%", height: "100%" }}>
+                  {safePercent > 0 && <div style={{ width: `${safePercent}%`, background: "linear-gradient(90deg,#16a34a,#22c55e)", boxShadow: "2px 0 8px rgba(34,197,94,0.7)" }} />}
+                  {askPercent  > 0 && <div style={{ width: `${askPercent}%`,  background: "linear-gradient(90deg,#d97706,#f59e0b)", boxShadow: "2px 0 8px rgba(245,158,11,0.6)" }} />}
+                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)", boxShadow: "2px 0 8px rgba(239,68,68,0.6)" }} />}
+                </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
                 <div style={{ display: "flex", gap: 7 }}>
@@ -218,12 +220,13 @@ function Stat({ count, label, rgb, isDark }: { count: number; label: string; rgb
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 5,
-      padding: "4px 10px", borderRadius: 999,
-      background: `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
-      border: `1px solid rgba(${rgb},${isDark ? "0.28" : "0.16"})`,
+      padding: "5px 12px", borderRadius: 999,
+      background: `rgba(${rgb},${isDark ? "0.18" : "0.10"})`,
+      border: `1.5px solid rgba(${rgb},${isDark ? "0.4" : "0.25"})`,
+      boxShadow: count > 0 ? `0 2px 10px rgba(${rgb},${isDark ? "0.3" : "0.18"})` : "none",
     }}>
-      <span style={{ fontSize: 14, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.02em" }}>{count}</span>
-      <span style={{ fontSize: 12, fontWeight: 700, color: `rgba(${rgb},${isDark ? "0.85" : "0.75"})` }}>{label}</span>
+      <span style={{ fontSize: 16, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.03em" }}>{count}</span>
+      <span style={{ fontSize: 12, fontWeight: 800, color: `rgba(${rgb},${isDark ? "0.9" : "0.8"})` }}>{label}</span>
     </div>
   );
 }
