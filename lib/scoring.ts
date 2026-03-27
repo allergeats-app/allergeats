@@ -80,8 +80,11 @@ export function scoreMenuItem(
         ? "likely-safe"
         : mapRisk(analyzed.risk);
   const allDetected: string[] = [...new Set([...analyzed.allDetectedAllergens, ...officialAllergens])];
+  // For official items, only surface officialHits as user-facing allergen hits.
+  // Merging analyzed.matchedAllergens would include dish/cuisine inferences
+  // (e.g. "burrito" → legumes) that are false positives against a verified ingredient list.
   const userAllergenHits: string[] = officialHits.length > 0
-    ? [...new Set([...analyzed.matchedAllergens, ...officialHits])]
+    ? officialHits
     : isOfficialData && vocabDirectHits.length > 0
       ? vocabDirectHits
       : isOfficialData
