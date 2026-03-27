@@ -1146,66 +1146,135 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     fontSize: 10, fontWeight: 800, color: "var(--c-sub)",
                     textTransform: "uppercase", letterSpacing: "0.1em",
                   }}>
-                    Your Items · {orderedItems.length}
+                    {restaurant?.builderConfig ? "Your Order" : `Your Items · ${orderedItems.length}`}
                   </span>
                 </div>
 
                 <div style={{ padding: "0 20px" }}>
-                  {orderedItems.map((item, idx) => {
-                    const meta = RISK_META[item.risk];
+                  {restaurant?.builderConfig ? (() => {
+                    // Builder restaurants: group into one cohesive meal card
+                    const steps = restaurant.builderConfig!.steps;
+                    const builderItemIds = new Set(steps.flatMap((step) => {
+                      const sec = vm.sections.find((s) => s.sectionName === step.category);
+                      return sec?.items.map((i) => i.id) ?? [];
+                    }));
+
+                    // Group selected items by step
+                    const stepGroups = steps.map((step) => {
+                      const sec = vm.sections.find((s) => s.sectionName === step.category);
+                      const items = sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? [];
+                      return { step, items };
+                    }).filter((g) => g.items.length > 0);
+
+                    // The first group's item is the "main" (vessel/base)
+                    const [mainGroup, ...modifierGroups] = stepGroups;
+                    const mainItem = mainGroup?.items[0];
+
+                    // Items added from regular menu, not through builder
+                    const extraItems = orderedItems.filter((i) => !builderItemIds.has(i.id));
+
+                    // Worst risk across all builder items
+                    const RISK_RANK2: Record<string, number> = { avoid: 0, ask: 1, unknown: 2, "likely-safe": 3 };
+                    const worstItem = [...orderedItems].sort((a, b) => (RISK_RANK2[a.risk] ?? 2) - (RISK_RANK2[b.risk] ?? 2))[0];
+                    const worstMeta = worstItem ? RISK_META[worstItem.risk] : null;
+
                     return (
-                      <div key={item.id} style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: "13px 0",
-                        borderBottom: idx < orderedItems.length - 1 ? "1px solid var(--c-border)" : "none",
-                      }}>
-                        {/* Safety dot */}
-                        <div style={{
-                          width: 9, height: 9, borderRadius: "50%",
-                          background: meta.color, flexShrink: 0,
-                        }} />
-                        {/* Item info */}
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                      <>
+                        {stepGroups.length > 0 && (
                           <div style={{
-                            fontSize: 15, fontWeight: 700, color: "var(--c-text)",
-                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            background: "var(--c-muted)", borderRadius: 14,
+                            border: "1px solid var(--c-border)",
+                            padding: "14px 16px", marginBottom: extraItems.length > 0 ? 10 : 0,
                           }}>
-                            {item.name}
+                            {/* Main item row */}
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: modifierGroups.length > 0 ? 10 : 0 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                {worstMeta && <div style={{ width: 9, height: 9, borderRadius: "50%", background: worstMeta.color, flexShrink: 0 }} />}
+                                <span style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)" }}>
+                                  {mainItem?.name ?? "Custom Order"}
+                                </span>
+                              </div>
+                              {/* Clear all builder items */}
+                              <button
+                                type="button"
+                                onClick={() => orderedItems.filter((i) => builderItemIds.has(i.id)).forEach((i) => toggleOrderItem(i.id))}
+                                style={{
+                                  fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
+                                  background: "none", border: "none", cursor: "pointer", padding: "2px 0",
+                                }}
+                              >
+                                Clear
+                              </button>
+                            </div>
+
+                            {/* Modifier rows */}
+                            {modifierGroups.map(({ step, items }) => (
+                              <div key={step.category} style={{
+                                display: "flex", alignItems: "baseline", gap: 6,
+                                paddingTop: 6, borderTop: "1px solid var(--c-border)",
+                                marginTop: 6,
+                              }}>
+                                <span style={{
+                                  fontSize: 11, fontWeight: 800, color: "var(--c-sub)",
+                                  textTransform: "uppercase", letterSpacing: "0.05em",
+                                  flexShrink: 0, minWidth: 70,
+                                }}>
+                                  {step.label.replace(/^(Choose your |Choose |Pick |Add )/i, "")}
+                                </span>
+                                <span style={{ fontSize: 13, color: "var(--c-text)", fontWeight: 600 }}>
+                                  {items.map((i) => i.name).join(", ")}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
-                            {item.category && (
-                              <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{item.category}</span>
-                            )}
-                            <span style={{
-                              fontSize: 11, fontWeight: 700, color: meta.color,
-                              background: meta.badgeBg, borderRadius: 999, padding: "2px 7px",
+                        )}
+
+                        {/* Extra non-builder items as flat list */}
+                        {extraItems.map((item, idx) => {
+                          const meta = RISK_META[item.risk];
+                          return (
+                            <div key={item.id} style={{
+                              display: "flex", alignItems: "center", gap: 12,
+                              padding: "13px 0",
+                              borderBottom: idx < extraItems.length - 1 ? "1px solid var(--c-border)" : "none",
                             }}>
-                              {meta.mark} {meta.label}
-                            </span>
-                          </div>
-                        </div>
-                        {/* Remove (trash icon) */}
-                        <button
-                          type="button"
-                          onClick={() => toggleOrderItem(item.id)}
-                          aria-label={`Remove ${item.name} from order`}
-                          style={{
-                            width: 34, height: 34, borderRadius: 999,
-                            background: "var(--c-muted)", border: "1px solid var(--c-border)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            cursor: "pointer", color: "var(--c-sub)", flexShrink: 0,
-                          }}
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                            <path d="M10 11v6M14 11v6"/>
-                            <path d="M9 6V4h6v2"/>
-                          </svg>
-                        </button>
-                      </div>
+                              <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
+                              </div>
+                              <button type="button" onClick={() => toggleOrderItem(item.id)} aria-label={`Remove ${item.name}`} style={{ width: 34, height: 34, borderRadius: 999, background: "var(--c-muted)", border: "1px solid var(--c-border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--c-sub)", flexShrink: 0 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </>
                     );
-                  })}
+                  })() : (
+                    // Regular restaurants: flat list
+                    orderedItems.map((item, idx) => {
+                      const meta = RISK_META[item.risk];
+                      return (
+                        <div key={item.id} style={{
+                          display: "flex", alignItems: "center", gap: 12,
+                          padding: "13px 0",
+                          borderBottom: idx < orderedItems.length - 1 ? "1px solid var(--c-border)" : "none",
+                        }}>
+                          <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                              {item.category && <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{item.category}</span>}
+                              <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, background: meta.badgeBg, borderRadius: 999, padding: "2px 7px" }}>{meta.mark} {meta.label}</span>
+                            </div>
+                          </div>
+                          <button type="button" onClick={() => toggleOrderItem(item.id)} aria-label={`Remove ${item.name} from order`} style={{ width: 34, height: 34, borderRadius: 999, background: "var(--c-muted)", border: "1px solid var(--c-border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--c-sub)", flexShrink: 0 }}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
