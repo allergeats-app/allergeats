@@ -13,6 +13,7 @@ import { bumpInteraction, registerForCrawl, markCrawled } from "@/lib/menu-crawl
 import { toRawMenuItems } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
 import { useFavorites } from "@/lib/favoritesContext";
+import { saveOrder } from "@/lib/savedOrders";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { GuidedOrderBuilder } from "@/components/GuidedOrderBuilder";
 import { CameraScanButton } from "@/components/CameraScanButton";
@@ -90,7 +91,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [showDrinks, setShowDrinks]   = useState(false);
   const [orderedItemIds, setOrderedItemIds] = useState<Set<string>>(new Set());
   const [showOrderSheet, setShowOrderSheet] = useState(false);
-  const [orderCopied, setOrderCopied]       = useState(false);
+  const [orderSaved, setOrderSaved]         = useState(false);
   const [showStaffCard, setShowStaffCard]   = useState(false);
   const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
 
@@ -354,55 +355,27 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     });
   }
 
-  async function copyOrderToClipboard() {
-    let text = `My order at ${restaurant!.name}:\n\n`;
+  function saveOrderToAccount() {
+    if (!restaurant || orderedItems.length === 0) return;
 
-    if (restaurant?.builderConfig) {
-      // Builder restaurants: format as one cohesive meal
+    if (restaurant.builderConfig) {
       const steps = restaurant.builderConfig.steps;
       const stepGroups = steps.map((step) => {
         const sec = vm?.sections.find((s) => s.sectionName === step.category);
-        const items = sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? [];
-        return { step, items };
+        const items = (sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? []).map((i) => ({
+          id: i.id, name: i.name, risk: i.risk, category: i.category,
+        }));
+        return { label: step.label.replace(/^(Choose your |Choose |Pick |Add )/i, ""), items };
       }).filter((g) => g.items.length > 0);
 
-      const [mainGroup, ...modifierGroups] = stepGroups;
-      if (mainGroup) {
-        text += `${mainGroup.items[0]?.name ?? "Custom Order"}\n`;
-        modifierGroups.forEach(({ step, items }) => {
-          const label = step.label.replace(/^(Choose your |Choose |Pick |Add )/i, "");
-          text += `  ${label}: ${items.map((i) => i.name).join(", ")}\n`;
-        });
-      }
-
-      // Any extra non-builder items
-      const builderItemIds = new Set(steps.flatMap((step) => {
-        const sec = vm?.sections.find((s) => s.sectionName === step.category);
-        return sec?.items.map((i) => i.id) ?? [];
-      }));
-      const extraItems = orderedItems.filter((i) => !builderItemIds.has(i.id));
-      if (extraItems.length > 0) {
-        text += "\nAlso:\n";
-        extraItems.forEach((i) => { text += `  + ${i.name}\n`; });
-      }
+      saveOrder({ restaurantId: restaurant.id, restaurantName: restaurant.name, stepGroups });
     } else {
-      // Regular restaurants: flat list grouped by risk
-      const safeItems = orderedItems.filter((i) => i.risk === "likely-safe");
-      const askItems  = orderedItems.filter((i) => i.risk === "ask");
-      safeItems.forEach((i) => { text += `✓ ${i.name}\n`; });
-      askItems.forEach((i)  => { text += `? ${i.name}\n`; });
+      const items = orderedItems.map((i) => ({ id: i.id, name: i.name, risk: i.risk, category: i.category }));
+      saveOrder({ restaurantId: restaurant.id, restaurantName: restaurant.name, items });
     }
 
-    const askItems = orderedItems.filter((i) => i.risk === "ask");
-    const questions = [...new Set(askItems.flatMap((i) => i.staffQuestions))];
-    if (questions.length > 0) {
-      text += `\nQuestions for staff:\n`;
-      questions.slice(0, 6).forEach((q) => { text += `• ${q}\n`; });
-    }
-
-    await navigator.clipboard.writeText(text.trim()).catch(() => {});
-    setOrderCopied(true);
-    setTimeout(() => setOrderCopied(false), 2500);
+    setOrderSaved(true);
+    setTimeout(() => setOrderSaved(false), 2500);
   }
 
   // Shared item renderer — wraps MenuItemCard with the feedback row
@@ -1393,13 +1366,13 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
               {/* Action buttons */}
               <div style={{ padding: "16px 20px 28px", display: "flex", flexDirection: "column", gap: 10 }}>
-                {/* Primary CTA */}
+                {/* Primary CTA — Save Order */}
                 <button
                   type="button"
-                  onClick={copyOrderToClipboard}
+                  onClick={saveOrderToAccount}
                   style={{
                     width: "100%", height: 54, borderRadius: 16,
-                    background: orderCopied ? "#16a34a" : "#eb1700",
+                    background: orderSaved ? "#16a34a" : "#eb1700",
                     color: "#fff", border: "none",
                     fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em",
                     cursor: "pointer",
@@ -1407,20 +1380,19 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     transition: "background 0.2s ease",
                   }}
                 >
-                  {orderCopied ? (
+                  {orderSaved ? (
                     <>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
-                      Copied to clipboard!
+                      Order saved!
                     </>
                   ) : (
                     <>
-                      Copy order to show staff
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
                       </svg>
+                      Save order
                     </>
                   )}
                 </button>
