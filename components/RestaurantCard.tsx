@@ -171,16 +171,16 @@ export function RestaurantCard({ restaurant: r }: Props) {
 
           {summary.total > 0 ? (
             <div>
-              <div style={{ height: 5, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex" }}>
-                <div style={{ width: `${safePercent}%`, background: "#22c55e" }} />
-                <div style={{ width: `${askPercent}%`, background: "#f59e0b" }} />
-                <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />
+              <div style={{ height: 7, borderRadius: 999, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)", overflow: "hidden", display: "flex", boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)" }}>
+                {safePercent > 0 && <div style={{ width: `${safePercent}%`, background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
+                {askPercent  > 0 && <div style={{ width: `${askPercent}%`,  background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
+                {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
-                <div style={{ display: "flex", gap: 14 }}>
-                  <Stat count={summary.likelySafe} label="Safe"  color="#16a34a" />
-                  <Stat count={summary.ask}        label="Ask"   color="#d97706" />
-                  <Stat count={summary.avoid}      label="Avoid" color="#dc2626" />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
+                <div style={{ display: "flex", gap: 7 }}>
+                  <Stat count={summary.likelySafe} label="Safe"  rgb="22,163,74"  isDark={isDark} />
+                  <Stat count={summary.ask}        label="Ask"   rgb="217,119,6"  isDark={isDark} />
+                  <Stat count={summary.avoid}      label="Avoid" rgb="220,38,38"  isDark={isDark} />
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                   <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
@@ -214,11 +214,16 @@ export function RestaurantCard({ restaurant: r }: Props) {
   );
 }
 
-function Stat({ count, label, color }: { count: number; label: string; color: string }) {
+function Stat({ count, label, rgb, isDark }: { count: number; label: string; rgb: string; isDark: boolean }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-      <span style={{ fontSize: 15, fontWeight: 800, color }}>{count}</span>
-      <span style={{ fontSize: 14, color: "var(--c-sub)" }}>{label}</span>
+    <div style={{
+      display: "flex", alignItems: "center", gap: 5,
+      padding: "4px 10px", borderRadius: 999,
+      background: `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
+      border: `1px solid rgba(${rgb},${isDark ? "0.28" : "0.16"})`,
+    }}>
+      <span style={{ fontSize: 14, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.02em" }}>{count}</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color: `rgba(${rgb},${isDark ? "0.85" : "0.75"})` }}>{label}</span>
     </div>
   );
 }
