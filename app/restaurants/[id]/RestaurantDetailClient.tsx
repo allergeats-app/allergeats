@@ -79,6 +79,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [userAllergens, setUserAllergens] = useState<AllergenId[]>([]);
   const [notFound, setNotFound]           = useState(false);
   const [riskFilter, setRiskFilter]       = useState<RiskFilter>("likely-safe");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [photoFailed, setPhotoFailed]     = useState(false);
   const [photoLoaded, setPhotoLoaded]     = useState(false);
   const [questionsCopied, setQuestionsCopied] = useState(false);
@@ -770,7 +771,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 }}>
                   <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
                     {RISK_CHIPS.map((c) => (
-                      <button key={c.value} onClick={() => setRiskFilter(c.value)} style={{
+                      <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
                         padding: "11px 18px", borderRadius: 999,
                         border: `1.5px solid ${riskFilter === c.value ? "#eb1700" : "var(--c-border)"}`,
                         background: riskFilter === c.value ? "#eb1700" : "var(--c-card)",
@@ -782,6 +783,23 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       </button>
                     ))}
                   </div>
+                  {/* Category sub-filter */}
+                  {vm.sections.filter((s) => !isDrinkSection(s.sectionName)).length > 1 && (
+                    <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2, marginTop: 8 }}>
+                      {[{ key: "all", label: "All" }, ...vm.sections.filter((s) => !isDrinkSection(s.sectionName)).map((s) => ({ key: s.sectionName, label: s.sectionName }))].map((c) => (
+                        <button key={c.key} onClick={() => setCategoryFilter(c.key)} style={{
+                          padding: "6px 13px", borderRadius: 999,
+                          border: `1px solid ${categoryFilter === c.key ? "var(--c-text)" : "var(--c-border)"}`,
+                          background: categoryFilter === c.key ? "var(--c-text)" : "transparent",
+                          color: categoryFilter === c.key ? "var(--c-bg)" : "var(--c-sub)",
+                          fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
+                          cursor: "pointer", flexShrink: 0,
+                        }}>
+                          {c.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {filteredItems.length === 0 ? (
@@ -793,22 +811,23 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               return (
                 <>
                   {/* ── Food sections ── */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 32, paddingBottom: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingBottom: 8 }}>
                     {foodSections.map((section) => {
                       const items = bySectionFiltered.get(section.sectionName);
                       if (!items?.length) return null;
+                      if (categoryFilter !== "all" && section.sectionName !== categoryFilter) return null;
                       return (
                         <div key={section.sectionName}>
-                          <div style={{ marginBottom: 14 }}>
-                            <h2 style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", margin: "0 0 4px", letterSpacing: "-0.01em" }}>{section.sectionName}</h2>
+                          <div style={{ marginBottom: 8 }}>
+                            <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", margin: "0 0 2px", letterSpacing: "-0.01em" }}>{section.sectionName}</h2>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</span>
+                              <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</span>
                               {section.safeCount > 0 && riskFilter === "all" && (
-                                <span style={{ fontSize: 13, color: "#15803d", fontWeight: 700 }}>· {section.safeCount} safe for you</span>
+                                <span style={{ fontSize: 12, color: "#15803d", fontWeight: 700 }}>· {section.safeCount} safe for you</span>
                               )}
                             </div>
                           </div>
-                          <div style={{ display: "grid", gap: 10 }}>
+                          <div style={{ display: "grid", gap: 6 }}>
                             {items.map(renderItem)}
                           </div>
                         </div>
@@ -874,28 +893,28 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               }
               return (
                 <>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingBottom: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14, paddingBottom: 8 }}>
                     {RISK_ORDER.map((risk) => {
                       const items = foodByRisk[risk];
                       if (!items.length) return null;
                       const meta = RISK_META[risk];
                       return (
                         <div key={risk}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                             <div style={{
-                              width: 36, height: 36, borderRadius: 10,
+                              width: 32, height: 32, borderRadius: 9,
                               background: meta.bg, border: `1px solid ${meta.border}`,
                               display: "grid", placeItems: "center",
-                              fontSize: 14, fontWeight: 900, color: meta.color, flexShrink: 0,
+                              fontSize: 13, fontWeight: 900, color: meta.color, flexShrink: 0,
                             }}>
                               {meta.mark}
                             </div>
                             <div>
-                              <div style={{ fontWeight: 800, fontSize: 16, color: "var(--c-text)" }}>{meta.label}</div>
-                              <div style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
+                              <div style={{ fontWeight: 800, fontSize: 15, color: "var(--c-text)" }}>{meta.label}</div>
+                              <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
                             </div>
                           </div>
-                          <div style={{ display: "grid", gap: 8 }}>
+                          <div style={{ display: "grid", gap: 6 }}>
                             {items.map(renderItem)}
                           </div>
                         </div>

@@ -100,7 +100,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
         onClick={() => setOpen((v) => !v)}
         style={{
           display: "block", width: "100%", textAlign: "left",
-          background: "none", border: "none", padding: "16px 16px 14px",
+          background: "none", border: "none", padding: "11px 14px 10px",
           cursor: "pointer",
         }}
       >
