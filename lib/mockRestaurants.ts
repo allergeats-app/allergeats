@@ -77,21 +77,24 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your base",    category: "Bases",    required: true,  maxSelect: 99 },
-        { label: "Choose your protein", category: "Proteins", required: true,  maxSelect: 1  },
-        { label: "Add a salsa",         category: "Salsas",   required: false, maxSelect: 99 },
-        { label: "Add toppings",        category: "Toppings", required: false, maxSelect: 99 },
+        { label: "Choose your vessel",  category: "Vessel",       required: true,  maxSelect: 1  },
+        { label: "Add rice & beans",    category: "Rice & Beans", required: false, maxSelect: 99 },
+        { label: "Choose your protein", category: "Proteins",     required: true,  maxSelect: 1  },
+        { label: "Add a salsa",         category: "Salsas",       required: false, maxSelect: 99 },
+        { label: "Add toppings",        category: "Toppings",     required: false, maxSelect: 99 },
       ],
     },
     menuItems: [
-      // Bases
-      { id: "chip-flourtort",   name: "Flour Tortilla (Burrito)",         category: "Bases",    sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "chip-corntort",    name: "Corn Tortilla (Tacos)",            category: "Bases",    sourceType: "official", allergens: ["corn"] },
-      { id: "chip-bowl-base",   name: "Burrito Bowl Base",                category: "Bases",    sourceType: "official", allergens: [] },
-      { id: "chip-rice-white",  name: "Cilantro-Lime White Rice",         category: "Bases",    sourceType: "official", allergens: [] },
-      { id: "chip-rice-brown",  name: "Cilantro-Lime Brown Rice",         category: "Bases",    sourceType: "official", allergens: [] },
-      { id: "chip-black",       name: "Black Beans",                      category: "Bases",    sourceType: "official", allergens: [] },
-      { id: "chip-pinto",       name: "Pinto Beans",                      category: "Bases",    sourceType: "official", allergens: [] },
+      // Vessel — pick your format
+      { id: "chip-flourtort",   name: "Flour Tortilla (Burrito)",         category: "Vessel",       sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "chip-corntort",    name: "Corn Tortilla (Tacos)",            category: "Vessel",       sourceType: "official", allergens: ["corn"] },
+      { id: "chip-bowl-base",   name: "Burrito Bowl",                     category: "Vessel",       sourceType: "official", allergens: [] },
+      { id: "chip-salad-base",  name: "Salad",                            category: "Vessel",       sourceType: "official", allergens: [] },
+      // Rice & Beans
+      { id: "chip-rice-white",  name: "Cilantro-Lime White Rice",         category: "Rice & Beans", sourceType: "official", allergens: [] },
+      { id: "chip-rice-brown",  name: "Cilantro-Lime Brown Rice",         category: "Rice & Beans", sourceType: "official", allergens: [] },
+      { id: "chip-black",       name: "Black Beans",                      category: "Rice & Beans", sourceType: "official", allergens: [] },
+      { id: "chip-pinto",       name: "Pinto Beans",                      category: "Rice & Beans", sourceType: "official", allergens: [] },
       // Proteins
       { id: "chip-chicken",     name: "Grilled Chicken",                  category: "Proteins", sourceType: "official", allergens: [] },
       { id: "chip-steak",       name: "Carne Asada Steak",                category: "Proteins", sourceType: "official", allergens: [] },

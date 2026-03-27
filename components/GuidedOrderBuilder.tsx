@@ -13,11 +13,19 @@ const RISK_DOT: Record<string, string> = {
 };
 
 const RISK_BADGE: Record<string, { bg: string; color: string; label: string }> = {
-  "likely-safe": { bg: "rgba(22,163,74,0.1)",   color: "var(--c-risk-safe)",  label: "Safe"      },
-  "ask":         { bg: "rgba(217,119,6,0.1)",   color: "var(--c-risk-ask)",   label: "Ask staff" },
-  "avoid":       { bg: "rgba(220,38,38,0.08)",  color: "var(--c-risk-avoid)", label: "Avoid"     },
-  "unknown":     { bg: "var(--c-muted)",         color: "var(--c-sub)",        label: "Unknown"   },
+  "likely-safe": { bg: "rgba(22,163,74,0.1)",  color: "var(--c-risk-safe)",  label: "Safe"      },
+  "ask":         { bg: "rgba(217,119,6,0.1)",  color: "var(--c-risk-ask)",   label: "Ask staff" },
+  "avoid":       { bg: "rgba(220,38,38,0.08)", color: "var(--c-risk-avoid)", label: "Avoid"     },
+  "unknown":     { bg: "var(--c-muted)",        color: "var(--c-sub)",        label: "Unknown"   },
 };
+
+// Label cleanup for the review summary
+function stepSummaryLabel(label: string): string {
+  return label
+    .replace(/^Choose your /i, "")
+    .replace(/^Add /i, "")
+    .replace(/^Pick /i, "");
+}
 
 type Props = {
   steps: BuilderStep[];
@@ -31,38 +39,42 @@ type Props = {
 export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOrder, onOpenOrder, onBrowse }: Props) {
   const { isDark } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
-  const [done, setDone] = useState(false);
-  // track which items were picked at each step so we can handle single-select replacement
-  const [stepPicks, setStepPicks] = useState<Record<number, Set<string>>>({});
+  const [done, setDone]               = useState(false);
 
-  const step = steps[currentStep];
+  const step    = steps[currentStep];
   const section = sections.find((s) => s.sectionName === step?.category);
   const stepItems = section?.items ?? [];
 
-  // Sort: safe → ask → unknown → avoid
+  // Always derive selection state directly from orderedItemIds — never from local state.
+  // This prevents stale-closure bugs and keeps the UI in sync with the order at all times.
   const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
   const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
 
-  const picksForStep = stepPicks[currentStep] ?? new Set<string>();
   const isSingle = step?.maxSelect === 1;
+  // Items in this step that are currently in the order
+  const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
-  // Count total selected items across all builder steps
-  const totalBuilderItems = Object.values(stepPicks).reduce((n, s) => n + s.size, 0);
+  // Count total builder-selected items (items from any step that are in the order)
+  const totalBuilderItems = steps.reduce((n, s) => {
+    const sec = sections.find((sec) => sec.sectionName === s.category);
+    return n + (sec?.items.filter((i) => orderedItemIds.has(i.id)).length ?? 0);
+  }, 0);
 
   function selectItem(item: AnalyzedMenuItem) {
     if (item.risk === "avoid") return;
 
     if (isSingle) {
-      // Deselect previous pick for this step from the order
-      const prev = stepPicks[currentStep] ?? new Set<string>();
-      for (const prevId of prev) {
-        if (orderedItemIds.has(prevId)) onToggleOrder(prevId);
+      // Remove any other item from this step currently in the order
+      for (const stepItem of stepItems) {
+        if (stepItem.id !== item.id && orderedItemIds.has(stepItem.id)) {
+          onToggleOrder(stepItem.id);
+        }
       }
-      // Add new item to order
-      if (!orderedItemIds.has(item.id)) onToggleOrder(item.id);
-      setStepPicks((p) => ({ ...p, [currentStep]: new Set([item.id]) }));
-
-      // Auto-advance after brief delay
+      // Add new item (if not already selected)
+      if (!orderedItemIds.has(item.id)) {
+        onToggleOrder(item.id);
+      }
+      // Auto-advance
       setTimeout(() => {
         if (currentStep < steps.length - 1) {
           setCurrentStep((s) => s + 1);
@@ -71,14 +83,8 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         }
       }, 280);
     } else {
-      // Multi-select: toggle
-      const isSelected = picksForStep.has(item.id);
+      // Multi-select: simple toggle
       onToggleOrder(item.id);
-      setStepPicks((p) => {
-        const s = new Set(p[currentStep] ?? []);
-        if (isSelected) s.delete(item.id); else s.add(item.id);
-        return { ...p, [currentStep]: s };
-      });
     }
   }
 
@@ -96,13 +102,13 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   }
 
   function startOver() {
-    // Remove all builder-picked items from order
-    for (const picks of Object.values(stepPicks)) {
-      for (const id of picks) {
-        if (orderedItemIds.has(id)) onToggleOrder(id);
+    // Remove every builder item from the order (across all steps)
+    for (const s of steps) {
+      const sec = sections.find((sec) => sec.sectionName === s.category);
+      for (const item of sec?.items ?? []) {
+        if (orderedItemIds.has(item.id)) onToggleOrder(item.id);
       }
     }
-    setStepPicks({});
     setCurrentStep(0);
     setDone(false);
   }
@@ -118,24 +124,26 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         <div style={{ textAlign: "center", paddingBottom: 4 }}>
           <div style={{ fontSize: 28, marginBottom: 6 }}>✓</div>
           <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>Your order is built!</div>
-          <div style={{ fontSize: 14, color: "var(--c-sub)" }}>{totalBuilderItems} item{totalBuilderItems !== 1 ? "s" : ""} added to your order</div>
+          <div style={{ fontSize: 14, color: "var(--c-sub)" }}>
+            {totalBuilderItems} item{totalBuilderItems !== 1 ? "s" : ""} added to your order
+          </div>
         </div>
 
-        {/* Summary by step */}
+        {/* Summary by step — derived from orderedItemIds, always accurate */}
         <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: "hidden" }}>
           {steps.map((s, i) => {
-            const picks = stepPicks[i];
-            if (!picks?.size) return null;
             const sec = sections.find((sec) => sec.sectionName === s.category);
-            const pickedItems = sec?.items.filter((item) => picks.has(item.id)) ?? [];
+            const pickedItems = sec?.items.filter((item) => orderedItemIds.has(item.id)) ?? [];
+            if (!pickedItems.length) return null;
+            const isLast = i === steps.length - 1;
             return (
               <div key={i} style={{
                 padding: "14px 16px",
-                borderBottom: i < steps.length - 1 ? `1px solid ${cardBorder}` : "none",
-                display: "flex", flexDirection: "column", gap: 4,
+                borderBottom: isLast ? "none" : `1px solid ${cardBorder}`,
+                display: "flex", flexDirection: "column", gap: 6,
               }}>
                 <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  {s.label.replace("Choose your ", "").replace("Add ", "")}
+                  {stepSummaryLabel(s.label)}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {pickedItems.map((item) => {
@@ -188,17 +196,17 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
       {/* ── Progress dots ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0 }}>
         {steps.map((_, i) => {
-          const isActive = i === currentStep;
-          const isDone   = i < currentStep;
+          const isActive  = i === currentStep;
+          const isStepDone = i < currentStep;
           return (
             <div key={i} style={{ display: "flex", alignItems: "center" }}>
               <div style={{
                 width: isActive ? 32 : 10, height: 10, borderRadius: 999,
-                background: isActive ? "#eb1700" : isDone ? "#eb1700" : (isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb"),
+                background: isActive ? "#eb1700" : isStepDone ? "#eb1700" : (isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb"),
                 transition: "all 0.25s ease",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                {isDone && (
+                {isStepDone && (
                   <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
@@ -207,7 +215,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               {i < steps.length - 1 && (
                 <div style={{
                   width: 18, height: 2,
-                  background: isDone ? "#eb1700" : (isDark ? "rgba(255,255,255,0.1)" : "#e5e7eb"),
+                  background: isStepDone ? "#eb1700" : (isDark ? "rgba(255,255,255,0.1)" : "#e5e7eb"),
                   transition: "background 0.25s ease",
                 }} />
               )}
@@ -225,7 +233,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           {step?.label}
         </div>
         <div style={{ fontSize: 13, color: "var(--c-sub)" }}>
-          {isSingle ? "Pick one" : "Pick as many as you'd like"}
+          {isSingle ? "Pick one" : step?.maxSelect && step.maxSelect < 99 ? `Pick up to ${step.maxSelect}` : "Pick as many as you'd like"}
           {!step?.required && " · optional"}
         </div>
       </div>
@@ -237,7 +245,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             No items available
           </div>
         ) : sortedItems.map((item, idx) => {
-          const isSelected = picksForStep.has(item.id);
+          const isSelected = orderedItemIds.has(item.id); // always fresh — no stale state
           const isAvoid    = item.risk === "avoid";
           const badge      = RISK_BADGE[item.risk] ?? RISK_BADGE["unknown"];
           const dot        = RISK_DOT[item.risk] ?? "#9ca3af";
@@ -290,10 +298,10 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                 {badge.label}
               </span>
 
-              {/* Check or add indicator */}
+              {/* Check indicator */}
               {!isAvoid && (
                 <div style={{
-                  width: 22, height: 22, borderRadius: 999, flexShrink: 0,
+                  width: 22, height: 22, borderRadius: isSingle ? 999 : 6, flexShrink: 0,
                   border: isSelected ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.2)" : "#d1d5db"}`,
                   background: isSelected ? "#eb1700" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
@@ -313,7 +321,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
 
       {/* ── Navigation ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        {/* Back / nothing */}
         {currentStep > 0 ? (
           <button onClick={goBack} style={{
             background: "none", border: `1px solid ${cardBorder}`,
@@ -324,7 +331,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           </button>
         ) : <div />}
 
-        {/* Right side: skip (optional) or continue (multi-select) */}
         {isSingle ? (
           !step?.required && (
             <button onClick={advance} style={{
@@ -338,16 +344,15 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           <button
             onClick={advance}
             style={{
-              flex: 1, padding: "13px 0", borderRadius: 12,
-              border: "none",
-              background: picksForStep.size > 0 ? "#eb1700" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
-              color: picksForStep.size > 0 ? "#fff" : "var(--c-sub)",
+              flex: 1, padding: "13px 0", borderRadius: 12, border: "none",
+              background: picksForStep.length > 0 ? "#eb1700" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
+              color: picksForStep.length > 0 ? "#fff" : "var(--c-sub)",
               fontSize: 15, fontWeight: 800, cursor: "pointer", minHeight: 48,
               transition: "background 0.15s, color 0.15s",
             }}
           >
-            {picksForStep.size > 0
-              ? `Continue with ${picksForStep.size} item${picksForStep.size !== 1 ? "s" : ""} →`
+            {picksForStep.length > 0
+              ? `Continue with ${picksForStep.length} item${picksForStep.length !== 1 ? "s" : ""} →`
               : step?.required ? "Select at least one" : "Skip this step →"}
           </button>
         )}
