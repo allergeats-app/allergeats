@@ -574,17 +574,27 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             ) : (
               <>
                 {/* Safety bar */}
-                <div style={{ height: 7, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex", marginBottom: 12 }}>
-                  <div style={{ width: `${safePercent}%`,  background: "#22c55e", transition: "width 0.5s" }} />
-                  <div style={{ width: `${askPercent}%`,   background: "#f59e0b", transition: "width 0.5s" }} />
-                  <div style={{ width: `${avoidPercent}%`, background: "#ef4444", transition: "width 0.5s" }} />
-                </div>
+                {(() => {
+                  const glowRgb = avoidPercent > 40 ? "239,68,68" : askPercent > 40 ? "245,158,11" : "34,197,94";
+                  return (
+                    <div style={{
+                      height: 8, borderRadius: 999,
+                      background: "var(--c-muted)",
+                      overflow: "hidden", display: "flex", marginBottom: 12,
+                      boxShadow: `0 0 10px 2px rgba(${glowRgb},0.35), inset 0 1px 3px rgba(0,0,0,0.15)`,
+                    }}>
+                      {safePercent > 0  && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s" }} />}
+                      {askPercent > 0   && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s" }} />}
+                      {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)", transition: "width 0.5s" }} />}
+                    </div>
+                  );
+                })()}
 
                 {/* ── 2. Quick stats row ── */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-                  <StatPill count={summary.likelySafe} label="Safe"  color="#15803d" bg="#f0fdf4" active={riskFilter === "likely-safe"} onClick={() => { setRiskFilter("likely-safe"); document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
-                  <StatPill count={summary.ask}        label="Ask"   color="#854d0e" bg="#fefce8" active={riskFilter === "ask"}         onClick={() => { setRiskFilter("ask");          document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
-                  <StatPill count={summary.avoid}      label="Avoid" color="#b91c1c" bg="#fff1f0" active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatPill count={summary.likelySafe} label="Safe"  color="#15803d" bg="#f0fdf4" rgb="21,128,61"  active={riskFilter === "likely-safe"} onClick={() => { setRiskFilter("likely-safe"); document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatPill count={summary.ask}        label="Ask"   color="#854d0e" bg="#fefce8" rgb="133,77,14"  active={riskFilter === "ask"}         onClick={() => { setRiskFilter("ask");          document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatPill count={summary.avoid}      label="Avoid" color="#b91c1c" bg="#fff1f0" rgb="185,28,28"  active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                 </div>
 
                 {/* Coverage trust signal */}
@@ -1316,8 +1326,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
 // ── Helper components ─────────────────────────────────────────────────────────
 
-function StatPill({ count, label, color, bg, active, onClick }: {
-  count: number; label: string; color: string; bg: string;
+function StatPill({ count, label, color, bg, rgb, active, onClick }: {
+  count: number; label: string; color: string; bg: string; rgb: string;
   active?: boolean; onClick?: () => void;
 }) {
   return (
@@ -1327,15 +1337,16 @@ function StatPill({ count, label, color, bg, active, onClick }: {
       title={`Show ${label.toLowerCase()} items`}
       style={{
         flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-        padding: "10px 8px", borderRadius: 12, background: bg,
-        border: active ? `2px solid ${color}` : "2px solid transparent",
+        padding: "12px 8px", borderRadius: 14, background: bg,
+        border: active ? `2px solid ${color}` : `1.5px solid rgba(${rgb},0.25)`,
         cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.15s",
+        boxShadow: count > 0 ? `0 2px 12px rgba(${rgb},0.2)` : "none",
+        transition: "border-color 0.15s, box-shadow 0.15s",
       }}
     >
-      <span style={{ fontWeight: 900, fontSize: 24, color, lineHeight: 1 }}>{count}</span>
-      <span style={{ fontSize: 13, color, opacity: 0.85, marginTop: 3, fontWeight: 700 }}>{label}</span>
-      {onClick && <span style={{ fontSize: 11, color, opacity: 0.6, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
+      <span style={{ fontWeight: 900, fontSize: 26, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{count}</span>
+      <span style={{ fontSize: 13, color, opacity: 0.85, marginTop: 4, fontWeight: 800 }}>{label}</span>
+      {onClick && <span style={{ fontSize: 11, color, opacity: 0.55, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
     </button>
   );
 }
