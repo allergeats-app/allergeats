@@ -355,16 +355,51 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   async function copyOrderToClipboard() {
-    const safeItems = orderedItems.filter((i) => i.risk === "likely-safe");
-    const askItems  = orderedItems.filter((i) => i.risk === "ask");
-    const questions = [...new Set(askItems.flatMap((i) => i.staffQuestions))];
     let text = `My order at ${restaurant!.name}:\n\n`;
-    safeItems.forEach((i) => { text += `✓ ${i.name}\n`; });
-    askItems.forEach((i)  => { text += `? ${i.name}\n`; });
+
+    if (restaurant?.builderConfig) {
+      // Builder restaurants: format as one cohesive meal
+      const steps = restaurant.builderConfig.steps;
+      const stepGroups = steps.map((step) => {
+        const sec = vm?.sections.find((s) => s.sectionName === step.category);
+        const items = sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? [];
+        return { step, items };
+      }).filter((g) => g.items.length > 0);
+
+      const [mainGroup, ...modifierGroups] = stepGroups;
+      if (mainGroup) {
+        text += `${mainGroup.items[0]?.name ?? "Custom Order"}\n`;
+        modifierGroups.forEach(({ step, items }) => {
+          const label = step.label.replace(/^(Choose your |Choose |Pick |Add )/i, "");
+          text += `  ${label}: ${items.map((i) => i.name).join(", ")}\n`;
+        });
+      }
+
+      // Any extra non-builder items
+      const builderItemIds = new Set(steps.flatMap((step) => {
+        const sec = vm?.sections.find((s) => s.sectionName === step.category);
+        return sec?.items.map((i) => i.id) ?? [];
+      }));
+      const extraItems = orderedItems.filter((i) => !builderItemIds.has(i.id));
+      if (extraItems.length > 0) {
+        text += "\nAlso:\n";
+        extraItems.forEach((i) => { text += `  + ${i.name}\n`; });
+      }
+    } else {
+      // Regular restaurants: flat list grouped by risk
+      const safeItems = orderedItems.filter((i) => i.risk === "likely-safe");
+      const askItems  = orderedItems.filter((i) => i.risk === "ask");
+      safeItems.forEach((i) => { text += `✓ ${i.name}\n`; });
+      askItems.forEach((i)  => { text += `? ${i.name}\n`; });
+    }
+
+    const askItems = orderedItems.filter((i) => i.risk === "ask");
+    const questions = [...new Set(askItems.flatMap((i) => i.staffQuestions))];
     if (questions.length > 0) {
       text += `\nQuestions for staff:\n`;
       questions.slice(0, 6).forEach((q) => { text += `• ${q}\n`; });
     }
+
     await navigator.clipboard.writeText(text.trim()).catch(() => {});
     setOrderCopied(true);
     setTimeout(() => setOrderCopied(false), 2500);
@@ -1155,13 +1190,13 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     // Builder restaurants: group into one cohesive meal card
                     const steps = restaurant.builderConfig!.steps;
                     const builderItemIds = new Set(steps.flatMap((step) => {
-                      const sec = vm.sections.find((s) => s.sectionName === step.category);
+                      const sec = vm?.sections.find((s) => s.sectionName === step.category);
                       return sec?.items.map((i) => i.id) ?? [];
                     }));
 
                     // Group selected items by step
                     const stepGroups = steps.map((step) => {
-                      const sec = vm.sections.find((s) => s.sectionName === step.category);
+                      const sec = vm?.sections.find((s) => s.sectionName === step.category);
                       const items = sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? [];
                       return { step, items };
                     }).filter((g) => g.items.length > 0);
