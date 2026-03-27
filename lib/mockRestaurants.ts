@@ -1342,7 +1342,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       steps: [
         { label: "Choose your wings",   category: "Wings",    required: true,  maxSelect: 1  },
         { label: "Choose your sauce",   category: "Sauces",   required: true,  maxSelect: 1  },
-        { label: "Add a side",          category: "Sides",    required: false, maxSelect: 99 },
+        { label: "Add a side & dip",    category: "Sides",    required: false, maxSelect: 99 },
       ],
     },
     menuItems: [
