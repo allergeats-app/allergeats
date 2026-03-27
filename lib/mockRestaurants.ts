@@ -75,6 +75,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["mexican"],
     distance: 0.7,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your base",    category: "Bases",    required: true,  maxSelect: 99 },
+        { label: "Choose your protein", category: "Proteins", required: true,  maxSelect: 1  },
+        { label: "Add a salsa",         category: "Salsas",   required: false, maxSelect: 99 },
+        { label: "Add toppings",        category: "Toppings", required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
       // Bases
       { id: "chip-flourtort",   name: "Flour Tortilla (Burrito)",         category: "Bases",    sourceType: "official", allergens: ["wheat","soy"] },
@@ -253,6 +261,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["sandwiches"],
     distance: 0.5,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your bread",    category: "Breads",     required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins",   required: true,  maxSelect: 1  },
+        { label: "Add cheese",           category: "Cheeses",    required: false, maxSelect: 1  },
+        { label: "Add vegetables",       category: "Vegetables", required: false, maxSelect: 99 },
+        { label: "Add sauces",           category: "Sauces",     required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
       // Breads — pick your base
       { id: "sub-italian",        name: "Italian White Bread",               category: "Breads",      sourceType: "official", allergens: ["wheat","soy"] },
@@ -722,6 +739,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["sandwiches"],
     distance: 0.5,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your bread",    category: "Breads",     required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins",   required: true,  maxSelect: 1  },
+        { label: "Add cheese",           category: "Cheeses",    required: false, maxSelect: 1  },
+        { label: "Add toppings",         category: "Toppings",   required: false, maxSelect: 99 },
+        { label: "Add condiments",       category: "Condiments", required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
       // Breads — pick your bread
       { id: "jj-b-french",        name: "French Bread",                     category: "Breads",    sourceType: "official", allergens: ["wheat","soy"] },

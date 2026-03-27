@@ -136,6 +136,22 @@ export type RestaurantTag =
   | "brunch" | "pancakes" | "american" | "drive-in" | "roast-beef" | "texas"
   | "ice-cream" | "custard" | "cheesecake" | "24-hour" | "burritos" | "tacos";
 
+// ─── Guided order builder config ────────────────────────────────────────────
+export type BuilderStep = {
+  /** Question shown to user, e.g. "Choose your bread" */
+  label: string;
+  /** Category name matching sectionName in the menu, e.g. "Breads" */
+  category: string;
+  /** Whether the user must pick at least one item before advancing */
+  required: boolean;
+  /** 1 = single-select (auto-advance); >1 = multi-select with Continue button */
+  maxSelect: number;
+};
+
+export type BuilderConfig = {
+  steps: BuilderStep[];
+};
+
 // ─── Restaurant ─────────────────────────────────────────────────────────────
 export type Restaurant = {
   id: string;
@@ -161,6 +177,8 @@ export type Restaurant = {
    * by location and have not been verified for this specific store.
    */
   menuIsGenericChainTemplate?: boolean;
+  /** When present, the restaurant supports a guided step-by-step order builder */
+  builderConfig?: BuilderConfig;
 };
 
 // ─── Restaurant with scoring applied ────────────────────────────────────────

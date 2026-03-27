@@ -14,6 +14,7 @@ import { toRawMenuItems } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
 import { useFavorites } from "@/lib/favoritesContext";
 import { MenuItemCard } from "@/components/MenuItemCard";
+import { GuidedOrderBuilder } from "@/components/GuidedOrderBuilder";
 import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
 import { ShowStaffCard } from "@/components/ShowStaffCard";
@@ -90,6 +91,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [showOrderSheet, setShowOrderSheet] = useState(false);
   const [orderCopied, setOrderCopied]       = useState(false);
   const [showStaffCard, setShowStaffCard]   = useState(false);
+  const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
 
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -726,37 +728,77 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         {/* ── 5. Full menu ── */}
         {!hasNoMenu && (
           <section id="full-menu">
-            <SectionHeader label="Menu" count={summary.total} />
-
-            {/* Sticky risk filter chips */}
-            <div style={{
-              position: "sticky", top: 48, zIndex: 40,
-              background: "var(--c-bg)",
-              marginLeft: -16, marginRight: -16,
-              paddingLeft: 16, paddingRight: 16,
-              paddingTop: 8, paddingBottom: 8,
-              borderBottom: "1px solid var(--c-border)",
-              marginBottom: 16,
-            }}>
-              <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
-                {RISK_CHIPS.map((c) => (
-                  <button key={c.value} onClick={() => setRiskFilter(c.value)} style={{
-                    padding: "11px 18px", borderRadius: 999,
-                    border: `1.5px solid ${riskFilter === c.value ? "#eb1700" : "var(--c-border)"}`,
-                    background: riskFilter === c.value ? "#eb1700" : "var(--c-card)",
-                    color: riskFilter === c.value ? "#fff" : "var(--c-text)",
-                    fontSize: 15, fontWeight: 700, whiteSpace: "nowrap",
-                    cursor: "pointer", flexShrink: 0, minHeight: 44,
-                  }}>
-                    {c.label}
+            {/* ── Guided builder mode ── */}
+            {restaurant?.builderConfig && !builderBrowseMode ? (
+              <>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.01em" }}>Build Your Order</div>
+                  <button
+                    onClick={() => setBuilderBrowseMode(true)}
+                    style={{
+                      background: "none", border: `1px solid var(--c-border)`,
+                      borderRadius: 10, padding: "8px 14px",
+                      fontSize: 13, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer",
+                    }}
+                  >
+                    Full menu
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
+                <GuidedOrderBuilder
+                  steps={restaurant.builderConfig.steps}
+                  sections={vm.sections}
+                  orderedItemIds={orderedItemIds}
+                  onToggleOrder={toggleOrderItem}
+                  onOpenOrder={() => setShowOrderSheet(true)}
+                  onBrowse={() => setBuilderBrowseMode(true)}
+                />
+              </>
+            ) : (
+              <>
+                {restaurant?.builderConfig && builderBrowseMode && (
+                  <button
+                    onClick={() => setBuilderBrowseMode(false)}
+                    style={{
+                      background: "none", border: "none", padding: "0 0 16px",
+                      fontSize: 14, fontWeight: 700, color: "#eb1700", cursor: "pointer",
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                    Back to order builder
+                  </button>
+                )}
+                <SectionHeader label="Menu" count={summary.total} />
 
-            {filteredItems.length === 0 ? (
-              <EmptyState title="No items match" subtitle="Try a different filter." />
-            ) : hasCategories ? (() => {
+                {/* Sticky risk filter chips */}
+                <div style={{
+                  position: "sticky", top: 48, zIndex: 40,
+                  background: "var(--c-bg)",
+                  marginLeft: -16, marginRight: -16,
+                  paddingLeft: 16, paddingRight: 16,
+                  paddingTop: 8, paddingBottom: 8,
+                  borderBottom: "1px solid var(--c-border)",
+                  marginBottom: 16,
+                }}>
+                  <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+                    {RISK_CHIPS.map((c) => (
+                      <button key={c.value} onClick={() => setRiskFilter(c.value)} style={{
+                        padding: "11px 18px", borderRadius: 999,
+                        border: `1.5px solid ${riskFilter === c.value ? "#eb1700" : "var(--c-border)"}`,
+                        background: riskFilter === c.value ? "#eb1700" : "var(--c-card)",
+                        color: riskFilter === c.value ? "#fff" : "var(--c-text)",
+                        fontSize: 15, fontWeight: 700, whiteSpace: "nowrap",
+                        cursor: "pointer", flexShrink: 0, minHeight: 44,
+                      }}>
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {filteredItems.length === 0 ? (
+                  <EmptyState title="No items match" subtitle="Try a different filter." />
+                ) : hasCategories ? (() => {
               const foodSections = vm.sections.filter((s) => !isDrinkSection(s.sectionName));
               const drinkSections = vm.sections.filter((s) => isDrinkSection(s.sectionName));
               const drinkItems = drinkSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
@@ -906,6 +948,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </>
               );
             })()}
+              </>
+            )}
           </section>
         )}
 
