@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
@@ -8,6 +9,8 @@ import { ThemeProvider } from "@/lib/themeContext";
 import { Analytics } from "@vercel/analytics/next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,6 +74,8 @@ export default function RootLayout({
             <FavoritesProvider>
               <ErrorBoundary>
                 <OfflineBanner />
+                <OnboardingModal />
+                <FeedbackButton />
                 {children}
                 <footer style={{
                   textAlign: "center",
@@ -80,6 +85,10 @@ export default function RootLayout({
                   lineHeight: 1.6,
                 }}>
                   Always confirm with staff before ordering.<br />AllergEats is a decision-support tool, not medical advice.
+                  <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 20 }}>
+                    <Link href="/privacy" style={{ color: "var(--c-sub)", textDecoration: "none", fontWeight: 600 }}>Privacy Policy</Link>
+                    <Link href="/terms" style={{ color: "var(--c-sub)", textDecoration: "none", fontWeight: 600 }}>Terms of Service</Link>
+                  </div>
                 </footer>
               </ErrorBoundary>
             </FavoritesProvider>

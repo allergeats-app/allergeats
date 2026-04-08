@@ -14,6 +14,13 @@
 
 import type { Restaurant } from "./types";
 
+/**
+ * ISO date when allergen data was last manually verified against
+ * each chain's published allergen guide. Update this whenever you
+ * audit and confirm the data is still accurate.
+ */
+export const MENU_DATA_VERIFIED_DATE = "2026-04-07";
+
 export const MOCK_RESTAURANTS: Restaurant[] = [
 
   // ─── McDonald's ─────────────────────────────────────────────────────────────

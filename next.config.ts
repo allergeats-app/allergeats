@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   // Prevent the page from being embedded in an iframe (clickjacking)
@@ -22,7 +23,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://va.vercel-insights.com https://nominatim.openstreetmap.org https://overpass-api.de https://overpass.kumi.systems https://overpass.openstreetmap.fr",
+      "connect-src 'self' https://*.supabase.co https://va.vercel-insights.com https://nominatim.openstreetmap.org https://overpass-api.de https://overpass.kumi.systems https://overpass.openstreetmap.fr https://*.sentry.io",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -41,4 +42,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry org + project (fill in after creating project at sentry.io)
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Auth token for source map uploads (set SENTRY_AUTH_TOKEN in Vercel env vars)
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  // Silences Sentry's build-time output
+  silent: true,
+
+  // Automatically tree-shake Sentry logger statements in production
+  disableLogger: true,
+
+  // Upload source maps so stack traces show original code
+  widenClientFileUpload: true,
+});

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { use } from "react";
 import { SettingsButton } from "@/components/SettingsButton";
-import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
+import { MOCK_RESTAURANTS, MENU_DATA_VERIFIED_DATE } from "@/lib/mockRestaurants";
 import { loadProfileAllergens } from "@/lib/allergenProfile";
 import { coverageTierColor } from "@/lib/scoring";
 import { fitLevel } from "@/lib/fitLevel";
@@ -540,6 +540,27 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 {hero.fitExplanation}
               </div>
             )}
+
+            {/* Staleness notice for official allergen data */}
+            {restaurant.sourceType === "official" && (() => {
+              const verifiedMs = new Date(MENU_DATA_VERIFIED_DATE).getTime();
+              const ageMonths = (Date.now() - verifiedMs) / (1000 * 60 * 60 * 24 * 30);
+              const isStale = ageMonths > 6;
+              const displayDate = new Date(MENU_DATA_VERIFIED_DATE).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+              return (
+                <div style={{
+                  fontSize: 12, color: isStale ? "#b91c1c" : "var(--c-sub)",
+                  background: isStale ? "rgba(185,28,28,0.07)" : "var(--c-muted)",
+                  border: `1px solid ${isStale ? "rgba(185,28,28,0.2)" : "var(--c-border)"}`,
+                  borderRadius: 10, padding: "8px 12px", marginBottom: 14, lineHeight: 1.5,
+                }}>
+                  {isStale
+                    ? `Allergen data last verified ${displayDate} — may be out of date. Always confirm with staff.`
+                    : `Allergen data verified ${displayDate}. Always confirm with staff before ordering.`
+                  }
+                </div>
+              );
+            })()}
 
             {hasNoMenu ? (
               <div style={{ padding: 16, borderRadius: 14, background: "var(--c-muted)", border: "1px solid var(--c-border)" }}>
