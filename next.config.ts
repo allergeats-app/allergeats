@@ -53,9 +53,6 @@ export default withSentryConfig(nextConfig, {
   // Silences Sentry's build-time output
   silent: true,
 
-  // Automatically tree-shake Sentry logger statements in production
-  disableLogger: true,
-
   // Upload source maps so stack traces show original code
   widenClientFileUpload: true,
 });
