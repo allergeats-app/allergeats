@@ -40,8 +40,9 @@ export default function AuthCallbackPage() {
     const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
       if (sess) {
         finish("/");
-      } else if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
-        // Exchange failed — fall back to error
+      } else if (event === "SIGNED_OUT") {
+        // Only treat explicit sign-out as a failure — TOKEN_REFRESHED with no session
+        // is a normal background event and should not trigger an error redirect.
         finish("/auth?error=oauth_cancelled");
       }
     });
