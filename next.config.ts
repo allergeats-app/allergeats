@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   // Prevent the page from being embedded in an iframe (clickjacking)
@@ -42,17 +41,16 @@ const nextConfig: NextConfig = {
   },
 };
 
+import { withSentryConfig } from "@sentry/nextjs";
+
+const sentryEnabled = Boolean(process.env.SENTRY_AUTH_TOKEN);
+
 export default withSentryConfig(nextConfig, {
-  // Sentry org + project (fill in after creating project at sentry.io)
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-
-  // Auth token for source map uploads (set SENTRY_AUTH_TOKEN in Vercel env vars)
   authToken: process.env.SENTRY_AUTH_TOKEN,
-
-  // Silences Sentry's build-time output
   silent: true,
-
-  // Upload source maps so stack traces show original code
-  widenClientFileUpload: true,
+  // Disable source map upload when credentials aren't configured
+  sourcemaps: { disable: !sentryEnabled },
+  widenClientFileUpload: sentryEnabled,
 });
