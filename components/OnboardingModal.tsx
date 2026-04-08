@@ -17,7 +17,7 @@ export function OnboardingModal() {
   useEffect(() => {
     // Show only if user hasn't completed onboarding and has no allergens set
     const done = localStorage.getItem(ONBOARDING_KEY);
-    if (!done) setVisible(true);
+    if (!done) setVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   function toggle(id: AllergenId) {

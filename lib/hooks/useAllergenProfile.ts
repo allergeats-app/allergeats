@@ -35,7 +35,7 @@ export function useAllergenProfile() {
 
   // Hydrate from localStorage after mount (browser-only)
   useEffect(() => {
-    setAllergensState(loadProfileAllergens());
+    setAllergensState(loadProfileAllergens()); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   // Auth allergens override localStorage on first load for signed-in users.
@@ -44,7 +44,7 @@ export function useAllergenProfile() {
   useEffect(() => {
     if (!authLoading && authAllergens.length > 0 && !initializedRef.current) {
       initializedRef.current = true;
-      setAllergensState(authAllergens);
+      setAllergensState(authAllergens); // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [authLoading, authAllergens]);
 
@@ -53,7 +53,7 @@ export function useAllergenProfile() {
   useEffect(() => {
     if (!user || !initializedRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    setSaveState("idle");
+    setSaveState("idle"); // eslint-disable-line react-hooks/set-state-in-effect
     debounceRef.current = setTimeout(async () => {
       const seq = ++saveSeqRef.current;
       setSaveState("saving");

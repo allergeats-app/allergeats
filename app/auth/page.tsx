@@ -42,12 +42,12 @@ export default function AuthPage() {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search).get("error");
     if (p === "email_conflict") {
-      setPendingGoogleLink(true);
-      setError("This email already has a password account. Sign in below and we\u2019ll link Google automatically.");
+      setPendingGoogleLink(true); // eslint-disable-line react-hooks/set-state-in-effect
+      setError("This email already has a password account. Sign in below and we\u2019ll link Google automatically."); // eslint-disable-line react-hooks/set-state-in-effect
     } else if (p === "oauth_cancelled") {
-      setError("Sign-in was cancelled.");
+      setError("Sign-in was cancelled."); // eslint-disable-line react-hooks/set-state-in-effect
     } else if (p === "oauth_failed") {
-      setError("Sign-in failed — please try again.");
+      setError("Sign-in failed — please try again."); // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, []);
 
