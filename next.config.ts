@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// Note: withSentryConfig (source map upload) is wired separately via Sentry CLI.
+// The Sentry SDK in sentry.client/server/edge.config.ts still captures runtime errors.
 
 const securityHeaders = [
   // Prevent the page from being embedded in an iframe (clickjacking)
@@ -41,16 +43,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-import { withSentryConfig } from "@sentry/nextjs";
-
-const sentryEnabled = Boolean(process.env.SENTRY_AUTH_TOKEN);
-
-export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: true,
-  // Disable source map upload when credentials aren't configured
-  sourcemaps: { disable: !sentryEnabled },
-  widenClientFileUpload: sentryEnabled,
-});
+export default nextConfig;
