@@ -138,6 +138,17 @@ a:focus-visible,
   }
 }
 
+/* ── Hide scrollbars on horizontal chip/pill rows ───────────────────────── */
+/* Keeps horizontal scroll functional but visually invisible (native app feel) */
+.chip-row {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.chip-row::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, iOS */
+}
+
 /* ── Spinner ─────────────────────────────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }

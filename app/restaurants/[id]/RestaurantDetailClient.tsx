@@ -401,7 +401,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: orderedItemIds.size > 0 ? 140 : 60 }}>
+    <main style={{
+      minHeight: "100dvh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif",
+      // When order bar is visible: bar height (74px) + safe-area + extra breathing room
+      // When no order bar: just safe-area + base padding
+      paddingBottom: orderedItemIds.size > 0
+        ? "max(140px, calc(74px + env(safe-area-inset-bottom) + 20px))"
+        : "max(60px, calc(32px + env(safe-area-inset-bottom)))",
+    }}>
 
       {showStaffCard && (
         <ShowStaffCard
@@ -792,7 +799,10 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
                 {/* Sticky risk filter chips */}
                 <div style={{
-                  position: "sticky", top: 48, zIndex: 40,
+                  position: "sticky",
+                  // Header height = paddingTop(max(12,12+safe-area)) + paddingBottom(12) + content(~44) = max(68, 68+safe-area)
+                  top: "max(68px, calc(68px + env(safe-area-inset-top)))",
+                  zIndex: 40,
                   background: "var(--c-bg)",
                   marginLeft: -16, marginRight: -16,
                   paddingLeft: 16, paddingRight: 16,
@@ -800,7 +810,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   borderBottom: "1px solid var(--c-border)",
                   marginBottom: 16,
                 }}>
-                  <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+                  <div className="chip-row" style={{ display: "flex", gap: 8, paddingBottom: 2 }}>
                     {RISK_CHIPS.map((c) => (
                       <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
                         padding: "11px 18px", borderRadius: 999,
@@ -816,15 +826,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   </div>
                   {/* Category sub-filter */}
                   {vm.sections.filter((s) => !isDrinkSection(s.sectionName)).length > 1 && (
-                    <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2, marginTop: 8 }}>
+                    <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2, marginTop: 8 }}>
                       {[{ key: "all", label: "All" }, ...vm.sections.filter((s) => !isDrinkSection(s.sectionName)).map((s) => ({ key: s.sectionName, label: s.sectionName }))].map((c) => (
                         <button key={c.key} onClick={() => setCategoryFilter(c.key)} style={{
-                          padding: "6px 13px", borderRadius: 999,
+                          padding: "8px 14px", borderRadius: 999, minHeight: 36,
                           border: `1px solid ${categoryFilter === c.key ? "var(--c-text)" : "var(--c-border)"}`,
                           background: categoryFilter === c.key ? "var(--c-text)" : "transparent",
                           color: categoryFilter === c.key ? "var(--c-bg)" : "var(--c-sub)",
                           fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
                           cursor: "pointer", flexShrink: 0,
+                          display: "flex", alignItems: "center",
                         }}>
                           {c.label}
                         </button>
@@ -1132,7 +1143,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             onClick={() => setShowOrderSheet(false)}
             aria-label="Close order"
             style={{
-              width: 36, height: 36, borderRadius: 999,
+              width: 44, height: 44, borderRadius: 999,
               background: "var(--c-muted)", border: "none",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", color: "var(--c-sub)", flexShrink: 0,
@@ -1145,7 +1156,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1 }}>
+        <div style={{ overflowY: "auto", flex: 1, WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
 
           {orderedItems.length === 0 ? (
             /* Empty state */
