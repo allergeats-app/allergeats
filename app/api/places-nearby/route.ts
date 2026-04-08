@@ -93,7 +93,7 @@ function mapPlace(p: V1Place): PlaceResult | null {
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), WINDOW_MS, MAX_REQUESTS_PER_WINDOW)) {
+  if (await isRateLimited(getClientIp(req), WINDOW_MS, MAX_REQUESTS_PER_WINDOW)) {
     return new Response("Too many requests", { status: 429 });
   }
 

@@ -28,7 +28,7 @@ function normalizeRestaurant(name: string | undefined): string | null {
 }
 
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), REPORT_WINDOW_MS, REPORT_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), REPORT_WINDOW_MS, REPORT_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 

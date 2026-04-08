@@ -41,7 +41,7 @@ export type CommunityScore = {
  * Returns community scores for each (dish, allergen) pair.
  */
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), SCORES_WINDOW_MS, SCORES_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), SCORES_WINDOW_MS, SCORES_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 

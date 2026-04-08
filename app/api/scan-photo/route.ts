@@ -33,7 +33,7 @@ const ALLOWED_MEDIA_TYPES = new Set([
 ]);
 
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), SCAN_WINDOW_MS, SCAN_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), SCAN_WINDOW_MS, SCAN_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
   }
 

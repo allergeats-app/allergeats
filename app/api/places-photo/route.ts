@@ -23,7 +23,7 @@ const FETCH_TIMEOUT_MS = 10_000;
 const PLACES_V1 = "https://places.googleapis.com/v1";
 
 export async function GET(req: Request) {
-  if (isRateLimited(getClientIp(req), PHOTO_WINDOW_MS, PHOTO_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), PHOTO_WINDOW_MS, PHOTO_MAX_REQ)) {
     return new Response("Too many requests", { status: 429 });
   }
 

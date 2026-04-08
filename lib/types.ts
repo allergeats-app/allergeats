@@ -134,7 +134,8 @@ export type RestaurantTag =
   | "sports-bar" | "asian" | "chinese" | "fast-food" | "fast-casual" | "wings"
   | "noodles" | "pasta" | "bar" | "craft-beer" | "southern" | "comfort-food"
   | "brunch" | "pancakes" | "american" | "drive-in" | "roast-beef" | "texas"
-  | "ice-cream" | "custard" | "cheesecake" | "24-hour" | "burritos" | "tacos";
+  | "ice-cream" | "custard" | "cheesecake" | "24-hour" | "burritos" | "tacos"
+  | "salads" | "healthy" | "buffet";
 
 // ─── Guided order builder config ────────────────────────────────────────────
 export type BuilderStep = {

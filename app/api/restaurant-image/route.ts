@@ -42,7 +42,7 @@ function isSsrfBlocked(rawUrl: string): boolean {
 }
 
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
   }
 
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  if (isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), IMAGE_WINDOW_MS, IMAGE_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
   }
 

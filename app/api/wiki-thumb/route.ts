@@ -80,7 +80,7 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_MAX       = 120;
 
 export async function GET(req: Request) {
-  if (isRateLimited(getClientIp(req), RATE_WINDOW_MS, RATE_MAX)) {
+  if (await isRateLimited(getClientIp(req), RATE_WINDOW_MS, RATE_MAX)) {
     return new Response(null, { status: 429 });
   }
 

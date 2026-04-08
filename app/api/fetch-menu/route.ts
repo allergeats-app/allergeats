@@ -14,7 +14,7 @@ const MAX_BODY_BYTES = 5 * 1024 * 1024;
 const FETCH_TIMEOUT_MS = 30_000;
 
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), FETCH_WINDOW_MS, FETCH_MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), FETCH_WINDOW_MS, FETCH_MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests — please wait a moment" }, { status: 429 });
   }
 

@@ -11,7 +11,7 @@ const WINDOW_MS = 60_000;
 const MAX_REQ   = 20;
 
 export async function POST(req: Request) {
-  if (isRateLimited(getClientIp(req), WINDOW_MS, MAX_REQ)) {
+  if (await isRateLimited(getClientIp(req), WINDOW_MS, MAX_REQ)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
