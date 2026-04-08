@@ -6,6 +6,7 @@ import { SettingsButton } from "@/components/SettingsButton";
 import { useFavorites, type FavoriteMeta } from "@/lib/favoritesContext";
 import { getRecentlyViewed, type RecentView } from "@/lib/recentlyViewed";
 import { getScanHistory, type ScanEntry } from "@/lib/scanHistory";
+import { loadSavedOrders, deleteSavedOrder, type SavedOrder } from "@/lib/savedOrders";
 import { CameraScanButton } from "@/components/CameraScanButton";
 
 function timeAgo(ts: number): string {
@@ -89,10 +90,82 @@ function ScanCard({ entry }: { entry: ScanEntry }) {
   );
 }
 
+function SavedOrderCard({ order, onDelete }: { order: SavedOrder; onDelete: () => void }) {
+  const isBuilder = !!order.stepGroups;
+  const [mainGroup, ...modGroups] = order.stepGroups ?? [];
+  const mainName = isBuilder ? (mainGroup?.items[0]?.name ?? "Custom Order") : null;
+  const flatItems = order.items ?? [];
+
+  return (
+    <div style={{
+      background: "var(--c-card)", border: "1px solid var(--c-border)",
+      borderRadius: 16, padding: "12px 14px",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+            <Link href={`/restaurants/${order.restaurantId}`} style={{ textDecoration: "none" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#eb1700" }}>{order.restaurantName}</span>
+            </Link>
+            <span style={{ fontSize: 11, color: "var(--c-sub)" }}>· {timeAgo(order.savedAt)}</span>
+          </div>
+
+          {isBuilder ? (
+            <>
+              <div style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)", marginBottom: 4 }}>{mainName}</div>
+              {modGroups.map(({ label, items }) => (
+                <div key={label} style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.04em", flexShrink: 0 }}>{label}:</span>
+                  <span style={{ fontSize: 12, color: "var(--c-text)" }}>{items.map(i => i.name).join(", ")}</span>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {flatItems.map((item) => {
+                const color = item.risk === "likely-safe" ? "#16a34a" : item.risk === "ask" ? "#d97706" : "#dc2626";
+                return (
+                  <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: "var(--c-text)" }}>{item.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label="Delete saved order"
+          style={{
+            width: 30, height: 30, borderRadius: 999, flexShrink: 0,
+            background: "var(--c-muted)", border: "1px solid var(--c-border)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", color: "var(--c-sub)",
+          }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SavedContent() {
   const { favorites, favoritesMeta } = useFavorites();
   const [recentViews]   = useState<RecentView[]>(() => getRecentlyViewed());
   const [scanHistory]   = useState<ScanEntry[]>(() => getScanHistory());
+  const [savedOrders, setSavedOrders] = useState<SavedOrder[]>(() => loadSavedOrders());
+
+  function removeOrder(id: string) {
+    deleteSavedOrder(id);
+    setSavedOrders((prev) => prev.filter((o) => o.id !== id));
+  }
 
   // "Your Usual Safe Spots" = restaurants that are both favorited AND recently viewed
   const usualSpots = recentViews.filter((v) => favorites.has(v.id));
@@ -105,7 +178,7 @@ function SavedContent() {
   const viewedIds = new Set(recentViews.map((v) => v.id));
   const savedNotViewed = [...favorites].filter((id) => !viewedIds.has(id));
 
-  const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || scanHistory.length > 0;
+  const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || scanHistory.length > 0 || savedOrders.length > 0;
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: 80 }}>
@@ -158,6 +231,18 @@ function SavedContent() {
           </div>
         ) : (
           <>
+            {/* ── Saved Orders ── */}
+            {savedOrders.length > 0 && (
+              <>
+                <SectionHeader label="Saved Orders" count={savedOrders.length} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {savedOrders.map((order) => (
+                    <SavedOrderCard key={order.id} order={order} onDelete={() => removeOrder(order.id)} />
+                  ))}
+                </div>
+              </>
+            )}
+
             {/* ── Your Usual Safe Spots ── */}
             {usualSpots.length > 0 && (
               <>
