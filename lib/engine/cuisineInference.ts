@@ -120,6 +120,48 @@ const CUISINE_PATTERNS: CuisinePattern[] = [
       { allergen: "tree-nut", reason: "Almonds and walnuts in tarts, sauces, and pastries" },
     ],
   },
+  {
+    match: ["filipino", "pilipino", "pinoy", "filipino cuisine"],
+    signals: [
+      { allergen: "soy",      reason: "Soy sauce (toyo) is used in almost every Filipino dish — adobo, sinigang, kare-kare" },
+      { allergen: "fish",     reason: "Fish sauce (patis) is a primary seasoning in Filipino cooking" },
+      { allergen: "shellfish",reason: "Bagoong (fermented shrimp paste) is a common condiment and cooking ingredient" },
+      { allergen: "peanut",   reason: "Kare-kare (peanut stew) and peanut-based sauces are Filipino staples" },
+    ],
+  },
+  {
+    match: ["brazilian", "churrasco", "rodizio", "churrascaria"],
+    signals: [
+      { allergen: "dairy",    reason: "Cheese and cream sauces are common in Brazilian side dishes" },
+      { allergen: "wheat",    reason: "Pão de queijo uses tapioca but many dishes use wheat flour" },
+      { allergen: "egg",      reason: "Eggs are used in Brazilian desserts and rice dishes" },
+    ],
+  },
+  {
+    match: ["american", "bar & grill", "bar and grill", "gastropub", "pub grub", "comfort food", "bbq", "barbecue"],
+    signals: [
+      { allergen: "wheat",    reason: "Burgers, sandwiches, and fried items use wheat-based buns and breading" },
+      { allergen: "dairy",    reason: "Cheese, ranch, and blue cheese dressings are staples" },
+      { allergen: "egg",      reason: "Mayo-based sauces and dressings contain egg" },
+      { allergen: "soy",      reason: "Worcestershire sauce and marinades often contain soy" },
+    ],
+  },
+  {
+    match: ["peruvian", "ceviche", "peruvian cuisine"],
+    signals: [
+      { allergen: "fish",     reason: "Ceviche (raw fish) and fish-based dishes are central to Peruvian cuisine" },
+      { allergen: "shellfish",reason: "Shrimp and shellfish are common in Peruvian coastal dishes" },
+      { allergen: "corn",     reason: "Choclo (giant corn) is a staple Peruvian ingredient" },
+    ],
+  },
+  {
+    match: ["ethiopian", "eritrean", "east african"],
+    signals: [
+      { allergen: "wheat",    reason: "Injera is a fermented flatbread (teff + sometimes wheat)" },
+      { allergen: "legumes",  reason: "Misir (lentils), shiro (chickpea), and split peas are staples" },
+      { allergen: "sesame",   reason: "Sesame seeds used in many Ethiopian spice blends and breads" },
+    ],
+  },
 ];
 
 /** Escape a string for use in a RegExp */

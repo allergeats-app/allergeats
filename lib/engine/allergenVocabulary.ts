@@ -592,4 +592,72 @@ export const ALLERGEN_VOCABULARY: VocabEntry[] = [
   { term: "almond milk",     allergens: ["tree-nut"],                         source: "direct" },
   { term: "oat milk",        allergens: ["oats"],                             source: "direct" },
   { term: "soy milk",        allergens: ["soy"],                              source: "direct" },
+
+  // ─── ASIAN SAUCES & PASTES ─────────────────────────────────────────────────
+  { term: "gochujang",      allergens: ["soy", "wheat", "gluten"],           source: "direct",  note: "Korean red chili paste — fermented with rice/wheat and soybean" },
+  { term: "doenjang",       allergens: ["soy"],                              source: "direct",  note: "Korean fermented soybean paste" },
+  { term: "teriyaki",       allergens: ["soy", "wheat", "gluten", "sesame"],source: "direct",  note: "Japanese glaze — soy sauce + mirin; sesame often added" },
+  { term: "teriyaki sauce", allergens: ["soy", "wheat", "gluten", "sesame"],source: "direct" },
+  { term: "bulgogi",        allergens: ["soy", "wheat", "sesame"],           source: "dish",    note: "Korean marinated beef — soy sauce + sesame oil" },
+  { term: "tonkatsu sauce", allergens: ["wheat", "gluten", "soy"],           source: "direct",  note: "Japanese Worcestershire-style sauce — wheat and soy" },
+  { term: "furikake",       allergens: ["fish", "sesame"],                   source: "direct",  note: "Japanese rice seasoning — dried fish flakes + sesame" },
+  { term: "gochugaru",      allergens: [],                                   source: "direct",  note: "Korean chili flakes — no allergens" },
+  { term: "ssam jang",      allergens: ["soy", "wheat"],                     source: "direct",  note: "Korean dipping paste — doenjang + gochujang" },
+  { term: "korean bbq",     allergens: ["soy", "wheat", "sesame"],           source: "dish",    note: "Typically marinated with soy sauce and sesame oil" },
+  { term: "ponzu",          allergens: ["soy", "wheat", "fish"],             source: "direct",  note: "Japanese citrus soy sauce — soy, wheat, dashi (fish)" },
+  { term: "yakiniku",       allergens: ["soy", "wheat", "sesame"],           source: "dish",    note: "Japanese grilled meat — soy-based tare with sesame" },
+
+  // ─── FRENCH / EUROPEAN SAUCES ──────────────────────────────────────────────
+  { term: "roux",           allergens: ["wheat", "gluten", "dairy"],         source: "direct",  note: "Butter + flour base used to thicken sauces and gravies" },
+  { term: "béarnaise",      allergens: ["egg", "dairy"],                     source: "dish",    note: "French sauce — egg yolks emulsified with clarified butter" },
+  { term: "bearnaise",      allergens: ["egg", "dairy"],                     source: "dish" },
+  { term: "velouté",        allergens: ["wheat", "gluten", "dairy"],         source: "dish",    note: "French mother sauce — roux-based" },
+  { term: "veloute",        allergens: ["wheat", "gluten", "dairy"],         source: "dish" },
+  { term: "beurre blanc",   allergens: ["dairy"],                            source: "dish",    note: "French butter sauce" },
+
+  // ─── MIDDLE EASTERN / NORTH AFRICAN ────────────────────────────────────────
+  { term: "harissa",        allergens: ["sesame"],                           source: "dish",    note: "North African chili paste — often contains tahini" },
+  { term: "zaatar",         allergens: ["sesame"],                           source: "direct",  note: "Middle Eastern spice blend — always contains sesame seeds" },
+  { term: "za'atar",        allergens: ["sesame"],                           source: "direct" },
+  { term: "shakshuka",      allergens: ["egg"],                              source: "dish",    note: "Eggs poached directly in spiced tomato sauce" },
+  { term: "muhammara",      allergens: ["tree-nut", "wheat", "gluten"],      source: "dish",    note: "Syrian red pepper and walnut dip with breadcrumbs" },
+
+  // ─── SOUTHEAST ASIAN ───────────────────────────────────────────────────────
+  { term: "sambal",         allergens: ["shellfish"],                        source: "dish",    note: "SE Asian chili sauce — many versions contain shrimp paste (belacan)" },
+  { term: "belacan",        allergens: ["shellfish"],                        source: "direct",  note: "Fermented shrimp paste — shellfish allergen" },
+  { term: "bagoong",        allergens: ["shellfish", "fish"],                source: "direct",  note: "Filipino fermented shrimp/fish paste" },
+  { term: "nuoc cham",      allergens: ["fish"],                             source: "direct",  note: "Vietnamese dipping sauce — fish sauce base" },
+  { term: "adobo sauce",    allergens: ["soy", "wheat"],                     source: "direct",  note: "Filipino/Mexican: soy + vinegar marinade (Philippines) or chipotle paste (Mexico)" },
+  { term: "satay sauce",    allergens: ["peanut", "soy"],                    source: "dish",    note: "Peanut-based dipping sauce for grilled skewers" },
+  { term: "peanut sauce",   allergens: ["peanut", "soy"],                    source: "dish",    note: "Common in Thai and Indonesian cuisine" },
+  { term: "pad see ew",     allergens: ["soy", "wheat", "gluten", "egg"],    source: "dish",    note: "Thai stir-fried noodles with soy sauce, oyster sauce, and egg" },
+  { term: "drunken noodles",allergens: ["soy", "wheat", "gluten", "egg"],    source: "dish",    note: "Thai pad kee mao — oyster sauce, soy sauce, egg" },
+
+  // ─── JAPANESE DISHES ───────────────────────────────────────────────────────
+  { term: "tonkotsu",       allergens: ["soy", "wheat", "gluten"],           source: "dish",    note: "Pork bone ramen — tare (seasoning) often contains soy sauce" },
+  { term: "shoyu ramen",    allergens: ["soy", "wheat", "gluten", "fish"],   source: "dish",    note: "Soy sauce ramen — soy, wheat noodles, dashi stock" },
+  { term: "miso ramen",     allergens: ["soy", "wheat", "gluten", "fish"],   source: "dish",    note: "Miso-based ramen with wheat noodles and dashi" },
+  { term: "tempura",        allergens: ["wheat", "gluten", "egg"],           source: "dish",    note: "Light batter made with wheat flour and egg" },
+  { term: "okonomiyaki",    allergens: ["wheat", "gluten", "egg", "fish", "shellfish"], source: "dish", note: "Japanese savory pancake with wheat batter, egg, topped with mayo and bonito" },
+  { term: "takoyaki",       allergens: ["wheat", "gluten", "egg", "shellfish"], source: "dish", note: "Octopus balls in wheat batter with egg" },
+  { term: "katsu curry",    allergens: ["wheat", "gluten", "egg", "soy"],    source: "dish",    note: "Breaded (wheat+egg) cutlet with Japanese curry (may contain soy)" },
+
+  // ─── LATIN / CARIBBEAN ─────────────────────────────────────────────────────
+  { term: "mole",           allergens: ["tree-nut", "soy", "sesame", "wheat", "gluten"], source: "dish", note: "Mexican complex sauce — often contains nuts, seeds, chocolate, and bread" },
+  { term: "sofrito",        allergens: [],                                   source: "dish",    note: "Latin aromatic base (herbs + peppers) — generally allergen-free" },
+  { term: "pernil",         allergens: [],                                   source: "dish",    note: "Puerto Rican roast pork — plain marinade, typically allergen-free" },
+  { term: "tostones",       allergens: ["corn"],                             source: "dish",    note: "Fried green plantains — sometimes seasoned with corn-based ingredients" },
+
+  // ─── AMERICAN / BBQ ────────────────────────────────────────────────────────
+  { term: "worcestershire", allergens: ["fish"],                             source: "direct",  note: "Classic sauce contains anchovies — fish allergen" },
+  { term: "caesar dressing",allergens: ["fish", "egg", "dairy"],             source: "dish",    note: "Anchovies + raw egg yolk + parmesan" },
+  { term: "remoulade",      allergens: ["egg", "fish"],                      source: "dish",    note: "French/Cajun mayo-based sauce — often contains anchovies and capers" },
+  { term: "deviled egg",    allergens: ["egg", "dairy"],                     source: "dish",    note: "Hard-boiled eggs + mayo + mustard" },
+  { term: "deviled eggs",   allergens: ["egg", "dairy"],                     source: "dish" },
+  { term: "cobb salad",     allergens: ["egg", "dairy", "fish"],             source: "dish",    note: "Hard-boiled egg, blue cheese, and often Caesar/blue cheese dressing" },
+  { term: "wedge salad",    allergens: ["dairy"],                            source: "dish",    note: "Blue cheese dressing is standard" },
+  { term: "pot pie",        allergens: ["wheat", "gluten", "dairy", "egg"],  source: "dish",    note: "Wheat pastry crust with cream/butter filling" },
+  { term: "chicken pot pie",allergens: ["wheat", "gluten", "dairy", "egg"],  source: "dish" },
+  { term: "corndog",        allergens: ["corn", "wheat", "gluten", "egg"],   source: "dish",    note: "Hot dog dipped in cornmeal + wheat batter" },
+  { term: "corn dog",       allergens: ["corn", "wheat", "gluten", "egg"],   source: "dish" },
 ];
