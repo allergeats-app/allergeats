@@ -181,13 +181,14 @@ function SavedContent() {
   const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || scanHistory.length > 0 || savedOrders.length > 0;
 
   return (
-    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: 80 }}>
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: "max(80px, calc(60px + env(safe-area-inset-bottom)))" }}>
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 100,
         background: "var(--c-hdr)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--c-border)",
-        padding: "12px 16px",
+        paddingTop: "max(12px, calc(12px + env(safe-area-inset-top)))",
+        paddingBottom: 12, paddingLeft: 16, paddingRight: 16,
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

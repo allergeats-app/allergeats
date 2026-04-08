@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useTheme, type ThemeMode } from "@/lib/themeContext";
-import { isPasskeySupported, registerPasskey, removePasskey } from "@/lib/passkey";
-import { getSupabaseClient } from "@/lib/supabaseClient";
 
 export default function ProfilePage() {
   const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
@@ -18,11 +16,6 @@ export default function ProfilePage() {
   const [lastEdit,  setLastEdit]    = useState("");
   const [nameSaved, setNameSaved]   = useState(false);
 
-  // Passkey state
-  const [passkeySupported, setPasskeySupported]   = useState(false);
-  const [passkeyRegistered, setPasskeyRegistered] = useState<string | null>(null); // credential_id
-  const [passkeyLoading, setPasskeyLoading]       = useState(false);
-  const [passkeyMsg, setPasskeyMsg]               = useState<{ text: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
@@ -33,58 +26,7 @@ export default function ProfilePage() {
     setLastEdit(lastName);
   }, [firstName, lastName]);
 
-  // Check passkey support and load existing credential
-  useEffect(() => {
-    isPasskeySupported().then(setPasskeySupported);
-  }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    const sb = getSupabaseClient();
-    if (!sb) return;
-    sb.from("webauthn_credentials")
-      .select("credential_id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .single()
-      .then(({ data }) => { if (data) setPasskeyRegistered(data.credential_id as string); });
-  }, [user]);
-
-  async function handleAddPasskey() {
-    const sb = getSupabaseClient();
-    const session = (await sb?.auth.getSession())?.data.session;
-    if (!session?.access_token) return;
-    setPasskeyLoading(true);
-    setPasskeyMsg(null);
-    const err = await registerPasskey(session.access_token);
-    setPasskeyLoading(false);
-    if (err) {
-      setPasskeyMsg({ text: err, ok: false });
-    } else {
-      // Reload credential id
-      const { data } = await sb!.from("webauthn_credentials")
-        .select("credential_id").eq("user_id", user!.id).limit(1).single();
-      if (data) setPasskeyRegistered(data.credential_id as string);
-      setPasskeyMsg({ text: "Face ID added! You can now sign in with it.", ok: true });
-    }
-  }
-
-  async function handleRemovePasskey() {
-    if (!passkeyRegistered) return;
-    const sb = getSupabaseClient();
-    const session = (await sb?.auth.getSession())?.data.session;
-    if (!session?.access_token) return;
-    setPasskeyLoading(true);
-    setPasskeyMsg(null);
-    const err = await removePasskey(passkeyRegistered, session.access_token);
-    setPasskeyLoading(false);
-    if (err) {
-      setPasskeyMsg({ text: err, ok: false });
-    } else {
-      setPasskeyRegistered(null);
-      setPasskeyMsg({ text: "Face ID removed.", ok: true });
-    }
-  }
 
   async function handleSaveName() {
     await saveName(firstEdit, lastEdit);
@@ -112,7 +54,7 @@ export default function ProfilePage() {
         minHeight: "100dvh",
         background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
-        paddingBottom: 48,
+        paddingBottom: "max(48px, calc(32px + env(safe-area-inset-bottom)))",
       }}
     >
       {/* Sticky header */}
@@ -120,7 +62,9 @@ export default function ProfilePage() {
         style={{
           position: "sticky", top: 0, zIndex: 50,
           background: "var(--c-hdr)", backdropFilter: "blur(12px)",
-          borderBottom: "1px solid var(--c-border)", padding: "12px 16px",
+          borderBottom: "1px solid var(--c-border)",
+          paddingTop: "max(12px, calc(12px + env(safe-area-inset-top)))",
+          paddingBottom: 12, paddingLeft: 16, paddingRight: 16,
         }}
       >
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -194,26 +138,28 @@ export default function ProfilePage() {
               <input
                 id="profile-first-name"
                 type="text"
+                autoComplete="given-name"
                 value={firstEdit}
                 onChange={(e) => setFirstEdit(e.target.value)}
                 placeholder="First name"
                 aria-label="First name"
                 style={{
                   flex: 1, minWidth: 100, padding: "10px 12px", border: "1px solid var(--c-border)",
-                  borderRadius: 10, fontSize: 14, color: "var(--c-text)",
+                  borderRadius: 10, fontSize: 16, color: "var(--c-text)",
                   background: "var(--c-input)", outline: "none", boxSizing: "border-box",
                 }}
               />
               <input
                 id="profile-last-name"
                 type="text"
+                autoComplete="family-name"
                 value={lastEdit}
                 onChange={(e) => setLastEdit(e.target.value)}
                 placeholder="Last name"
                 aria-label="Last name"
                 style={{
                   flex: 1, minWidth: 100, padding: "10px 12px", border: "1px solid var(--c-border)",
-                  borderRadius: 10, fontSize: 14, color: "var(--c-text)",
+                  borderRadius: 10, fontSize: 16, color: "var(--c-text)",
                   background: "var(--c-input)", outline: "none", boxSizing: "border-box",
                 }}
               />

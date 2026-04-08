@@ -255,7 +255,9 @@ export default function AuthPage() {
                 <label htmlFor="auth-email" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>Email</label>
                 <input id="auth-email" type="email" required value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com" style={inputStyle} />
+                  placeholder="you@example.com"
+                  autoComplete="email" inputMode="email"
+                  style={inputStyle} />
               </div>
 
               {/* Password */}
@@ -272,15 +274,16 @@ export default function AuthPage() {
                 <input id="auth-password" type="password" required minLength={6}
                   value={password} onChange={(e) => setPassword(e.target.value)}
                   placeholder={mode === "signup" ? "At least 6 characters" : "••••••••"}
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   style={inputStyle} />
               </div>
 
               {/* Stay signed in */}
               {mode === "signin" && (
-                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none", minHeight: 44, paddingLeft: 2 }}>
                   <input type="checkbox" checked={staySignedIn} onChange={(e) => setStay(e.target.checked)}
-                    style={{ width: 17, height: 17, accentColor: "#eb1700", cursor: "pointer", flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>Stay signed in</span>
+                    style={{ width: 20, height: 20, accentColor: "#eb1700", cursor: "pointer", flexShrink: 0 }} />
+                  <span style={{ fontSize: 15, fontWeight: 600, color: "var(--c-text)" }}>Stay signed in</span>
                 </label>
               )}
 

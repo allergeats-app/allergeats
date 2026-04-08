@@ -67,7 +67,7 @@ export default function AllergiesPage() {
         minHeight: "100dvh",
         background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
-        paddingBottom: 48,
+        paddingBottom: "max(48px, calc(32px + env(safe-area-inset-bottom)))",
       }}
     >
       {showStaffCard && (
@@ -82,7 +82,9 @@ export default function AllergiesPage() {
         style={{
           position: "sticky", top: 0, zIndex: 50,
           background: "var(--c-hdr)", backdropFilter: "blur(12px)",
-          borderBottom: "1px solid var(--c-border)", padding: "12px 16px",
+          borderBottom: "1px solid var(--c-border)",
+          paddingTop: "max(12px, calc(12px + env(safe-area-inset-top)))",
+          paddingBottom: 12, paddingLeft: 16, paddingRight: 16,
         }}
       >
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>

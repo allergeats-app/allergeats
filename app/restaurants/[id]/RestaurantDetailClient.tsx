@@ -415,7 +415,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
       <div style={{
         position: "sticky", top: 0, zIndex: 50,
         background: "var(--c-hdr)", backdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--c-border)", padding: "12px 16px",
+        borderBottom: "1px solid var(--c-border)",
+        paddingTop: "max(12px, calc(12px + env(safe-area-inset-top)))",
+        paddingBottom: 12, paddingLeft: 16, paddingRight: 16,
       }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontSize: 15, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none", padding: "8px 0", minHeight: 44, display: "flex", alignItems: "center" }}>← Restaurants</Link>
