@@ -158,7 +158,7 @@ export function OnboardingModal() {
                 letterSpacing: "-0.01em",
               }}
             >
-              Set My Allergens
+              Set My Allergens & Find Food
             </button>
 
             {/* Skip + Sign In — centered */}
