@@ -39,8 +39,10 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
   const [searching, setSearching] = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [locating, setLocating]   = useState(false);
-  const inputRef  = useRef<HTMLInputElement>(null);
+  const inputRef    = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Set to true when user hits Enter while results are still loading — auto-picks first result on arrival
+  const autoPickRef = useRef(false);
 
   // Lock body scroll while open
   useEffect(() => {
@@ -70,7 +72,7 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const q = query.trim();
-    if (!q) { setResults([]); setError(null); setSearching(false); return; }
+    if (!q) { setResults([]); setError(null); setSearching(false); autoPickRef.current = false; return; }
 
     setSearching(true);
     setError(null);
@@ -82,14 +84,22 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
         );
         if (!res.ok) throw new Error();
         const data: NominatimResult[] = await res.json();
+        // If user hit Enter while we were fetching, pick the top result immediately
+        if (autoPickRef.current && data.length > 0) {
+          autoPickRef.current = false;
+          pickResult(data[0]);
+          return;
+        }
+        autoPickRef.current = false;
         setResults(data);
         if (!data.length) setError("No places found — try a different search");
       } catch {
+        autoPickRef.current = false;
         setError("Couldn't search right now. Check your connection.");
       } finally {
         setSearching(false);
       }
-    }, 600);
+    }, 400);
 
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
@@ -248,6 +258,17 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                if (results.length > 0) {
+                  // Results already loaded — pick the top one immediately
+                  pickResult(results[0]);
+                } else if (searching) {
+                  // Still fetching — flag to auto-pick when results arrive
+                  autoPickRef.current = true;
+                }
+              }}
               placeholder="City, neighborhood, or address…"
               aria-label="Search location"
               style={{
