@@ -10,6 +10,7 @@ import { locationProvider, MockLocationProvider, checkLocationPermission, loadLa
 import type { Coordinates } from "@/lib/providers/locationProvider";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { RestaurantCard } from "@/components/RestaurantCard";
+import { HeroRestaurantCard } from "@/components/HeroRestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
 import { CameraScanButton } from "@/components/CameraScanButton";
 import { RestaurantsHeader } from "@/components/RestaurantsHeader";
@@ -480,25 +481,7 @@ function HomeContent() {
             {/* ── Best Match for You (hero) ───────────────────────── */}
             {nearbyFiltered.length > 0 && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
-                    Best Match for You
-                  </h2>
-                </div>
-                <div style={{ position: "relative" }}>
-                  <div style={{
-                    position: "absolute", top: 10, left: 10, zIndex: 1,
-                    background: "#eb1700", color: "#fff",
-                    fontSize: 10, fontWeight: 800, padding: "3px 9px",
-                    borderRadius: 999, letterSpacing: "0.04em", pointerEvents: "none",
-                  }}>
-                    #1 Match
-                  </div>
-                  <RestaurantCard restaurant={nearbyFiltered[0]} />
-                </div>
+                <HeroRestaurantCard restaurant={nearbyFiltered[0]} />
               </div>
             )}
 
