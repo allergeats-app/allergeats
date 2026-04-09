@@ -74,6 +74,26 @@ const WIKI_TITLES: Record<string, string> = {
   "ruths chris steak house":              "Ruth's Chris Steak House",
   "cooper's hawk winery & restaurants":   "Cooper's Hawk Winery & Restaurants",
   "coopers hawk winery and restaurant":   "Cooper's Hawk Winery & Restaurants",
+  // Batch 2
+  "bojangles":                            "Bojangles (restaurant)",
+  "carl's jr.":                           "Carl's Jr.",
+  "carls jr":                             "Carl's Jr.",
+  "el pollo loco":                        "El Pollo Loco",
+  "freddy's frozen custard & steakburgers": "Freddy's Frozen Custard & Steakburgers",
+  "freddy's":                             "Freddy's Frozen Custard & Steakburgers",
+  "golden corral":                        "Golden Corral",
+  "mod pizza":                            "MOD Pizza",
+  "pei wei":                              "Pei Wei Asian Diner",
+  "portillo's":                           "Portillo's",
+  "smashburger":                          "Smashburger",
+  "steak n shake":                        "Steak 'n Shake",
+  "steak 'n shake":                       "Steak 'n Shake",
+  "sweetgreen":                           "Sweetgreen",
+  "the capital grille":                   "The Capital Grille",
+  "capital grille":                       "The Capital Grille",
+  "the habit burger grill":               "The Habit Burger Grill",
+  "habit burger grill":                   "The Habit Burger Grill",
+  "zaxby's":                              "Zaxby's",
 };
 
 const RATE_WINDOW_MS = 60_000;

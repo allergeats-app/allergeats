@@ -25,6 +25,21 @@ const KNOWN_CHAINS = new Set([
   "longhorn steakhouse",
   "ruth's chris steak house", "ruths chris steak house",
   "cooper's hawk winery & restaurants", "coopers hawk winery and restaurant",
+  // Additional chains (batch 2)
+  "bojangles",
+  "carl's jr.", "carls jr",
+  "el pollo loco",
+  "freddy's frozen custard & steakburgers", "freddy's",
+  "golden corral",
+  "mod pizza",
+  "pei wei",
+  "portillo's",
+  "smashburger",
+  "steak n shake", "steak 'n shake",
+  "sweetgreen",
+  "the capital grille", "capital grille",
+  "the habit burger grill", "habit burger grill",
+  "zaxby's",
 ]);
 
 /**
