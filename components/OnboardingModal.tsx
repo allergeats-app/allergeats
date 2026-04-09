@@ -72,7 +72,7 @@ export function OnboardingModal() {
                 Eat out safely.
               </div>
               <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.65 }}>
-                AllergEats flags menu items that contain your allergens — before you order. Takes 30 seconds to set up.
+                Instantly shows what you can eat. Set up in 30 seconds.
               </div>
             </div>
 
