@@ -700,11 +700,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 No items in our analysis are flagged safe for your allergy profile at this restaurant.
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {bestOptions.map((rec) => (
-                  <BestOptionCard key={rec.item.id} rec={rec} />
-                ))}
-              </div>
+              <BestOptionsCombo recs={bestOptions} />
             )}
           </section>
         )}
@@ -1513,37 +1509,104 @@ function SectionHeader({ label, count }: { label: string; count?: number }) {
   );
 }
 
-function BestOptionCard({ rec }: { rec: SafeOrderRecommendation }) {
+function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
   const { isDark } = useTheme();
+  const topLabel = recs[0]?.reasonLabel ?? "Safe Picks";
+  const topExplanation = recs[0]?.explanation;
+  const allAskNotes = [...new Set(recs.flatMap((r) => r.askNotes))].slice(0, 2);
+
   return (
     <div style={{
-      background: isDark ? "var(--c-card)" : "#f0fdf4",
+      borderRadius: 18,
       border: isDark ? "1px solid #166534" : "1px solid #bbf7d0",
-      borderRadius: 14, padding: "12px 14px",
-      display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
+      background: isDark ? "var(--c-card)" : "#f0fdf4",
+      overflow: "hidden",
     }}>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: 800, fontSize: 16, color: "var(--c-text)", lineHeight: 1.3 }}>{rec.item.name}</div>
-        {rec.item.category && (
-          <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>{rec.item.category}</div>
-        )}
-        <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
-          {rec.explanation}
-        </div>
-        {rec.askNotes.length > 0 && (
-          <div style={{ fontSize: 13, color: isDark ? "#86efac" : "#854d0e", marginTop: 5 }}>
-            Ask: {rec.askNotes[0]}
-          </div>
-        )}
-      </div>
-      <span style={{
-        flexShrink: 0, padding: "4px 12px", borderRadius: 999,
-        background: isDark ? "#14532d" : "#dcfce7",
-        color: isDark ? "#86efac" : "#15803d",
-        fontSize: 13, fontWeight: 700,
+      {/* Header */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "12px 16px",
+        borderBottom: isDark ? "1px solid rgba(22,101,52,0.5)" : "1px solid #bbf7d0",
+        background: isDark ? "rgba(20,83,45,0.35)" : "rgba(220,252,231,0.6)",
       }}>
-        {rec.reasonLabel}
-      </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          <span style={{ fontSize: 13, fontWeight: 800, color: isDark ? "#86efac" : "#15803d", letterSpacing: "0.01em" }}>
+            Suggested Order
+          </span>
+        </div>
+        <span style={{
+          padding: "3px 10px", borderRadius: 999,
+          background: isDark ? "#14532d" : "#dcfce7",
+          color: isDark ? "#86efac" : "#15803d",
+          fontSize: 12, fontWeight: 700,
+        }}>
+          {topLabel}
+        </span>
+      </div>
+
+      {/* Items */}
+      <div style={{ padding: "4px 0" }}>
+        {recs.map((rec, i) => (
+          <div key={rec.item.id} style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "11px 16px",
+            borderBottom: i < recs.length - 1
+              ? isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(0,0,0,0.05)"
+              : "none",
+          }}>
+            {/* Check icon */}
+            <div style={{
+              width: 22, height: 22, borderRadius: 999, flexShrink: 0,
+              background: isDark ? "#14532d" : "#dcfce7",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            {/* Name */}
+            <span style={{ flex: 1, fontSize: 15, fontWeight: 800, color: "var(--c-text)", lineHeight: 1.3, minWidth: 0 }}>
+              {rec.item.name}
+            </span>
+            {/* Category pill */}
+            {rec.item.category && (
+              <span style={{
+                flexShrink: 0, fontSize: 11, fontWeight: 700,
+                color: isDark ? "#86efac" : "#16a34a",
+                background: isDark ? "rgba(20,83,45,0.4)" : "rgba(220,252,231,0.8)",
+                padding: "3px 9px", borderRadius: 999,
+                border: isDark ? "1px solid rgba(22,101,52,0.4)" : "1px solid #bbf7d0",
+              }}>
+                {rec.item.category}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Footer — explanation + ask notes */}
+      {(topExplanation || allAskNotes.length > 0) && (
+        <div style={{
+          padding: "10px 16px 13px",
+          borderTop: isDark ? "1px solid rgba(22,101,52,0.5)" : "1px solid #bbf7d0",
+          background: isDark ? "rgba(20,83,45,0.2)" : "rgba(240,253,244,0.7)",
+        }}>
+          {topExplanation && (
+            <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+              {topExplanation}
+            </div>
+          )}
+          {allAskNotes.length > 0 && (
+            <div style={{ fontSize: 13, color: isDark ? "#fbbf24" : "#92400e", marginTop: topExplanation ? 5 : 0, fontWeight: 600 }}>
+              Ask staff: {allAskNotes.join(" · ")}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
