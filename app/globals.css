@@ -149,6 +149,11 @@ a:focus-visible,
   display: none; /* Chrome, Safari, iOS */
 }
 
+/* ── Restaurant swipe rail — hide scrollbar ──────────────────────────────── */
+.restaurant-rail::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Spinner ─────────────────────────────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }

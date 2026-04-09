@@ -456,26 +456,19 @@ function HomeContent() {
             </div>
           }>
           <>
-            {/* ── Best Match for You ──────────────────────────────── */}
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
-                    Best Match for You
-                  </h2>
-                </div>
-                <div style={{ fontSize: 12, color: "var(--c-sub)", paddingLeft: 19 }}>
-                  {searchCenter
-                    ? "Best option in this area based on your allergies and menu data"
-                    : "Based on your allergies, menu data, and nearby distance"}
-                </div>
+            {/* ── Best Match for You (hero) ───────────────────────── */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
+                  Best Match for You
+                </h2>
               </div>
               <div style={{ position: "relative" }}>
                 <div style={{
-                  position: "absolute", top: 12, left: 12, zIndex: 1,
+                  position: "absolute", top: 10, left: 10, zIndex: 1,
                   background: "#eb1700", color: "#fff",
                   fontSize: 10, fontWeight: 800, padding: "3px 9px",
                   borderRadius: 999, letterSpacing: "0.04em", pointerEvents: "none",
@@ -486,15 +479,49 @@ function HomeContent() {
               </div>
             </div>
 
-            {/* ── All Restaurants ─────────────────────────────────── */}
+            {/* ── Top Picks swipe rail (positions 2–5) ────────────── */}
             {filtered.length > 1 && (
+              <div style={{ marginBottom: 20 }}>
+                <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>
+                  {searchCenter ? "Also Nearby" : "Top Picks"}
+                </h2>
+                {/* Negative margin pulls rail flush to screen edges; padding restores inner spacing */}
+                <div className="restaurant-rail" style={{
+                  display: "flex",
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  gap: 10,
+                  margin: "0 -16px",
+                  padding: "2px 16px 10px",
+                  scrollbarWidth: "none",
+                  WebkitOverflowScrolling: "touch" as never,
+                }}>
+                  {filtered.slice(1, 5).map((r) => (
+                    <div key={r.id} style={{
+                      flex: "0 0 72vw",
+                      maxWidth: 300,
+                      scrollSnapAlign: "start",
+                    }}>
+                      <RestaurantCard restaurant={r} variant="rail" />
+                    </div>
+                  ))}
+                  {/* Peek ghost so user knows there's more */}
+                  {filtered.slice(1, 5).length === 4 && (
+                    <div style={{ flex: "0 0 8px", flexShrink: 0 }} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── All Restaurants compact list (position 6+) ──────── */}
+            {filtered.length > 5 && (
               <>
-                <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "20px 0 10px" }}>
+                <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>
                   {searchCenter ? "More in This Area" : "More Nearby"}
                 </h2>
-                <div style={{ display: "grid", gap: 12 }}>
-                  {filtered.slice(1).map((r) => (
-                    <RestaurantCard key={r.id} restaurant={r} />
+                <div style={{ display: "grid", gap: 10 }}>
+                  {filtered.slice(5).map((r) => (
+                    <RestaurantCard key={r.id} restaurant={r} variant="compact" />
                   ))}
                 </div>
               </>

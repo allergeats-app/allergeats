@@ -11,12 +11,14 @@ import { trackEvent } from "@/lib/analytics";
 import { coverGradient } from "@/lib/coverGradient";
 import { chainLogoUrl } from "@/lib/chainLogos";
 
-type Props = { restaurant: ScoredRestaurant };
+type Props = { restaurant: ScoredRestaurant; variant?: "default" | "rail" | "compact" };
 
 
-export function RestaurantCard({ restaurant: r }: Props) {
+export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const { isDark } = useTheme();
   const { summary } = r;
+  const isRail    = variant === "rail";
+  const isCompact = variant === "compact";
 
   const safePercent  = useMemo(() => summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0, [summary]);
   const askPercent   = useMemo(() => summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0, [summary]);
@@ -80,20 +82,22 @@ export function RestaurantCard({ restaurant: r }: Props) {
     return photoSrc.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc);
   })();
 
+  const imgHeight = isRail ? 108 : isCompact ? 108 : 148;
+
   return (
     <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
       <div style={{
         background: "var(--c-card)",
         border: "1px solid var(--c-border)",
-        borderRadius: 24,
+        borderRadius: 20,
         overflow: "hidden",
         boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
         cursor: "pointer",
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
-        {/* Cover image area — cuisine gradient is always the base; photo fades in on load */}
+        {/* Cover image area */}
         <div style={{
-          height: 148,
+          height: imgHeight,
           background: isLogo && photoLoaded ? "#fff" : photoLoaded ? "var(--c-card)" : cover.bg,
           display: "flex", alignItems: "center", justifyContent: "center",
           position: "relative", overflow: "hidden",
@@ -112,13 +116,13 @@ export function RestaurantCard({ restaurant: r }: Props) {
                 width: "100%", height: "100%",
                 objectFit: isLogo ? "contain" : "cover",
                 objectPosition: "center",
-                padding: isLogo ? "20px 32px" : 0,
+                padding: isLogo ? (isRail || isCompact ? "14px 24px" : "20px 32px") : 0,
                 opacity: photoLoaded ? 1 : 0,
                 transition: "opacity 0.4s ease",
               }}
             />
           )}
-          {/* Gradient scrim on photos so overlaid badges stay legible */}
+          {/* Gradient scrim on photos */}
           {!isLogo && photoLoaded && (
             <div style={{
               position: "absolute", inset: 0,
@@ -126,108 +130,126 @@ export function RestaurantCard({ restaurant: r }: Props) {
               pointerEvents: "none",
             }} />
           )}
+          {/* Fit badge */}
           <div style={{
-            position: "absolute", top: 10, right: 10,
+            position: "absolute", top: 8, right: 8,
             background: badge.bg, color: badge.color,
-            padding: "5px 10px", borderRadius: 999,
-            fontSize: 12, fontWeight: 800,
+            padding: isRail ? "4px 8px" : "5px 10px", borderRadius: 999,
+            fontSize: isRail ? 11 : 12, fontWeight: 800,
             textAlign: "center", lineHeight: 1.2,
           }}>
             {level}
-            {summary.total >= 5 && (
+            {!isRail && summary.total >= 5 && (
               <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.8, marginTop: 1 }}>
                 {Math.round(safePercent)}% safe
               </div>
             )}
           </div>
+          {/* Distance badge */}
           {r.distance != null && (
             <div style={{
-              position: "absolute", bottom: 10, left: 12,
+              position: "absolute", bottom: 8, left: 10,
               background: "rgba(0,0,0,0.45)", color: "#fff",
-              padding: "4px 9px", borderRadius: 999,
-              fontSize: 11, fontWeight: 700, backdropFilter: "blur(4px)",
+              padding: "3px 8px", borderRadius: 999,
+              fontSize: 10, fontWeight: 700, backdropFilter: "blur(4px)",
             }}>
               {r.distance} mi
             </div>
           )}
+          {/* Save button */}
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier }); toggleFavorite(r.id, { name: r.name, cuisine: r.cuisine }); }}
             aria-label={favorited ? `Remove ${r.name} from saved` : `Save ${r.name}`}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
-              position: "absolute", bottom: 8, right: 8,
+              position: "absolute", bottom: 6, right: 6,
               background: favorited ? "#eb1700" : "rgba(0,0,0,0.38)",
               border: "none", borderRadius: 999,
-              width: 44, height: 44,
+              width: isRail ? 36 : 44, height: isRail ? 36 : 44,
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", backdropFilter: "blur(4px)",
               fontSize: 18, lineHeight: 1,
               transition: "background 0.15s",
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width={isRail ? 13 : 16} height={isRail ? 13 : 16} viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
         </div>
 
         {/* Card body */}
-        <div style={{ padding: "16px 18px 18px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+        <div style={{ padding: isRail ? "11px 13px 13px" : isCompact ? "12px 14px 14px" : "16px 18px 18px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isRail ? 2 : 4 }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 900, fontSize: 19, color: "var(--c-text)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
-              <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 3 }}>{r.cuisine}</div>
-              {r.address && (
-                <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {r.address}
-                </div>
-              )}
+              <div style={{
+                fontWeight: 900,
+                fontSize: isRail ? 15 : isCompact ? 16 : 19,
+                color: "var(--c-text)", lineHeight: 1.2,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{r.name}</div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
             </div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>See menu fit →</div>
+            {!isRail && (
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>→</div>
+            )}
           </div>
 
-          <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 12, lineHeight: 1.5 }}>
-            {explanation}
-          </div>
+          {/* Explanation — default: 2 lines; compact: 1 line; rail: hidden */}
+          {!isRail && (
+            <div style={{
+              fontSize: 13, color: "var(--c-sub)", marginBottom: isCompact ? 8 : 12, lineHeight: 1.45,
+              ...(isCompact ? { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } : {}),
+            }}>
+              {explanation}
+            </div>
+          )}
 
           {summary.total > 0 ? (
             <div>
-              {/* Bar with per-section colored glow */}
-              <div style={{ position: "relative", height: 8 }}>
-                {/* Blurred glow layer — same proportions, spreads behind the real bar */}
-                <div style={{
-                  position: "absolute", inset: "-4px 0", borderRadius: 999,
-                  display: "flex", overflow: "hidden",
-                  filter: "blur(5px)",
-                  opacity: isDark ? 0.75 : 0.5,
-                }}>
-                  {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e" }} />}
-                  {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b" }} />}
-                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />}
+              {/* Progress bar — hidden on rail */}
+              {!isRail && (
+                <div style={{ position: "relative", height: 7, marginBottom: isCompact ? 8 : 8 }}>
+                  {/* Blurred glow layer */}
+                  <div style={{
+                    position: "absolute", inset: "-4px 0", borderRadius: 999,
+                    display: "flex", overflow: "hidden",
+                    filter: "blur(5px)",
+                    opacity: isDark ? 0.75 : 0.5,
+                  }}>
+                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e" }} />}
+                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b" }} />}
+                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />}
+                  </div>
+                  {/* Actual bar */}
+                  <div style={{
+                    position: "absolute", inset: 0, borderRadius: 999,
+                    background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                    overflow: "hidden", display: "flex",
+                  }}>
+                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
+                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
+                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
+                  </div>
                 </div>
-                {/* Actual bar on top */}
-                <div style={{
-                  position: "absolute", inset: 0, borderRadius: 999,
-                  background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                  overflow: "hidden", display: "flex",
-                }}>
-                  {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
-                  {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
-                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
+              )}
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: isRail ? 5 : 7 }}>
+                  <Stat count={summary.likelySafe} label="Safe"  rgb="22,163,74"  isDark={isDark} small={isRail} />
+                  <Stat count={summary.ask}        label="Ask"   rgb="217,119,6"  isDark={isDark} small={isRail} />
+                  <Stat count={summary.avoid}      label="Avoid" rgb="220,38,38"  isDark={isDark} small={isRail} />
                 </div>
+                {!isRail && !isCompact && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{tierLabel}</span>
+                  </div>
+                )}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
-                <div style={{ display: "flex", gap: 7 }}>
-                  <Stat count={summary.likelySafe} label="Safe"  rgb="22,163,74"  isDark={isDark} />
-                  <Stat count={summary.ask}        label="Ask"   rgb="217,119,6"  isDark={isDark} />
-                  <Stat count={summary.avoid}      label="Avoid" rgb="220,38,38"  isDark={isDark} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{tierLabel}</span>
-                </div>
-              </div>
-              {safeItemNames.length > 0 && (
+
+              {/* Safe item tags — default only */}
+              {!isRail && !isCompact && safeItemNames.length > 0 && (
                 <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {safeItemNames.map((name) => (
                     <span key={name} style={{
@@ -245,7 +267,7 @@ export function RestaurantCard({ restaurant: r }: Props) {
             </div>
           ) : (
             <div style={{ fontSize: 12, color: "var(--c-sub)" }}>
-              Menu not analyzed yet — tap to scan
+              {isRail ? "No menu yet" : "Menu not analyzed yet — tap to scan"}
             </div>
           )}
         </div>
@@ -254,17 +276,17 @@ export function RestaurantCard({ restaurant: r }: Props) {
   );
 }
 
-function Stat({ count, label, rgb, isDark }: { count: number; label: string; rgb: string; isDark: boolean }) {
+function Stat({ count, label, rgb, isDark, small }: { count: number; label: string; rgb: string; isDark: boolean; small?: boolean }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 5,
-      padding: "5px 12px", borderRadius: 999,
+      display: "flex", alignItems: "center", gap: small ? 3 : 5,
+      padding: small ? "4px 9px" : "5px 12px", borderRadius: 999,
       background: `rgba(${rgb},${isDark ? "0.18" : "0.10"})`,
       border: `1.5px solid rgba(${rgb},${isDark ? "0.4" : "0.25"})`,
       boxShadow: count > 0 ? `0 2px 10px rgba(${rgb},${isDark ? "0.3" : "0.18"})` : "none",
     }}>
-      <span style={{ fontSize: 16, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.03em" }}>{count}</span>
-      <span style={{ fontSize: 12, fontWeight: 800, color: `rgba(${rgb},${isDark ? "0.9" : "0.8"})` }}>{label}</span>
+      <span style={{ fontSize: small ? 13 : 16, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.03em" }}>{count}</span>
+      <span style={{ fontSize: small ? 10 : 12, fontWeight: 800, color: `rgba(${rgb},${isDark ? "0.9" : "0.8"})` }}>{label}</span>
     </div>
   );
 }
