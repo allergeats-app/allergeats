@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ALLERGEN_LIST, saveProfileAllergens, loadProfileAllergens } from "@/lib/allergenProfile";
 import type { AllergenId } from "@/lib/types";
 import { useTheme } from "@/lib/themeContext";
@@ -136,16 +137,27 @@ export function OnboardingModal() {
             >
               Set My Allergens
             </button>
-            <button
-              onClick={handleSkip}
-              style={{
-                width: "100%", padding: "12px 0", marginTop: 10, borderRadius: 16,
-                border: "none", background: "transparent",
-                color: "var(--c-sub)", fontSize: 14, fontWeight: 600, cursor: "pointer",
-              }}
-            >
-              Skip for now
-            </button>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, padding: "0 4px" }}>
+              <button
+                onClick={handleSkip}
+                style={{
+                  padding: "10px 0", border: "none", background: "transparent",
+                  color: "var(--c-sub)", fontSize: 14, fontWeight: 600, cursor: "pointer",
+                }}
+              >
+                Skip for now
+              </button>
+              <span style={{ fontSize: 14, color: "var(--c-sub)" }}>
+                Already a Member?{" "}
+                <Link
+                  href="/auth"
+                  onClick={handleSkip}
+                  style={{ color: "#eb1700", fontWeight: 700, textDecoration: "none" }}
+                >
+                  Sign In
+                </Link>
+              </span>
+            </div>
           </>
         )}
 
