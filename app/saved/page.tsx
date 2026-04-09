@@ -93,7 +93,11 @@ function ScanCard({ entry }: { entry: ScanEntry }) {
 function SavedOrderCard({ order, onDelete }: { order: SavedOrder; onDelete: () => void }) {
   const isBuilder = !!order.stepGroups;
   const [mainGroup, ...modGroups] = order.stepGroups ?? [];
-  const mainName = isBuilder ? (mainGroup?.items[0]?.name ?? "Custom Order") : null;
+  const mainName = isBuilder
+    ? (mainGroup?.items.length
+        ? mainGroup.items.map(i => i.name).join(" + ")
+        : "Custom Order")
+    : null;
   const flatItems = order.items ?? [];
 
   return (

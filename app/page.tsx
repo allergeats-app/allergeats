@@ -33,7 +33,12 @@ const SESSION_KEY = "allegeats_live_restaurants";
  * menuIsGenericChainTemplate: true flags them for separate UI treatment.
  */
 function withAllChains(list: Restaurant[]): Restaurant[] {
-  const names = new Set(list.filter((r) => r.menuItems.length > 0).map((r) => r.name.toLowerCase()));
+  // Strip stale chain-template entries from cached lists (they may carry hardcoded
+  // distance: 0.4 from a previous session). Real live entries always have an address
+  // or were matched from a live source, so they're kept.
+  const liveOnly = list.filter((r) => !r.menuIsGenericChainTemplate || r.address);
+
+  const names = new Set(liveOnly.filter((r) => r.menuItems.length > 0).map((r) => r.name.toLowerCase()));
   const missing = MOCK_RESTAURANTS
     .filter((m) => !names.has(m.name.toLowerCase()))
     .map((m) => ({
@@ -42,7 +47,7 @@ function withAllChains(list: Restaurant[]): Restaurant[] {
       address:                   undefined as string | undefined,
       menuIsGenericChainTemplate: true,
     }));
-  return missing.length ? [...list, ...missing] : list;
+  return missing.length ? [...liveOnly, ...missing] : liveOnly;
 }
 
 function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: TypeFilter): boolean {
