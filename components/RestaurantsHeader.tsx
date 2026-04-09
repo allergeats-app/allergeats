@@ -81,7 +81,9 @@ export function RestaurantsHeader({
           <div
             style={{
               position: "absolute", inset: 0,
-              display: "flex", alignItems: "center",
+              display: "grid",
+              gridTemplateColumns: "1fr auto 1fr",
+              alignItems: "center",
               opacity: isSearchActive ? 0 : 1,
               transform: isSearchActive ? "scale(0.96) translateY(-3px)" : "scale(1) translateY(0)",
               transition: "opacity 0.18s ease, transform 0.18s ease",
@@ -96,8 +98,9 @@ export function RestaurantsHeader({
               style={{
                 display: "flex", alignItems: "center", gap: 5,
                 background: "none", border: "none", padding: 0,
-                cursor: "pointer", minWidth: 0, flex: 1,
+                cursor: "pointer", minWidth: 0,
                 WebkitTapHighlightColor: "transparent",
+                overflow: "hidden",
               }}
             >
               {/* GPS quality dot */}
@@ -126,14 +129,13 @@ export function RestaurantsHeader({
               </svg>
             </button>
 
-            {/* Center: logo — absolute so it never shifts */}
+            {/* Center: logo — grid column keeps it from ever overlapping neighbors */}
             <Link
               href="/"
               aria-label="AllergEats home"
               style={{
-                position: "absolute", left: "50%", transform: "translateX(-50%)",
-                display: "flex", alignItems: "center", textDecoration: "none",
-                zIndex: 1,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                textDecoration: "none",
               }}
             >
               <Image
@@ -145,7 +147,7 @@ export function RestaurantsHeader({
             </Link>
 
             {/* Right: icon cluster */}
-            <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: "auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}>
 
               {/* Search */}
               <button type="button" onClick={openSearch} aria-label="Search restaurants" style={ICON}>
