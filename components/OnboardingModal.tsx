@@ -136,10 +136,7 @@ export function OnboardingModal() {
 
             {/* Subtitle */}
             <div style={{ textAlign: "center", marginBottom: 16 }}>
-              <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.65 }}>
-                Instantly shows what you can eat.
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)", marginTop: 2 }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)" }}>
                 Set Up in 30 Seconds
               </div>
             </div>
