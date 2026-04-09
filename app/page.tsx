@@ -26,10 +26,22 @@ import { trackEvent } from "@/lib/analytics";
 
 const SESSION_KEY = "allegeats_live_restaurants";
 
-/** Ensure all 50 chain templates are always present, even when OSM coverage is sparse. */
+/**
+ * Append chain menu templates for any chain not already in the live results.
+ * Templates are stripped of hardcoded distances/addresses — they have no real
+ * location, so they should never appear to be "0.4 mi" from the user.
+ * menuIsGenericChainTemplate: true flags them for separate UI treatment.
+ */
 function withAllChains(list: Restaurant[]): Restaurant[] {
   const names = new Set(list.filter((r) => r.menuItems.length > 0).map((r) => r.name.toLowerCase()));
-  const missing = MOCK_RESTAURANTS.filter((m) => !names.has(m.name.toLowerCase()));
+  const missing = MOCK_RESTAURANTS
+    .filter((m) => !names.has(m.name.toLowerCase()))
+    .map((m) => ({
+      ...m,
+      distance:                  undefined as number | undefined,
+      address:                   undefined as string | undefined,
+      menuIsGenericChainTemplate: true,
+    }));
   return missing.length ? [...list, ...missing] : list;
 }
 
@@ -292,6 +304,10 @@ function HomeContent() {
     return list;
   }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite, layout]);
 
+  // Split live-location results (real address + real distance) from chain-only templates
+  const nearbyFiltered  = useMemo(() => filtered.filter((r) => !r.menuIsGenericChainTemplate || r.address), [filtered]);
+  const chainTemplates  = useMemo(() => filtered.filter((r) =>  r.menuIsGenericChainTemplate && !r.address), [filtered]);
+
   const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
 
@@ -457,35 +473,36 @@ function HomeContent() {
           }>
           <>
             {/* ── Best Match for You (hero) ───────────────────────── */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
-                  Best Match for You
-                </h2>
-              </div>
-              <div style={{ position: "relative" }}>
-                <div style={{
-                  position: "absolute", top: 10, left: 10, zIndex: 1,
-                  background: "#eb1700", color: "#fff",
-                  fontSize: 10, fontWeight: 800, padding: "3px 9px",
-                  borderRadius: 999, letterSpacing: "0.04em", pointerEvents: "none",
-                }}>
-                  #1 Match
+            {nearbyFiltered.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="#eb1700" stroke="none" aria-hidden="true">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
+                    Best Match for You
+                  </h2>
                 </div>
-                <RestaurantCard restaurant={filtered[0]} />
+                <div style={{ position: "relative" }}>
+                  <div style={{
+                    position: "absolute", top: 10, left: 10, zIndex: 1,
+                    background: "#eb1700", color: "#fff",
+                    fontSize: 10, fontWeight: 800, padding: "3px 9px",
+                    borderRadius: 999, letterSpacing: "0.04em", pointerEvents: "none",
+                  }}>
+                    #1 Match
+                  </div>
+                  <RestaurantCard restaurant={nearbyFiltered[0]} />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* ── Top Picks swipe rail (positions 2–5) ────────────── */}
-            {filtered.length > 1 && (
+            {nearbyFiltered.length > 1 && (
               <div style={{ marginBottom: 20 }}>
                 <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>
                   {searchCenter ? "Also Nearby" : "Top Picks"}
                 </h2>
-                {/* Negative margin pulls rail flush to screen edges; padding restores inner spacing */}
                 <div className="restaurant-rail" style={{
                   display: "flex",
                   overflowX: "auto",
@@ -496,7 +513,7 @@ function HomeContent() {
                   scrollbarWidth: "none",
                   WebkitOverflowScrolling: "touch" as never,
                 }}>
-                  {filtered.slice(1, 5).map((r) => (
+                  {nearbyFiltered.slice(1, 5).map((r) => (
                     <div key={r.id} style={{
                       flex: "0 0 72vw",
                       maxWidth: 300,
@@ -505,26 +522,60 @@ function HomeContent() {
                       <RestaurantCard restaurant={r} variant="rail" />
                     </div>
                   ))}
-                  {/* Peek ghost so user knows there's more */}
-                  {filtered.slice(1, 5).length === 4 && (
+                  {nearbyFiltered.slice(1, 5).length === 4 && (
                     <div style={{ flex: "0 0 8px", flexShrink: 0 }} />
                   )}
                 </div>
               </div>
             )}
 
-            {/* ── All Restaurants compact list (position 6+) ──────── */}
-            {filtered.length > 5 && (
+            {/* ── More Nearby compact list (position 6+) ──────────── */}
+            {nearbyFiltered.length > 5 && (
               <>
                 <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>
                   {searchCenter ? "More in This Area" : "More Nearby"}
                 </h2>
                 <div style={{ display: "grid", gap: 10 }}>
-                  {filtered.slice(5).map((r) => (
+                  {nearbyFiltered.slice(5).map((r) => (
                     <RestaurantCard key={r.id} restaurant={r} variant="compact" />
                   ))}
                 </div>
               </>
+            )}
+
+            {/* ── Chain menus (no confirmed nearby location) ───────── */}
+            {chainTemplates.length > 0 && (
+              <div style={{ marginTop: nearbyFiltered.length > 0 ? 28 : 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
+                    Browse Chain Menus
+                  </h2>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 10 }}>
+                  No confirmed location nearby — menu data only
+                </div>
+                <div className="restaurant-rail" style={{
+                  display: "flex",
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  gap: 10,
+                  margin: "0 -16px",
+                  padding: "2px 16px 10px",
+                  scrollbarWidth: "none",
+                  WebkitOverflowScrolling: "touch" as never,
+                }}>
+                  {chainTemplates.map((r) => (
+                    <div key={r.id} style={{
+                      flex: "0 0 72vw",
+                      maxWidth: 300,
+                      scrollSnapAlign: "start",
+                    }}>
+                      <RestaurantCard restaurant={r} variant="rail" />
+                    </div>
+                  ))}
+                  <div style={{ flex: "0 0 8px", flexShrink: 0 }} />
+                </div>
+              </div>
             )}
           </>
           </ErrorBoundary>
