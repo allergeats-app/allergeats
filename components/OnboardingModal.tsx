@@ -76,10 +76,10 @@ export function OnboardingModal() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "center", marginBottom: 20 }}>
               {[
                 {
-                  text: "Search nearby restaurants",
+                  text: "Find Nearby Restaurants",
                   icon: (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
@@ -87,7 +87,7 @@ export function OnboardingModal() {
                   ),
                 },
                 {
-                  text: "Safe / Ask / Avoid ratings per item",
+                  text: "Know What's Safe Instantly",
                   icon: (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
@@ -95,7 +95,7 @@ export function OnboardingModal() {
                   ),
                 },
                 {
-                  text: "Save scans and orders for later",
+                  text: "Save Your Go-To Meals",
                   icon: (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
@@ -104,8 +104,8 @@ export function OnboardingModal() {
                 },
               ].map(({ icon, text }) => (
                 <div key={text} style={{
-                  display: "flex", alignItems: "center", gap: 14,
-                  borderRadius: 16, padding: "13px 16px",
+                  display: "inline-flex", alignItems: "center", gap: 10,
+                  borderRadius: 999, padding: "9px 16px 9px 10px",
                   background: isDark
                     ? "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)"
                     : "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,248,246,0.8) 100%)",
@@ -115,13 +115,13 @@ export function OnboardingModal() {
                     : "inset 0 1px 0 rgba(255,255,255,1), 0 1px 4px rgba(0,0,0,0.06)",
                 }}>
                   <div style={{
-                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                    width: 28, height: 28, borderRadius: 999, flexShrink: 0,
                     background: isDark ? "rgba(235,23,0,0.12)" : "rgba(235,23,0,0.07)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
                     {icon}
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", letterSpacing: "-0.01em" }}>{text}</span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>{text}</span>
                 </div>
               ))}
             </div>
