@@ -18,6 +18,7 @@ import { LocationPickerSheet } from "@/components/LocationPickerSheet";
 import { SmartEmptyState } from "@/components/SmartEmptyState";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import { AllergenProfileCard } from "@/components/AllergenProfileCard";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Restaurant } from "@/lib/types";
 import type { AllergenId } from "@/lib/types";
 import type { SortOption, LayoutOption, TypeFilter } from "./restaurants/types";
@@ -449,6 +450,11 @@ function HomeContent() {
             isDark={isDark}
           />
         ) : (
+          <ErrorBoundary fallback={
+            <div style={{ padding: "40px 24px", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
+              Couldn't load restaurants. Please reload the page.
+            </div>
+          }>
           <>
             {/* ── Best Match for You ──────────────────────────────── */}
             <div style={{ marginBottom: 8 }}>
@@ -494,6 +500,7 @@ function HomeContent() {
               </>
             )}
           </>
+          </ErrorBoundary>
         )}
       </div>
     </main>

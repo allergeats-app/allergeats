@@ -18,6 +18,7 @@ import { MenuItemCard } from "@/components/MenuItemCard";
 import { GuidedOrderBuilder } from "@/components/GuidedOrderBuilder";
 import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ShowStaffCard } from "@/components/ShowStaffCard";
 import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
@@ -771,14 +772,20 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     Full menu
                   </button>
                 </div>
-                <GuidedOrderBuilder
-                  steps={restaurant.builderConfig.steps}
-                  sections={vm.sections}
-                  orderedItemIds={orderedItemIds}
-                  onToggleOrder={toggleOrderItem}
-                  onOpenOrder={() => setShowOrderSheet(true)}
-                  onBrowse={() => setBuilderBrowseMode(true)}
-                />
+                <ErrorBoundary fallback={
+                  <div style={{ padding: "24px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
+                    Couldn't load the order builder. <button onClick={() => setBuilderBrowseMode(true)} style={{ background: "none", border: "none", color: "#eb1700", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Browse full menu instead</button>
+                  </div>
+                }>
+                  <GuidedOrderBuilder
+                    steps={restaurant.builderConfig.steps}
+                    sections={vm.sections}
+                    orderedItemIds={orderedItemIds}
+                    onToggleOrder={toggleOrderItem}
+                    onOpenOrder={() => setShowOrderSheet(true)}
+                    onBrowse={() => setBuilderBrowseMode(true)}
+                  />
+                </ErrorBoundary>
               </>
             ) : (
               <>
@@ -844,6 +851,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   )}
                 </div>
 
+                <ErrorBoundary fallback={
+                  <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
+                    Couldn't display menu items. Try reloading the page.
+                  </div>
+                }>
                 {filteredItems.length === 0 ? (
                   <EmptyState title="No items match" subtitle="Try a different filter." />
                 ) : hasCategories ? (() => {
@@ -997,6 +1009,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </>
               );
             })()}
+                </ErrorBoundary>
               </>
             )}
           </section>

@@ -2,7 +2,11 @@
 
 import { Component, type ReactNode } from "react";
 
-interface Props { children: ReactNode }
+interface Props {
+  children: ReactNode;
+  /** Optional inline fallback instead of the full-page error screen */
+  fallback?: ReactNode;
+}
 interface State { hasError: boolean; message: string }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -15,6 +19,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.hasError) return this.props.children;
+
+    if (this.props.fallback) return this.props.fallback;
+
     return (
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center",
