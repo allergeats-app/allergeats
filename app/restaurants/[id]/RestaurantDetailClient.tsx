@@ -613,22 +613,29 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </div>
             ) : (
               <>
-                {/* Safety bar */}
-                {(() => {
-                  const glowRgb = avoidPercent > 40 ? "239,68,68" : askPercent > 40 ? "245,158,11" : "34,197,94";
-                  return (
-                    <div style={{
-                      height: 8, borderRadius: 999,
-                      background: "var(--c-muted)",
-                      overflow: "hidden", display: "flex", marginBottom: 12,
-                      boxShadow: `0 0 10px 2px rgba(${glowRgb},0.35), inset 0 1px 3px rgba(0,0,0,0.15)`,
-                    }}>
-                      {safePercent > 0  && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s" }} />}
-                      {askPercent > 0   && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s" }} />}
-                      {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)", transition: "width 0.5s" }} />}
-                    </div>
-                  );
-                })()}
+                {/* Safety bar — per-section colored glow */}
+                <div style={{ position: "relative", height: 8, marginBottom: 12 }}>
+                  {/* Blurred glow layer */}
+                  <div style={{
+                    position: "absolute", inset: "-4px 0", borderRadius: 999,
+                    display: "flex", overflow: "hidden",
+                    filter: "blur(5px)", opacity: 0.6,
+                  }}>
+                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e", transition: "width 0.5s" }} />}
+                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b", transition: "width 0.5s" }} />}
+                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444", transition: "width 0.5s" }} />}
+                  </div>
+                  {/* Actual bar */}
+                  <div style={{
+                    position: "absolute", inset: 0, borderRadius: 999,
+                    background: "var(--c-muted)",
+                    overflow: "hidden", display: "flex",
+                  }}>
+                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s" }} />}
+                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s" }} />}
+                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)", transition: "width 0.5s" }} />}
+                  </div>
+                </div>
 
                 {/* ── 2. Quick stats row ── */}
                 <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
