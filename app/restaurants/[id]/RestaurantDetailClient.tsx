@@ -1247,7 +1247,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                             {/* Main item row */}
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: modifierGroups.length > 0 ? 10 : 0 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                {worstMeta && <div style={{ width: 9, height: 9, borderRadius: "50%", background: worstMeta.color, flexShrink: 0 }} />}
+                                {worstMeta && (worstMeta === RISK_META["likely-safe"] ? (
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+                                ) : (
+                                  <div style={{ width: 9, height: 9, borderRadius: "50%", background: worstMeta.color, flexShrink: 0 }} />
+                                ))}
                                 <span style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)" }}>
                                   {mainItem?.name ?? "Custom Order"}
                                 </span>
@@ -1296,7 +1300,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                               padding: "13px 0",
                               borderBottom: idx < extraItems.length - 1 ? "1px solid var(--c-border)" : "none",
                             }}>
-                              <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                              {meta === RISK_META["likely-safe"] ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+                              ) : (
+                                <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                              )}
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
                               </div>
@@ -1318,7 +1326,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           padding: "13px 0",
                           borderBottom: idx < orderedItems.length - 1 ? "1px solid var(--c-border)" : "none",
                         }}>
-                          <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                          {meta === RISK_META["likely-safe"] ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+                          ) : (
+                            <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                          )}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
                             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
