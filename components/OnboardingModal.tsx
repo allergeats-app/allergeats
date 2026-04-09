@@ -52,22 +52,20 @@ export function OnboardingModal() {
   if (!visible) return null;
 
   return (
-    // Backdrop — no bottom padding so sheet fills edge-to-edge on iOS
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
       background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
       WebkitBackdropFilter: "blur(6px)",
-      display: "flex", alignItems: "flex-end", justifyContent: "center",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "20px max(20px, env(safe-area-inset-left))",
     }}>
-      {/* Sheet — extends to physical bottom edge; internal padding clears home indicator */}
       <div style={{
         background: "var(--c-card)",
-        borderRadius: "28px 28px 0 0",
-        width: "100%", maxWidth: 520,
-        // Top padding + side padding + bottom padding respects home indicator
-        padding: `28px 24px max(36px, calc(24px + env(safe-area-inset-bottom)))`,
-        boxShadow: "0 -4px 40px rgba(0,0,0,0.18)",
-        maxHeight: "92dvh",
+        borderRadius: 28,
+        width: "100%", maxWidth: 480,
+        padding: "32px 24px 28px",
+        boxShadow: "0 8px 48px rgba(0,0,0,0.28)",
+        maxHeight: "90dvh",
         overflowY: "auto",
         WebkitOverflowScrolling: "touch" as never,
       }}>
