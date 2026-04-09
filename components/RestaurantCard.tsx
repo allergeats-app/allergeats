@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
@@ -32,6 +32,8 @@ export function RestaurantCard({ restaurant: r }: Props) {
 
   const [photoFailed, setPhotoFailed] = useState(false);
   const [photoLoaded, setPhotoLoaded] = useState(false);
+  const [fallbackSrc, setFallbackSrc] = useState<string | null>(null);
+  const fallbackFiredRef = useRef(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(r.id);
 
@@ -39,8 +41,9 @@ export function RestaurantCard({ restaurant: r }: Props) {
   //   1. r.imageUrl   — pre-enriched URL from the image enrichment pipeline
   //   2. chainLogoUrl — Wikipedia photo via /api/wiki-thumb (free, no API key)
   //   3. places-photo — Google Places proxy (requires API key, best for OSM restaurants)
+  //   4. restaurant-image — Google Places → Yelp → website og:image (last resort, async)
   const wikiUrl  = chainLogoUrl(r.name);
-  const photoSrc = !photoFailed
+  const primarySrc = !photoFailed
     ? (r.imageUrl ?? wikiUrl
         ?? (r.googlePlaceId
           ? `/api/places-photo?placeId=${encodeURIComponent(r.googlePlaceId)}`
@@ -49,10 +52,28 @@ export function RestaurantCard({ restaurant: r }: Props) {
             : null))
     : null;
 
+  const photoSrc = primarySrc ?? fallbackSrc;
+
+  // Fire the restaurant-image fallback when the primary chain has nothing to show
+  useEffect(() => {
+    if (fallbackFiredRef.current) return;
+    if (primarySrc && !photoFailed) return; // primary chain has a URL — don't fire yet
+    if (!r.name) return;
+    fallbackFiredRef.current = true;
+    const params = new URLSearchParams({ name: r.name });
+    if (r.lat  != null) params.set("lat",  String(r.lat));
+    if (r.lng  != null) params.set("lng",  String(r.lng));
+    fetch(`/api/restaurant-image?${params}`)
+      .then(res => res.ok ? res.json() : null)
+      .then((data: { imageUrl?: string } | null) => { if (data?.imageUrl) setFallbackSrc(data.imageUrl); })
+      .catch(() => {});
+  }, [primarySrc, photoFailed, r.name, r.lat, r.lng]);
+
   // Wiki-thumb images are chain logos — use contain so the full logo is visible.
-  // Places photos and pre-enriched images are real photos — use cover.
+  // Places photos, fallback images, and pre-enriched photos use cover.
   const isLogo = (() => {
     if (!photoSrc) return false;
+    if (photoSrc === fallbackSrc) return false; // restaurant-image results are always photos
     if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
       return /\.svg\.png/i.test(decodeURIComponent(photoSrc));
     }
@@ -73,7 +94,7 @@ export function RestaurantCard({ restaurant: r }: Props) {
         {/* Cover image area — cuisine gradient is always the base; photo fades in on load */}
         <div style={{
           height: 148,
-          background: isLogo && photoLoaded ? "#fff" : cover.bg,
+          background: isLogo && photoLoaded ? "#fff" : photoLoaded ? "var(--c-card)" : cover.bg,
           display: "flex", alignItems: "center", justifyContent: "center",
           position: "relative", overflow: "hidden",
           transition: "background 0.3s ease",
