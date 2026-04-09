@@ -1864,7 +1864,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: yardhouse.com — Allergen Menu
   {
     id: "yard-house",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Yard_House_logo.svg/640px-Yard_House_logo.svg.png",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Yard_House_logo.svg/480px-Yard_House_logo.svg.png",
     name: "Yard House",
     cuisine: "Casual Dining · American & Craft Beer",
     tags: ["american", "bar", "craft-beer", "casual"],
@@ -1889,7 +1889,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Outback Steakhouse ──────────────────────────────────────────────────────
   {
     id: "outback",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Outback_Steakhouse_logo.svg/640px-Outback_Steakhouse_logo.svg.png",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Outback_Steakhouse.jpg/640px-Outback_Steakhouse.jpg",
     name: "Outback Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
