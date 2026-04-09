@@ -171,21 +171,30 @@ export function RestaurantCard({ restaurant: r }: Props) {
 
           {summary.total > 0 ? (
             <div>
-              {(() => {
-                const glowColor = avoidPercent > 40 ? "239,68,68" : askPercent > 40 ? "245,158,11" : "34,197,94";
-                return (
-                  <div style={{
-                    height: 8, borderRadius: 999,
-                    background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                    overflow: "hidden", display: "flex",
-                    boxShadow: `0 0 10px 2px rgba(${glowColor},${isDark ? "0.45" : "0.3"}), inset 0 1px 3px rgba(0,0,0,0.15)`,
-                  }}>
-                    {safePercent > 0 && <div style={{ width: `${safePercent}%`, background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
-                    {askPercent  > 0 && <div style={{ width: `${askPercent}%`,  background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
-                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
-                  </div>
-                );
-              })()}
+              {/* Bar with per-section colored glow */}
+              <div style={{ position: "relative", height: 8 }}>
+                {/* Blurred glow layer — same proportions, spreads behind the real bar */}
+                <div style={{
+                  position: "absolute", inset: "-4px 0", borderRadius: 999,
+                  display: "flex", overflow: "hidden",
+                  filter: "blur(5px)",
+                  opacity: isDark ? 0.75 : 0.5,
+                }}>
+                  {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e" }} />}
+                  {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b" }} />}
+                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />}
+                </div>
+                {/* Actual bar on top */}
+                <div style={{
+                  position: "absolute", inset: 0, borderRadius: 999,
+                  background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                  overflow: "hidden", display: "flex",
+                }}>
+                  {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
+                  {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
+                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
+                </div>
+              </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
                 <div style={{ display: "flex", gap: 7 }}>
                   <Stat count={summary.likelySafe} label="Safe"  rgb="22,163,74"  isDark={isDark} />
