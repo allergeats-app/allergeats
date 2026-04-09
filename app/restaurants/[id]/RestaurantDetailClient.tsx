@@ -1337,42 +1337,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </div>
 
               {/* Order summary (DoorDash-style breakdown) */}
-              <div style={{
-                margin: "12px 20px 0",
-                borderRadius: 14, overflow: "hidden",
-                border: "1px solid var(--c-border)",
-              }}>
-                <div style={{
-                  padding: "10px 16px 8px",
-                  background: "var(--c-muted)",
-                  borderBottom: "1px solid var(--c-border)",
-                }}>
-                  <span style={{
-                    fontSize: 10, fontWeight: 800, color: "var(--c-sub)",
-                    textTransform: "uppercase", letterSpacing: "0.1em",
-                  }}>
-                    Order Summary
-                  </span>
-                </div>
-                <div style={{ background: "var(--c-card)", padding: "4px 16px 10px" }}>
-                  {[
-                    { label: "Total items",       value: `${orderedItems.length}`,                                                                          color: "var(--c-text)"       },
-                    ...(orderedItems.filter(i => i.risk === "likely-safe").length > 0 ? [{ label: "Safe to order",      value: `${orderedItems.filter(i => i.risk === "likely-safe").length} ✓`, color: "var(--c-risk-safe)"  }] : []),
-                    ...(orderedItems.filter(i => i.risk === "ask").length > 0         ? [{ label: "Need confirmation",  value: `${orderedItems.filter(i => i.risk === "ask").length} ?`,         color: "var(--c-risk-ask)"   }] : []),
-                    ...(orderedItems.filter(i => i.risk === "avoid").length > 0       ? [{ label: "Contains allergens", value: `${orderedItems.filter(i => i.risk === "avoid").length} !`,        color: "var(--c-risk-avoid)" }] : []),
-                  ].map(({ label, value, color }, i, arr) => (
-                    <div key={label} style={{
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
-                      padding: "8px 0",
-                      borderBottom: i < arr.length - 1 ? "1px solid var(--c-border)" : "none",
-                    }}>
-                      <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{label}</span>
-                      <span style={{ fontSize: 13, fontWeight: 800, color }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Staff questions (like "Special Instructions" in DoorDash) */}
               {(() => {
                 const askQuestions = [...new Set(
@@ -1446,6 +1410,24 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     </>
                   )}
                 </button>
+                {/* View Saved Orders — appears after save */}
+                {orderSaved && (
+                  <Link
+                    href="/saved"
+                    style={{
+                      width: "100%", height: 54, borderRadius: 16,
+                      background: "transparent", border: "2px solid #16a34a",
+                      color: "#16a34a", fontSize: 15, fontWeight: 800,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      textDecoration: "none", letterSpacing: "-0.01em",
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    View Saved Orders
+                  </Link>
+                )}
                 {/* Secondary: Clear */}
                 <button
                   type="button"
