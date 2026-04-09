@@ -181,19 +181,19 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     })
       .then(async (res) => {
         if (cancelled) return;
-        if (!res.ok) { setCrawlStatus("failed"); return; }
+        if (!res.ok) { if (!cancelled) setCrawlStatus("failed"); return; }
 
         let data: { menu?: NormalizedMenu };
         try {
           data = await res.json() as { menu?: NormalizedMenu };
         } catch {
-          setCrawlStatus("failed");
+          if (!cancelled) setCrawlStatus("failed");
           return;
         }
-        if (!data.menu) { setCrawlStatus("empty"); return; }
+        if (!data.menu) { if (!cancelled) setCrawlStatus("empty"); return; }
 
         const items = toRawMenuItems(data.menu);
-        if (items.length === 0) { setCrawlStatus("empty"); return; }
+        if (items.length === 0) { if (!cancelled) setCrawlStatus("empty"); return; }
 
         const enriched  = { ...restaurant, menuItems: items };
         const allergens = loadProfileAllergens();

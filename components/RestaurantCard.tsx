@@ -251,8 +251,8 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               {/* Safe item tags — default only */}
               {!isRail && !isCompact && safeItemNames.length > 0 && (
                 <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {safeItemNames.map((name) => (
-                    <span key={name} style={{
+                  {safeItemNames.map((name, i) => (
+                    <span key={`${i}-${name}`} style={{
                       fontSize: 13, fontWeight: 700,
                       color: isDark ? "#86efac" : "#15803d",
                       background: isDark ? "#0a2414" : "#f0fdf4",

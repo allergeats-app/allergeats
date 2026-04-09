@@ -69,7 +69,7 @@ export function useAllergenProfile() {
       }
     }, 800);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [allergens]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allergens, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function setAllergens(next: AllergenId[]) {
     setAllergensState(next);

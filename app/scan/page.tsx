@@ -61,7 +61,8 @@ export default function ScanPage() {
   const [photoConsentGiven, setPhotoConsentGiven] = useState(() => {
     try { return localStorage.getItem("allegeats_photo_consent") === "1"; } catch { return false; }
   });
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef    = useRef<HTMLInputElement>(null);
+  const communitySeqRef   = useRef(0);
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
   const [communityScores, setCommunityScores]   = useState<CommunityScoreMap>(new Map());
   // Track which dishes the user has already reported: "dish_normalized::allergen" → outcome
@@ -111,8 +112,9 @@ export default function ScanPage() {
   // Fetch community scores whenever results are ready
   useEffect(() => {
     if (step !== 3 || menuItems.length === 0 || selectedAllergens.length === 0) return;
+    const seq = ++communitySeqRef.current;
     fetchCommunityScores(menuItems, selectedAllergens as string[], loadedRestaurant ?? undefined)
-      .then(setCommunityScores)
+      .then((scores) => { if (seq === communitySeqRef.current) setCommunityScores(scores); })
       .catch(() => { /* community scores are non-critical — fail silently */ });
   }, [step, menuItems, selectedAllergens, loadedRestaurant]);
 
