@@ -76,19 +76,52 @@ export function OnboardingModal() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: 12, marginBottom: 20 }}>
+            <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
               {[
-                { icon: "🔍", text: "Search nearby restaurants" },
-                { icon: "⚠️", text: "See Safe / Ask / Avoid ratings per item" },
-                { icon: "💾", text: "Save scans and orders for later" },
+                {
+                  text: "Search nearby restaurants",
+                  icon: (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  ),
+                },
+                {
+                  text: "Safe / Ask / Avoid ratings per item",
+                  icon: (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                  ),
+                },
+                {
+                  text: "Save scans and orders for later",
+                  icon: (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                  ),
+                },
               ].map(({ icon, text }) => (
                 <div key={text} style={{
                   display: "flex", alignItems: "center", gap: 14,
-                  background: isDark ? "#1c1c1e" : "#f9f8f6",
-                  borderRadius: 14, padding: "12px 16px",
+                  borderRadius: 16, padding: "13px 16px",
+                  background: isDark
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)"
+                    : "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,248,246,0.8) 100%)",
+                  border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
+                  boxShadow: isDark
+                    ? "inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 4px rgba(0,0,0,0.25)"
+                    : "inset 0 1px 0 rgba(255,255,255,1), 0 1px 4px rgba(0,0,0,0.06)",
                 }}>
-                  <span style={{ fontSize: 22 }}>{icon}</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "var(--c-text)" }}>{text}</span>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                    background: isDark ? "rgba(235,23,0,0.12)" : "rgba(235,23,0,0.07)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    {icon}
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", letterSpacing: "-0.01em" }}>{text}</span>
                 </div>
               ))}
             </div>
