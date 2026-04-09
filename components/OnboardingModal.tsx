@@ -78,11 +78,8 @@ export function OnboardingModal() {
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <Image src="/logo.png" alt="AllergEats" width={200} height={46}
                 style={{ width: "auto", height: 44, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
-              <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", marginBottom: 10 }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)" }}>
                 Eat out safely.
-              </div>
-              <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.65 }}>
-                Instantly shows what you can eat. Set up in 30 seconds.
               </div>
             </div>
 
@@ -137,6 +134,11 @@ export function OnboardingModal() {
                   </span>
                 </div>
               ))}
+            </div>
+
+            {/* Subtitle */}
+            <div style={{ textAlign: "center", fontSize: 15, color: "var(--c-sub)", lineHeight: 1.65, marginBottom: 16 }}>
+              Instantly shows what you can eat. Set up in 30 seconds.
             </div>
 
             {/* CTA */}
