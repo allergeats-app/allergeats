@@ -156,7 +156,7 @@ export function RestaurantsFilterDrawer({
             : "transform 0.28s cubic-bezier(0.4,0,1,1)",
           maxHeight: "min(90dvh, calc(100dvh - 60px))",
           display: "flex", flexDirection: "column",
-          paddingBottom: "env(safe-area-inset-bottom)",
+          paddingBottom: "max(16px, env(safe-area-inset-bottom))",
         }}
       >
         {/* Scrollable body */}
