@@ -194,7 +194,7 @@ function SavedContent() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Link href="/" style={{ color: "var(--c-sub)", textDecoration: "none", fontSize: 13, fontWeight: 700 }}>← Back</Link>
           <span style={{ color: "var(--c-border)" }}>|</span>
-          <span style={{ fontSize: 15, fontWeight: 900, color: "var(--c-text)" }}>Saved & Recent</span>
+          <span style={{ fontSize: 15, fontWeight: 900, color: "var(--c-text)" }}>Saved Orders</span>
         </div>
         <SettingsButton />
       </div>

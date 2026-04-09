@@ -93,7 +93,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       steps: [
         { label: "Choose your vessel",  category: "Vessel",       required: true,  maxSelect: 1  },
         { label: "Add rice & beans",    category: "Rice & Beans", required: false, maxSelect: 99 },
-        { label: "Choose your protein", category: "Proteins",     required: true,  maxSelect: 1  },
+        { label: "Choose your protein", category: "Proteins",     required: true,  maxSelect: 99 },
         { label: "Add a salsa",         category: "Salsas",       required: false, maxSelect: 99 },
         { label: "Add toppings",        category: "Toppings",     required: false, maxSelect: 99 },
       ],
@@ -282,7 +282,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     builderConfig: {
       steps: [
         { label: "Choose your bread",    category: "Breads",     required: true,  maxSelect: 1  },
-        { label: "Choose your protein",  category: "Proteins",   required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins",   required: true,  maxSelect: 99 },
         { label: "Add cheese",           category: "Cheeses",    required: false, maxSelect: 1  },
         { label: "Add vegetables",       category: "Vegetables", required: false, maxSelect: 99 },
         { label: "Add sauces",           category: "Sauces",     required: false, maxSelect: 99 },
@@ -733,7 +733,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     builderConfig: {
       steps: [
         { label: "Choose your bread",    category: "Breads",   required: true,  maxSelect: 1  },
-        { label: "Choose your protein",  category: "Proteins", required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins", required: true,  maxSelect: 99 },
         { label: "Add cheese",           category: "Cheeses",  required: false, maxSelect: 1  },
         { label: "Add toppings",         category: "Toppings", required: false, maxSelect: 99 },
         { label: "Add sauces",           category: "Sauces",   required: false, maxSelect: 99 },
@@ -795,7 +795,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     builderConfig: {
       steps: [
         { label: "Choose your bread",    category: "Breads",     required: true,  maxSelect: 1  },
-        { label: "Choose your protein",  category: "Proteins",   required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins",   required: true,  maxSelect: 99 },
         { label: "Add cheese",           category: "Cheeses",    required: false, maxSelect: 1  },
         { label: "Add toppings",         category: "Toppings",   required: false, maxSelect: 99 },
         { label: "Add condiments",       category: "Condiments", required: false, maxSelect: 99 },
@@ -1671,7 +1671,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     builderConfig: {
       steps: [
         { label: "Choose your base",     category: "Bases",        required: true,  maxSelect: 1  },
-        { label: "Choose your protein",  category: "Proteins",     required: true,  maxSelect: 1  },
+        { label: "Choose your protein",  category: "Proteins",     required: true,  maxSelect: 99 },
         { label: "Add rice & beans",     category: "Rice & Beans", required: false, maxSelect: 99 },
         { label: "Add a salsa",          category: "Salsas",       required: false, maxSelect: 99 },
         { label: "Add toppings",         category: "Toppings",     required: false, maxSelect: 99 },

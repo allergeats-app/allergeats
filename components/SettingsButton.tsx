@@ -104,12 +104,6 @@ export function SettingsButton() {
                 </div>
               </div>
 
-              {/* Saved & Recent */}
-              <Link href="/saved" onClick={() => setOpen(false)} style={itemStyle}>
-                <span>Saved & Recent</span>
-                <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
-              </Link>
-
               {/* My Account */}
               <Link href="/profile" onClick={() => setOpen(false)} style={itemStyle}>
                 <span>My Account</span>
@@ -119,6 +113,12 @@ export function SettingsButton() {
               {/* My Allergies */}
               <Link href="/allergies" onClick={() => setOpen(false)} style={itemStyle}>
                 <span>My Allergies</span>
+                <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
+              </Link>
+
+              {/* Saved Orders */}
+              <Link href="/saved" onClick={() => setOpen(false)} style={itemStyle}>
+                <span>Saved Orders</span>
                 <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
               </Link>
 
