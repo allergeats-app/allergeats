@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 
-// Rate-limit: max 5 feedback submissions per IP per 10 minutes
-const recentSubmissions = new Map<string, number[]>();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const times = (recentSubmissions.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (times.length >= MAX_PER_WINDOW) return true;
-  recentSubmissions.set(ip, [...times, now]);
-  return false;
-}
-
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isRateLimited(ip)) {
+  const ip = getClientIp(req);
+  if (await isRateLimited(ip, WINDOW_MS, MAX_PER_WINDOW)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 

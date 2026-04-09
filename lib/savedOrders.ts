@@ -21,7 +21,8 @@ export type SavedOrder = {
 
 export function loadSavedOrders(): SavedOrder[] {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const parsed: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(parsed) ? (parsed as SavedOrder[]) : [];
   } catch {
     return [];
   }

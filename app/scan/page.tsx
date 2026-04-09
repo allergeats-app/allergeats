@@ -57,6 +57,10 @@ export default function ScanPage() {
   const [isScanning, setIsScanning]             = useState(false);
   const [photoPreview, setPhotoPreview]         = useState<string | null>(null);
   const [scanStep, setScanStep]                 = useState(0); // 0=idle 1=uploading 2=reading 3=analyzing
+  const [showPhotoConsent, setShowPhotoConsent] = useState(false);
+  const [photoConsentGiven, setPhotoConsentGiven] = useState(() => {
+    try { return localStorage.getItem("allegeats_photo_consent") === "1"; } catch { return false; }
+  });
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [learnedRules, setLearnedRules]         = useState<LearnedRule[]>([]);
   const [communityScores, setCommunityScores]   = useState<CommunityScoreMap>(new Map());
@@ -553,7 +557,11 @@ function StaffBlock({ row }: { row: Row }) {
                 style={{ display: "none" }}
               />
               <button
-                onClick={() => { if (!isScanning) cameraInputRef.current?.click(); }}
+                onClick={() => {
+                  if (isScanning) return;
+                  if (photoConsentGiven) { cameraInputRef.current?.click(); }
+                  else { setShowPhotoConsent(true); }
+                }}
                 disabled={isScanning}
                 style={{
                   width: "100%", padding: "20px", textAlign: "left",
@@ -794,6 +802,85 @@ function StaffBlock({ row }: { row: Row }) {
 
         </div>
       </div>
+
+      {/* Photo consent modal */}
+      {showPhotoConsent && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="consent-title"
+          style={{
+            position: "fixed", inset: 0, zIndex: 1000,
+            background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+            padding: "0 0 env(safe-area-inset-bottom, 0)",
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPhotoConsent(false); }}
+        >
+          <div style={{
+            background: "var(--c-card)", borderRadius: "20px 20px 0 0",
+            border: "1px solid var(--c-border)", width: "100%", maxWidth: 480,
+            padding: "24px 20px 28px", display: "flex", flexDirection: "column", gap: 14,
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 12, background: "rgba(235,23,0,0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </div>
+              <div>
+                <div id="consent-title" style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 4 }}>
+                  Before you scan
+                </div>
+                <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.55 }}>
+                  Your photo will be sent to an AI service to read menu text. It is not stored or used after processing.
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              fontSize: 12, color: "var(--c-sub)", background: "var(--c-muted)",
+              border: "1px solid var(--c-border)", borderRadius: 10, padding: "10px 12px", lineHeight: 1.5,
+            }}>
+              AllergEats uses Claude (Anthropic) to extract menu items from photos. No image data is retained. See Anthropic&apos;s privacy policy for details.
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 2 }}>
+              <button
+                onClick={() => setShowPhotoConsent(false)}
+                style={{
+                  flex: 1, padding: "13px", borderRadius: 14,
+                  background: "var(--c-muted)", border: "1px solid var(--c-border)",
+                  fontSize: 15, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  try { localStorage.setItem("allegeats_photo_consent", "1"); } catch { /* */ }
+                  setPhotoConsentGiven(true);
+                  setShowPhotoConsent(false);
+                  setTimeout(() => cameraInputRef.current?.click(), 50);
+                }}
+                style={{
+                  flex: 2, padding: "13px", borderRadius: 14,
+                  background: "#eb1700", border: "none",
+                  fontSize: 15, fontWeight: 800, color: "#fff", cursor: "pointer",
+                  boxShadow: "0 4px 14px rgba(235,23,0,0.25)",
+                }}
+              >
+                Got it, scan menu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }

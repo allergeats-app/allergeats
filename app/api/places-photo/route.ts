@@ -109,7 +109,7 @@ export async function GET(req: Request) {
     // Legacy photo_reference strings are short alphanumeric tokens.
     const photoUrl = resolvedPhotoRef.startsWith("places/")
       ? `${PLACES_V1}/${resolvedPhotoRef}/media?maxWidthPx=600&key=${key}&skipHttpRedirect=true`
-      : `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photo_reference=${resolvedPhotoRef}&key=${key}`;
+      : `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photo_reference=${encodeURIComponent(resolvedPhotoRef)}&key=${key}`;
 
     const photoRes = await fetch(photoUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 

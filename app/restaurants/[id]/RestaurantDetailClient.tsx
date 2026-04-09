@@ -557,15 +557,29 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               const displayDate = new Date(MENU_DATA_VERIFIED_DATE).toLocaleDateString("en-US", { month: "long", year: "numeric" });
               return (
                 <div style={{
-                  fontSize: 12, color: isStale ? "#b91c1c" : "var(--c-sub)",
-                  background: isStale ? "rgba(185,28,28,0.07)" : "var(--c-muted)",
-                  border: `1px solid ${isStale ? "rgba(185,28,28,0.2)" : "var(--c-border)"}`,
-                  borderRadius: 10, padding: "8px 12px", marginBottom: 14, lineHeight: 1.5,
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                  background: isStale ? "rgba(185,28,28,0.07)" : "rgba(234,179,8,0.08)",
+                  border: `1.5px solid ${isStale ? "rgba(185,28,28,0.25)" : "rgba(234,179,8,0.35)"}`,
+                  borderRadius: 12, padding: "11px 14px", marginBottom: 16,
                 }}>
-                  {isStale
-                    ? `Allergen data last verified ${displayDate} — may be out of date. Always confirm with staff.`
-                    : `Allergen data verified ${displayDate}. Always confirm with staff before ordering.`
-                  }
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke={isStale ? "#b91c1c" : "#b45309"} strokeWidth="2.2"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: isStale ? "#b91c1c" : "#92400e", lineHeight: 1.3, marginBottom: 3 }}>
+                      {isStale ? "Allergen data may be outdated" : "Always verify with staff"}
+                    </div>
+                    <div style={{ fontSize: 12, color: isStale ? "#b91c1c" : "#b45309", lineHeight: 1.5 }}>
+                      {isStale
+                        ? `Last verified ${displayDate}. Recipes change — confirm all allergens directly with restaurant staff before ordering.`
+                        : `Analysis is based on menu text patterns, not official certification. Verified ${displayDate}. Confirm with staff before ordering.`
+                      }
+                    </div>
+                  </div>
                 </div>
               );
             })()}

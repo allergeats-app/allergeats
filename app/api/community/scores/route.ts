@@ -84,6 +84,7 @@ export async function POST(req: Request) {
     // Double-quote the value so PostgREST handles names that contain spaces correctly.
     // restNorm is alphanumeric+spaces only (stripped by normalizeRestaurant), so no
     // quote characters can appear in it — the wrapping quotes are safe.
+    if (/[^\w\s]/.test(restNorm)) return NextResponse.json({ scores: [] });
     query = query.or(`rest_normalized.eq."${restNorm}",rest_normalized.is.null`);
   }
 
