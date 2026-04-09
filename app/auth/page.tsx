@@ -188,7 +188,7 @@ export default function AuthPage() {
             </div>
             <form onSubmit={handleForgotPassword} style={{ display: "grid", gap: 14 }}>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com" style={inputStyle} />
+                placeholder="you@example.com" aria-label="Email address" style={inputStyle} />
               {error && <div style={{ padding: "10px 14px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{error}</div>}
               {info  && <div style={{ padding: "10px 14px", borderRadius: 10, background: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: 13, color: "#15803d" }}>{info}</div>}
               <button type="submit" disabled={loading} style={{

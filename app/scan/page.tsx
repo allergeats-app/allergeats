@@ -633,6 +633,7 @@ function StaffBlock({ row }: { row: Row }) {
                         onChange={(e) => setRestaurantSearch(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter" && selectedMenu) loadSelectedRestaurant(); }}
                         placeholder="Search restaurants…"
+                        aria-label="Search restaurants"
                         style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
                       />
                       <select
@@ -673,6 +674,7 @@ function StaffBlock({ row }: { row: Row }) {
                         value={menuUrl}
                         onChange={(e) => setMenuUrl(e.target.value)}
                         placeholder="https://restaurant.com/menu"
+                        aria-label="Restaurant menu URL"
                         style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", border: "1px solid var(--c-border)", borderRadius: 10, color: "var(--c-text)", background: "var(--c-input)", outline: "none", marginBottom: 8 }}
                       />
                       <button

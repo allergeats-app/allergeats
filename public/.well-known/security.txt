@@ -1,0 +1,5 @@
+Contact: mailto:privacy@allergeats.com
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://allergeats.com/.well-known/security.txt
+Policy: https://allergeats.com/privacy
