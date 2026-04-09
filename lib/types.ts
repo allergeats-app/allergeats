@@ -147,6 +147,11 @@ export type BuilderStep = {
   required: boolean;
   /** 1 = single-select (auto-advance); >1 = multi-select with Continue button */
   maxSelect: number;
+  /**
+   * When true, items in this step are displayed as numbered combos (#1, #2, #3…).
+   * Used for fast food entrée steps where items map to meal numbers.
+   */
+  showAsCombo?: boolean;
 };
 
 export type BuilderConfig = {

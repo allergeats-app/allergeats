@@ -245,11 +245,15 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             No items available
           </div>
         ) : sortedItems.map((item, idx) => {
-          const isSelected = orderedItemIds.has(item.id); // always fresh — no stale state
+          const isSelected = orderedItemIds.has(item.id);
           const isAvoid    = item.risk === "avoid";
           const badge      = RISK_BADGE[item.risk] ?? RISK_BADGE["unknown"];
           const dot        = RISK_DOT[item.risk] ?? "#9ca3af";
           const isLast     = idx === sortedItems.length - 1;
+          // Combo number = 1-based position in the original (unsorted) step items list
+          const comboNum   = step?.showAsCombo
+            ? (stepItems.findIndex((i) => i.id === item.id) + 1)
+            : null;
 
           return (
             <button
@@ -274,8 +278,24 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                 minHeight: 56,
               }}
             >
-              {/* Safety dot */}
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: dot, flexShrink: 0 }} />
+              {/* Combo number badge OR safety dot */}
+              {comboNum ? (
+                <div style={{
+                  width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+                  background: isSelected ? "#eb1700" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.15s",
+                }}>
+                  <span style={{
+                    fontSize: 13, fontWeight: 900, lineHeight: 1,
+                    color: isSelected ? "#fff" : "var(--c-sub)",
+                  }}>
+                    #{comboNum}
+                  </span>
+                </div>
+              ) : (
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: dot, flexShrink: 0 }} />
+              )}
 
               {/* Name + allergen hits */}
               <div style={{ flex: 1, minWidth: 0 }}>
