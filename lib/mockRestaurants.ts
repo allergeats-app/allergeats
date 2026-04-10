@@ -1895,6 +1895,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["steakhouse", "casual"],
     distance: 1.8,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Start with an appetizer?",  category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Choose your entrée",        categories: ["Steaks", "Seafood", "Chicken"], category: "Steaks", required: true,  maxSelect: 1 },
+        { label: "Add a side",                category: "Sides",      required: false, maxSelect: 2 },
+        { label: "Save room for dessert?",    category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "ob-bloomin-onion",    name: "Bloomin\' Onion",                  category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       { id: "ob-spinach-dip",      name: "Spinach Artichoke Dip",            category: "Appetizers", sourceType: "official", allergens: ["dairy","wheat","soy"] },
@@ -1922,6 +1930,13 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["salads", "healthy", "fast-casual"],
     distance: 0.9,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your bowl or salad", categories: ["Warm Bowls", "Salads"], category: "Warm Bowls", required: true,  maxSelect: 1 },
+        { label: "Add a protein?",            category: "Proteins",                 required: false, maxSelect: 1 },
+        { label: "Add a side?",               category: "Sides",                    required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "sg-harvest-bowl",     name: "Harvest Bowl",                     category: "Warm Bowls", sourceType: "official", allergens: ["tree-nut","dairy"] },
       { id: "sg-shroomami",        name: "Shroomami Bowl",                   category: "Warm Bowls", sourceType: "official", allergens: ["soy","sesame","wheat"] },
@@ -1944,6 +1959,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["steakhouse", "fine-dining"],
     distance: 2.5,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Start with an appetizer?",    category: "Appetizers",             required: false, maxSelect: 1 },
+        { label: "Soup or salad?",              categories: ["Soups", "Salads"],    category: "Soups", required: false, maxSelect: 1 },
+        { label: "Choose your entrée",          category: "Steaks",                 required: true,  maxSelect: 1 },
+        { label: "Add a side",                  category: "Sides",                  required: false, maxSelect: 2 },
+        { label: "Finish with dessert?",        category: "Desserts",               required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "cg-shrimp-cocktail",  name: "Chilled Shrimp Cocktail",          category: "Appetizers", sourceType: "official", allergens: ["shellfish"] },
       { id: "cg-lobster-bisque",   name: "Lobster Bisque",                   category: "Soups",      sourceType: "official", allergens: ["shellfish","dairy","wheat"] },

@@ -143,6 +143,12 @@ export type BuilderStep = {
   label: string;
   /** Category name matching sectionName in the menu, e.g. "Breads" */
   category: string;
+  /**
+   * When set, pools items from all listed section names into a single step.
+   * Overrides `category` when present. Used for sit-down restaurants where
+   * "Choose your entrée" spans multiple sections (Steaks, Seafood, Chicken).
+   */
+  categories?: string[];
   /** Whether the user must pick at least one item before advancing */
   required: boolean;
   /** 1 = single-select (auto-advance); >1 = multi-select with Continue button */

@@ -42,8 +42,12 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   const [done, setDone]               = useState(false);
 
   const step    = steps[currentStep];
-  const section = sections.find((s) => s.sectionName === step?.category);
-  const stepItems = section?.items ?? [];
+  // Support multi-category steps (sit-down restaurants: "Choose your entrée" spans Steaks + Seafood + Chicken)
+  const stepItems = step
+    ? step.categories
+      ? sections.filter((s) => step.categories!.includes(s.sectionName)).flatMap((s) => s.items)
+      : (sections.find((s) => s.sectionName === step.category)?.items ?? [])
+    : [];
 
   // Always derive selection state directly from orderedItemIds — never from local state.
   // This prevents stale-closure bugs and keeps the UI in sync with the order at all times.
