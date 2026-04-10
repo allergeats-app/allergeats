@@ -48,7 +48,10 @@ function loadQueue(): Record<string, CrawlRecord> {
   if (typeof localStorage === "undefined") return {};
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, CrawlRecord>) : {};
+    const parsed: unknown = raw ? JSON.parse(raw) : {};
+    return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, CrawlRecord>)
+      : {};
   } catch {
     return {};
   }

@@ -33,7 +33,10 @@ const SAFE_TYPES = new Set<FeedbackEntry["type"]>([
 
 function load(): CandidateRule[] {
   if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(KEY) ?? "[]"); }
+  try {
+    const parsed = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  }
   catch { return []; }
 }
 

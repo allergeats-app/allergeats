@@ -25,7 +25,10 @@ const WARNINGS_KEY = "allegeats_restaurant_warnings";
 
 function loadFacts(): RestaurantMemoryFact[] {
   if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(MEMORY_KEY) ?? "[]"); }
+  try {
+    const parsed = JSON.parse(localStorage.getItem(MEMORY_KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  }
   catch { return []; }
 }
 
@@ -35,7 +38,10 @@ function saveFacts(facts: RestaurantMemoryFact[]): void {
 
 function loadWarnings(): RestaurantWarning[] {
   if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(WARNINGS_KEY) ?? "[]"); }
+  try {
+    const parsed = JSON.parse(localStorage.getItem(WARNINGS_KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  }
   catch { return []; }
 }
 

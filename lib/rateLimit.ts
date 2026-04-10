@@ -62,11 +62,13 @@ async function kvIsRateLimited(
     const redisKey = `rl:${key}:${Math.floor(Date.now() / windowMs)}`;
 
     // Pipeline: INCR then SET expiry only if key is new (atomic)
-    const [[, count]] = await kv.pipeline()
+    const results = await kv.pipeline()
       .incr(redisKey)
       .expire(redisKey, windowSec * 2) // 2× window so key outlasts the window
-      .exec() as [[null, number], [null, number]];
+      .exec();
 
+    // exec() returns [[error, value], ...] — validate before destructuring
+    const count = Array.isArray(results) && Array.isArray(results[0]) ? (results[0][1] as number) : 1;
     return count > maxRequests;
   } catch {
     // KV call failed — fall back to in-memory so the request isn't blocked

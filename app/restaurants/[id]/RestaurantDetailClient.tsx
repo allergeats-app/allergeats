@@ -64,7 +64,8 @@ function findRestaurant(id: string): Restaurant | undefined {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (raw) {
-      const list: Restaurant[] = JSON.parse(raw);
+      const parsed: unknown = JSON.parse(raw);
+      const list: Restaurant[] = Array.isArray(parsed) ? parsed : [];
       const found = list.find((r) => r.id === id);
       if (found) return found;
     }

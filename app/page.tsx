@@ -114,7 +114,8 @@ function HomeContent() {
     try {
       const cached = sessionStorage.getItem(SESSION_KEY);
       if (cached) {
-        setRawRestaurants(withAllChains(JSON.parse(cached) as Restaurant[]));
+        const parsed: unknown = JSON.parse(cached);
+        if (Array.isArray(parsed)) setRawRestaurants(withAllChains(parsed as Restaurant[]));
         setLoading(false);
       }
     } catch { /* ignore */ }

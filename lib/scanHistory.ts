@@ -16,7 +16,8 @@ export interface ScanEntry {
 export function getScanHistory(): ScanEntry[] {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as ScanEntry[]) : [];
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as ScanEntry[]) : [];
   } catch { return []; }
 }
 

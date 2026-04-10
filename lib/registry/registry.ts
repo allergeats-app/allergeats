@@ -80,7 +80,8 @@ function loadRegistry(): CanonicalRestaurant[] {
   if (typeof localStorage === "undefined") return [];
   try {
     const raw = localStorage.getItem(REGISTRY_KEY);
-    return raw ? (JSON.parse(raw) as CanonicalRestaurant[]) : [];
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as CanonicalRestaurant[]) : [];
   } catch {
     return [];
   }

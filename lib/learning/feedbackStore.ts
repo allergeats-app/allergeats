@@ -13,7 +13,8 @@ const MAX = 300;
 function load(): FeedbackEntry[] {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const parsed = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
   } catch { return []; }
 }
 

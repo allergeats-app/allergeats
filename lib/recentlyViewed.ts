@@ -14,7 +14,8 @@ export interface RecentView {
 export function getRecentlyViewed(): RecentView[] {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as RecentView[]) : [];
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as RecentView[]) : [];
   } catch { return []; }
 }
 

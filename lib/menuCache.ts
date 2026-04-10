@@ -29,7 +29,8 @@ function readCache(): MenuCache {
   if (typeof window === "undefined") return [];
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as MenuCache) : [];
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as MenuCache) : [];
   } catch {
     return [];
   }
