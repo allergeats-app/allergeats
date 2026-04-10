@@ -1,47 +1,62 @@
 /**
  * lib/menu-ingestion/adapters/pdfAdapter.ts
  *
- * STUB — PDF menu adapter.
+ * PDF menu adapter — extracts text from PDF files and parses them
+ * using the same logic as UserUploadAdapter.
  *
- * Ingests menus from PDF files, which are common for fine dining,
- * seasonal menus, and chains that publish printable menu PDFs.
+ * Works for: restaurant PDF menus, printable menu PDFs, allergen PDFs.
+ * Confidence: MEDIUM — layout artifacts are possible in multi-column PDFs,
+ * but text-heavy menus (most restaurant PDFs) parse cleanly.
  *
- * Confidence: MEDIUM — extracted text may have layout artifacts,
- * especially from multi-column layouts or image-heavy PDFs.
- *
- * TODO when implementing:
- *   1. Choose PDF extraction library:
- *      - pdf-parse (npm) — simple text extraction, no layout awareness
- *      - pdfjs-dist — full PDF.js, supports page-by-page extraction
- *      - Recommended: pdfjs-dist for production quality
- *   2. Extract text page by page
- *   3. Feed extracted text into UserUploadAdapter logic
- *      (PDF text output is structurally similar to pasted text)
- *   4. Handle multi-column layouts (common in restaurant menus):
- *      sort text blocks by x-coordinate before joining lines
- *   5. Image-only PDFs → fall back to imageAdapter (OCR required)
- *
- * Input: Buffer or base64-encoded PDF content
- *
- * Required additional dependency:
- *   npm install pdfjs-dist  (or pdf-parse for simpler use case)
+ * Server-side only — uses pdf-parse (Node.js).
  */
 
 import type { MenuIngestionAdapter, NormalizedMenu, IngestionMeta } from "../types";
-import { buildMenuShell, buildSection } from "./base";
+import { UserUploadAdapter } from "./userUploadAdapter";
 
-export class PdfAdapter implements MenuIngestionAdapter<string> {
+// Lazy-load pdf-parse so it never touches client bundles
+// (it uses Node.js fs/path internally)
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require("pdf-parse") as (
+    buf: Buffer,
+    opts?: { max?: number }
+  ) => Promise<{ text: string; numpages: number }>;
+
+  const { text } = await pdfParse(buffer, { max: 30 }); // cap at 30 pages
+  return text;
+}
+
+/**
+ * Clean PDF-extracted text before handing to the menu parser:
+ * - Collapse runs of 3+ spaces (multi-column layout artifact)
+ * - Replace form-feed characters (page breaks) with newlines
+ * - Collapse triple+ blank lines to a single blank line
+ */
+function cleanPdfText(raw: string): string {
+  return raw
+    .replace(/\f/g, "\n")
+    .replace(/[ \t]{3,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+export class PdfAdapter implements MenuIngestionAdapter<Buffer> {
   readonly sourceType = "pdf" as const;
 
-  async ingest(_pdfBase64: string, meta: IngestionMeta): Promise<NormalizedMenu> {
-    const menu = buildMenuShell("pdf", meta);
+  async ingest(pdfBuffer: Buffer, meta: IngestionMeta): Promise<NormalizedMenu> {
+    const rawText = await extractPdfText(pdfBuffer);
+    const cleaned = cleanPdfText(rawText);
 
-    // TODO: implement PDF text extraction
-    // const text = await extractTextFromPdf(pdfBase64);
-    // const uploadAdapter = new UserUploadAdapter();
-    // return uploadAdapter.ingest(text, meta);
+    // Reuse the UserUploadAdapter parser — PDF text output is structurally
+    // identical to pasted plain text once the layout artifacts are removed.
+    const uploadAdapter = new UserUploadAdapter();
+    const menu = await uploadAdapter.ingest(cleaned, meta);
 
-    menu.sections = [buildSection("Menu")];
+    // Override source type and raw snapshot
+    menu.sourceType  = "pdf";
+    menu.rawSnapshot = cleaned.slice(0, 5_000);
+
     return menu;
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ingestFromHtml, toRawMenuItems } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
+import { PdfAdapter } from "@/lib/menu-ingestion/adapters/pdfAdapter";
 import { persistMenu } from "@/lib/db/persistMenu";
 import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 
@@ -98,6 +99,40 @@ export async function POST(req: Request) {
       );
     }
 
+    const ingestionMeta = {
+      restaurantId:   restaurantId ?? parsed.hostname,
+      restaurantName: restaurantName ?? parsed.hostname,
+      sourceUrl:      url,
+      sourceLabel:    `${restaurantName ?? parsed.hostname} website`,
+    };
+
+    // ── PDF branch ──────────────────────────────────────────────────────────
+    const contentType = res.headers.get("content-type") ?? "";
+    const isPdf = contentType.includes("application/pdf") || parsed.pathname.toLowerCase().endsWith(".pdf");
+
+    if (isPdf) {
+      const arrayBuffer = await res.arrayBuffer();
+      if (arrayBuffer.byteLength > MAX_BODY_BYTES) {
+        return NextResponse.json({ error: "PDF is too large to process (max 5 MB)" }, { status: 413 });
+      }
+      let menu: NormalizedMenu;
+      try {
+        const pdfAdapter = new PdfAdapter();
+        menu = await pdfAdapter.ingest(Buffer.from(arrayBuffer), ingestionMeta);
+      } catch (err) {
+        console.error("[fetch-menu] PDF ingestion error:", err);
+        return NextResponse.json({ error: "Could not extract menu from this PDF" }, { status: 422 });
+      }
+      const menuLines = toRawMenuItems(menu).map((item) =>
+        [item.name, item.description].filter(Boolean).join(" — ")
+      );
+      if (restaurantId && restaurantName) {
+        persistMenu(menu, { id: restaurantId, name: restaurantName }).catch(() => {});
+      }
+      return NextResponse.json({ url, menuLines, menu });
+    }
+
+    // ── HTML branch ─────────────────────────────────────────────────────────
     const html = await res.text();
     if (html.length > MAX_BODY_BYTES) {
       return NextResponse.json(
@@ -109,12 +144,7 @@ export async function POST(req: Request) {
     // Run ingestion — errors here are a 422 (bad content), not a 500
     let menu: NormalizedMenu;
     try {
-      menu = await ingestFromHtml(html, {
-        restaurantId:   restaurantId ?? parsed.hostname,
-        restaurantName: restaurantName ?? parsed.hostname,
-        sourceUrl:      url,
-        sourceLabel:    `${restaurantName ?? parsed.hostname} website`,
-      });
+      menu = await ingestFromHtml(html, ingestionMeta);
     } catch (err) {
       console.error("[fetch-menu] ingestion error:", err);
       return NextResponse.json({ error: "Could not extract menu from this page" }, { status: 422 });

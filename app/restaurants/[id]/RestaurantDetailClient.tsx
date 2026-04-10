@@ -211,6 +211,58 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     return () => { cancelled = true; };
   }, [restaurant?.id, restaurant?.website]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── USDA FoodData Central cross-check ──────────────────────────────────────
+  // Fires after crawl completes (or immediately if we already have menu data).
+  // Looks up items with no official allergen data on USDA's free branded-foods DB
+  // and merges any found allergens back into the restaurant state.
+  // Completely non-blocking — failures are silent and don't affect the main flow.
+  useEffect(() => {
+    if (!restaurant || restaurant.menuItems.length === 0) return;
+    // Only enrich items that have no official allergen data yet
+    const unenriched = restaurant.menuItems.filter((i) => !i.allergens || i.allergens.length === 0);
+    if (unenriched.length === 0) return;
+
+    // Cap at 10 items to stay within USDA DEMO_KEY rate limit
+    const sample = unenriched.slice(0, 10);
+    let cancelled = false;
+
+    Promise.all(
+      sample.map((item) =>
+        fetch("/api/usda", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ query: item.name, brandName: restaurant.name }),
+          signal:  AbortSignal.timeout(6_000),
+        })
+          .then((r) => r.ok ? r.json() : { results: [] })
+          .then((data: { results?: Array<{ allergens: string[] }> }) => ({
+            item,
+            allergens: data.results?.[0]?.allergens ?? [],
+          }))
+          .catch(() => ({ item, allergens: [] }))
+      )
+    ).then((enriched) => {
+      if (cancelled) return;
+      const updates = enriched.filter((e) => e.allergens.length > 0);
+      if (updates.length === 0) return;
+
+      setRestaurant((prev) => {
+        if (!prev) return prev;
+        const itemMap = new Map(updates.map((u) => [u.item.id, u.allergens]));
+        return {
+          ...prev,
+          menuItems: prev.menuItems.map((i) =>
+            itemMap.has(i.id) && (!i.allergens || i.allergens.length === 0)
+              ? { ...i, allergens: itemMap.get(i.id)!, sourceType: "official" as const }
+              : i
+          ),
+        };
+      });
+    });
+
+    return () => { cancelled = true; };
+  }, [restaurant?.id, restaurant?.menuItems.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Memory-enhanced analysis ────────────────────────────────────────────────
   // Re-computes when baseAnalysis loads, allergens change, or feedback is submitted.
   // memoryVersion intentionally included: forces a fresh localStorage read after submitFeedback.

@@ -261,13 +261,17 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
     }
 
-    // Only fetch Overpass when Google returns few results (small towns, rural areas).
-    // Dense cities like NYC return 60-100 Google results — running Overpass on top
-    // would parse thousands of OSM nodes and freeze the main thread.
-    const overpassResults = googlePlaces.length < MIN_GOOGLE_FOR_OVERPASS
-      ? await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[])
-      : [];
-    const merged = this._mergeResults(lat, lng, googlePlaces, overpassResults);
+    // Only fetch supplemental sources when Google returns few results (rural areas, small towns).
+    const needsSupplemental = googlePlaces.length < MIN_GOOGLE_FOR_OVERPASS;
+
+    const [overpassResults, yelpResults] = needsSupplemental
+      ? await Promise.all([
+          this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[]),
+          this._fetchYelp(lat, lng, radiusMiles).catch(() => [] as Restaurant[]),
+        ])
+      : [[], []];
+
+    const merged = this._mergeResults(lat, lng, googlePlaces, [...overpassResults, ...yelpResults]);
     // Hard-filter: drop anything outside the search radius (guards against a
     // bad IP-geolocated user position returning distant restaurants).
     return merged.filter((r) => r.distance == null || r.distance <= radiusMiles * 1.2);
@@ -367,5 +371,91 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     }
 
     return googleMapped.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+  }
+
+  /**
+   * Fetch restaurants from Yelp Fusion as a supplemental source.
+   * Only called when Google returns sparse results (rural areas, small towns).
+   * Returns [] gracefully if YELP_API_KEY is not configured.
+   */
+  private async _fetchYelp(lat: number, lng: number, radiusMiles: number): Promise<Restaurant[]> {
+    type YelpBusiness = {
+      id: string; name: string;
+      coordinates: { latitude: number; longitude: number };
+      location: { display_address: string[] };
+      phone?: string; url?: string;
+      categories: Array<{ alias: string; title: string }>;
+      distance: number; // metres
+    };
+
+    let businesses: YelpBusiness[] = [];
+    try {
+      const res = await fetch("/api/yelp-nearby", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ lat, lng, radiusMiles }),
+        signal:  AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) return [];
+      const data = await res.json() as { businesses?: YelpBusiness[] };
+      businesses = data.businesses ?? [];
+    } catch {
+      return [];
+    }
+
+    const results: Restaurant[] = [];
+    beginRegistryBatch();
+    try {
+      for (const b of businesses) {
+        const bLat  = b.coordinates.latitude;
+        const bLng  = b.coordinates.longitude;
+        const dist  = Math.round(haversineDistance(lat, lng, bLat, bLng) * 10) / 10;
+        const mock  = findMockMatch(b.name);
+        const addr  = b.location.display_address.join(", ");
+
+        const canonical = upsertRestaurant({
+          displayName: b.name,
+          address:     addr || undefined,
+          lat:         bLat,
+          lng:         bLng,
+          phone:       b.phone,
+          website:     b.url,
+          sourceType:  "yelp",
+          confidence:  "medium",
+        });
+
+        if (mock) {
+          results.push({
+            ...mock,
+            id:      canonical.registryId,
+            address: addr || mock.address,
+            lat:     bLat,
+            lng:     bLng,
+            distance: dist,
+            menuIsGenericChainTemplate: true,
+          });
+        } else {
+          const primaryCat = b.categories[0];
+          results.push({
+            id:         canonical.registryId,
+            name:       b.name,
+            cuisine:    primaryCat?.title ?? "Restaurant",
+            tags:       [],
+            address:    addr,
+            lat:        bLat,
+            lng:        bLng,
+            distance:   dist,
+            phone:      b.phone,
+            website:    b.url,
+            sourceType: "scraped" as SourceType,
+            menuItems:  [],
+          });
+        }
+      }
+    } finally {
+      endRegistryBatch();
+    }
+
+    return results.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
   }
 }
