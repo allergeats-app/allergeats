@@ -351,8 +351,6 @@ function HomeContent() {
         activeFilterCount={activeFilterCount}
         showFilterDrawer={showFilterDrawer}
         setShowFilterDrawer={setShowFilterDrawer}
-        layout={layout}
-        setLayout={setLayout}
         loading={loading}
         filteredCount={filtered.length}
       />
@@ -569,6 +567,55 @@ function HomeContent() {
           </ErrorBoundary>
         )}
       </div>
+
+      {/* ── Floating map / list toggle ─────────────────────────────────────── */}
+      {!loading && filtered.length > 0 && (
+        <div style={{
+          position: "fixed",
+          bottom: `max(24px, calc(16px + env(safe-area-inset-bottom)))`,
+          left: "50%", transform: "translateX(-50%)",
+          zIndex: 40,
+        }}>
+          <button
+            type="button"
+            onClick={() => setLayout(layout === "list" ? "map" : "list")}
+            aria-label={layout === "list" ? "Switch to map view" : "Switch to list view"}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              padding: "10px 20px",
+              background: "var(--c-text)", color: "var(--c-bg)",
+              border: "none", borderRadius: 999, cursor: "pointer",
+              fontSize: 13, fontWeight: 800,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.22)",
+              WebkitTapHighlightColor: "transparent",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {layout === "list" ? (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                  <line x1="8" y1="2" x2="8" y2="18"/>
+                  <line x1="16" y1="6" x2="16" y2="22"/>
+                </svg>
+                Map
+              </>
+            ) : (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                List
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
     </main>
   );
 }
