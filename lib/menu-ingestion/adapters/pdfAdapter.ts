@@ -17,8 +17,9 @@ import { UserUploadAdapter } from "./userUploadAdapter";
 // Lazy-load pdf-parse so it never touches client bundles
 // (it uses Node.js fs/path internally)
 async function extractPdfText(buffer: Buffer): Promise<string> {
+  // Use lib path to skip pdf-parse's built-in test-file import (known v1 issue)
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfParse = require("pdf-parse") as (
+  const pdfParse = require("pdf-parse/lib/pdf-parse") as (
     buf: Buffer,
     opts?: { max?: number }
   ) => Promise<{ text: string; numpages: number }>;

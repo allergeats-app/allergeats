@@ -1071,40 +1071,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           </section>
         )}
 
-        {/* ── Why this rating ── */}
-        {!hasNoMenu && (
-          <section style={{ marginTop: 32, marginBottom: 28 }}>
-            <SectionHeader label="Why this rating" />
-            <div style={{
-              background: "var(--c-card)", border: "1px solid var(--c-border)",
-              borderRadius: 16, padding: "14px 16px",
-            }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
-                {whyThisWorks.map((bullet, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ color: badge.color, fontWeight: 900, fontSize: 15, lineHeight: "1.5", flexShrink: 0 }}>·</span>
-                    <span style={{ fontSize: 15, color: "var(--c-text)", lineHeight: 1.6 }}>{bullet}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
-                {coverage.trustSignal} · Always confirm with staff before ordering.
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── Your Allergy Profile ── */}
-        <section style={{ marginBottom: 28 }}>
-          <SectionHeader label="Your Allergy Profile" />
-          <AllergenProfileCard
-            allergens={profileAllergens}
-            saveState={saveState}
-            isSignedIn={!!user}
-            onChange={setProfileAllergens}
-          />
-        </section>
-
         {/* ── Safety disclaimer ── */}
         {(() => {
           const verifiedMs = new Date(MENU_DATA_VERIFIED_DATE).getTime();
