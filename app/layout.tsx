@@ -88,7 +88,20 @@ export default function RootLayout({
                   color: "var(--c-sub)",
                   lineHeight: 1.6,
                 }}>
-                  Always confirm with staff before ordering.<br />AllergEats is a decision-support tool, not medical advice.
+                  <span style={{
+                    display: "block",
+                    fontSize: 18,
+                    fontWeight: 900,
+                    fontFamily: "'Georgia', 'Times New Roman', serif",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                    background: "linear-gradient(135deg, #b45309 0%, #ef4444 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    marginBottom: 4,
+                  }}>Always confirm with staff before ordering.</span>
+                  AllergEats is a decision-support tool, not medical advice.
                   <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 20 }}>
                     <Link href="/privacy" style={{ color: "var(--c-sub)", textDecoration: "none", fontWeight: 600 }}>Privacy Policy</Link>
                     <Link href="/terms" style={{ color: "var(--c-sub)", textDecoration: "none", fontWeight: 600 }}>Terms of Service</Link>

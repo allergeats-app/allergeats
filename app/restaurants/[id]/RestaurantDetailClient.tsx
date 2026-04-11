@@ -1152,10 +1152,22 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   </svg>
                 </div>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: isStale ? "#b91c1c" : "#92400e", lineHeight: 1.2 }}>
+                  <div style={{
+                    fontSize: 22,
+                    fontWeight: 900,
+                    fontFamily: "'Georgia', 'Times New Roman', serif",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                    background: isStale
+                      ? "linear-gradient(135deg, #b91c1c 0%, #ef4444 100%)"
+                      : "linear-gradient(135deg, #b45309 0%, #ef4444 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}>
                     {isStale ? "Allergen data may be outdated" : "Always verify with staff"}
                   </div>
-                  <div style={{ fontSize: 12, color: isStale ? "rgba(185,28,28,0.7)" : "#b45309", marginTop: 1 }}>
+                  <div style={{ fontSize: 12, color: isStale ? "rgba(185,28,28,0.7)" : "#b45309", marginTop: 2 }}>
                     {isStale ? `Last verified ${displayDate}` : `Verified ${displayDate}`}
                   </div>
                 </div>

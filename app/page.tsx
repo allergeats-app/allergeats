@@ -544,11 +544,11 @@ function HomeContent() {
               <div style={{ marginTop: nearbyFiltered.length > 0 ? 28 : 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
-                    Browse Chain Menus
+                    Browse Popular Menus
                   </h2>
                 </div>
                 <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 10 }}>
-                  No confirmed location nearby — menu data only
+                  No Nearby Results — Menus Only
                 </div>
                 <div className="restaurant-rail" style={{
                   display: "flex",
