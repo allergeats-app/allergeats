@@ -58,10 +58,17 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   // Items in this step that are currently in the order
   const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
+  // Helper: get all items for a step (handles both single-category and multi-category steps)
+  function getStepItems(s: BuilderStep): AnalyzedMenuItem[] {
+    if (s.categories) {
+      return sections.filter((sec) => s.categories!.includes(sec.sectionName)).flatMap((sec) => sec.items);
+    }
+    return sections.find((sec) => sec.sectionName === s.category)?.items ?? [];
+  }
+
   // Count total builder-selected items (items from any step that are in the order)
   const totalBuilderItems = steps.reduce((n, s) => {
-    const sec = sections.find((sec) => sec.sectionName === s.category);
-    return n + (sec?.items.filter((i) => orderedItemIds.has(i.id)).length ?? 0);
+    return n + getStepItems(s).filter((i) => orderedItemIds.has(i.id)).length;
   }, 0);
 
   function selectItem(item: AnalyzedMenuItem) {
@@ -106,10 +113,9 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   }
 
   function startOver() {
-    // Remove every builder item from the order (across all steps)
+    // Remove every builder item from the order (across all steps, including multi-category)
     for (const s of steps) {
-      const sec = sections.find((sec) => sec.sectionName === s.category);
-      for (const item of sec?.items ?? []) {
+      for (const item of getStepItems(s)) {
         if (orderedItemIds.has(item.id)) onToggleOrder(item.id);
       }
     }
@@ -136,8 +142,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         {/* Summary by step — derived from orderedItemIds, always accurate */}
         <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: "hidden" }}>
           {steps.map((s, i) => {
-            const sec = sections.find((sec) => sec.sectionName === s.category);
-            const pickedItems = sec?.items.filter((item) => orderedItemIds.has(item.id)) ?? [];
+            const pickedItems = getStepItems(s).filter((item) => orderedItemIds.has(item.id));
             if (!pickedItems.length) return null;
             const isLast = i === steps.length - 1;
             return (

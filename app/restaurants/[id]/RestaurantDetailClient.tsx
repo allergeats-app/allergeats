@@ -415,8 +415,10 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     if (restaurant.builderConfig) {
       const steps = restaurant.builderConfig.steps;
       const stepGroups = steps.map((step) => {
-        const sec = vm?.sections.find((s) => s.sectionName === step.category);
-        const items = (sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? []).map((i) => ({
+        const allItems = step.categories
+          ? step.categories.flatMap((cat) => vm?.sections.find((s) => s.sectionName === cat)?.items ?? [])
+          : (vm?.sections.find((s) => s.sectionName === step.category)?.items ?? []);
+        const items = allItems.filter((i) => orderedItemIds.has(i.id)).map((i) => ({
           id: i.id, name: i.name, risk: i.risk, category: i.category,
         }));
         return { label: step.label.replace(/^(Choose your |Choose |Pick |Add )/i, ""), items };
@@ -1279,15 +1281,20 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   {restaurant?.builderConfig ? (() => {
                     // Builder restaurants: group into one cohesive meal card
                     const steps = restaurant.builderConfig!.steps;
-                    const builderItemIds = new Set(steps.flatMap((step) => {
-                      const sec = vm?.sections.find((s) => s.sectionName === step.category);
-                      return sec?.items.map((i) => i.id) ?? [];
-                    }));
+                    // Helper: resolve all items for a step (supports multi-category steps)
+                    const getStepAllItems = (step: typeof steps[number]) => {
+                      if (step.categories) {
+                        return step.categories.flatMap((cat) =>
+                          vm?.sections.find((s) => s.sectionName === cat)?.items ?? []
+                        );
+                      }
+                      return vm?.sections.find((s) => s.sectionName === step.category)?.items ?? [];
+                    };
+                    const builderItemIds = new Set(steps.flatMap((step) => getStepAllItems(step).map((i) => i.id)));
 
                     // Group selected items by step
                     const stepGroups = steps.map((step) => {
-                      const sec = vm?.sections.find((s) => s.sectionName === step.category);
-                      const items = sec?.items.filter((i) => orderedItemIds.has(i.id)) ?? [];
+                      const items = getStepAllItems(step).filter((i) => orderedItemIds.has(i.id));
                       return { step, items };
                     }).filter((g) => g.items.length > 0);
 
@@ -1337,8 +1344,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                             </div>
 
                             {/* Modifier rows */}
-                            {modifierGroups.map(({ step, items }) => (
-                              <div key={step.category} style={{
+                            {modifierGroups.map(({ step, items }, mIdx) => (
+                              <div key={step.categories?.join(",") ?? step.category ?? mIdx} style={{
                                 display: "flex", alignItems: "baseline", gap: 6,
                                 paddingTop: 6, borderTop: "1px solid var(--c-border)",
                                 marginTop: 6,
