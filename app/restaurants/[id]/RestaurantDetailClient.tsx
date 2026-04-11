@@ -23,6 +23,9 @@ import { ShowStaffCard } from "@/components/ShowStaffCard";
 import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
 import { useTheme } from "@/lib/themeContext";
+import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
+import { AllergenProfileCard } from "@/components/AllergenProfileCard";
+import { useAuth } from "@/lib/authContext";
 import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
 import type {
   RestaurantMenuAnalysis,
@@ -98,13 +101,15 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
 
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { user } = useAuth();
+  const { allergens: profileAllergens, saveState, setAllergens: setProfileAllergens } = useAllergenProfile();
 
   // ── Load restaurant + base analysis ────────────────────────────────────────
   useEffect(() => {
     const found = findRestaurant(id);
     if (!found) { setNotFound(true); return; }
 
-    const allergens  = loadProfileAllergens();
+    const allergens  = profileAllergens.length ? profileAllergens : loadProfileAllergens();
     const sevs       = loadProfileSeverities();
     setUserAllergens(allergens);
     setSeverities(sevs);
@@ -267,6 +272,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   // ── Memory-enhanced analysis ────────────────────────────────────────────────
   // Re-computes when baseAnalysis loads, allergens change, or feedback is submitted.
   // memoryVersion intentionally included: forces a fresh localStorage read after submitFeedback.
+  // Sync profile allergens → analysis when user edits them on this page
+  useEffect(() => {
+    if (profileAllergens.length === 0) return;
+    setUserAllergens(profileAllergens);
+  }, [profileAllergens]);
+
   const enhancedAnalysis = useMemo(
     () => (baseAnalysis ? applyMemoryToAnalysis(baseAnalysis, userAllergens) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -604,40 +615,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </div>
             )}
 
-            {/* Staleness notice for official allergen data */}
-            {restaurant.sourceType === "official" && (() => {
-              const verifiedMs = new Date(MENU_DATA_VERIFIED_DATE).getTime();
-              const ageMonths = (Date.now() - verifiedMs) / (1000 * 60 * 60 * 24 * 30);
-              const isStale = ageMonths > 6;
-              const displayDate = new Date(MENU_DATA_VERIFIED_DATE).toLocaleDateString("en-US", { month: "long", year: "numeric" });
-              return (
-                <div style={{
-                  display: "flex", alignItems: "flex-start", gap: 10,
-                  background: isStale ? "rgba(185,28,28,0.07)" : "rgba(234,179,8,0.08)",
-                  border: `1.5px solid ${isStale ? "rgba(185,28,28,0.25)" : "rgba(234,179,8,0.35)"}`,
-                  borderRadius: 12, padding: "11px 14px", marginBottom: 16,
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke={isStale ? "#b91c1c" : "#b45309"} strokeWidth="2.2"
-                    strokeLinecap="round" strokeLinejoin="round"
-                    style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: isStale ? "#b91c1c" : "#92400e", lineHeight: 1.3, marginBottom: 3 }}>
-                      {isStale ? "Allergen data may be outdated" : "Always verify with staff"}
-                    </div>
-                    <div style={{ fontSize: 12, color: isStale ? "#b91c1c" : "#b45309", lineHeight: 1.5 }}>
-                      {isStale
-                        ? `Last verified ${displayDate}. Recipes change — confirm all allergens directly with restaurant staff before ordering.`
-                        : `Analysis is based on menu text patterns, not official certification. Verified ${displayDate}. Confirm with staff before ordering.`
-                      }
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
 
             {hasNoMenu ? (
               <div style={{ padding: 16, borderRadius: 14, background: "var(--c-muted)", border: "1px solid var(--c-border)" }}>
@@ -1109,6 +1086,84 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             </div>
           </section>
         )}
+
+        {/* ── Your Allergy Profile ── */}
+        <section style={{ marginBottom: 28 }}>
+          <SectionHeader label="Your Allergy Profile" />
+          <AllergenProfileCard
+            allergens={profileAllergens}
+            saveState={saveState}
+            isSignedIn={!!user}
+            onChange={setProfileAllergens}
+          />
+        </section>
+
+        {/* ── Safety disclaimer ── */}
+        {(() => {
+          const verifiedMs = new Date(MENU_DATA_VERIFIED_DATE).getTime();
+          const ageMonths = (Date.now() - verifiedMs) / (1000 * 60 * 60 * 24 * 30);
+          const isStale = ageMonths > 6;
+          const displayDate = new Date(MENU_DATA_VERIFIED_DATE).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+          return (
+            <div style={{
+              marginBottom: 32,
+              borderRadius: 18,
+              overflow: "hidden",
+              border: `1.5px solid ${isStale ? "rgba(185,28,28,0.3)" : "rgba(234,179,8,0.4)"}`,
+              background: isStale
+                ? "linear-gradient(135deg, rgba(185,28,28,0.06) 0%, rgba(220,38,38,0.03) 100%)"
+                : "linear-gradient(135deg, rgba(234,179,8,0.08) 0%, rgba(251,191,36,0.04) 100%)",
+            }}>
+              {/* Header bar */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "14px 16px 12px",
+                borderBottom: `1px solid ${isStale ? "rgba(185,28,28,0.15)" : "rgba(234,179,8,0.2)"}`,
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                  background: isStale ? "rgba(185,28,28,0.1)" : "rgba(234,179,8,0.12)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke={isStale ? "#b91c1c" : "#d97706"} strokeWidth="2.2"
+                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: isStale ? "#b91c1c" : "#92400e", lineHeight: 1.2 }}>
+                    {isStale ? "Allergen data may be outdated" : "Always verify with staff"}
+                  </div>
+                  <div style={{ fontSize: 12, color: isStale ? "rgba(185,28,28,0.7)" : "#b45309", marginTop: 1 }}>
+                    {isStale ? `Last verified ${displayDate}` : `Verified ${displayDate}`}
+                  </div>
+                </div>
+              </div>
+              {/* Body */}
+              <div style={{ padding: "12px 16px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  isStale
+                    ? "Recipes and ingredients may have changed since our last verification."
+                    : "This analysis is based on menu text patterns, not official allergen certification.",
+                  "Cross-contamination is always possible in shared kitchens.",
+                  "Always confirm allergens directly with restaurant staff before ordering.",
+                ].map((line, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <div style={{
+                      width: 4, height: 4, borderRadius: "50%", flexShrink: 0, marginTop: 7,
+                      background: isStale ? "#b91c1c" : "#d97706", opacity: 0.6,
+                    }} />
+                    <span style={{ fontSize: 13, color: isStale ? "#7f1d1d" : "#78350f", lineHeight: 1.6 }}>
+                      {line}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
 
