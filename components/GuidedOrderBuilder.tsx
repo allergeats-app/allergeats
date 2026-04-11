@@ -387,14 +387,16 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         )}
       </div>
 
-      {/* Browse link */}
-      <div style={{ textAlign: "center", paddingTop: 4 }}>
+      {/* Browse button */}
+      <div style={{ paddingTop: 8 }}>
         <button onClick={onBrowse} style={{
-          background: "none", border: "none",
-          fontSize: 13, color: "var(--c-sub)", cursor: "pointer",
-          fontWeight: 600, padding: "6px 0",
+          width: "100%", padding: "13px 0",
+          borderRadius: 14, border: "1.5px solid var(--c-border)",
+          background: "var(--c-card)",
+          fontSize: 15, fontWeight: 700, color: "var(--c-text)",
+          cursor: "pointer", letterSpacing: "-0.01em",
         }}>
-          Browse full menu instead →
+          Browse Full Menu
         </button>
       </div>
     </div>

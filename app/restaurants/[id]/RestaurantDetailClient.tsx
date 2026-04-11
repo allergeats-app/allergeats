@@ -827,18 +827,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       Step-by-step — only safe options shown
                     </div>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <button
-                      onClick={() => setBuilderBrowseMode(true)}
-                      style={{
-                        background: "none", border: `1px solid var(--c-border)`,
-                        borderRadius: 10, padding: "8px 14px",
-                        fontSize: 13, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer",
-                      }}
-                    >
-                      Full menu
-                    </button>
-                  </div>
                 </div>
                 <ErrorBoundary fallback={
                   <div style={{ padding: "24px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
