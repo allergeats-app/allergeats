@@ -14,14 +14,7 @@ export function getSupabaseClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
-
-  // Route auth traffic through our own domain proxy (/_supabase/...) so users
-  // see allergeats.app in the address bar instead of supabase.co during Google sign-in.
-  const proxyUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/_supabase`
-    : url;
-
-  _client = createClient(proxyUrl, key, {
+  _client = createClient(url, key, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
