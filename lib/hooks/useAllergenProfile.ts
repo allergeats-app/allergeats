@@ -29,9 +29,10 @@ export function useAllergenProfile() {
   const [allergens, setAllergensState] = useState<AllergenId[]>([]);
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
-  const initializedRef = useRef(false);
-  const debounceRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const saveSeqRef     = useRef(0);
+  const initializedRef     = useRef(false); // true only after user explicitly edits
+  const authOverriddenRef  = useRef(false); // true after auth allergens have been applied once
+  const debounceRef        = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveSeqRef         = useRef(0);
 
   // Hydrate from localStorage after mount (browser-only)
   useEffect(() => {
@@ -42,9 +43,11 @@ export function useAllergenProfile() {
   // Only runs once (initializedRef guards it) so subsequent local edits
   // are not clobbered when authAllergens reference changes.
   useEffect(() => {
-    if (!authLoading && authAllergens.length > 0 && !initializedRef.current) {
-      initializedRef.current = true;
+    if (!authLoading && authAllergens.length > 0 && !authOverriddenRef.current) {
+      authOverriddenRef.current = true;
       setAllergensState(authAllergens); // eslint-disable-line react-hooks/set-state-in-effect
+      // Do NOT set initializedRef here — that would trigger a spurious remote save
+      // on every page load. initializedRef is only set when the user explicitly edits.
     }
   }, [authLoading, authAllergens]);
 
