@@ -24,6 +24,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://fonts.gstatic.com",
+      // *.supabase.co still needed for server-side routes and image cache; /_supabase proxy is same-origin ('self')
       "connect-src 'self' https://*.supabase.co https://va.vercel-insights.com https://nominatim.openstreetmap.org https://overpass-api.de https://overpass.kumi.systems https://overpass.openstreetmap.fr https://*.sentry.io",
       "frame-ancestors 'none'",
       "base-uri 'self'",
@@ -32,12 +33,25 @@ const securityHeaders = [
   },
 ];
 
+const SUPABASE_URL = "https://hdggopyudrjjnfamzlst.supabase.co";
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
       {
         source: "/(.*)",
         headers: securityHeaders,
+      },
+    ];
+  },
+
+  async rewrites() {
+    return [
+      // Proxy all Supabase auth traffic through our own domain.
+      // Users see allergeats.app/... in the address bar instead of supabase.co during OAuth.
+      {
+        source: "/_supabase/:path*",
+        destination: `${SUPABASE_URL}/:path*`,
       },
     ];
   },
