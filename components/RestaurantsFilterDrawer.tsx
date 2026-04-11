@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { AllergySelector } from "@/components/AllergySelector";
 import { FilterChips } from "@/components/FilterChips";
-import type { AllergenId } from "@/lib/types";
 import type { SortOption, TypeFilter } from "@/app/restaurants/types";
 
 const SORT_CHIPS = [
@@ -85,7 +83,6 @@ function ToggleSwitch({ checked, onChange, label }: {
 export function RestaurantsFilterDrawer({
   open, onClose,
   activeFilterCount, loading, filteredCount,
-  localAllergens, onAllergenChange,
   sort, setSort,
   typeFilter, setTypeFilter,
   radiusMiles, setRadiusMiles, clearSearchCenter,
@@ -95,7 +92,6 @@ export function RestaurantsFilterDrawer({
 }: {
   open: boolean; onClose: () => void;
   activeFilterCount: number; loading: boolean; filteredCount: number;
-  localAllergens: AllergenId[]; onAllergenChange: (v: AllergenId[]) => void;
   sort: SortOption; setSort: (v: SortOption) => void;
   typeFilter: TypeFilter; setTypeFilter: (v: TypeFilter) => void;
   radiusMiles: number; setRadiusMiles: (v: number) => void; clearSearchCenter: () => void;
@@ -200,26 +196,6 @@ export function RestaurantsFilterDrawer({
               </svg>
             </button>
           </div>
-
-          {/* Allergies */}
-          <DrawerSection
-            title="Your allergies"
-            hint="Results update as you change selections"
-            action={localAllergens.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => onAllergenChange([])}
-                style={{
-                  fontSize: 12, fontWeight: 700, color: "#eb1700",
-                  background: "none", border: "none", cursor: "pointer", padding: 0,
-                }}
-              >
-                Clear
-              </button>
-            ) : undefined}
-          >
-            <AllergySelector selected={localAllergens} onChange={onAllergenChange} />
-          </DrawerSection>
 
           {/* Sort */}
           <DrawerSection title="Sort by">

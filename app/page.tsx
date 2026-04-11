@@ -392,8 +392,6 @@ function HomeContent() {
         activeFilterCount={activeFilterCount}
         loading={loading}
         filteredCount={filtered.length}
-        localAllergens={localAllergens}
-        onAllergenChange={handleAllergenChange}
         sort={sort}
         setSort={(v) => { trackEvent("filters_sort_changed", { sort: v }); setSort(v); }}
         typeFilter={typeFilter}
