@@ -77,7 +77,7 @@ export function OnboardingModal() {
               <Image src="/logo.png" alt="AllergEats" width={200} height={46}
                 style={{ width: "auto", height: 44, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
               <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)" }}>
-                Eat out safely.
+                Eat Out Without Guessing.
               </div>
             </div>
 
