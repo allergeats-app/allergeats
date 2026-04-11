@@ -808,18 +808,37 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             {/* ── Guided builder mode ── */}
             {restaurant?.builderConfig && !builderBrowseMode ? (
               <>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.01em" }}>Build Your Order</div>
-                  <button
-                    onClick={() => setBuilderBrowseMode(true)}
-                    style={{
-                      background: "none", border: `1px solid var(--c-border)`,
-                      borderRadius: 10, padding: "8px 14px",
-                      fontSize: 13, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer",
-                    }}
-                  >
-                    Full menu
-                  </button>
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ textAlign: "center", marginBottom: 14 }}>
+                    <div style={{
+                      fontSize: 34,
+                      fontWeight: 900,
+                      fontFamily: "'Georgia', 'Times New Roman', serif",
+                      letterSpacing: "-0.02em",
+                      background: "linear-gradient(135deg, #eb1700 0%, #ff6b35 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      lineHeight: 1.1,
+                    }}>
+                      Build Your Order
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 5, fontWeight: 500 }}>
+                      Step-by-step — only safe options shown
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      onClick={() => setBuilderBrowseMode(true)}
+                      style={{
+                        background: "none", border: `1px solid var(--c-border)`,
+                        borderRadius: 10, padding: "8px 14px",
+                        fontSize: 13, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer",
+                      }}
+                    >
+                      Full menu
+                    </button>
+                  </div>
                 </div>
                 <ErrorBoundary fallback={
                   <div style={{ padding: "24px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
