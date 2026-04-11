@@ -146,9 +146,15 @@ function HomeContent() {
 
   useEffect(() => {
     let cancelled = false;
+    // Prevents the cached-position search result from overwriting fresh GPS results
+    // if GPS resolves first (the two searches run concurrently).
+    let freshResultsCommitted = false;
 
     async function load() {
-      if (!rawRestaurants.length) setLoading(true);
+      // Do NOT unconditionally setLoading(true) here — the closure captures rawRestaurants
+      // from the initial render (always []), so this would override the sessionStorage
+      // hydration's setLoading(false) and cause a skeleton flash even when cache exists.
+      // Callers that need loading=true set it before triggering this effect.
       setResultsSource("live");
 
       try {
@@ -193,7 +199,11 @@ function HomeContent() {
             locationProvider
               .searchRestaurants(cachedPos.lat, cachedPos.lng, radiusMiles, cachedPos.accuracy)
               .then((cachedRaw) => {
-                if (!cancelled) { setRawRestaurants(withAllChains(cachedRaw)); setLoading(false); }
+                // Guard: don't overwrite fresh GPS results if they already arrived
+                if (!cancelled && !freshResultsCommitted) {
+                  setRawRestaurants(withAllChains(cachedRaw));
+                  setLoading(false);
+                }
               })
               .catch(() => {});
           }
@@ -239,6 +249,7 @@ function HomeContent() {
         }
 
         if (!cancelled) {
+          freshResultsCommitted = true; // prevent stale cached-pos results from overwriting these
           raw = withAllChains(raw);
           try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(raw)); } catch { /* ignore */ }
           setRawRestaurants(raw);
