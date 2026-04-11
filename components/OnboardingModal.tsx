@@ -61,17 +61,17 @@ export function OnboardingModal() {
     }}>
       <div style={{
         background: isDark
-          ? "linear-gradient(150deg, #1e1a0a 0%, #2e2408 20%, #1a1506 45%, #2a2008 70%, #1c1808 100%)"
-          : "linear-gradient(150deg, #fefbe8 0%, #f9ed80 15%, #fffde8 32%, #f2d445 52%, #fffbe8 68%, #e9c535 84%, #fdf7c8 100%)",
+          ? "linear-gradient(150deg, #111214 0%, #1e2023 20%, #141618 45%, #1a1d20 70%, #111214 100%)"
+          : "linear-gradient(150deg, #f8f9fa 0%, #e8eaed 15%, #ffffff 32%, #d0d4d8 52%, #f4f5f6 68%, #c8ccd0 84%, #eef0f2 100%)",
         borderRadius: 28,
         width: "100%", maxWidth: 480,
         padding: "32px 24px 28px",
         boxShadow: isDark
-          ? "0 0 0 1px rgba(210,170,40,0.25), 0 16px 64px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,210,60,0.18), inset 0 -1px 0 rgba(0,0,0,0.35)"
-          : "0 0 0 1px rgba(170,125,5,0.2), 0 16px 64px rgba(120,88,0,0.28), inset 0 1px 0 rgba(255,255,255,0.92), inset 0 -1px 0 rgba(155,115,0,0.12)",
+          ? "0 0 0 1px rgba(180,185,195,0.2), 0 16px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.4)"
+          : "0 0 0 1px rgba(140,148,158,0.18), 0 16px 64px rgba(60,70,80,0.22), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(100,110,120,0.12)",
         border: isDark
-          ? "1px solid rgba(205,162,28,0.38)"
-          : "1px solid rgba(175,130,8,0.28)",
+          ? "1px solid rgba(160,168,178,0.3)"
+          : "1px solid rgba(150,158,168,0.3)",
         maxHeight: "90dvh",
         overflowY: "auto",
         WebkitOverflowScrolling: "touch" as never,
@@ -82,8 +82,8 @@ export function OnboardingModal() {
           position: "absolute", top: 0, left: 0, right: 0, height: 80,
           borderRadius: "28px 28px 0 0",
           background: isDark
-            ? "linear-gradient(180deg, rgba(255,218,60,0.07) 0%, rgba(255,218,60,0) 100%)"
-            : "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0) 100%)",
+            ? "linear-gradient(180deg, rgba(220,225,235,0.08) 0%, rgba(220,225,235,0) 100%)"
+            : "linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 100%)",
           pointerEvents: "none",
         }} />
 
@@ -100,8 +100,8 @@ export function OnboardingModal() {
                 letterSpacing: "-0.02em",
                 lineHeight: 1.15,
                 background: isDark
-                  ? "linear-gradient(135deg, #f5d060 0%, #ffe899 50%, #c9960a 100%)"
-                  : "linear-gradient(135deg, #7a5200 0%, #b87800 40%, #5c3c00 100%)",
+                  ? "linear-gradient(135deg, #c8cdd5 0%, #e8ecf0 50%, #9aa0a8 100%)"
+                  : "linear-gradient(135deg, #2c3038 0%, #4a5260 40%, #1e2228 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -165,7 +165,7 @@ export function OnboardingModal() {
 
             {/* Subtitle */}
             <div style={{ textAlign: "center", marginBottom: 16 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: isDark ? "rgba(255,218,80,0.7)" : "rgba(100,68,0,0.65)" }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: isDark ? "rgba(180,188,198,0.7)" : "rgba(60,70,82,0.6)" }}>
                 Set Up in 30 Seconds
               </div>
             </div>
