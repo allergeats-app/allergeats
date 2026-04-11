@@ -60,15 +60,32 @@ export function OnboardingModal() {
       padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
     }}>
       <div style={{
-        background: "var(--c-card)",
+        background: isDark
+          ? "linear-gradient(150deg, #1e1a0a 0%, #2e2408 20%, #1a1506 45%, #2a2008 70%, #1c1808 100%)"
+          : "linear-gradient(150deg, #fefbe8 0%, #f9ed80 15%, #fffde8 32%, #f2d445 52%, #fffbe8 68%, #e9c535 84%, #fdf7c8 100%)",
         borderRadius: 28,
         width: "100%", maxWidth: 480,
         padding: "32px 24px 28px",
-        boxShadow: "0 8px 48px rgba(0,0,0,0.28)",
+        boxShadow: isDark
+          ? "0 0 0 1px rgba(210,170,40,0.25), 0 16px 64px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,210,60,0.18), inset 0 -1px 0 rgba(0,0,0,0.35)"
+          : "0 0 0 1px rgba(170,125,5,0.2), 0 16px 64px rgba(120,88,0,0.28), inset 0 1px 0 rgba(255,255,255,0.92), inset 0 -1px 0 rgba(155,115,0,0.12)",
+        border: isDark
+          ? "1px solid rgba(205,162,28,0.38)"
+          : "1px solid rgba(175,130,8,0.28)",
         maxHeight: "90dvh",
         overflowY: "auto",
         WebkitOverflowScrolling: "touch" as never,
+        position: "relative",
       }}>
+        {/* Metallic shine highlight */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 80,
+          borderRadius: "28px 28px 0 0",
+          background: isDark
+            ? "linear-gradient(180deg, rgba(255,218,60,0.07) 0%, rgba(255,218,60,0) 100%)"
+            : "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0) 100%)",
+          pointerEvents: "none",
+        }} />
 
         {/* ── Welcome ── */}
         {step === "welcome" && (
@@ -76,7 +93,19 @@ export function OnboardingModal() {
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <Image src="/logo.png" alt="AllergEats" width={200} height={46}
                 style={{ width: "auto", height: 44, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
-              <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)" }}>
+              <div style={{
+                fontSize: 24,
+                fontWeight: 900,
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.15,
+                background: isDark
+                  ? "linear-gradient(135deg, #f5d060 0%, #ffe899 50%, #c9960a 100%)"
+                  : "linear-gradient(135deg, #7a5200 0%, #b87800 40%, #5c3c00 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
                 Eat Out Without Guessing.
               </div>
             </div>
@@ -136,7 +165,7 @@ export function OnboardingModal() {
 
             {/* Subtitle */}
             <div style={{ textAlign: "center", marginBottom: 16 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)" }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: isDark ? "rgba(255,218,80,0.7)" : "rgba(100,68,0,0.65)" }}>
                 Set Up in 30 Seconds
               </div>
             </div>
@@ -148,7 +177,9 @@ export function OnboardingModal() {
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
                 borderRadius: 16, border: "none",
-                background: "#eb1700", color: "#fff",
+                background: "linear-gradient(135deg, #c41200 0%, #eb1700 50%, #ff3d1f 100%)",
+                boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(180,0,0,0.35), inset 0 1px 0 rgba(255,120,100,0.3)",
+                color: "#fff",
                 fontSize: 17, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
               }}
