@@ -36,6 +36,9 @@ const securityHeaders = [
 const SUPABASE_URL = "https://hdggopyudrjjnfamzlst.supabase.co";
 
 const nextConfig: NextConfig = {
+  // pdf-parse uses Node.js fs/http/https — keep it server-side only, never bundled for the client
+  serverExternalPackages: ["pdf-parse"],
+
   async headers() {
     return [
       {
