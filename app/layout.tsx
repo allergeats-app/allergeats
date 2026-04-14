@@ -45,16 +45,11 @@ export const metadata: Metadata = {
 };
 
 const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type":    "WebSite",
-  "name":     "AllergEats",
-  "url":      "https://www.allergeats.com",
+  "@context":   "https://schema.org",
+  "@type":      "WebSite",
+  "name":       "AllergEats",
+  "url":        "https://www.allergeats.com",
   "description": "Find restaurants and menu items safe for your food allergies.",
-  "potentialAction": {
-    "@type":       "SearchAction",
-    "target":      "https://www.allergeats.com/?q={search_term_string}",
-    "query-input": "required name=search_term_string",
-  },
 };
 
 export default function RootLayout({

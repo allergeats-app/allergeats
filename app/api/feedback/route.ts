@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+import { supabase } from "@/lib/supabase";
 
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
@@ -30,25 +31,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Message too long" }, { status: 400 });
   }
 
-  // Log to server console (Vercel will capture this in Function Logs)
-  console.log("[feedback]", JSON.stringify({
-    type,
-    message: message.trim(),
-    url,
+  const entry = {
+    type:       String(type ?? "general").slice(0, 50),
+    message:    message.trim().slice(0, 2000),
+    url:        typeof url === "string" ? url.slice(0, 500) : null,
     ip,
-    ts: new Date().toISOString(),
-  }));
+    created_at: new Date().toISOString(),
+  };
 
-  // If a FEEDBACK_EMAIL env var is set, forward via a simple fetch to a mail service.
-  // For now we log only — wire up Resend / SendGrid here when ready.
-  // Example:
-  // if (process.env.RESEND_API_KEY) {
-  //   await fetch("https://api.resend.com/emails", {
-  //     method: "POST",
-  //     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-  //     body: JSON.stringify({ from: "feedback@allergeats.com", to: process.env.FEEDBACK_EMAIL, subject: `[AllergEats feedback] ${type}`, text: `${message}\n\nURL: ${url}` }),
-  //   });
-  // }
+  // Persist to Supabase (requires a `feedback` table — fails silently if absent)
+  const { error: dbError } = await supabase.from("feedback").insert(entry);
+  if (dbError) {
+    // Fall back to Vercel Function Logs so submissions are never fully lost
+    console.log("[feedback]", JSON.stringify(entry));
+    console.error("[feedback] supabase insert error:", dbError.message);
+  }
 
   return NextResponse.json({ ok: true });
 }

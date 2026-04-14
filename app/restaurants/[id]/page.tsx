@@ -74,8 +74,28 @@ export default async function RestaurantDetailPage({ params }: Props) {
         />
       )}
       <Suspense fallback={
-        <main style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--c-bg)", fontSize: 14, color: "#9ca3af" }}>
-          Loading…
+        <main style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
+          {/* Sticky header skeleton */}
+          <div style={{ height: "max(68px, calc(68px + env(safe-area-inset-top)))", background: "var(--c-hdr)", borderBottom: "1px solid var(--c-border)" }} />
+          <div style={{ maxWidth: 600, margin: "0 auto", padding: "16px 16px 0" }}>
+            {/* Hero card skeleton */}
+            <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, overflow: "hidden", marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+              <div className="skeleton" style={{ height: 148, borderRadius: 0 }} />
+              <div style={{ padding: 20 }}>
+                <div className="skeleton" style={{ height: 24, width: "55%", marginBottom: 10 }} />
+                <div className="skeleton" style={{ height: 14, width: "35%", marginBottom: 18 }} />
+                <div className="skeleton" style={{ height: 8, borderRadius: 999, marginBottom: 14 }} />
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[0,1,2].map((i) => <div key={i} className="skeleton" style={{ height: 48, flex: 1, borderRadius: 12 }} />)}
+                </div>
+              </div>
+            </div>
+            {/* Section skeletons */}
+            <div className="skeleton" style={{ height: 12, width: 120, marginBottom: 12 }} />
+            <div style={{ display: "grid", gap: 8 }}>
+              {[0,1,2,3].map((i) => <div key={i} className="skeleton" style={{ height: 64, borderRadius: 14 }} />)}
+            </div>
+          </div>
         </main>
       }>
         <RestaurantDetailClient params={params} />

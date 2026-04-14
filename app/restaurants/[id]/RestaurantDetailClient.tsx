@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { use } from "react";
 import { SettingsButton } from "@/components/SettingsButton";
 import { MOCK_RESTAURANTS, MENU_DATA_VERIFIED_DATE } from "@/lib/mockRestaurants";
@@ -517,16 +518,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             transition: "background 0.3s ease",
           }}>
             {photoSrc && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={photoSrc}
                 alt={hero.restaurantName}
+                fill
+                unoptimized
+                priority
                 onLoad={() => setPhotoLoaded(true)}
                 onError={() => setPhotoFailed(true)}
-                loading="lazy"
+                sizes="(max-width: 600px) 100vw, 600px"
                 style={{
-                  position: "absolute", inset: 0,
-                  width: "100%", height: "100%",
                   objectFit: isLogo ? "contain" : "cover",
                   objectPosition: "center",
                   padding: isLogo ? "20px 32px" : 0,

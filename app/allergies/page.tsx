@@ -1,35 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { AllergySelector } from "@/components/AllergySelector";
-import { ALLERGEN_LIST } from "@/lib/allergenProfile";
+import {
+  ALLERGEN_LIST,
+  loadProfileAllergens,
+  saveProfileAllergens,
+  loadProfileSeverities,
+  saveProfileSeverities,
+} from "@/lib/allergenProfile";
 import { ShowStaffCard } from "@/components/ShowStaffCard";
 import type { AllergenId, AllergenSeverity } from "@/lib/types";
 
 export default function AllergiesPage() {
-  const { user, loading, allergens, severities, saveAllergens, saveSeverities } = useAuth();
-  const router = useRouter();
+  const { user, loading, allergens: authAllergens, severities: authSeverities, saveAllergens, saveSeverities } = useAuth();
 
   const [selected, setSelected]                     = useState<AllergenId[]>([]);
   const [savedSelection, setSavedSelection]         = useState<AllergenId[]>([]);
   const [localSeverities, setLocalSeverities]       = useState<Partial<Record<AllergenId, AllergenSeverity>>>({});
   const [saved, setSaved]                           = useState(false);
   const [showStaffCard, setShowStaffCard]           = useState(false);
+  const [hydrated, setHydrated]                     = useState(false);
 
+  // Hydrate: use auth profile when signed in, localStorage when anonymous
   useEffect(() => {
-    if (!loading && !user) router.replace("/auth");
-  }, [loading, user, router]);
-
-  useEffect(() => {
-    if (!loading && allergens.length > 0 && selected.length === 0) {
-      setSelected(allergens);          // eslint-disable-line react-hooks/set-state-in-effect
-      setSavedSelection(allergens);
-      setLocalSeverities(severities);  // eslint-disable-line react-hooks/set-state-in-effect
+    if (loading) return;
+    if (user) {
+      const a = authAllergens.length > 0 ? authAllergens : loadProfileAllergens();
+      const s = Object.keys(authSeverities).length > 0 ? authSeverities : loadProfileSeverities();
+      setSelected(a);
+      setSavedSelection(a);
+      setLocalSeverities(s);
+    } else {
+      const a = loadProfileAllergens();
+      const s = loadProfileSeverities();
+      setSelected(a);
+      setSavedSelection(a);
+      setLocalSeverities(s);
     }
-  }, [loading, allergens, severities]); // eslint-disable-line react-hooks/exhaustive-deps
+    setHydrated(true);
+  }, [loading, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleSeverity(id: AllergenId) {
     setLocalSeverities((prev) => {
@@ -39,17 +51,22 @@ export default function AllergiesPage() {
   }
 
   const isDirty = [...selected].sort().join() !== [...savedSelection].sort().join()
-    || JSON.stringify(localSeverities) !== JSON.stringify(severities);
+    || JSON.stringify(localSeverities) !== JSON.stringify(user ? authSeverities : loadProfileSeverities());
 
   async function handleSave() {
-    await saveAllergens(selected);
-    saveSeverities(localSeverities);
+    if (user) {
+      await saveAllergens(selected);
+      saveSeverities(localSeverities);
+    } else {
+      saveProfileAllergens(selected);
+      saveProfileSeverities(localSeverities);
+    }
     setSavedSelection([...selected]);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
 
-  if (loading || !user) {
+  if (loading || !hydrated) {
     return (
       <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>
         Loading…
@@ -66,7 +83,6 @@ export default function AllergiesPage() {
       style={{
         minHeight: "100dvh",
         background: "var(--c-bg)",
-        fontFamily: "Inter, Arial, sans-serif",
         paddingBottom: "max(48px, calc(32px + env(safe-area-inset-bottom)))",
       }}
     >
@@ -88,13 +104,33 @@ export default function AllergiesPage() {
         }}
       >
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/profile" style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}>← Back</Link>
+          <Link href={user ? "/profile" : "/"} style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none" }}>← Back</Link>
           <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>My Allergies</span>
           <div style={{ width: 48 }} />
         </div>
       </div>
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px 16px", display: "grid", gap: 16 }}>
+
+        {/* Anonymous user notice */}
+        {!user && (
+          <div style={{
+            padding: "12px 14px", borderRadius: 14,
+            background: "var(--c-muted)", border: "1px solid var(--c-border)",
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+          }}>
+            <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+              Saved to this device. <strong style={{ color: "var(--c-text)" }}>Sign in</strong> to sync across devices.
+            </div>
+            <Link href="/auth" style={{
+              flexShrink: 0, padding: "8px 14px", borderRadius: 10,
+              background: "var(--c-text)", color: "var(--c-bg)",
+              fontSize: 13, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
+            }}>
+              Sign In
+            </Link>
+          </div>
+        )}
 
         {/* Allergy profile card */}
         <div
@@ -108,7 +144,7 @@ export default function AllergiesPage() {
             Allergy Profile
           </div>
           <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 16 }}>
-            Saved to your account and synced across devices.
+            {user ? "Saved to your account and synced across devices." : "Tap to select your allergens."}
           </div>
 
           <AllergySelector selected={selected} onChange={setSelected} limit={4} />

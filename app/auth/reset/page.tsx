@@ -43,7 +43,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError(null);
     if (password !== confirm) { setError("Passwords don't match."); return; }
-    if (password.length < 6)  { setError("Password must be at least 6 characters."); return; }
+    if (password.length < 8)  { setError("Password must be at least 8 characters."); return; }
 
     setLoading(true);
     const sb = getSupabaseClient();
@@ -121,9 +121,9 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
               <div>
                 <label htmlFor="new-password" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>New password</label>
-                <input id="new-password" type="password" required minLength={6}
+                <input id="new-password" type="password" required minLength={8}
                   value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters" style={inputStyle} />
+                  placeholder="At least 8 characters" style={inputStyle} />
               </div>
               <div>
                 <label htmlFor="confirm-password" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>Confirm password</label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ALLERGEN_LIST, saveProfileAllergens, loadProfileAllergens } from "@/lib/allergenProfile";
@@ -16,16 +16,41 @@ const iosTap: React.CSSProperties = {
   userSelect: "none",
 };
 
+const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function OnboardingModal() {
   const { isDark } = useTheme();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<"welcome" | "allergens" | "done">("welcome");
   const [selected, setSelected] = useState<Set<AllergenId>>(new Set());
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) setVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
+
+  // Focus first interactive element whenever the modal appears or the step changes
+  useEffect(() => {
+    if (!visible) return;
+    requestAnimationFrame(() => {
+      dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+    });
+  }, [visible, step]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Escape") { handleSkip(); return; }
+    if (e.key !== "Tab") return;
+    const nodes = dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE);
+    if (!nodes || nodes.length === 0) return;
+    const first = nodes[0];
+    const last  = nodes[nodes.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggle(id: AllergenId) {
     setSelected((prev) => {
@@ -63,9 +88,9 @@ export function OnboardingModal() {
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
       }}
-      onKeyDown={(e) => { if (e.key === "Escape") handleSkip(); }}
+      onKeyDown={handleKeyDown}
     >
-      <div style={{
+      <div ref={dialogRef} style={{
         background: isDark
           ? "linear-gradient(150deg, #111214 0%, #1e2023 20%, #141618 45%, #1a1d20 70%, #111214 100%)"
           : "linear-gradient(150deg, #f8f9fa 0%, #e8eaed 15%, #ffffff 32%, #d0d4d8 52%, #f4f5f6 68%, #c8ccd0 84%, #eef0f2 100%)",

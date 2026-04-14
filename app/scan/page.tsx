@@ -289,7 +289,8 @@ function StaffBlock({ row }: { row: Row }) {
       <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 8 }}>
         <button onClick={() => upsertLearnedRule("safe", row.item)} style={{ padding: "8px 12px", borderRadius: 999, border: "1px solid #bbf7d0", background: "#f0fdf4", color: "#15803d", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark safe</button>
         <button onClick={() => upsertLearnedRule("unsure", row.item)} style={{ padding: "8px 12px", borderRadius: 999, border: "1px solid #f4dd8d", background: "#fff7db", color: "#854d0e", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Mark unsure</button>
-        {avoidAllergens.map((a) => <button key={a} onClick={() => upsertLearnedRule("avoid", row.item, a)} style={{ padding: "8px 12px", borderRadius: 999, border: "1px solid #f3c5c0", background: "#fff1f0", color: "#b91c1c", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Contains {a}</button>)}
+        {avoidAllergens.slice(0, 4).map((a) => <button key={a} onClick={() => upsertLearnedRule("avoid", row.item, a)} style={{ padding: "8px 12px", borderRadius: 999, border: "1px solid #f3c5c0", background: "#fff1f0", color: "#b91c1c", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Contains {a}</button>)}
+        {avoidAllergens.length > 4 && <span style={{ fontSize: 11, color: "var(--c-sub)", alignSelf: "center" }}>+{avoidAllergens.length - 4} more</span>}
       </div>
     );
   }
@@ -308,7 +309,7 @@ function StaffBlock({ row }: { row: Row }) {
         fontSize: 11, fontWeight: 700,
         color: dominantlySafe ? "#15803d" : hasReactions ? "#b91c1c" : "#6b7280",
       }}>
-        👥 {dominantlySafe
+        <span aria-hidden="true">👥</span>{" "}{dominantlySafe
           ? `${signal.safeTotal} ate safely`
           : hasReactions
             ? `${signal.reactionTotal} had reaction${signal.reactionTotal > 1 ? "s" : ""}`
@@ -469,7 +470,8 @@ function StaffBlock({ row }: { row: Row }) {
   const STEPS = ["Your Allergies", "Load Menu", "Results"];
 
   return (
-    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", fontFamily: "Inter, Arial, sans-serif", paddingBottom: 40 }}>
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: 40 }}>
+      <h1 className="sr-only">Menu Scan — AllergEats</h1>
       {/* Sticky header */}
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--c-border)", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>

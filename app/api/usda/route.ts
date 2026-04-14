@@ -19,6 +19,13 @@ const BASE    = "https://api.nal.usda.gov/fdc/v1";
 const WINDOW  = 60_000;
 const MAX_REQ = 15;
 
+// Server-side cache: avoids re-hitting USDA for the same dish+brand within a warm instance.
+// Keys: "normalizedQuery::normalizedBrand" → detected allergen IDs
+const _usdaCache = new Map<string, string[]>();
+function cacheKey(query: string, brand?: string) {
+  return `${query.toLowerCase().trim()}::${(brand ?? "").toLowerCase().trim()}`;
+}
+
 // FDA major allergens we extract from ingredient text
 const ALLERGEN_PATTERNS: Array<{ id: string; patterns: RegExp[] }> = [
   { id: "dairy",     patterns: [/\b(milk|dairy|cream|cheese|butter|lactose|whey|casein)\b/i] },
@@ -72,6 +79,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ results: [] }, { status: 400 });
   }
 
+  // Return cached result if available — avoids burning DEMO_KEY quota for repeated lookups
+  const key = cacheKey(query, brandName);
+  if (_usdaCache.has(key)) {
+    return NextResponse.json({ results: [{ allergens: _usdaCache.get(key)! }] });
+  }
+
   const apiKey = process.env.FDC_API_KEY ?? "DEMO_KEY"; // DEMO_KEY = 30 req/min, no signup
   const searchQuery = brandName ? `${brandName} ${query}` : query;
 
@@ -107,6 +120,11 @@ export async function POST(req: Request) {
         allergens,
       };
     });
+
+    // Cache the first result's allergens for this query
+    if (results.length > 0) {
+      _usdaCache.set(key, results[0].allergens);
+    }
 
     return NextResponse.json({ results });
   } catch (err) {
