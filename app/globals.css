@@ -160,15 +160,24 @@ a:focus-visible,
 }
 
 /* ── Skeleton shimmer ────────────────────────────────────────────────────── */
+/* Uses transform: translateX on a pseudo-element — fully composited, zero paint cost */
 @keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position:  400px 0; }
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 .skeleton {
-  background: linear-gradient(90deg, var(--c-border) 25%, var(--c-muted) 50%, var(--c-border) 75%);
-  background-size: 800px 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  background: var(--c-border);
   border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, var(--c-muted) 50%, transparent 100%);
+  animation: shimmer 1.4s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────────── */

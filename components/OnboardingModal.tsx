@@ -52,13 +52,19 @@ export function OnboardingModal() {
   if (!visible) return null;
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-      WebkitBackdropFilter: "blur(6px)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
-    }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Welcome to AllergEats"
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
+      }}
+      onKeyDown={(e) => { if (e.key === "Escape") handleSkip(); }}
+    >
       <div style={{
         background: isDark
           ? "linear-gradient(150deg, #111214 0%, #1e2023 20%, #141618 45%, #1a1d20 70%, #111214 100%)"
@@ -92,6 +98,7 @@ export function OnboardingModal() {
           <>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <Image src="/logo.png" alt="AllergEats" width={200} height={46}
+                sizes="200px"
                 style={{ width: "auto", height: 44, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
               <div style={{
                 fontSize: 24,

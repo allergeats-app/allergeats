@@ -130,6 +130,7 @@ export default function AuthPage() {
       {/* Logo */}
       <Link href="/" style={{ textDecoration: "none", marginBottom: 8, display: "block", textAlign: "center" }}>
         <Image src="/logo.png" alt="AllergEats" width={280} height={64}
+          sizes="280px"
           style={{ width: "auto", height: 56, maxWidth: "80vw", display: "block", margin: "0 auto" }} priority />
       </Link>
       <p style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 28, textAlign: "center" }}>
