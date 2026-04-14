@@ -99,7 +99,7 @@ export function HowItWorksSheet({ open, onClose }: { open: boolean; onClose: () 
               { n: "3", title: "Know Exactly What to Order", desc: "See what's safe, what to ask staff, and what to avoid — in seconds." },
             ].map(({ n, title, desc }) => (
               <div key={n} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "var(--c-bg)", border: "1px solid var(--c-border)", borderRadius: 16, padding: "14px 16px" }}>
-                <div style={{ width: 32, height: 32, borderRadius: 10, background: "#1fbdcc", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "#1fbdcc", color: "var(--c-brand-fg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, flexShrink: 0 }}>{n}</div>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", marginBottom: 3 }}>{title}</div>
                   <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>{desc}</div>

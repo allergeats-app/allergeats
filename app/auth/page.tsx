@@ -154,7 +154,7 @@ export default function AuthPage() {
           <div style={{ display: "grid", gap: 10 }}>
             <button onClick={handleEnrollPasskey} disabled={passkeyEnrolling} style={{
               padding: "14px 0", borderRadius: 14, border: "none",
-              background: passkeyEnrolling ? "#9ca3af" : "#1fbdcc", color: "#fff",
+              background: passkeyEnrolling ? "#9ca3af" : "#1fbdcc", color: "var(--c-brand-fg)",
               fontSize: 15, fontWeight: 800, cursor: passkeyEnrolling ? "not-allowed" : "pointer",
             }}>
               {passkeyEnrolling ? "Setting up…" : "Enable Face ID"}
@@ -194,7 +194,7 @@ export default function AuthPage() {
               {info  && <div style={{ padding: "10px 14px", borderRadius: 10, background: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: 13, color: "#15803d" }}>{info}</div>}
               <button type="submit" disabled={loading} style={{
                 padding: "14px 0", borderRadius: 14, border: "none",
-                background: loading ? "#9ca3af" : "#1fbdcc", color: "#fff",
+                background: loading ? "#9ca3af" : "#1fbdcc", color: "var(--c-brand-fg)",
                 fontSize: 15, fontWeight: 800, cursor: loading ? "not-allowed" : "pointer",
               }}>
                 {loading ? "Sending…" : "Send Reset Link"}
@@ -293,7 +293,7 @@ export default function AuthPage() {
 
               <button type="submit" disabled={loading} style={{
                 marginTop: 2, padding: "14px 0", borderRadius: 14, border: "none",
-                background: loading ? "#9ca3af" : "#1fbdcc", color: "#fff",
+                background: loading ? "#9ca3af" : "#1fbdcc", color: "var(--c-brand-fg)",
                 fontSize: 15, fontWeight: 800,
                 cursor: loading ? "not-allowed" : "pointer", transition: "background 0.2s",
               }}>

@@ -179,7 +179,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           onClick={onOpenOrder}
           style={{
             width: "100%", padding: "15px 0", borderRadius: 14, border: "none",
-            background: "#1fbdcc", color: "#fff",
+            background: "#1fbdcc", color: "var(--c-brand-fg)",
             fontSize: 16, fontWeight: 800, cursor: "pointer", minHeight: 54,
           }}
         >

@@ -62,7 +62,7 @@ export default function NotFound() {
             padding: "14px 0", borderRadius: 14,
             background: "linear-gradient(135deg, #149aab 0%, #1fbdcc 50%, #35d4e4 100%)",
             boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(0,150,165,0.3)",
-            color: "#fff", fontSize: 15, fontWeight: 800,
+            color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 800,
             textDecoration: "none", letterSpacing: "-0.01em",
           }}
         >

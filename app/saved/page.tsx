@@ -218,7 +218,7 @@ function SavedContent() {
               <Link href="/" style={{
                 display: "block", textAlign: "center",
                 padding: "13px 0", borderRadius: 14,
-                background: "#1fbdcc", color: "#fff",
+                background: "#1fbdcc", color: "var(--c-brand-fg)",
                 fontSize: 14, fontWeight: 800, textDecoration: "none",
               }}>
                 Browse Restaurants

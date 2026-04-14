@@ -360,7 +360,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         <EmptyState
           title="Restaurant not found"
           subtitle="This restaurant isn't in our database."
-          action={<Link href="/" style={{ padding: "12px 20px", background: "#1fbdcc", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
+          action={<Link href="/" style={{ padding: "12px 20px", background: "#1fbdcc", color: "var(--c-brand-fg)", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
         />
       </main>
     );
@@ -636,7 +636,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     </div>
                     <CameraScanButton style={{
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "10px 18px", background: "#1fbdcc", color: "#fff",
+                      padding: "10px 18px", background: "#1fbdcc", color: "var(--c-brand-fg)",
                       borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
                     }}>
                       Scan Menu →
@@ -650,7 +650,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     </div>
                     <CameraScanButton style={{
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "10px 18px", background: "#1fbdcc", color: "#fff",
+                      padding: "10px 18px", background: "#1fbdcc", color: "var(--c-brand-fg)",
                       borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
                     }}>
                       Scan Menu →
@@ -739,7 +739,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </div>
                 <Link href="/allergies" style={{
                   flexShrink: 0, padding: "11px 18px", borderRadius: 12,
-                  background: "#1fbdcc", color: "#fff",
+                  background: "#1fbdcc", color: "var(--c-brand-fg)",
                   fontSize: 15, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
                 }}>
                   Set Allergies
@@ -1177,12 +1177,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               background: "rgba(255,255,255,0.22)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <span style={{ fontSize: 14, fontWeight: 900, color: "#fff" }}>{orderedItemIds.size}</span>
+              <span style={{ fontSize: 14, fontWeight: 900, color: "var(--c-brand-fg)" }}>{orderedItemIds.size}</span>
             </div>
             {/* Label */}
             <span style={{
               position: "absolute", left: "50%", transform: "translateX(-50%)",
-              fontSize: 16, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em",
+              fontSize: 16, fontWeight: 800, color: "var(--c-brand-fg)", letterSpacing: "-0.01em",
               whiteSpace: "nowrap",
             }}>
               View Order
@@ -1193,7 +1193,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               background: "rgba(255,255,255,0.2)",
               borderRadius: 999, padding: "4px 10px",
             }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-brand-fg)", whiteSpace: "nowrap" }}>
                 {orderedItems.every((i) => i.risk === "likely-safe")
                   ? "All safe ✓"
                   : `${orderedItems.filter((i) => i.risk === "ask").length} to confirm`}
@@ -1256,7 +1256,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   minWidth: 22, height: 22, padding: "0 6px",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <span style={{ fontSize: 11, fontWeight: 900, color: "#fff", lineHeight: 1 }}>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: "var(--c-brand-fg)", lineHeight: 1 }}>
                     {orderedItems.length}
                   </span>
                 </div>
@@ -1514,7 +1514,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   style={{
                     width: "100%", height: 54, borderRadius: 16,
                     background: orderSaved ? "#16a34a" : "#1fbdcc",
-                    color: "#fff", border: "none",
+                    color: "var(--c-brand-fg)", border: "none",
                     fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em",
                     cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 10,

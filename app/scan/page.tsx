@@ -532,7 +532,7 @@ function StaffBlock({ row }: { row: Row }) {
               </div>
               <button
                 onClick={() => setStep(2)}
-                style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#1fbdcc", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+                style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
               >
                 Continue →
               </button>
@@ -578,7 +578,7 @@ function StaffBlock({ row }: { row: Row }) {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36 }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isScanning ? "var(--c-text)" : "#fff"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isScanning ? "var(--c-text)" : "var(--c-brand-fg)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                       <circle cx="12" cy="13" r="4"/>
                     </svg>
@@ -593,7 +593,7 @@ function StaffBlock({ row }: { row: Row }) {
                         : "Point your camera at any menu for instant analysis"}
                     </div>
                   </div>
-                  {!isScanning && <span style={{ fontSize: 22, color: "#fff", flexShrink: 0 }}>→</span>}
+                  {!isScanning && <span style={{ fontSize: 22, color: "var(--c-brand-fg)", flexShrink: 0 }}>→</span>}
                 </div>
                 {isScanning && (
                   <div style={{ marginTop: 14, display: "flex", gap: 6 }}>
@@ -692,7 +692,7 @@ function StaffBlock({ row }: { row: Row }) {
                       <button
                         onClick={fetchMenuFromUrl}
                         disabled={isFetching}
-                        style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: isFetching ? "#9ca3af" : "#1fbdcc", color: "#fff", fontWeight: 800, fontSize: 14, cursor: isFetching ? "not-allowed" : "pointer" }}
+                        style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: isFetching ? "#9ca3af" : "#1fbdcc", color: "var(--c-brand-fg)", fontWeight: 800, fontSize: 14, cursor: isFetching ? "not-allowed" : "pointer" }}
                       >
                         {isFetching ? "Fetching…" : "Fetch Menu"}
                       </button>
@@ -757,7 +757,7 @@ function StaffBlock({ row }: { row: Row }) {
                   )}
                   <button
                     onClick={() => { setAnalyzed(true); setStep(3); }}
-                    style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#1fbdcc", color: "#fff", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+                    style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
                   >
                     Analyze Menu →
                   </button>
@@ -874,7 +874,7 @@ function StaffBlock({ row }: { row: Row }) {
                 style={{
                   flex: 2, padding: "13px", borderRadius: 14,
                   background: "#1fbdcc", border: "none",
-                  fontSize: 15, fontWeight: 800, color: "#fff", cursor: "pointer",
+                  fontSize: 15, fontWeight: 800, color: "var(--c-brand-fg)", cursor: "pointer",
                   boxShadow: "0 4px 14px rgba(31,189,204,0.25)",
                 }}
               >

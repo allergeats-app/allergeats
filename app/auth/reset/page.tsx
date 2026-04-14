@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
                   onClick={() => router.replace("/auth")}
                   style={{
                     padding: "12px 24px", borderRadius: 12, border: "none",
-                    background: "#1fbdcc", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                    background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 700, cursor: "pointer",
                   }}
                 >
                   Back to sign in
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
 
               <button type="submit" disabled={loading} style={{
                 marginTop: 2, padding: "14px 0", borderRadius: 14, border: "none",
-                background: loading ? "#9ca3af" : "#1fbdcc", color: "#fff",
+                background: loading ? "#9ca3af" : "#1fbdcc", color: "var(--c-brand-fg)",
                 fontSize: 15, fontWeight: 800,
                 cursor: loading ? "not-allowed" : "pointer",
               }}>

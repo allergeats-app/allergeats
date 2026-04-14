@@ -211,7 +211,7 @@ export function OnboardingModal() {
                 borderRadius: 16, border: "none",
                 background: "linear-gradient(135deg, #149aab 0%, #1fbdcc 50%, #35d4e4 100%)",
                 boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(0,150,165,0.35), inset 0 1px 0 rgba(100,230,240,0.3)",
-                color: "#fff",
+                color: "var(--c-brand-fg)",
                 fontSize: 17, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
               }}
@@ -304,7 +304,7 @@ export function OnboardingModal() {
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
                 borderRadius: 16, border: "none",
-                background: "#1fbdcc", color: "#fff",
+                background: "#1fbdcc", color: "var(--c-brand-fg)",
                 fontSize: 17, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
               }}

@@ -149,7 +149,7 @@ export function FeedbackButton() {
                   style={{
                     width: "100%", padding: "14px 0", borderRadius: 14, border: "none",
                     background: sending || !message.trim() ? "#9ca3af" : "#1fbdcc",
-                    color: "#fff", fontSize: 15, fontWeight: 800,
+                    color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 800,
                     cursor: sending || !message.trim() ? "not-allowed" : "pointer",
                   }}
                 >

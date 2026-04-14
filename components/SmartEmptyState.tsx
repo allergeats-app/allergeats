@@ -70,7 +70,7 @@ export function SmartEmptyState({
       <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 12 }}>Or scan any menu directly</div>
       <CameraScanButton style={{
         display: "inline-flex", alignItems: "center", gap: 7,
-        padding: "12px 22px", background: "#1fbdcc", color: "#fff",
+        padding: "12px 22px", background: "#1fbdcc", color: "var(--c-brand-fg)",
         borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer",
       }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

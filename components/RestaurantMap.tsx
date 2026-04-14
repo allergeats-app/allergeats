@@ -338,7 +338,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
             style={{
               display: "flex", alignItems: "center", gap: 7,
               padding: "10px 20px",
-              background: "#1fbdcc", color: "#fff",
+              background: "#1fbdcc", color: "var(--c-brand-fg)",
               border: "none", borderRadius: 999,
               fontSize: 13, fontWeight: 800,
               cursor: "pointer",

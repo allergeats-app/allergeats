@@ -78,7 +78,7 @@ export default function AuthCallbackPage() {
         </div>
         <button onClick={() => router.replace("/auth")} style={{
           padding: "12px 24px", borderRadius: 12, border: "none",
-          background: "#1fbdcc", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+          background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 700, cursor: "pointer",
         }}>
           Try again
         </button>

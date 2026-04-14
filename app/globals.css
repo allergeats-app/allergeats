@@ -11,6 +11,11 @@
   --c-muted:  #f9fafb;
   --c-hdr:    rgba(247,247,247,0.95);
 
+  /* Brand teal — overridden in dark mode by the blocking theme script */
+  --c-brand:    #1fbdcc;               /* fills, borders, icons, focus rings    */
+  --c-brand-fg: #001f26;               /* text ON teal fills — 7.8:1 contrast   */
+  --c-brand-bg: rgba(31,189,204,0.09); /* subtle teal tint for cards/pills      */
+
   /* Risk-level text colors — paired dark-mode versions set in layout.tsx */
   --c-risk-safe:  #15803d;
   --c-risk-ask:   #854d0e;

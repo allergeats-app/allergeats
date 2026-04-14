@@ -49,7 +49,7 @@ export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
         borderBottom: "1px solid #f3f4f6",
       }}>
         <div style={{
-          background: "#1fbdcc", color: "#fff",
+          background: "#1fbdcc", color: "var(--c-brand-fg)",
           fontWeight: 900, fontSize: 11, letterSpacing: "0.1em",
           textTransform: "uppercase", borderRadius: 6, padding: "4px 10px",
         }}>

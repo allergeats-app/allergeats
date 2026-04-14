@@ -88,7 +88,7 @@ export function SettingsButton() {
               }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%",
-                  background: "#1fbdcc", color: "#fff",
+                  background: "#1fbdcc", color: "var(--c-brand-fg)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 13, fontWeight: 900, flexShrink: 0,
                 }}>
