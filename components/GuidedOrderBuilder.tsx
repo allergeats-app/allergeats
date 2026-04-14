@@ -179,7 +179,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           onClick={onOpenOrder}
           style={{
             width: "100%", padding: "15px 0", borderRadius: 14, border: "none",
-            background: "#eb1700", color: "#fff",
+            background: "#1fbdcc", color: "#fff",
             fontSize: 16, fontWeight: 800, cursor: "pointer", minHeight: 54,
           }}
         >
@@ -211,7 +211,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             <div key={i} style={{ display: "flex", alignItems: "center" }}>
               <div style={{
                 width: isActive ? 32 : 10, height: 10, borderRadius: 999,
-                background: isActive ? "#eb1700" : isStepDone ? "#eb1700" : (isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb"),
+                background: isActive ? "#1fbdcc" : isStepDone ? "#1fbdcc" : (isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb"),
                 transition: "all 0.25s ease",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
@@ -224,7 +224,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               {i < steps.length - 1 && (
                 <div style={{
                   width: 18, height: 2,
-                  background: isStepDone ? "#eb1700" : (isDark ? "rgba(255,255,255,0.1)" : "#e5e7eb"),
+                  background: isStepDone ? "#1fbdcc" : (isDark ? "rgba(255,255,255,0.1)" : "#e5e7eb"),
                   transition: "background 0.25s ease",
                 }} />
               )}
@@ -275,7 +275,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                 width: "100%", textAlign: "left",
                 padding: "14px 16px",
                 background: isSelected
-                  ? (isDark ? "rgba(235,23,0,0.1)" : "rgba(235,23,0,0.04)")
+                  ? (isDark ? "rgba(31,189,204,0.1)" : "rgba(31,189,204,0.04)")
                   : isAvoid
                     ? (isDark ? "rgba(255,255,255,0.02)" : "#fafafa")
                     : "transparent",
@@ -291,7 +291,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               {comboNum ? (
                 <div style={{
                   width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                  background: isSelected ? "#eb1700" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
+                  background: isSelected ? "#1fbdcc" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
                   display: "flex", alignItems: "center", justifyContent: "center",
                   transition: "background 0.15s",
                 }}>
@@ -332,7 +332,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                 <div style={{
                   width: 22, height: 22, borderRadius: isSingle ? 999 : 6, flexShrink: 0,
                   border: isSelected ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.2)" : "#d1d5db"}`,
-                  background: isSelected ? "#eb1700" : "transparent",
+                  background: isSelected ? "#1fbdcc" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   transition: "all 0.15s",
                 }}>
@@ -374,7 +374,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             onClick={advance}
             style={{
               flex: 1, padding: "13px 0", borderRadius: 12, border: "none",
-              background: picksForStep.length > 0 ? "#eb1700" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
+              background: picksForStep.length > 0 ? "#1fbdcc" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
               color: picksForStep.length > 0 ? "#fff" : "var(--c-sub)",
               fontSize: 15, fontWeight: 800, cursor: "pointer", minHeight: 48,
               transition: "background 0.15s, color 0.15s",

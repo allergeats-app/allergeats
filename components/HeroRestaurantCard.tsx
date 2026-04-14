@@ -153,7 +153,7 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
               aria-label={favorited ? `Remove ${r.name} from saved` : `Save ${r.name}`}
               style={{
                 width: 40, height: 40, borderRadius: 999,
-                background: favorited ? "#eb1700" : "rgba(0,0,0,0.4)",
+                background: favorited ? "#1fbdcc" : "rgba(0,0,0,0.4)",
                 backdropFilter: "blur(8px)",
                 WebkitBackdropFilter: "blur(8px)",
                 border: "1px solid rgba(255,255,255,0.18)",
@@ -304,7 +304,7 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
               {summary.total > 0 ? `${summary.total} items analyzed` : "Tap to scan menu"}
             </span>
             <span style={{
-              fontSize: 14, fontWeight: 800, color: "#eb1700",
+              fontSize: 14, fontWeight: 800, color: "#1fbdcc",
               display: "flex", alignItems: "center", gap: 4,
             }}>
               See menu fit

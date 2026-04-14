@@ -23,8 +23,8 @@ export function FilterChips<T extends string>({ chips, active, onChange }: Props
             style={{
               padding: "8px 14px",
               borderRadius: 999,
-              border: `1.5px solid ${isActive ? "#eb1700" : "#e5e7eb"}`,
-              background: isActive ? "#eb1700" : "#fff",
+              border: `1.5px solid ${isActive ? "#1fbdcc" : "#e5e7eb"}`,
+              background: isActive ? "#1fbdcc" : "#fff",
               color: isActive ? "#fff" : "#374151",
               fontSize: 13,
               fontWeight: 700,

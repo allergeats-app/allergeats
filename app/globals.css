@@ -118,7 +118,7 @@ a:active,
   WCAG 2.1 SC 2.4.7 non-text-contrast requirement.
 */
 :focus-visible {
-  outline: 2.5px solid #eb1700;
+  outline: 2.5px solid #1fbdcc;
   outline-offset: 3px;
   border-radius: 4px;
 }

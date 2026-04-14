@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
                   onClick={() => router.replace("/auth")}
                   style={{
                     padding: "12px 24px", borderRadius: 12, border: "none",
-                    background: "#eb1700", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                    background: "#1fbdcc", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
                   }}
                 >
                   Back to sign in
@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
               <>
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%",
-                  border: "3px solid var(--c-border)", borderTopColor: "#eb1700",
+                  border: "3px solid var(--c-border)", borderTopColor: "#1fbdcc",
                   animation: "spin 0.8s linear infinite", margin: "0 auto 12px",
                 }} />
                 <div style={{ fontSize: 14, color: "var(--c-sub)" }}>Verifying reset link…</div>
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
 
               <button type="submit" disabled={loading} style={{
                 marginTop: 2, padding: "14px 0", borderRadius: 14, border: "none",
-                background: loading ? "#9ca3af" : "#eb1700", color: "#fff",
+                background: loading ? "#9ca3af" : "#1fbdcc", color: "#fff",
                 fontSize: 15, fontWeight: 800,
                 cursor: loading ? "not-allowed" : "pointer",
               }}>

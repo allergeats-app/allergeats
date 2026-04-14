@@ -217,8 +217,8 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
               width: "100%", display: "flex", alignItems: "center", gap: 12,
               padding: "13px 16px", borderRadius: 16, marginBottom: 16,
               background: locating ? "#fff5f5" : "#fef2f2",
-              border: "1.5px solid #eb1700",
-              color: "#eb1700", fontSize: 14, fontWeight: 800,
+              border: "1.5px solid #1fbdcc",
+              color: "#1fbdcc", fontSize: 14, fontWeight: 800,
               cursor: locating ? "default" : "pointer", textAlign: "left",
               opacity: locating ? 0.8 : 1,
             }}

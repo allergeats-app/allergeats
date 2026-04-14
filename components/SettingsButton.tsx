@@ -88,7 +88,7 @@ export function SettingsButton() {
               }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%",
-                  background: "#eb1700", color: "#fff",
+                  background: "#1fbdcc", color: "#fff",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 13, fontWeight: 900, flexShrink: 0,
                 }}>
@@ -142,7 +142,7 @@ export function SettingsButton() {
                 </span>
                 <div style={{
                   width: 36, height: 22, borderRadius: 999, flexShrink: 0,
-                  background: isDark ? "#eb1700" : "var(--c-border)",
+                  background: isDark ? "#1fbdcc" : "var(--c-border)",
                   position: "relative", transition: "background 0.2s",
                 }}>
                   <div style={{
@@ -183,7 +183,7 @@ export function SettingsButton() {
                 </span>
                 <div style={{
                   width: 36, height: 22, borderRadius: 999, flexShrink: 0,
-                  background: isDark ? "#eb1700" : "var(--c-border)",
+                  background: isDark ? "#1fbdcc" : "var(--c-border)",
                   position: "relative", transition: "background 0.2s",
                 }}>
                   <div style={{
@@ -197,7 +197,7 @@ export function SettingsButton() {
 
               {/* Sign in */}
               <div style={{ borderTop: "1px solid var(--c-border)", marginTop: 4, paddingTop: 4 }}>
-                <Link href="/auth" onClick={() => setOpen(false)} style={{ ...itemStyle, fontWeight: 700, color: "#eb1700" }}>
+                <Link href="/auth" onClick={() => setOpen(false)} style={{ ...itemStyle, fontWeight: 700, color: "#1fbdcc" }}>
                   Sign In / Create Account
                 </Link>
               </div>

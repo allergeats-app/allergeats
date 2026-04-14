@@ -163,7 +163,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
               position: "absolute", bottom: 6, right: 6,
-              background: favorited ? "#eb1700" : "rgba(0,0,0,0.38)",
+              background: favorited ? "#1fbdcc" : "rgba(0,0,0,0.38)",
               border: "none", borderRadius: 999,
               width: isRail ? 36 : 44, height: isRail ? 36 : 44,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -191,7 +191,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
             </div>
             {!isRail && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#eb1700", flexShrink: 0, paddingTop: 2 }}>→</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1fbdcc", flexShrink: 0, paddingTop: 2 }}>→</div>
             )}
           </div>
 

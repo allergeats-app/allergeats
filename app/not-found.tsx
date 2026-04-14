@@ -19,13 +19,13 @@ export default function NotFound() {
     }}>
       <div style={{
         width: 64, height: 64, borderRadius: 20,
-        background: "rgba(235,23,0,0.08)",
-        border: "1.5px solid rgba(235,23,0,0.2)",
+        background: "rgba(31,189,204,0.08)",
+        border: "1.5px solid rgba(31,189,204,0.2)",
         display: "flex", alignItems: "center", justifyContent: "center",
         margin: "0 auto 20px",
       }}>
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="#eb1700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          stroke="#1fbdcc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           aria-hidden="true">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="12"/>
@@ -37,7 +37,7 @@ export default function NotFound() {
         fontSize: 28, fontWeight: 900,
         fontFamily: "'Georgia', 'Times New Roman', serif",
         letterSpacing: "-0.02em", lineHeight: 1.15,
-        background: "linear-gradient(135deg, #c41200 0%, #eb1700 50%, #ff3d1f 100%)",
+        background: "linear-gradient(135deg, #149aab 0%, #1fbdcc 50%, #35d4e4 100%)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
@@ -60,8 +60,8 @@ export default function NotFound() {
           style={{
             display: "block", textAlign: "center",
             padding: "14px 0", borderRadius: 14,
-            background: "linear-gradient(135deg, #c41200 0%, #eb1700 50%, #ff3d1f 100%)",
-            boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(180,0,0,0.3)",
+            background: "linear-gradient(135deg, #149aab 0%, #1fbdcc 50%, #35d4e4 100%)",
+            boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(0,150,165,0.3)",
             color: "#fff", fontSize: 15, fontWeight: 800,
             textDecoration: "none", letterSpacing: "-0.01em",
           }}

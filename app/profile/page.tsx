@@ -100,7 +100,7 @@ export default function ProfilePage() {
             <div
               style={{
                 width: 48, height: 48, borderRadius: "50%",
-                background: "#eb1700", color: "#fff",
+                background: "#1fbdcc", color: "#fff",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 18, fontWeight: 900, flexShrink: 0,
               }}

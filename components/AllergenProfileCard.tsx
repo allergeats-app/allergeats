@@ -34,7 +34,7 @@ export function AllergenProfileCard({ allergens, saveState, isSignedIn, onChange
             </span>
           )}
           {!isSignedIn && (
-            <Link href="/auth" style={{ fontSize: 11, fontWeight: 700, color: "#eb1700", textDecoration: "none" }}>
+            <Link href="/auth" style={{ fontSize: 11, fontWeight: 700, color: "#1fbdcc", textDecoration: "none" }}>
               Sign in to save
             </Link>
           )}
@@ -47,7 +47,7 @@ export function AllergenProfileCard({ allergens, saveState, isSignedIn, onChange
           padding: "8px 12px", borderRadius: 10,
           background: "#fef2f2", border: "1px solid #fecaca",
         }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#eb1700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>

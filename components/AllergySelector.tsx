@@ -37,7 +37,7 @@ export function AllergySelector({ selected, onChange, limit }: Props) {
               padding: "11px 16px",
               borderRadius: 999,
               border: `1.5px solid ${active ? "transparent" : "var(--c-border)"}`,
-              background: active ? "#eb1700" : "var(--c-muted)",
+              background: active ? "#1fbdcc" : "var(--c-muted)",
               color: active ? "#fff" : "var(--c-text)",
               fontSize: 15,
               fontWeight: 700,

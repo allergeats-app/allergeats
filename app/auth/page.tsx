@@ -154,7 +154,7 @@ export default function AuthPage() {
           <div style={{ display: "grid", gap: 10 }}>
             <button onClick={handleEnrollPasskey} disabled={passkeyEnrolling} style={{
               padding: "14px 0", borderRadius: 14, border: "none",
-              background: passkeyEnrolling ? "#9ca3af" : "#eb1700", color: "#fff",
+              background: passkeyEnrolling ? "#9ca3af" : "#1fbdcc", color: "#fff",
               fontSize: 15, fontWeight: 800, cursor: passkeyEnrolling ? "not-allowed" : "pointer",
             }}>
               {passkeyEnrolling ? "Setting up…" : "Enable Face ID"}
@@ -194,7 +194,7 @@ export default function AuthPage() {
               {info  && <div style={{ padding: "10px 14px", borderRadius: 10, background: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: 13, color: "#15803d" }}>{info}</div>}
               <button type="submit" disabled={loading} style={{
                 padding: "14px 0", borderRadius: 14, border: "none",
-                background: loading ? "#9ca3af" : "#eb1700", color: "#fff",
+                background: loading ? "#9ca3af" : "#1fbdcc", color: "#fff",
                 fontSize: 15, fontWeight: 800, cursor: loading ? "not-allowed" : "pointer",
               }}>
                 {loading ? "Sending…" : "Send Reset Link"}
@@ -267,7 +267,7 @@ export default function AuthPage() {
                   <label htmlFor="auth-password" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Password</label>
                   {mode === "signin" && (
                     <button type="button" onClick={() => switchMode("forgot")}
-                      style={{ background: "none", border: "none", fontSize: 12, color: "#eb1700", fontWeight: 600, cursor: "pointer", padding: 0 }}>
+                      style={{ background: "none", border: "none", fontSize: 12, color: "#1fbdcc", fontWeight: 600, cursor: "pointer", padding: 0 }}>
                       Forgot password?
                     </button>
                   )}
@@ -283,7 +283,7 @@ export default function AuthPage() {
               {mode === "signin" && (
                 <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none", minHeight: 44, paddingLeft: 2 }}>
                   <input type="checkbox" checked={staySignedIn} onChange={(e) => setStay(e.target.checked)}
-                    style={{ width: 20, height: 20, accentColor: "#eb1700", cursor: "pointer", flexShrink: 0 }} />
+                    style={{ width: 20, height: 20, accentColor: "#1fbdcc", cursor: "pointer", flexShrink: 0 }} />
                   <span style={{ fontSize: 15, fontWeight: 600, color: "var(--c-text)" }}>Stay signed in</span>
                 </label>
               )}
@@ -293,7 +293,7 @@ export default function AuthPage() {
 
               <button type="submit" disabled={loading} style={{
                 marginTop: 2, padding: "14px 0", borderRadius: 14, border: "none",
-                background: loading ? "#9ca3af" : "#eb1700", color: "#fff",
+                background: loading ? "#9ca3af" : "#1fbdcc", color: "#fff",
                 fontSize: 15, fontWeight: 800,
                 cursor: loading ? "not-allowed" : "pointer", transition: "background 0.2s",
               }}>

@@ -94,7 +94,7 @@ function makePopupHtml(r: ScoredRestaurant): string {
       ${barHtml}
       <a href="/restaurants/${r.id}"
         style="display:block;text-align:center;padding:9px;border-radius:12px;
-          background:#eb1700;color:#fff;font-size:13px;font-weight:800;
+          background:#1fbdcc;color:#fff;font-size:13px;font-weight:800;
           text-decoration:none;letter-spacing:0.01em;">
         View Menu Fit →
       </a>
@@ -338,11 +338,11 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
             style={{
               display: "flex", alignItems: "center", gap: 7,
               padding: "10px 20px",
-              background: "#eb1700", color: "#fff",
+              background: "#1fbdcc", color: "#fff",
               border: "none", borderRadius: 999,
               fontSize: 13, fontWeight: 800,
               cursor: "pointer",
-              boxShadow: "0 4px 20px rgba(235,23,0,0.4)",
+              boxShadow: "0 4px 20px rgba(31,189,204,0.4)",
               whiteSpace: "nowrap",
             }}
           >
@@ -380,7 +380,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
           aria-pressed={menuOnly}
           style={{
             padding: "7px 13px", borderRadius: 999,
-            background: menuOnly ? "#eb1700" : chipBg,
+            background: menuOnly ? "#1fbdcc" : chipBg,
             color:      menuOnly ? "#fff"    : chipText,
             border: "none",
             fontSize: 12, fontWeight: 700, cursor: "pointer",

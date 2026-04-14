@@ -360,7 +360,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         <EmptyState
           title="Restaurant not found"
           subtitle="This restaurant isn't in our database."
-          action={<Link href="/" style={{ padding: "12px 20px", background: "#eb1700", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
+          action={<Link href="/" style={{ padding: "12px 20px", background: "#1fbdcc", color: "#fff", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
         />
       </main>
     );
@@ -580,7 +580,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       rel="noopener noreferrer"
                       style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        marginTop: 6, fontSize: 13, color: "#eb1700",
+                        marginTop: 6, fontSize: 13, color: "#1fbdcc",
                         fontWeight: 600, textDecoration: "none",
                       }}
                     >
@@ -598,8 +598,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
                   flexShrink: 0, width: 48, height: 48, borderRadius: 999,
-                  background: favorited ? "#eb1700" : "var(--c-muted)",
-                  border: `1.5px solid ${favorited ? "#eb1700" : "var(--c-border)"}`,
+                  background: favorited ? "#1fbdcc" : "var(--c-muted)",
+                  border: `1.5px solid ${favorited ? "#1fbdcc" : "var(--c-border)"}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", transition: "background 0.15s, border-color 0.15s",
                 }}
@@ -636,7 +636,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     </div>
                     <CameraScanButton style={{
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "10px 18px", background: "#eb1700", color: "#fff",
+                      padding: "10px 18px", background: "#1fbdcc", color: "#fff",
                       borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
                     }}>
                       Scan Menu →
@@ -650,7 +650,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     </div>
                     <CameraScanButton style={{
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "10px 18px", background: "#eb1700", color: "#fff",
+                      padding: "10px 18px", background: "#1fbdcc", color: "#fff",
                       borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
                     }}>
                       Scan Menu →
@@ -739,7 +739,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </div>
                 <Link href="/allergies" style={{
                   flexShrink: 0, padding: "11px 18px", borderRadius: 12,
-                  background: "#eb1700", color: "#fff",
+                  background: "#1fbdcc", color: "#fff",
                   fontSize: 15, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
                 }}>
                   Set Allergies
@@ -816,7 +816,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       fontWeight: 900,
                       fontFamily: "'Georgia', 'Times New Roman', serif",
                       letterSpacing: "-0.02em",
-                      background: "linear-gradient(135deg, #eb1700 0%, #ff6b35 100%)",
+                      background: "linear-gradient(135deg, #1fbdcc 0%, #ff6b35 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -831,7 +831,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </div>
                 <ErrorBoundary fallback={
                   <div style={{ padding: "24px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
-                    Couldn't load the order builder. <button onClick={() => setBuilderBrowseMode(true)} style={{ background: "none", border: "none", color: "#eb1700", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Browse full menu instead</button>
+                    Couldn't load the order builder. <button onClick={() => setBuilderBrowseMode(true)} style={{ background: "none", border: "none", color: "#1fbdcc", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Browse full menu instead</button>
                   </div>
                 }>
                   <GuidedOrderBuilder
@@ -851,7 +851,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     onClick={() => setBuilderBrowseMode(false)}
                     style={{
                       background: "none", border: "none", padding: "0 0 16px",
-                      fontSize: 14, fontWeight: 700, color: "#eb1700", cursor: "pointer",
+                      fontSize: 14, fontWeight: 700, color: "#1fbdcc", cursor: "pointer",
                       display: "flex", alignItems: "center", gap: 6,
                     }}
                   >
@@ -878,8 +878,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     {RISK_CHIPS.map((c) => (
                       <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
                         padding: "11px 18px", borderRadius: 999,
-                        border: `1.5px solid ${riskFilter === c.value ? "#eb1700" : "var(--c-border)"}`,
-                        background: riskFilter === c.value ? "#eb1700" : "var(--c-card)",
+                        border: `1.5px solid ${riskFilter === c.value ? "#1fbdcc" : "var(--c-border)"}`,
+                        background: riskFilter === c.value ? "#1fbdcc" : "var(--c-card)",
                         color: riskFilter === c.value ? "#fff" : "var(--c-text)",
                         fontSize: 15, fontWeight: 700, whiteSpace: "nowrap",
                         cursor: "pointer", flexShrink: 0, minHeight: 44,
@@ -1166,7 +1166,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             onClick={() => setShowOrderSheet(true)}
             style={{
               width: "100%", height: 54, borderRadius: 16, padding: "0 6px",
-              background: "#eb1700", border: "none", cursor: "pointer",
+              background: "#1fbdcc", border: "none", cursor: "pointer",
               position: "relative", display: "flex", alignItems: "center",
             }}
           >
@@ -1252,7 +1252,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </h2>
               {orderedItems.length > 0 && (
                 <div style={{
-                  background: "#eb1700", borderRadius: 999,
+                  background: "#1fbdcc", borderRadius: 999,
                   minWidth: 22, height: 22, padding: "0 6px",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
@@ -1513,7 +1513,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   onClick={saveOrderToAccount}
                   style={{
                     width: "100%", height: 54, borderRadius: 16,
-                    background: orderSaved ? "#16a34a" : "#eb1700",
+                    background: orderSaved ? "#16a34a" : "#1fbdcc",
                     color: "#fff", border: "none",
                     fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em",
                     cursor: "pointer",

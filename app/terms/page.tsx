@@ -93,11 +93,11 @@ export default function TermsPage() {
 
         <Section title="11. Contact">
           Questions about these Terms? Contact us at:{" "}
-          <a href="mailto:legal@allergeats.com" style={{ color: "#eb1700" }}>legal@allergeats.com</a>
+          <a href="mailto:legal@allergeats.com" style={{ color: "#1fbdcc" }}>legal@allergeats.com</a>
         </Section>
 
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--c-border)", display: "flex", gap: 20, flexWrap: "wrap" }}>
-          <Link href="/privacy" style={{ fontSize: 13, color: "#eb1700", fontWeight: 600, textDecoration: "none" }}>Privacy Policy</Link>
+          <Link href="/privacy" style={{ fontSize: 13, color: "#1fbdcc", fontWeight: 600, textDecoration: "none" }}>Privacy Policy</Link>
           <Link href="/" style={{ fontSize: 13, color: "var(--c-sub)", fontWeight: 600, textDecoration: "none" }}>← Back to AllergEats</Link>
         </div>
       </div>

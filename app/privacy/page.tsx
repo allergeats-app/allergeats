@@ -90,7 +90,7 @@ export default function PrivacyPage() {
           If you have questions about this Privacy Policy or your data:
           <br /><br />
           <strong>AllergEats</strong><br />
-          Email: <a href="mailto:privacy@allergeats.com" style={{ color: "#eb1700" }}>privacy@allergeats.com</a>
+          Email: <a href="mailto:privacy@allergeats.com" style={{ color: "#1fbdcc" }}>privacy@allergeats.com</a>
         </Section>
 
         <Section title="10. Changes to This Policy">
@@ -98,7 +98,7 @@ export default function PrivacyPage() {
         </Section>
 
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--c-border)", display: "flex", gap: 20, flexWrap: "wrap" }}>
-          <Link href="/terms" style={{ fontSize: 13, color: "#eb1700", fontWeight: 600, textDecoration: "none" }}>Terms of Service</Link>
+          <Link href="/terms" style={{ fontSize: 13, color: "#1fbdcc", fontWeight: 600, textDecoration: "none" }}>Terms of Service</Link>
           <Link href="/" style={{ fontSize: 13, color: "var(--c-sub)", fontWeight: 600, textDecoration: "none" }}>← Back to AllergEats</Link>
         </div>
       </div>
