@@ -14,6 +14,10 @@ type Props = {
   isDark?: boolean;
 };
 
+function escHtml(s: string): string {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
 function safeColor(r: ScoredRestaurant): string {
   if (r.summary.total === 0) return "#9ca3af";
   const pct = (r.summary.likelySafe / r.summary.total) * 100;
@@ -48,18 +52,28 @@ function makeTooltipHtml(r: ScoredRestaurant, dark: boolean): string {
     box-shadow:0 2px 10px rgba(0,0,0,${dark ? "0.5" : "0.18"});
     font-family:Inter,Arial,sans-serif;white-space:nowrap;pointer-events:none;
   ">
-    <span style="font-size:12px;font-weight:700;color:${textColor};">${r.name}</span>
+    <span style="font-size:12px;font-weight:700;color:${textColor};">${escHtml(r.name)}</span>
     <span style="font-size:11px;font-weight:800;color:${color};">${label}</span>
   </div>`;
 }
 
-function makePopupHtml(r: ScoredRestaurant): string {
+function makePopupHtml(r: ScoredRestaurant, dark: boolean): string {
   const color      = safeColor(r);
   const total      = r.summary.total;
   const safePct    = total > 0 ? Math.round((r.summary.likelySafe / total) * 100) : null;
   const askPct     = total > 0 ? Math.round((r.summary.ask        / total) * 100) : 0;
   const avoidPct   = total > 0 ? Math.round((r.summary.avoid      / total) * 100) : 0;
   const distStr    = r.distance != null ? ` · ${r.distance} mi` : "";
+
+  const textPrimary = dark ? "#f2f2f7"  : "#111111";
+  const textSub     = dark ? "#8e8e93"  : "#6b7280";
+  const barTrack    = dark ? "#2c2c2e"  : "#e5e7eb";
+  const noDataBg    = dark ? "#2c2c2e"  : "#f3f4f6";
+  const safeClr     = dark ? "#34d399"  : "#15803d";
+  const askClr      = dark ? "#fbbf24"  : "#b45309";
+  const avoidClr    = dark ? "#f87171"  : "#b91c1c";
+  const ctaBg       = dark ? "#29d5e8"  : "#1fbdcc";
+  const ctaFg       = dark ? "#ffffff"  : "#001f26";
 
   const badgeHtml = safePct != null
     ? `<span style="
@@ -71,30 +85,30 @@ function makePopupHtml(r: ScoredRestaurant): string {
         <span style="width:6px;height:6px;border-radius:50%;background:${color};display:inline-block;"></span>
         ${safePct}% safe
       </span>`
-    : `<span style="padding:3px 10px;border-radius:999px;background:#f3f4f6;font-size:11px;font-weight:700;color:#6b7280;">No menu data</span>`;
+    : `<span style="padding:3px 10px;border-radius:999px;background:${noDataBg};font-size:11px;font-weight:700;color:${textSub};">No menu data</span>`;
 
   const barHtml = total > 0
-    ? `<div style="height:5px;border-radius:999px;background:#e5e7eb;overflow:hidden;display:flex;margin:10px 0 8px;">
+    ? `<div style="height:5px;border-radius:999px;background:${barTrack};overflow:hidden;display:flex;margin:10px 0 8px;">
         <div style="width:${safePct}%;background:#22c55e;transition:width 0.4s;"></div>
         <div style="width:${askPct}%;background:#f59e0b;"></div>
         <div style="width:${avoidPct}%;background:#ef4444;"></div>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:10px;">
-        <span style="font-size:11px;color:#15803d;font-weight:700;">${r.summary.likelySafe} safe</span>
-        <span style="font-size:11px;color:#b45309;font-weight:700;">${r.summary.ask} ask</span>
-        <span style="font-size:11px;color:#b91c1c;font-weight:700;">${r.summary.avoid} avoid</span>
+        <span style="font-size:11px;color:${safeClr};font-weight:700;">${r.summary.likelySafe} safe</span>
+        <span style="font-size:11px;color:${askClr};font-weight:700;">${r.summary.ask} ask</span>
+        <span style="font-size:11px;color:${avoidClr};font-weight:700;">${r.summary.avoid} avoid</span>
       </div>`
-    : `<div style="font-size:12px;color:#9ca3af;margin:8px 0 10px;">Tap to scan the menu</div>`;
+    : `<div style="font-size:12px;color:${textSub};margin:8px 0 10px;">Tap to scan the menu</div>`;
 
   return `
     <div style="font-family:Inter,Arial,sans-serif;min-width:210px;padding:2px;">
-      <div style="font-weight:900;font-size:15px;color:#111;line-height:1.2;margin-bottom:2px;">${r.name}</div>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">${r.cuisine}${distStr}</div>
+      <div style="font-weight:900;font-size:15px;color:${textPrimary};line-height:1.2;margin-bottom:2px;">${escHtml(r.name)}</div>
+      <div style="font-size:12px;color:${textSub};margin-bottom:8px;">${escHtml(r.cuisine ?? "")}${escHtml(distStr)}</div>
       ${badgeHtml}
       ${barHtml}
-      <a href="/restaurants/${r.id}"
+      <a href="/restaurants/${escHtml(r.id)}"
         style="display:block;text-align:center;padding:9px;border-radius:12px;
-          background:#1fbdcc;color:#fff;font-size:13px;font-weight:800;
+          background:${ctaBg};color:${ctaFg};font-size:13px;font-weight:800;
           text-decoration:none;letter-spacing:0.01em;">
         View Menu Fit →
       </a>
@@ -265,7 +279,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
           opacity: 1,
           className: "allegeats-tooltip",
         })
-        .bindPopup(makePopupHtml(r), { maxWidth: 260 });
+        .bindPopup(makePopupHtml(r, isDark), { maxWidth: 260 });
     }
 
     // Auto-fit on first load only — don't fight the user's panning after that
