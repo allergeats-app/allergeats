@@ -38,7 +38,7 @@ export function AllergySelector({ selected, onChange, limit }: Props) {
               borderRadius: 999,
               border: `1.5px solid ${active ? "transparent" : "var(--c-border)"}`,
               background: active ? "#1fbdcc" : "var(--c-muted)",
-              color: active ? "#fff" : "var(--c-text)",
+              color: active ? "var(--c-brand-fg)" : "var(--c-text)",
               fontSize: 15,
               fontWeight: 700,
               cursor: "pointer",

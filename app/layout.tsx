@@ -33,6 +33,22 @@ export const metadata: Metadata = {
   title: "AllergEats — Eat safely with food allergies",
   description: "Find restaurants and menu items safe for your food allergies.",
   manifest: "/manifest.json",
+  metadataBase: new URL("https://www.allergeats.com"),
+  openGraph: {
+    title: "AllergEats — Eat safely with food allergies",
+    description: "Find nearby restaurants and scan menus instantly. Know what's safe before you order.",
+    url: "https://www.allergeats.com",
+    siteName: "AllergEats",
+    locale: "en_US",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "AllergEats — Eat safely with food allergies" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AllergEats — Eat safely with food allergies",
+    description: "Find nearby restaurants and scan menus instantly. Know what's safe before you order.",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
