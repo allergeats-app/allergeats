@@ -166,11 +166,13 @@ export default function ProfilePage() {
               {(firstEdit.trim() !== firstName || lastEdit.trim() !== lastName || nameSaved) && (
                 <button
                   onClick={handleSaveName}
+                  disabled={!firstEdit.trim() || !lastEdit.trim()}
                   style={{
                     padding: "10px 16px", borderRadius: 10, border: "none",
-                    background: nameSaved ? "#22c55e" : "var(--c-text)",
+                    background: nameSaved ? "#22c55e" : (!firstEdit.trim() || !lastEdit.trim()) ? "var(--c-border)" : "var(--c-text)",
                     color: "var(--c-bg)", fontSize: 13, fontWeight: 700,
-                    cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
+                    cursor: (!firstEdit.trim() || !lastEdit.trim()) ? "not-allowed" : "pointer",
+                    transition: "background 0.2s", whiteSpace: "nowrap",
                   }}
                 >
                   {nameSaved ? "Saved!" : "Save"}

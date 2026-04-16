@@ -27,7 +27,12 @@ export function OnboardingModal() {
 
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
-    if (!done) setVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
+    if (!done) {
+      // Pre-populate any allergens already saved (e.g. user dismissed before, then re-opened)
+      const existing = loadProfileAllergens();
+      if (existing.length > 0) setSelected(new Set(existing as AllergenId[]));
+      setVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
+    }
   }, []);
 
   // Focus first interactive element whenever the modal appears or the step changes

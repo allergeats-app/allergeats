@@ -142,6 +142,11 @@ export default function ScanPage() {
     if (filteredMenus.length && !filteredMenus.some((m) => m.id === selectedMenuId)) setSelectedMenuId(filteredMenus[0].id);
   }, [filteredMenus, selectedMenuId]);
 
+  // Revoke the object URL when it changes or the component unmounts to avoid memory leaks
+  useEffect(() => {
+    return () => { if (photoPreview) URL.revokeObjectURL(photoPreview); };
+  }, [photoPreview]);
+
   const selectedMenu = useMemo(() =>
     filteredMenus.find((m) => m.id === selectedMenuId) ?? ALL_MENUS.find((m) => m.id === selectedMenuId) ?? null,
     [filteredMenus, selectedMenuId]

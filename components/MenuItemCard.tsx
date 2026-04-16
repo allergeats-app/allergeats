@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { ScoredMenuItem } from "@/lib/types";
 import { ConfidenceBadge } from "./ConfidenceBadge";
 import { submitFeedback } from "@/lib/learning/learningEngine";
@@ -41,6 +41,13 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
   const [open, setOpen]                   = useState(false);
   const [copied, setCopied]               = useState(false);
   const [feedbackState, setFeedbackState] = useState<"idle" | "open" | "done">("idle");
+  const [submitting, setSubmitting]       = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Scroll into view when expanded so content isn't hidden below the fold
+  useEffect(() => {
+    if (open) cardRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [open]);
 
   const safety = SAFETY[item.risk] ?? SAFETY["unknown"];
 
@@ -65,17 +72,19 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
       ];
 
   const handleFeedback = useCallback((option: FeedbackOption) => {
-    if (!restaurantId || !restaurantName) return;
+    if (!restaurantId || !restaurantName || submitting) return;
+    setSubmitting(true);
     submitFeedback({ restaurantId, restaurantName, dishName: item.name, type: option.type, allergen: option.allergen, originalRisk: item.risk, originalConfidence: item.confidence });
     setFeedbackState("done");
-  }, [restaurantId, restaurantName, item.name, item.risk, item.confidence]);
+  }, [restaurantId, restaurantName, item.name, item.risk, item.confidence, submitting]);
 
   const handleConfirm = useCallback(() => {
-    if (!restaurantId || !restaurantName) return;
+    if (!restaurantId || !restaurantName || submitting) return;
+    setSubmitting(true);
     const type: FeedbackType = item.risk === "avoid" || item.risk === "ask" ? "found-unsafe" : "confirmed-safe";
     submitFeedback({ restaurantId, restaurantName, dishName: item.name, type, allergen: primaryAllergen, originalRisk: item.risk, originalConfidence: item.confidence });
     setFeedbackState("done");
-  }, [restaurantId, restaurantName, item.name, item.risk, item.confidence, primaryAllergen]);
+  }, [restaurantId, restaurantName, item.name, item.risk, item.confidence, primaryAllergen, submitting]);
 
   const hasAllergenDetail = !!(
     item.detectedAllergens.some((a) => !item.userAllergenHits.includes(a)) ||
@@ -87,7 +96,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
   const cardBorder = isDark ? "var(--c-border)" : "#f0f0f0";
 
   return (
-    <div style={{
+    <div ref={cardRef} style={{
       background: cardBg,
       border: `1px solid ${cardBorder}`,
       borderRadius: 16,

@@ -258,6 +258,8 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
                       background: isDark ? "#0a2414" : "#f0fdf4",
                       border: `1px solid ${isDark ? "#14532d" : "#bbf7d0"}`,
                       padding: "4px 10px", borderRadius: 999,
+                      maxWidth: "100%", overflow: "hidden",
+                      textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
                       ✓ {name}
                     </span>
