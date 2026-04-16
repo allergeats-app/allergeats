@@ -12,7 +12,7 @@
       "src": "/logo.png",
       "sizes": "any",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["food", "health", "lifestyle"],
