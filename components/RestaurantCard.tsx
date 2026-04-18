@@ -103,6 +103,34 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
           position: "relative", overflow: "hidden",
           transition: "background 0.3s ease",
         }}>
+          {/* Initial logo — shown when no photo has loaded */}
+          {!photoLoaded && (
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <div style={{
+                width: isRail || isCompact ? 48 : 60,
+                height: isRail || isCompact ? 48 : 60,
+                borderRadius: 16,
+                background: "rgba(255,255,255,0.12)",
+                border: "1.5px solid rgba(255,255,255,0.22)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                backdropFilter: "blur(4px)",
+              }}>
+                <span style={{
+                  fontSize: isRail || isCompact ? 22 : 28,
+                  fontWeight: 900,
+                  color: "rgba(255,255,255,0.9)",
+                  lineHeight: 1,
+                  fontFamily: "Georgia, serif",
+                  letterSpacing: "-0.02em",
+                }}>
+                  {r.name.trim().charAt(0).toUpperCase()}
+                </span>
+              </div>
+            </div>
+          )}
           {photoSrc && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
