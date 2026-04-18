@@ -816,7 +816,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       fontWeight: 900,
                       fontFamily: "'Georgia', 'Times New Roman', serif",
                       letterSpacing: "-0.02em",
-                      background: "linear-gradient(135deg, #1fbdcc 0%, #ff6b35 100%)",
+                      background: "linear-gradient(135deg, #1fbdcc 0%, #ffffff 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -1580,7 +1580,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
 // ── Helper components ─────────────────────────────────────────────────────────
 
-function StatPill({ count, label, color, bg, rgb, active, onClick }: {
+function StatPill({ count, label, color, bg: _bg, rgb, active, onClick }: {
   count: number; label: string; color: string; bg: string; rgb: string;
   active?: boolean; onClick?: () => void;
 }) {
@@ -1591,16 +1591,16 @@ function StatPill({ count, label, color, bg, rgb, active, onClick }: {
       title={`Show ${label.toLowerCase()} items`}
       style={{
         flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-        padding: "12px 8px", borderRadius: 14, background: bg,
-        border: active ? `2px solid ${color}` : `1.5px solid rgba(${rgb},0.25)`,
+        padding: "10px 6px", borderRadius: 12,
+        background: active ? `rgba(${rgb},0.08)` : "var(--c-card)",
+        border: active ? `1.5px solid rgba(${rgb},0.5)` : "1px solid var(--c-border)",
         cursor: onClick ? "pointer" : "default",
-        boxShadow: count > 0 ? `0 2px 12px rgba(${rgb},0.2)` : "none",
-        transition: "border-color 0.15s, box-shadow 0.15s",
+        transition: "border-color 0.15s, background 0.15s",
+        gap: 2,
       }}
     >
-      <span style={{ fontWeight: 900, fontSize: 26, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{count}</span>
-      <span style={{ fontSize: 13, color, opacity: 0.85, marginTop: 4, fontWeight: 800 }}>{label}</span>
-      {onClick && <span style={{ fontSize: 11, color, opacity: 0.55, marginTop: 2, fontWeight: 600 }}>tap to filter</span>}
+      <span style={{ fontWeight: 800, fontSize: 22, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{count}</span>
+      <span style={{ fontSize: 11, color: "var(--c-sub)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase" }}>{label}</span>
     </button>
   );
 }
@@ -1641,51 +1641,51 @@ function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
       {/* Header */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "12px 16px",
+        padding: "8px 12px",
         borderBottom: isDark ? "1px solid rgba(22,101,52,0.5)" : "1px solid #bbf7d0",
         background: isDark ? "rgba(20,83,45,0.35)" : "rgba(220,252,231,0.6)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
-          <span style={{ fontSize: 13, fontWeight: 800, color: isDark ? "#86efac" : "#15803d", letterSpacing: "0.01em" }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: isDark ? "#86efac" : "#15803d", letterSpacing: "0.01em" }}>
             Suggested Order
           </span>
         </div>
         <span style={{
-          padding: "3px 10px", borderRadius: 999,
+          padding: "2px 8px", borderRadius: 999,
           background: isDark ? "#14532d" : "#dcfce7",
           color: isDark ? "#86efac" : "#15803d",
-          fontSize: 12, fontWeight: 700,
+          fontSize: 11, fontWeight: 700,
         }}>
           {topLabel}
         </span>
       </div>
 
       {/* Items */}
-      <div style={{ padding: "4px 0" }}>
+      <div style={{ padding: "2px 0" }}>
         {recs.map((rec, i) => (
           <div key={rec.item.id} style={{
-            display: "flex", alignItems: "center", gap: 12,
-            padding: "11px 16px",
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "8px 12px",
             borderBottom: i < recs.length - 1
               ? isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(0,0,0,0.05)"
               : "none",
           }}>
             {/* Check icon */}
             <div style={{
-              width: 22, height: 22, borderRadius: 999, flexShrink: 0,
+              width: 18, height: 18, borderRadius: 999, flexShrink: 0,
               background: isDark ? "#14532d" : "#dcfce7",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
             {/* Name */}
-            <span style={{ flex: 1, fontSize: 15, fontWeight: 800, color: "var(--c-text)", lineHeight: 1.3, minWidth: 0 }}>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: "var(--c-text)", lineHeight: 1.3, minWidth: 0 }}>
               {rec.item.name}
             </span>
             {/* Category pill */}
@@ -1694,7 +1694,7 @@ function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
                 flexShrink: 0, fontSize: 11, fontWeight: 700,
                 color: isDark ? "#86efac" : "#16a34a",
                 background: isDark ? "rgba(20,83,45,0.4)" : "rgba(220,252,231,0.8)",
-                padding: "3px 9px", borderRadius: 999,
+                padding: "2px 7px", borderRadius: 999,
                 border: isDark ? "1px solid rgba(22,101,52,0.4)" : "1px solid #bbf7d0",
               }}>
                 {rec.item.category}
@@ -1707,17 +1707,17 @@ function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
       {/* Footer — explanation + ask notes */}
       {(topExplanation || allAskNotes.length > 0) && (
         <div style={{
-          padding: "10px 16px 13px",
+          padding: "8px 12px 10px",
           borderTop: isDark ? "1px solid rgba(22,101,52,0.5)" : "1px solid #bbf7d0",
           background: isDark ? "rgba(20,83,45,0.2)" : "rgba(240,253,244,0.7)",
         }}>
           {topExplanation && (
-            <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.5 }}>
               {topExplanation}
             </div>
           )}
           {allAskNotes.length > 0 && (
-            <div style={{ fontSize: 13, color: isDark ? "#fbbf24" : "#92400e", marginTop: topExplanation ? 5 : 0, fontWeight: 600 }}>
+            <div style={{ fontSize: 12, color: isDark ? "#fbbf24" : "#92400e", marginTop: topExplanation ? 4 : 0, fontWeight: 600 }}>
               Ask staff: {allAskNotes.join(" · ")}
             </div>
           )}
