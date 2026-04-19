@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { ALLERGEN_LIST } from "@/lib/allergenProfile";
+import { ALLERGEN_SOURCE_URLS } from "@/lib/allergenSourceUrls";
 import {
   getCorrectionForItem,
   saveCorrection,
@@ -26,6 +27,7 @@ function AdminMenuInner() {
   const [search, setSearch] = useState("");
   const [filterUncorrected, setFilterUncorrected] = useState(false);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [focusedIdx, setFocusedIdx] = useState(0);
 
   useEffect(() => {
     if (sessionStorage.getItem(SESSION_KEY) === "1") setAuthed(true);
@@ -123,21 +125,39 @@ function AdminMenuInner() {
   const verifiedCount = correctedIds.size;
   const totalCount = restaurant.menuItems.length;
   const pct = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
+  const sourceUrl = ALLERGEN_SOURCE_URLS[restaurant.id];
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#0f0f0f", color: "#f2f2f7", paddingBottom: 60 }}>
+    <div
+      style={{ minHeight: "100dvh", background: "#0f0f0f", color: "#f2f2f7", paddingBottom: 60 }}
+      onKeyDown={(e) => {
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+        if (e.key === "ArrowDown") { e.preventDefault(); setFocusedIdx(i => Math.min(i + 1, items.length - 1)); }
+        if (e.key === "ArrowUp")   { e.preventDefault(); setFocusedIdx(i => Math.max(i - 1, 0)); }
+        if (e.key === "s" || e.key === "S") { const item = items[focusedIdx]; if (item && itemState[item.id]?.dirty) saveItem(item.id); }
+      }}
+      tabIndex={-1}
+    >
       {/* Header */}
       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(15,15,15,0.97)", borderBottom: "1px solid #2c2c2e", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <Link href="/admin" style={{ color: "#8e8e93", textDecoration: "none", fontSize: 13, fontWeight: 700, flexShrink: 0 }}>← Admin</Link>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 17, fontWeight: 900, color: "#f2f2f7", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{restaurant.name}</div>
-            <div style={{ fontSize: 12, color: "#8e8e93" }}>{verifiedCount}/{totalCount} verified · {pct}%</div>
+            <div style={{ fontSize: 12, color: "#8e8e93" }}>{verifiedCount}/{totalCount} verified · {pct}% · <span style={{ color: "#636366" }}>↑↓ navigate · S save</span></div>
           </div>
         </div>
-        <button onClick={download} style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid #3c3c3e", background: "transparent", color: "#f2f2f7", fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
-          Export JSON
-        </button>
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          {sourceUrl && (
+            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid rgba(31,189,204,0.4)", background: "rgba(31,189,204,0.08)", color: "#1fbdcc", fontSize: 13, fontWeight: 700, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Allergen Page
+            </a>
+          )}
+          <button onClick={download} style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid #3c3c3e", background: "transparent", color: "#f2f2f7", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+            Export JSON
+          </button>
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -163,18 +183,21 @@ function AdminMenuInner() {
 
       {/* Item list */}
       <div style={{ padding: "0 16px", display: "grid", gap: 12 }}>
-        {items.map((item) => {
+        {items.map((item, idx) => {
           const state = itemState[item.id];
           if (!state) return null;
           const isVerified = correctedIds.has(item.id);
+          const isFocused = idx === focusedIdx;
           const originalAllergens = new Set((item.allergens ?? []) as AllergenId[]);
 
           return (
-            <div key={item.id} style={{
+            <div key={item.id} onClick={() => setFocusedIdx(idx)} style={{
               background: "#1c1c1e",
-              border: `1px solid ${isVerified ? "rgba(31,189,204,0.35)" : "#2c2c2e"}`,
+              border: `1.5px solid ${isFocused ? "#1fbdcc" : isVerified ? "rgba(31,189,204,0.35)" : "#2c2c2e"}`,
               borderRadius: 16,
               padding: 16,
+              cursor: "default",
+              outline: "none",
             }}>
               {/* Item header */}
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>

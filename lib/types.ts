@@ -195,6 +195,8 @@ export type Restaurant = {
   menuIsGenericChainTemplate?: boolean;
   /** When present, the restaurant supports a guided step-by-step order builder */
   builderConfig?: BuilderConfig;
+  /** Direct URL to the restaurant's official allergen/nutrition page — used in admin audit tool */
+  allergenPageUrl?: string;
 };
 
 // ─── Restaurant with scoring applied ────────────────────────────────────────

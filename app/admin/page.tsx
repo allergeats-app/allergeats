@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { correctionCount, exportCorrections, clearAllCorrections } from "@/lib/adminCorrections";
+import { correctionCount, exportCorrections, clearAllCorrections, getAllCorrections } from "@/lib/adminCorrections";
 import { MOCK_RESTAURANTS, MENU_DATA_VERIFIED_DATE } from "@/lib/mockRestaurants";
+import { ALLERGEN_SOURCE_URLS } from "@/lib/allergenSourceUrls";
 
 const PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "";
 const SESSION_KEY = "allegeats_admin_authed";
@@ -118,17 +119,31 @@ export default function AdminPage() {
 
       {/* Restaurant list */}
       <div style={{ display: "grid", gap: 8 }}>
-        {restaurants.map((r) => (
-          <Link key={r.id} href={`/admin/menu?id=${r.id}`} style={{ textDecoration: "none" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#1c1c1e", border: "1px solid #2c2c2e", borderRadius: 14, padding: "14px 18px", cursor: "pointer" }}>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: "#f2f2f7" }}>{r.name}</div>
-                <div style={{ fontSize: 12, color: "#8e8e93", marginTop: 2 }}>{r.cuisine} · {r.menuItems.length} items</div>
-              </div>
-              <span style={{ fontSize: 18, color: "#3c3c3e" }}>→</span>
+        {restaurants.map((r) => {
+          const allCorrections = getAllCorrections();
+          const verified = Object.keys(allCorrections).filter(k => k.startsWith(r.id + "::")).length;
+          const sourceUrl = ALLERGEN_SOURCE_URLS[r.id];
+          return (
+            <div key={r.id} style={{ background: "#1c1c1e", border: "1px solid #2c2c2e", borderRadius: 14, overflow: "hidden" }}>
+              <Link href={`/admin/menu?id=${r.id}`} style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px" }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: "#f2f2f7" }}>{r.name}</span>
+                    {verified > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: "#1fbdcc", background: "rgba(31,189,204,0.12)", border: "1px solid rgba(31,189,204,0.3)", padding: "1px 7px", borderRadius: 999 }}>{verified}/{r.menuItems.length}</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#8e8e93", marginTop: 2 }}>{r.cuisine} · {r.menuItems.length} items</div>
+                </div>
+                <span style={{ fontSize: 18, color: "#3c3c3e", flexShrink: 0 }}>→</span>
+              </Link>
+              {sourceUrl && (
+                <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", borderTop: "1px solid #2c2c2e", textDecoration: "none", background: "rgba(31,189,204,0.04)" }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  <span style={{ fontSize: 11, color: "#1fbdcc", fontWeight: 700 }}>Open official allergen page</span>
+                </a>
+              )}
             </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
