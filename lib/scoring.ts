@@ -6,6 +6,7 @@
 import { analyzeLine } from "./engine/analyzerPipeline";
 import { getAllergenSources } from "./engine/riskScorer";
 import { getSubstitutions } from "./engine/substitutionSuggester";
+import { getCorrectionForItem } from "./adminCorrections";
 import type {
   RawMenuItem,
   ScoredMenuItem,
@@ -303,9 +304,13 @@ export function scoreRestaurant(
   severities: Partial<Record<AllergenId, AllergenSeverity>> = {}
 ): ScoredRestaurant {
   const cuisineContext = restaurant.cuisine;
-  const scoredItems = restaurant.menuItems.map((item) =>
-    scoreMenuItem(item, restaurant.sourceType, userAllergens, cuisineContext, severities)
-  );
+  const scoredItems = restaurant.menuItems.map((item) => {
+    const correction = getCorrectionForItem(restaurant.id, item.id);
+    const effective: RawMenuItem = correction
+      ? { ...item, allergens: correction.allergens, auditNotes: correction.auditNotes, lastVerified: correction.verifiedAt }
+      : item;
+    return scoreMenuItem(effective, restaurant.sourceType, userAllergens, cuisineContext, severities);
+  });
 
   const summary: RestaurantSafetySummary = {
     likelySafe: scoredItems.filter((i) => i.risk === "likely-safe").length,

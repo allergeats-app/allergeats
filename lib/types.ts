@@ -79,6 +79,10 @@ export type RawMenuItem = {
    * re-group or sort items by their original menu structure.
    */
   sectionIndex?: number;
+  /** ISO date (YYYY-MM-DD) when this item's allergen data was last manually verified */
+  lastVerified?: string;
+  /** Free-text notes from the manual audit (e.g. "sesame in bun confirmed Apr 2026") */
+  auditNotes?: string;
 };
 
 // ─── Scored menu item (after running through the scoring pipeline) ──────────
