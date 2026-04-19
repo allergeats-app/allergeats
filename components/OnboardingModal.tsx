@@ -259,45 +259,73 @@ export function OnboardingModal() {
         {/* ── Safety acknowledgment ── */}
         {step === "safety" && (
           <>
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
+            {/* Gold card */}
+            <div style={{
+              borderRadius: 20,
+              background: "linear-gradient(160deg, #1e1a0e 0%, #2a2010 60%, #1a1508 100%)",
+              border: "1.5px solid #b8892a",
+              boxShadow: "0 0 32px rgba(212,160,40,0.25), inset 0 0 40px rgba(180,130,20,0.06)",
+              padding: "28px 22px 24px",
+              marginBottom: 20,
+              textAlign: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}>
+              {/* Top gold line glow */}
+              <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.8), transparent)" }} />
+              {/* Bottom gold line glow */}
+              <div style={{ position: "absolute", bottom: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.5), transparent)" }} />
+
+              {/* Icon */}
+              <div style={{ marginBottom: 14, display: "flex", justifyContent: "center" }}>
+                <div style={{ position: "relative" }}>
+                  <div style={{ position: "absolute", inset: -8, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,160,40,0.35) 0%, transparent 70%)" }} />
+                  <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+                    <polygon points="26,5 49,45 3,45" fill="url(#goldTriangle)" stroke="#c9922a" strokeWidth="1.5" strokeLinejoin="round"/>
+                    <defs>
+                      <linearGradient id="goldTriangle" x1="26" y1="5" x2="26" y2="45" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#f5c842"/>
+                        <stop offset="100%" stopColor="#b8720a"/>
+                      </linearGradient>
+                    </defs>
+                    <text x="26" y="38" textAnchor="middle" fontSize="20" fontWeight="900" fill="#1a1200">!</text>
+                  </svg>
+                </div>
+              </div>
+
+              {/* Title */}
               <div style={{
-                width: 56, height: 56, borderRadius: 16, margin: "0 auto 16px",
-                background: isDark ? "rgba(251,191,36,0.12)" : "rgba(251,191,36,0.1)",
-                border: "1.5px solid rgba(251,191,36,0.4)",
-                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 22, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 4,
+                background: "linear-gradient(135deg, #f5c842 0%, #e8a820 50%, #c9922a 100%)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
               }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/>
-                </svg>
+                Important Information
               </div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", marginBottom: 8, letterSpacing: "-0.02em" }}>
-                Important Safety Notice
-              </div>
-            </div>
 
-            <div style={{
-              background: isDark ? "rgba(251,191,36,0.08)" : "rgba(254,252,232,0.8)",
-              border: "1.5px solid rgba(251,191,36,0.35)",
-              borderRadius: 16, padding: "16px 18px", marginBottom: 20,
-            }}>
-              <div style={{ fontSize: 14, color: "var(--c-text)", lineHeight: 1.65, fontWeight: 500 }}>
-                AllergEats is a <strong>decision-support tool</strong>, not medical advice. It helps you identify potential allergens in menu text, but:
-              </div>
-              <ul style={{ margin: "10px 0 0", padding: "0 0 0 18px", fontSize: 14, color: "var(--c-text)", lineHeight: 1.8 }}>
-                <li>Menus change — ingredients listed today may differ tomorrow</li>
-                <li>Cross-contamination is not detectable from text alone</li>
-                <li>Detection is not 100% accurate for all ingredient names</li>
-              </ul>
-            </div>
+              {/* Divider */}
+              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.4), transparent)", margin: "14px 0" }} />
 
-            <div style={{
-              background: isDark ? "rgba(31,189,204,0.08)" : "rgba(240,253,254,0.9)",
-              border: "1px solid rgba(31,189,204,0.25)",
-              borderRadius: 12, padding: "12px 14px", marginBottom: 20,
-              fontSize: 13, color: "var(--c-sub)", lineHeight: 1.6,
-            }}>
-              <strong style={{ color: "var(--c-text)" }}>Always confirm with restaurant staff before ordering</strong>, especially for severe or life-threatening allergies.
+              {/* Body */}
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: 14, color: "#e8c97a", lineHeight: 1.65, fontWeight: 600, marginBottom: 12 }}>
+                  <span style={{ color: "#f5c842" }}>AllergEats</span> is a decision-support tool, not medical advice. It helps you identify potential allergens in menu text, but:
+                </div>
+                <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 14, color: "#c8a84a", lineHeight: 1.85 }}>
+                  <li>Menus change — ingredients listed today may differ tomorrow</li>
+                  <li>Cross-contamination is not detectable from text alone</li>
+                  <li>Detection is not 100% accurate for all ingredient names</li>
+                </ul>
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.4), transparent)", margin: "14px 0" }} />
+
+              {/* Red warning line */}
+              <div style={{
+                fontSize: 13, color: "#fca5a5", lineHeight: 1.6, fontWeight: 600,
+              }}>
+                <strong style={{ color: "#f87171" }}>Always confirm with restaurant staff before ordering</strong>, especially for severe or life-threatening allergies.
+              </div>
             </div>
 
             <button
