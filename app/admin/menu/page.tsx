@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,7 +17,7 @@ import type { AllergenId } from "@/lib/types";
 
 const SESSION_KEY = "allegeats_admin_authed";
 
-export default function AdminMenuPage() {
+function AdminMenuInner() {
   const params = useSearchParams();
   const router = useRouter();
   const restaurantId = params.get("id") ?? "";
@@ -251,5 +252,13 @@ export default function AdminMenuPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminMenuPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100dvh", background: "#0f0f0f" }} />}>
+      <AdminMenuInner />
+    </Suspense>
   );
 }
