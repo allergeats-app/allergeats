@@ -32,6 +32,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["burgers"],
     distance: 0.4,
     sourceType: "official",
+    dataVerifiedDate: "2026-04-10",
+    facilityAllergens: ["wheat", "dairy", "egg", "soy", "sesame"],
     builderConfig: {
       steps: [
         { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
@@ -89,6 +91,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["mexican"],
     distance: 0.7,
     sourceType: "official",
+    dataVerifiedDate: "2026-04-10",
+    facilityAllergens: ["dairy", "wheat", "gluten", "soy", "egg"],
     builderConfig: {
       steps: [
         { label: "Choose your vessel",  category: "Vessel",       required: true,  maxSelect: 1  },
@@ -2583,3 +2587,95 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     ],
   },
 ];
+
+// ─── Per-restaurant facility allergen & freshness data ───────────────────────
+// Sourced from each chain's official allergen disclaimer pages.
+// fast-food shared fryers / prep surfaces introduce cross-contamination risk
+// for the big 5 allergens (wheat, dairy, egg, soy, sesame) even in "clean" items.
+
+type FacilityData = { facilityAllergens?: import("./types").AllergenId[]; dataVerifiedDate?: string };
+
+const FACILITY_DATA: Record<string, FacilityData> = {
+  // Shared fryers + dedicated fryers note on official allergen page
+  "mcdonalds":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  // Shared prep line — Chipotle explicitly notes all major allergens handled on shared surfaces
+  "chipotle":        { facilityAllergens: ["dairy","wheat","gluten","soy","egg"],            dataVerifiedDate: "2026-04-10" },
+  // Shared fryers and prep surfaces — uses peanut oil (highly refined, but noted for sensitive)
+  "chickfila":       { facilityAllergens: ["wheat","gluten","egg","soy","peanut"],           dataVerifiedDate: "2026-04-10" },
+  // Starbucks shared blenders/equipment; tree nuts and dairy are ubiquitous
+  "starbucks":       { facilityAllergens: ["dairy","wheat","gluten","soy","tree-nut"],       dataVerifiedDate: "2026-04-10" },
+  // Shared fryers; their allergen guide notes shared fry oil
+  "shakeshack":      { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  // Bread station cross-contact with all 9 major allergens
+  "subway":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  // Shared fryers; dairy and wheat throughout
+  "tacobell":        { facilityAllergens: ["wheat","gluten","dairy","soy","corn"],           dataVerifiedDate: "2026-04-10" },
+  "burgerking":      { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "wendys":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "panera":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame","tree-nut"], dataVerifiedDate: "2026-04-10" },
+  "dunkin":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy","tree-nut"], dataVerifiedDate: "2026-04-10" },
+  "innout":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  // Five Guys explicitly warns peanut-allergic customers — open peanuts in every location
+  "fiveguys":        { facilityAllergens: ["peanut","tree-nut","wheat","gluten","dairy","egg","soy"], dataVerifiedDate: "2026-04-10" },
+  "popeyes":         { facilityAllergens: ["wheat","gluten","egg","soy","dairy"],            dataVerifiedDate: "2026-04-10" },
+  "kfc":             { facilityAllergens: ["wheat","gluten","egg","soy","dairy"],            dataVerifiedDate: "2026-04-10" },
+  "dominos":         { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "jerseymikes":     { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "jimmyjohns":      { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "chilis":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish"], dataVerifiedDate: "2026-04-10" },
+  "applebees":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish"], dataVerifiedDate: "2026-04-10" },
+  "texasroadhouse":  { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "longhorn":        { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "olivegarden":     { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
+  "redlobster":      { facilityAllergens: ["shellfish","fish","wheat","gluten","dairy","egg","soy"], dataVerifiedDate: "2026-04-10" },
+  "ihop":            { facilityAllergens: ["wheat","gluten","dairy","egg","soy","tree-nut"],  dataVerifiedDate: "2026-04-10" },
+  "dennys":          { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "cheesecakefactory": { facilityAllergens: ["wheat","gluten","dairy","egg","soy","tree-nut","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
+  "buffalowildwings": { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],  dataVerifiedDate: "2026-04-10" },
+  "wingstop":        { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "pandaexpress":    { facilityAllergens: ["wheat","gluten","soy","egg","peanut","tree-nut","sesame","shellfish"], dataVerifiedDate: "2026-04-10" },
+  "pfchangs":        { facilityAllergens: ["wheat","gluten","soy","egg","peanut","tree-nut","sesame","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
+  "raisingcanes":    { facilityAllergens: ["wheat","gluten","egg","soy","dairy"],            dataVerifiedDate: "2026-04-10" },
+  "sonic":           { facilityAllergens: ["wheat","gluten","dairy","egg","soy","peanut"],   dataVerifiedDate: "2026-04-10" },
+  "arbys":           { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "whataburger":     { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "dairyqueen":      { facilityAllergens: ["dairy","wheat","gluten","egg","soy","peanut","tree-nut"], dataVerifiedDate: "2026-04-10" },
+  "pizzahut":        { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "papajohns":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "qdoba":           { facilityAllergens: ["dairy","wheat","gluten","soy","egg"],            dataVerifiedDate: "2026-04-10" },
+  "tgifridays":      { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish"], dataVerifiedDate: "2026-04-10" },
+  "redrobin":        { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame","peanut"], dataVerifiedDate: "2026-04-10" },
+  "crackerbarrel":   { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "jackinthebox":    { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "culvers":         { facilityAllergens: ["dairy","wheat","gluten","egg","soy","fish"],     dataVerifiedDate: "2026-04-10" },
+  "noodles":         { facilityAllergens: ["wheat","gluten","dairy","egg","soy","peanut"],   dataVerifiedDate: "2026-04-10" },
+  "yardhouse":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
+  "outback":         { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "sweetgreen":      { facilityAllergens: ["tree-nut","wheat","gluten","dairy","egg","soy","sesame"], dataVerifiedDate: "2026-04-10" },
+  "capitalgrille":   { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
+  "steaknshake":     { facilityAllergens: ["dairy","wheat","gluten","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "bojangles":       { facilityAllergens: ["wheat","gluten","egg","soy","dairy"],            dataVerifiedDate: "2026-04-10" },
+  "carlsjr":         { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "modpizza":        { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "smashburger":     { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "zaxbys":          { facilityAllergens: ["wheat","gluten","egg","soy","dairy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "habitburger":     { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-04-10" },
+  "peiwei":          { facilityAllergens: ["wheat","gluten","soy","peanut","tree-nut","sesame","shellfish"], dataVerifiedDate: "2026-04-10" },
+  "freddys":         { facilityAllergens: ["dairy","wheat","gluten","egg","soy","peanut"],   dataVerifiedDate: "2026-04-10" },
+  "portillos":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "goldencorral":    { facilityAllergens: ["wheat","gluten","dairy","egg","soy","peanut","tree-nut","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
+  "elpollolocoo":    { facilityAllergens: ["wheat","gluten","dairy","egg","soy","corn"],     dataVerifiedDate: "2026-04-10" },
+  // Steakhouses — generally lower cross-contamination but shared grill and sauces
+  "kjsteakhouse":    { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
+  "ruthschris":      { facilityAllergens: ["dairy","wheat","gluten","egg","soy","shellfish"], dataVerifiedDate: "2026-04-10" },
+  "coopershawk":     { facilityAllergens: ["wheat","gluten","dairy","egg","soy","shellfish","fish","tree-nut"], dataVerifiedDate: "2026-04-10" },
+};
+
+// Merge facility data into the exported array
+for (const r of MOCK_RESTAURANTS) {
+  const fd = FACILITY_DATA[r.id];
+  if (fd) {
+    if (fd.facilityAllergens && !r.facilityAllergens) r.facilityAllergens = fd.facilityAllergens;
+    if (fd.dataVerifiedDate  && !r.dataVerifiedDate)  r.dataVerifiedDate  = fd.dataVerifiedDate;
+  }
+}

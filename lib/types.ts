@@ -197,6 +197,18 @@ export type Restaurant = {
   builderConfig?: BuilderConfig;
   /** Direct URL to the restaurant's official allergen/nutrition page — used in admin audit tool */
   allergenPageUrl?: string;
+  /**
+   * Allergens present in shared kitchen equipment (fryers, prep surfaces) at this location.
+   * Items that don't contain these allergens in their own ingredient list will receive
+   * a precautionary "may contain" signal — scored as "ask" rather than "avoid".
+   */
+  facilityAllergens?: AllergenId[];
+  /**
+   * ISO date (YYYY-MM-DD) when allergen data for this restaurant was last verified
+   * against the chain's official allergen guide. Falls back to MENU_DATA_VERIFIED_DATE
+   * when not set. Used to show a staleness warning in the UI.
+   */
+  dataVerifiedDate?: string;
 };
 
 // ─── Restaurant with scoring applied ────────────────────────────────────────

@@ -1072,12 +1072,43 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           </section>
         )}
 
+        {/* ── Facility allergen warning ── */}
+        {(() => {
+          const facilityHits = (restaurant?.facilityAllergens ?? []).filter(
+            (a) => userAllergens.includes(a as AllergenId)
+          );
+          if (facilityHits.length === 0) return null;
+          const labels = facilityHits.map((a) => a.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()));
+          return (
+            <div style={{
+              marginBottom: 16, borderRadius: 14,
+              border: "1.5px solid rgba(249,115,22,0.4)",
+              background: "var(--c-muted)",
+              padding: "12px 14px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span style={{ fontSize: 13, fontWeight: 800, color: "#f97316" }}>
+                  Shared equipment risk: {labels.join(", ")}
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.55, margin: 0 }}>
+                This kitchen handles {labels.join(", ")} in shared equipment. Items without those allergens listed may still have cross-contact. Items are marked "Ask Staff" where applicable.
+              </p>
+            </div>
+          );
+        })()}
+
         {/* ── Safety disclaimer ── */}
         {(() => {
-          const verifiedMs = new Date(MENU_DATA_VERIFIED_DATE).getTime();
+          const verifiedDate = restaurant?.dataVerifiedDate ?? MENU_DATA_VERIFIED_DATE;
+          const verifiedMs = new Date(verifiedDate).getTime();
           const ageMonths = (Date.now() - verifiedMs) / (1000 * 60 * 60 * 24 * 30);
           const isStale = ageMonths > 6;
-          const displayDate = new Date(MENU_DATA_VERIFIED_DATE).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+          const displayDate = new Date(verifiedDate).toLocaleDateString("en-US", { month: "long", year: "numeric" });
           return (
             <div style={{
               marginBottom: 32,

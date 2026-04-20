@@ -304,12 +304,48 @@ export function scoreRestaurant(
   severities: Partial<Record<AllergenId, AllergenSeverity>> = {}
 ): ScoredRestaurant {
   const cuisineContext = restaurant.cuisine;
+  const facilitySet = new Set<AllergenId>(
+    (restaurant.facilityAllergens ?? []).filter((a) => userAllergens.includes(a))
+  );
+
   const scoredItems = restaurant.menuItems.map((item) => {
     const correction = getCorrectionForItem(restaurant.id, item.id);
     const effective: RawMenuItem = correction
       ? { ...item, allergens: correction.allergens, auditNotes: correction.auditNotes, lastVerified: correction.verifiedAt }
       : item;
-    return scoreMenuItem(effective, restaurant.sourceType, userAllergens, cuisineContext, severities);
+    let scored = scoreMenuItem(effective, restaurant.sourceType, userAllergens, cuisineContext, severities);
+
+    // Inject facility-level precautionary hits for user allergens that are present
+    // in shared kitchen equipment but NOT already flagged by the item's own data.
+    // These are always "ask" (never "avoid") and marked precautionary.
+    if (facilitySet.size > 0) {
+      const existingHits = new Set(scored.userAllergenHits);
+      const facilityHits = [...facilitySet].filter((a) => !existingHits.has(a));
+      if (facilityHits.length > 0) {
+        const newHits = [...scored.userAllergenHits, ...facilityHits];
+        const newCertainty: "definite" | "precautionary" =
+          scored.allergenCertainty === "definite" ? "definite" : "precautionary";
+        const facilityRisk: Risk =
+          scored.risk === "avoid" ? "avoid"
+          : scored.risk === "ask"  ? "ask"
+          : "ask"; // facility cross-contact → at minimum ask
+        const facilityExplanation = facilityHits.length > 0
+          ? `${facilityHits.map(a => a.replace(/-/g, " ")).join(", ")} present in shared kitchen equipment — cross-contamination risk. ${scored.explanation}`
+          : scored.explanation;
+        scored = {
+          ...scored,
+          userAllergenHits: newHits,
+          allergenCertainty: newCertainty,
+          risk: facilityRisk,
+          explanation: facilityExplanation,
+          staffQuestions: scored.staffQuestions.length > 0
+            ? scored.staffQuestions
+            : facilityHits.map(a => `Does this item come into contact with ${a.replace(/-/g, " ")} from shared equipment or fryers?`),
+        };
+      }
+    }
+
+    return scored;
   });
 
   const summary: RestaurantSafetySummary = {
