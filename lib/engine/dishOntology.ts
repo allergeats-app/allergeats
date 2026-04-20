@@ -1867,4 +1867,665 @@ export const DISH_ONTOLOGY: DishEntry[] = [
       { ingredient: "beer",         allergen: "gluten", confidence: "common",   reason: "Beer in the batter contains barley — a gluten source" },
     ],
   },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ASIAN — Thai
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "Pad Thai",
+    variants:  ["pad thai", "phad thai", "pad-thai"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "fish sauce",    allergen: "fish",      confidence: "common",   reason: "Pad Thai is seasoned with fish sauce" },
+      { ingredient: "tamarind",      allergen: "soy",       confidence: "possible", reason: "Some restaurants use soy sauce alongside tamarind" },
+      { ingredient: "egg",           allergen: "egg",       confidence: "common",   reason: "Pad Thai is stir-fried with egg" },
+      { ingredient: "peanuts",       allergen: "peanut",    confidence: "common",   reason: "Crushed peanuts are a standard topping on Pad Thai" },
+      { ingredient: "rice noodles",  allergen: "soy",       confidence: "possible", reason: "Shared wok cross-contact with soy sauce is common" },
+    ],
+  },
+
+  {
+    canonical: "Pad See Ew",
+    variants:  ["pad see ew", "pad see-ew", "pad siew", "pad si ew", "pad siew moo"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "soy sauce",    allergen: "soy",   confidence: "common",  reason: "Pad See Ew is made with dark and light soy sauce" },
+      { ingredient: "oyster sauce", allergen: "fish",  confidence: "common",  reason: "Oyster sauce (contains shellfish/fish) is a key flavoring" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "common",  reason: "Egg is stir-fried directly into Pad See Ew" },
+      { ingredient: "wheat noodles",allergen: "wheat", confidence: "possible",reason: "Wide sen yai noodles are rice-based but some versions use wheat noodles" },
+    ],
+  },
+
+  {
+    canonical: "drunken noodles",
+    variants:  ["drunken noodles", "pad kee mao", "pad kee maow", "kee mao"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "oyster sauce", allergen: "fish",  confidence: "common",  reason: "Oyster sauce is a core component of drunken noodles" },
+      { ingredient: "soy sauce",    allergen: "soy",   confidence: "common",  reason: "Soy sauce seasons the dish" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "possible",reason: "Many versions include stir-fried egg" },
+    ],
+  },
+
+  {
+    canonical: "satay",
+    variants:  ["satay", "saté", "chicken satay", "beef satay", "pork satay"],
+    category:  "dish",
+    cuisine:   "Southeast Asian",
+    ingredients: [
+      { ingredient: "peanut sauce", allergen: "peanut", confidence: "common",  reason: "Satay is served with peanut dipping sauce" },
+      { ingredient: "soy sauce",    allergen: "soy",    confidence: "common",  reason: "Soy sauce is in the marinade" },
+      { ingredient: "sesame oil",   allergen: "sesame", confidence: "possible",reason: "Sesame oil is often added to the marinade or sauce" },
+    ],
+  },
+
+  {
+    canonical: "larb",
+    variants:  ["larb", "laab", "larp", "laap"],
+    category:  "dish",
+    cuisine:   "Thai/Lao",
+    ingredients: [
+      { ingredient: "fish sauce",  allergen: "fish",  confidence: "common",  reason: "Larb is seasoned with fish sauce" },
+      { ingredient: "toasted rice",allergen: "wheat", confidence: "possible",reason: "Toasted rice powder used for texture may share equipment with wheat" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ASIAN — Japanese / Pan-Asian
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "ramen",
+    variants:  ["ramen", "tonkotsu", "shoyu ramen", "miso ramen", "spicy ramen",
+                "tan tan men", "tantanmen"],
+    category:  "dish",
+    cuisine:   "Japanese",
+    ingredients: [
+      { ingredient: "wheat noodles", allergen: "wheat",  confidence: "common",  reason: "Ramen noodles are made from wheat flour" },
+      { ingredient: "soy sauce",     allergen: "soy",    confidence: "common",  reason: "Shoyu tare or miso tare both contain soy" },
+      { ingredient: "soft-boiled egg",allergen: "egg",   confidence: "common",  reason: "Ajitsuke tamago (marinated egg) is a standard ramen topping" },
+      { ingredient: "sesame",        allergen: "sesame", confidence: "common",  reason: "Sesame oil and sesame seeds are common ramen garnishes" },
+      { ingredient: "fish cake",     allergen: "fish",   confidence: "possible",reason: "Narutomaki/fish cake is a traditional ramen topping" },
+    ],
+  },
+
+  {
+    canonical: "gyoza",
+    variants:  ["gyoza", "pot stickers", "potstickers", "pan-fried dumplings",
+                "fried dumplings", "dumplings", "xiao long bao", "soup dumplings",
+                "har gow", "shumai", "dim sum"],
+    category:  "dish",
+    cuisine:   "Japanese/Chinese",
+    ingredients: [
+      { ingredient: "wheat wrapper", allergen: "wheat",  confidence: "common",  reason: "Dumpling wrappers are made from wheat flour" },
+      { ingredient: "soy sauce",     allergen: "soy",    confidence: "common",  reason: "Gyoza filling and dipping sauce both contain soy" },
+      { ingredient: "sesame oil",    allergen: "sesame", confidence: "common",  reason: "Sesame oil is used in the filling and dipping sauce" },
+      { ingredient: "egg wash",      allergen: "egg",    confidence: "possible",reason: "Some wrappers or pan-frying preparations use egg" },
+    ],
+  },
+
+  {
+    canonical: "tempura",
+    variants:  ["tempura", "vegetable tempura", "shrimp tempura", "prawn tempura",
+                "tempura roll", "spider roll"],
+    category:  "dish",
+    cuisine:   "Japanese",
+    ingredients: [
+      { ingredient: "wheat batter", allergen: "wheat",    confidence: "common",  reason: "Tempura batter is made from wheat flour" },
+      { ingredient: "egg",          allergen: "egg",      confidence: "common",  reason: "Egg is mixed into the tempura batter" },
+      { ingredient: "shrimp",       allergen: "shellfish",confidence: "possible",reason: "Shrimp tempura is the most common variety" },
+    ],
+  },
+
+  {
+    canonical: "bao bun",
+    variants:  ["bao", "bao bun", "steamed bun", "char siu bao", "bbq pork bun",
+                "hirata bun", "gua bao"],
+    category:  "bread",
+    cuisine:   "Chinese/Japanese",
+    ingredients: [
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "common",  reason: "Bao buns are made from wheat-based steamed dough" },
+      { ingredient: "soy sauce",   allergen: "soy",   confidence: "common",  reason: "The filling is typically seasoned with soy sauce" },
+      { ingredient: "sesame",      allergen: "sesame",confidence: "possible",reason: "Sesame seeds or oil are often added as garnish" },
+    ],
+  },
+
+  {
+    canonical: "bibimbap",
+    variants:  ["bibimbap", "bibim bap", "dolsot bibimbap"],
+    category:  "dish",
+    cuisine:   "Korean",
+    ingredients: [
+      { ingredient: "egg",        allergen: "egg",    confidence: "common",  reason: "Bibimbap is topped with a fried or raw egg" },
+      { ingredient: "gochujang",  allergen: "soy",    confidence: "common",  reason: "Gochujang (chili paste) contains fermented soy" },
+      { ingredient: "sesame oil", allergen: "sesame", confidence: "common",  reason: "Sesame oil is drizzled over bibimbap before serving" },
+    ],
+  },
+
+  {
+    canonical: "General Tso's chicken",
+    variants:  ["general tso", "general tso's", "general tsao", "general gau"],
+    category:  "dish",
+    cuisine:   "Chinese-American",
+    ingredients: [
+      { ingredient: "wheat batter", allergen: "wheat", confidence: "common",  reason: "Chicken is battered in wheat flour before frying" },
+      { ingredient: "soy sauce",    allergen: "soy",   confidence: "common",  reason: "The sauce is soy-sauce based" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "common",  reason: "Egg is used in the batter" },
+      { ingredient: "sesame",       allergen: "sesame",confidence: "possible",reason: "Sesame seeds are often garnished on top" },
+    ],
+  },
+
+  {
+    canonical: "orange chicken",
+    variants:  ["orange chicken", "orange beef", "orange peel chicken"],
+    category:  "dish",
+    cuisine:   "Chinese-American",
+    ingredients: [
+      { ingredient: "wheat batter", allergen: "wheat", confidence: "common",  reason: "Orange chicken is deep-fried in wheat batter" },
+      { ingredient: "soy sauce",    allergen: "soy",   confidence: "common",  reason: "The orange sauce is soy-sauce based" },
+      { ingredient: "egg",          allergen: "egg",   confidence: "common",  reason: "Egg is used in the batter coating" },
+    ],
+  },
+
+  {
+    canonical: "Kung Pao chicken",
+    variants:  ["kung pao", "kung pao chicken", "kung po", "gong bao"],
+    category:  "dish",
+    cuisine:   "Chinese",
+    ingredients: [
+      { ingredient: "peanuts",    allergen: "peanut", confidence: "common",  reason: "Peanuts are a defining ingredient of Kung Pao" },
+      { ingredient: "soy sauce",  allergen: "soy",    confidence: "common",  reason: "Soy sauce is in the stir-fry sauce" },
+      { ingredient: "sesame oil", allergen: "sesame", confidence: "possible",reason: "Sesame oil is commonly added to the finish" },
+    ],
+  },
+
+  {
+    canonical: "miso soup",
+    variants:  ["miso soup", "miso broth"],
+    category:  "soup",
+    cuisine:   "Japanese",
+    ingredients: [
+      { ingredient: "miso paste", allergen: "soy",  confidence: "common",  reason: "Miso is fermented soybean paste" },
+      { ingredient: "dashi stock",allergen: "fish", confidence: "common",  reason: "Traditional dashi is made from bonito flakes (fish)" },
+    ],
+  },
+
+  {
+    canonical: "edamame",
+    variants:  ["edamame"],
+    category:  "side",
+    cuisine:   "Japanese",
+    ingredients: [
+      { ingredient: "soybeans", allergen: "soy", confidence: "common", reason: "Edamame are immature soybeans" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MEXICAN / LATIN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "enchiladas",
+    variants:  ["enchilada", "enchiladas", "beef enchilada", "chicken enchilada",
+                "cheese enchilada"],
+    category:  "dish",
+    cuisine:   "Mexican",
+    ingredients: [
+      { ingredient: "corn tortilla", allergen: "corn",  confidence: "common",  reason: "Enchiladas are made with corn tortillas" },
+      { ingredient: "cheese",        allergen: "dairy", confidence: "common",  reason: "Enchiladas are smothered in melted cheese" },
+      { ingredient: "sour cream",    allergen: "dairy", confidence: "possible",reason: "Often served with sour cream" },
+      { ingredient: "wheat",         allergen: "wheat", confidence: "possible",reason: "Some restaurants use flour tortillas instead of corn" },
+    ],
+  },
+
+  {
+    canonical: "tamales",
+    variants:  ["tamale", "tamales"],
+    category:  "dish",
+    cuisine:   "Mexican",
+    ingredients: [
+      { ingredient: "masa (corn dough)", allergen: "corn",  confidence: "common",  reason: "Tamales are made from masa, which is corn-based" },
+      { ingredient: "lard or butter",    allergen: "dairy", confidence: "possible",reason: "Some masa recipes use butter instead of traditional lard" },
+    ],
+  },
+
+  {
+    canonical: "nachos",
+    variants:  ["nachos", "loaded nachos", "nachos supreme", "nacho fries"],
+    category:  "dish",
+    cuisine:   "Mexican-American",
+    ingredients: [
+      { ingredient: "tortilla chips", allergen: "corn",  confidence: "common",  reason: "Nachos are made from corn tortilla chips" },
+      { ingredient: "cheese",         allergen: "dairy", confidence: "common",  reason: "Nachos are loaded with melted cheese" },
+      { ingredient: "sour cream",     allergen: "dairy", confidence: "common",  reason: "Sour cream is a standard nacho topping" },
+      { ingredient: "jalapeños",      allergen: "soy",   confidence: "possible",reason: "Queso dip may contain soy-based thickeners" },
+    ],
+  },
+
+  {
+    canonical: "fish tacos",
+    variants:  ["fish taco", "fish tacos", "baja fish taco", "crispy fish taco"],
+    category:  "dish",
+    cuisine:   "Mexican",
+    ingredients: [
+      { ingredient: "fish",        allergen: "fish",  confidence: "common",  reason: "Fish tacos contain fried or grilled white fish" },
+      { ingredient: "crema",       allergen: "dairy", confidence: "common",  reason: "Baja fish tacos are topped with crema (Mexican sour cream)" },
+      { ingredient: "wheat batter",allergen: "wheat", confidence: "possible",reason: "Crispy fish tacos use wheat batter for frying" },
+      { ingredient: "corn tortilla",allergen: "corn", confidence: "common",  reason: "Fish tacos are typically served on corn tortillas" },
+    ],
+  },
+
+  {
+    canonical: "churros",
+    variants:  ["churro", "churros", "churro bites"],
+    category:  "dessert",
+    cuisine:   "Spanish/Mexican",
+    ingredients: [
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "common", reason: "Churros are fried wheat dough" },
+      { ingredient: "egg",         allergen: "egg",   confidence: "common", reason: "Eggs are in the churro dough" },
+      { ingredient: "chocolate dip",allergen: "dairy",confidence: "possible",reason: "Often served with chocolate dipping sauce containing dairy" },
+    ],
+  },
+
+  {
+    canonical: "flan",
+    variants:  ["flan", "crème caramel", "creme caramel"],
+    category:  "dessert",
+    cuisine:   "Spanish/Mexican",
+    ingredients: [
+      { ingredient: "eggs",         allergen: "egg",   confidence: "common", reason: "Flan is an egg custard dessert" },
+      { ingredient: "whole milk",   allergen: "dairy", confidence: "common", reason: "Flan is made with whole milk or cream" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MEDITERRANEAN / MIDDLE EASTERN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "falafel",
+    variants:  ["falafel", "falafel wrap", "falafel bowl"],
+    category:  "dish",
+    cuisine:   "Middle Eastern",
+    ingredients: [
+      { ingredient: "sesame (tahini)", allergen: "sesame",  confidence: "common",  reason: "Falafel is served with tahini sauce — pure sesame paste" },
+      { ingredient: "chickpeas",       allergen: "legumes", confidence: "common",  reason: "Falafel is made from ground chickpeas" },
+      { ingredient: "wheat wrap",      allergen: "wheat",   confidence: "possible",reason: "Often served in a wheat pita or wrap" },
+    ],
+  },
+
+  {
+    canonical: "hummus",
+    variants:  ["hummus", "houmous", "hummus dip", "hummus plate"],
+    category:  "condiment",
+    cuisine:   "Middle Eastern",
+    ingredients: [
+      { ingredient: "sesame (tahini)", allergen: "sesame",  confidence: "common", reason: "Tahini (sesame paste) is a primary ingredient in hummus" },
+      { ingredient: "chickpeas",       allergen: "legumes", confidence: "common", reason: "Hummus is made from blended chickpeas" },
+    ],
+  },
+
+  {
+    canonical: "shawarma",
+    variants:  ["shawarma", "shwarma", "chicken shawarma", "beef shawarma",
+                "lamb shawarma"],
+    category:  "dish",
+    cuisine:   "Middle Eastern",
+    ingredients: [
+      { ingredient: "pita bread",    allergen: "wheat",  confidence: "common",  reason: "Shawarma is served in wheat pita bread" },
+      { ingredient: "tahini",        allergen: "sesame", confidence: "common",  reason: "Tahini sauce (sesame) is standard on shawarma" },
+      { ingredient: "garlic sauce",  allergen: "egg",    confidence: "possible",reason: "Toum (garlic sauce) often contains egg white" },
+    ],
+  },
+
+  {
+    canonical: "gyro",
+    variants:  ["gyro", "gyros", "chicken gyro", "lamb gyro", "beef gyro"],
+    category:  "dish",
+    cuisine:   "Greek",
+    ingredients: [
+      { ingredient: "pita bread",  allergen: "wheat",  confidence: "common", reason: "Gyros are wrapped in wheat pita bread" },
+      { ingredient: "tzatziki",    allergen: "dairy",  confidence: "common", reason: "Tzatziki (yogurt-cucumber sauce) is the standard gyro sauce" },
+      { ingredient: "sesame",      allergen: "sesame", confidence: "possible",reason: "Some pita breads are topped with sesame seeds" },
+    ],
+  },
+
+  {
+    canonical: "tzatziki",
+    variants:  ["tzatziki", "tzatziki sauce", "tzatziki dip"],
+    category:  "sauce",
+    cuisine:   "Greek",
+    ingredients: [
+      { ingredient: "Greek yogurt", allergen: "dairy", confidence: "common", reason: "Tzatziki is made from strained Greek yogurt" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // SEAFOOD
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "lobster roll",
+    variants:  ["lobster roll", "lobster salad roll", "warm lobster roll",
+                "maine lobster roll", "connecticut lobster roll"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "lobster",    allergen: "shellfish", confidence: "common",  reason: "Lobster roll contains lobster — a shellfish" },
+      { ingredient: "mayo",       allergen: "egg",       confidence: "common",  reason: "Cold lobster rolls are bound with mayonnaise" },
+      { ingredient: "butter",     allergen: "dairy",     confidence: "possible",reason: "Warm Connecticut-style rolls are dressed with drawn butter" },
+      { ingredient: "hot dog bun",allergen: "wheat",     confidence: "common",  reason: "Lobster rolls are served in a split-top wheat bun" },
+    ],
+  },
+
+  {
+    canonical: "crab cake",
+    variants:  ["crab cake", "crab cakes", "lump crab cake", "maryland crab cake"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "crab",         allergen: "shellfish", confidence: "common",  reason: "Crab cakes contain crab — a shellfish" },
+      { ingredient: "breadcrumbs",  allergen: "wheat",     confidence: "common",  reason: "Breadcrumbs bind the crab cake" },
+      { ingredient: "egg",          allergen: "egg",       confidence: "common",  reason: "Egg is used as a binder" },
+      { ingredient: "mayo",         allergen: "egg",       confidence: "common",  reason: "Mayonnaise is standard in crab cake mixture" },
+      { ingredient: "mustard",      allergen: "mustard",   confidence: "possible",reason: "Old Bay/Dijon mustard is often in the crab cake mix" },
+    ],
+  },
+
+  {
+    canonical: "clam chowder",
+    variants:  ["clam chowder", "new england clam chowder", "manhattan clam chowder",
+                "chowder", "seafood chowder"],
+    category:  "soup",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "clams",       allergen: "shellfish", confidence: "common", reason: "Clam chowder contains clams — a shellfish" },
+      { ingredient: "heavy cream", allergen: "dairy",     confidence: "common", reason: "New England chowder is cream-based" },
+      { ingredient: "flour",       allergen: "wheat",     confidence: "common", reason: "Flour thickens the chowder base" },
+    ],
+  },
+
+  {
+    canonical: "shrimp scampi",
+    variants:  ["shrimp scampi", "scampi", "prawn scampi"],
+    category:  "dish",
+    cuisine:   "Italian-American",
+    ingredients: [
+      { ingredient: "shrimp",   allergen: "shellfish", confidence: "common",  reason: "Shrimp scampi is made with shrimp" },
+      { ingredient: "butter",   allergen: "dairy",     confidence: "common",  reason: "Scampi sauce is a garlic butter sauce" },
+      { ingredient: "pasta",    allergen: "wheat",     confidence: "common",  reason: "Scampi is typically served over linguine or pasta" },
+    ],
+  },
+
+  {
+    canonical: "ceviche",
+    variants:  ["ceviche", "ceviche tostada", "shrimp ceviche", "fish ceviche"],
+    category:  "dish",
+    cuisine:   "Latin American",
+    ingredients: [
+      { ingredient: "raw fish/shellfish", allergen: "fish",     confidence: "common",  reason: "Ceviche is made with raw fish or shrimp cured in citrus" },
+      { ingredient: "shrimp",             allergen: "shellfish",confidence: "possible",reason: "Many ceviches use shrimp as the primary protein" },
+      { ingredient: "tostada",            allergen: "corn",     confidence: "possible",reason: "Often served on corn tostadas" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // AMERICAN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "Nashville hot chicken",
+    variants:  ["nashville hot", "nashville hot chicken", "hot chicken sandwich",
+                "spicy crispy chicken"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "wheat batter",  allergen: "wheat", confidence: "common",  reason: "Nashville hot chicken is fried in a wheat flour coating" },
+      { ingredient: "egg",           allergen: "egg",   confidence: "common",  reason: "Egg wash is used in the breading process" },
+      { ingredient: "butter",        allergen: "dairy", confidence: "possible",reason: "The hot paste is sometimes butter-based" },
+    ],
+  },
+
+  {
+    canonical: "Philly cheesesteak",
+    variants:  ["philly cheesesteak", "cheesesteak", "cheese steak", "philly steak"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "hoagie roll", allergen: "wheat", confidence: "common", reason: "Cheesesteak is served on a wheat hoagie roll" },
+      { ingredient: "cheese whiz", allergen: "dairy", confidence: "common", reason: "Classic Philly cheesesteaks use Cheez Whiz or provolone" },
+      { ingredient: "soy",         allergen: "soy",   confidence: "possible",reason: "Processed cheese products like Cheez Whiz often contain soy" },
+    ],
+  },
+
+  {
+    canonical: "Reuben sandwich",
+    variants:  ["reuben", "reuben sandwich"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "rye bread",      allergen: "wheat",   confidence: "common",  reason: "Reubens are served on rye bread (wheat-based)" },
+      { ingredient: "Swiss cheese",   allergen: "dairy",   confidence: "common",  reason: "Swiss cheese is standard on a Reuben" },
+      { ingredient: "Russian dressing",allergen: "egg",    confidence: "common",  reason: "Russian/Thousand Island dressing contains mayo (egg)" },
+      { ingredient: "mustard",        allergen: "mustard", confidence: "possible",reason: "Some Reuben variations use mustard" },
+    ],
+  },
+
+  {
+    canonical: "Monte Cristo",
+    variants:  ["monte cristo", "monte cristo sandwich"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bread",  allergen: "wheat", confidence: "common", reason: "Monte Cristo is a bread-based sandwich" },
+      { ingredient: "egg batter",allergen: "egg",confidence: "common", reason: "The sandwich is dipped in egg batter and fried" },
+      { ingredient: "cheese", allergen: "dairy", confidence: "common", reason: "Monte Cristo contains ham and Swiss or gruyère cheese" },
+    ],
+  },
+
+  {
+    canonical: "po' boy",
+    variants:  ["po boy", "po' boy", "poboy", "shrimp po boy", "oyster po boy",
+                "catfish po boy"],
+    category:  "sandwich",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "french bread",  allergen: "wheat",     confidence: "common",  reason: "Po' boys are served on French bread rolls" },
+      { ingredient: "shrimp/oysters",allergen: "shellfish", confidence: "possible",reason: "Shrimp and oyster po' boys are the most common varieties" },
+      { ingredient: "remoulade",     allergen: "egg",       confidence: "common",  reason: "Remoulade sauce is mayo-based (egg)" },
+    ],
+  },
+
+  {
+    canonical: "buffalo chicken",
+    variants:  ["buffalo chicken", "buffalo wings", "boneless wings", "buffalo tenders",
+                "buffalo chicken wrap", "buffalo chicken sandwich"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "butter",         allergen: "dairy", confidence: "common",  reason: "Buffalo sauce is made with hot sauce and melted butter" },
+      { ingredient: "blue cheese dip",allergen: "dairy", confidence: "common",  reason: "Blue cheese dressing (dairy) is the classic pairing" },
+      { ingredient: "wheat breading", allergen: "wheat", confidence: "possible",reason: "Breaded buffalo chicken uses wheat flour coating" },
+      { ingredient: "egg",            allergen: "egg",   confidence: "possible",reason: "Breaded varieties use egg wash" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // BREAKFAST / BRUNCH
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "quiche",
+    variants:  ["quiche", "quiche lorraine", "spinach quiche", "veggie quiche"],
+    category:  "breakfast",
+    cuisine:   "French",
+    ingredients: [
+      { ingredient: "eggs",       allergen: "egg",   confidence: "common", reason: "Quiche is an egg custard baked in a pastry shell" },
+      { ingredient: "cream",      allergen: "dairy", confidence: "common", reason: "Quiche filling is made with cream or milk" },
+      { ingredient: "pastry shell",allergen: "wheat",confidence: "common", reason: "Quiche is baked in a wheat pastry crust" },
+      { ingredient: "cheese",     allergen: "dairy", confidence: "common", reason: "Cheese is a standard quiche ingredient" },
+    ],
+  },
+
+  {
+    canonical: "shakshuka",
+    variants:  ["shakshuka", "shakshouka"],
+    category:  "breakfast",
+    cuisine:   "Middle Eastern",
+    ingredients: [
+      { ingredient: "eggs",  allergen: "egg",   confidence: "common",  reason: "Shakshuka is eggs poached in tomato sauce" },
+      { ingredient: "bread", allergen: "wheat", confidence: "possible",reason: "Often served with pita or crusty bread for dipping" },
+      { ingredient: "feta",  allergen: "dairy", confidence: "possible",reason: "Many versions are topped with crumbled feta cheese" },
+    ],
+  },
+
+  {
+    canonical: "crepes",
+    variants:  ["crepe", "crepes", "sweet crepes", "savory crepes", "galette"],
+    category:  "breakfast",
+    cuisine:   "French",
+    ingredients: [
+      { ingredient: "wheat flour", allergen: "wheat", confidence: "common", reason: "Crepes are thin wheat flour pancakes" },
+      { ingredient: "eggs",        allergen: "egg",   confidence: "common", reason: "Eggs are a core ingredient in crepe batter" },
+      { ingredient: "milk/butter", allergen: "dairy", confidence: "common", reason: "Crepes are made with milk and butter" },
+    ],
+  },
+
+  {
+    canonical: "overnight oats",
+    variants:  ["overnight oats", "oat bowl", "oatmeal bowl"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "oats",  allergen: "oats",  confidence: "common",  reason: "Overnight oats are made with rolled oats" },
+      { ingredient: "milk",  allergen: "dairy", confidence: "common",  reason: "Oats are soaked in dairy milk" },
+      { ingredient: "nuts",  allergen: "tree-nut",confidence: "possible",reason: "Often topped with almonds, walnuts, or pecans" },
+    ],
+  },
+
+  {
+    canonical: "granola",
+    variants:  ["granola", "granola bowl", "granola parfait"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "oats",    allergen: "oats",    confidence: "common",   reason: "Granola is oat-based" },
+      { ingredient: "tree nuts",allergen: "tree-nut",confidence: "common",  reason: "Almonds, walnuts, pecans are standard granola ingredients" },
+      { ingredient: "honey",   allergen: "soy",     confidence: "possible", reason: "Some granolas contain soy lecithin as an emulsifier" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ITALIAN DESSERTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "tiramisu",
+    variants:  ["tiramisu", "tiramisù"],
+    category:  "dessert",
+    cuisine:   "Italian",
+    ingredients: [
+      { ingredient: "mascarpone", allergen: "dairy", confidence: "common", reason: "Tiramisu is made with mascarpone cheese" },
+      { ingredient: "egg yolks",  allergen: "egg",   confidence: "common", reason: "Sabayon made from egg yolks is the base of tiramisu" },
+      { ingredient: "ladyfingers",allergen: "wheat", confidence: "common", reason: "Savoiardi ladyfinger cookies are soaked in espresso" },
+    ],
+  },
+
+  {
+    canonical: "cannoli",
+    variants:  ["cannoli", "cannolo"],
+    category:  "dessert",
+    cuisine:   "Italian",
+    ingredients: [
+      { ingredient: "ricotta",     allergen: "dairy", confidence: "common", reason: "Cannoli filling is made from sweetened ricotta" },
+      { ingredient: "pastry shell",allergen: "wheat", confidence: "common", reason: "The fried pastry shell is wheat-based" },
+      { ingredient: "egg",         allergen: "egg",   confidence: "possible",reason: "Egg yolk is sometimes in the pastry dough" },
+      { ingredient: "pistachios",  allergen: "tree-nut",confidence: "possible",reason: "Cannoli are often garnished with pistachios" },
+    ],
+  },
+
+  {
+    canonical: "gelato",
+    variants:  ["gelato", "gelati"],
+    category:  "dessert",
+    cuisine:   "Italian",
+    ingredients: [
+      { ingredient: "milk",     allergen: "dairy", confidence: "common",  reason: "Gelato is made from whole milk and cream" },
+      { ingredient: "egg yolks",allergen: "egg",   confidence: "common",  reason: "Custard-based gelato uses egg yolks" },
+      { ingredient: "nuts",     allergen: "tree-nut",confidence: "possible",reason: "Pistachio, hazelnut, and almond are common gelato flavors" },
+    ],
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MISC HIGH-FREQUENCY
+  // ══════════════════════════════════════════════════════════════════════════
+
+  {
+    canonical: "avocado toast",
+    variants:  ["avocado toast", "avo toast", "smashed avocado toast"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "toast",   allergen: "wheat",  confidence: "common",  reason: "Avocado toast is served on wheat bread" },
+      { ingredient: "egg",     allergen: "egg",    confidence: "possible",reason: "Frequently topped with a poached or fried egg" },
+      { ingredient: "sesame",  allergen: "sesame", confidence: "possible",reason: "Everything bagel seasoning or sesame seeds are common toppings" },
+      { ingredient: "feta",    allergen: "dairy",  confidence: "possible",reason: "Many versions include crumbled feta cheese" },
+    ],
+  },
+
+  {
+    canonical: "acai bowl",
+    variants:  ["acai bowl", "açaí bowl", "acai", "superfood bowl"],
+    category:  "breakfast",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "granola",  allergen: "oats",     confidence: "common",  reason: "Acai bowls are typically topped with oat granola" },
+      { ingredient: "nuts",     allergen: "tree-nut", confidence: "possible",reason: "Almond butter, almonds, or walnuts are common toppings" },
+      { ingredient: "dairy",    allergen: "dairy",    confidence: "possible",reason: "Often blended with almond milk, oat milk, or coconut milk" },
+    ],
+  },
+
+  {
+    canonical: "pho",
+    variants:  ["pho", "phở", "beef pho", "chicken pho", "pho bo", "pho ga"],
+    category:  "soup",
+    cuisine:   "Vietnamese",
+    ingredients: [
+      { ingredient: "rice noodles", allergen: "soy",   confidence: "possible",reason: "Pho broth often contains soy sauce for seasoning" },
+      { ingredient: "fish sauce",   allergen: "fish",  confidence: "common",  reason: "Fish sauce is added to the broth" },
+      { ingredient: "hoisin sauce", allergen: "wheat", confidence: "possible",reason: "Hoisin sauce (served on the side) contains wheat" },
+      { ingredient: "bean sprouts", allergen: "soy",   confidence: "possible",reason: "Bean sprouts are soybean sprouts" },
+    ],
+  },
+
+  {
+    canonical: "banh mi",
+    variants:  ["banh mi", "bánh mì", "vietnamese sandwich"],
+    category:  "sandwich",
+    cuisine:   "Vietnamese",
+    ingredients: [
+      { ingredient: "baguette",   allergen: "wheat",  confidence: "common",  reason: "Bánh mì is served on a French baguette" },
+      { ingredient: "mayo",       allergen: "egg",    confidence: "common",  reason: "Mayonnaise is spread on the bread" },
+      { ingredient: "soy sauce",  allergen: "soy",    confidence: "possible",reason: "Proteins are marinated in soy sauce" },
+      { ingredient: "fish sauce", allergen: "fish",   confidence: "possible",reason: "Pickled daikon/carrots are sometimes seasoned with fish sauce" },
+    ],
+  },
+
+  {
+    canonical: "Buddha bowl",
+    variants:  ["buddha bowl", "grain bowl", "power bowl", "harvest bowl",
+                "nourish bowl", "wellness bowl"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "tahini dressing", allergen: "sesame",  confidence: "possible",reason: "Tahini-based dressings are common on grain bowls" },
+      { ingredient: "tofu",            allergen: "soy",     confidence: "possible",reason: "Tofu is a common protein in plant-based bowls" },
+      { ingredient: "edamame",         allergen: "soy",     confidence: "possible",reason: "Edamame is a standard grain bowl topping" },
+      { ingredient: "nuts/seeds",      allergen: "tree-nut",confidence: "possible",reason: "Pumpkin seeds, sunflower seeds, or walnuts are common toppings" },
+    ],
+  },
 ];
