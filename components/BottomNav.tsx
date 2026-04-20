@@ -4,11 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function BottomNav({
-  locationMode,
   onMapPress,
   onSearchPress,
 }: {
-  locationMode: "precise" | "approximate" | "cached" | "unavailable";
   onMapPress: () => void;
   onSearchPress: () => void;
 }) {
@@ -46,22 +44,6 @@ export function BottomNav({
           --bn-fade-s6:    rgba(255,255,255,0.80);
           --bn-fade-s7:    rgba(255,255,255,0.93);
           --bn-fade-end:   rgba(255,255,255,1);
-        }
-        [data-theme="dark"] {
-          --bn-circle-bg: #000000;
-          --bn-icon: #e5e7eb;
-          --bn-pill-bg: #000000;
-          --bn-pill-text: #6b7280;
-          --bn-bar-bg: #000000;
-          --bn-fade-start: rgba(0,0,0,0);
-          --bn-fade-s1:    rgba(0,0,0,0.03);
-          --bn-fade-s2:    rgba(0,0,0,0.09);
-          --bn-fade-s3:    rgba(0,0,0,0.20);
-          --bn-fade-s4:    rgba(0,0,0,0.38);
-          --bn-fade-s5:    rgba(0,0,0,0.60);
-          --bn-fade-s6:    rgba(0,0,0,0.80);
-          --bn-fade-s7:    rgba(0,0,0,0.93);
-          --bn-fade-end:   rgba(0,0,0,1);
         }
         .bn-btn:active { transform: scale(0.92) !important; }
       `}</style>

@@ -32,6 +32,20 @@ function applyVars(dark: boolean) {
     r.style.setProperty("--c-input", "#252528");
     r.style.setProperty("--c-muted", "#2c2c2e");
     r.style.setProperty("--c-hdr",   "rgba(15,15,15,0.95)");
+    r.style.setProperty("--bn-circle-bg",  "#000000");
+    r.style.setProperty("--bn-icon",       "#e5e7eb");
+    r.style.setProperty("--bn-pill-bg",    "#000000");
+    r.style.setProperty("--bn-pill-text",  "#6b7280");
+    r.style.setProperty("--bn-bar-bg",     "#000000");
+    r.style.setProperty("--bn-fade-start", "rgba(0,0,0,0)");
+    r.style.setProperty("--bn-fade-s1",    "rgba(0,0,0,0.03)");
+    r.style.setProperty("--bn-fade-s2",    "rgba(0,0,0,0.09)");
+    r.style.setProperty("--bn-fade-s3",    "rgba(0,0,0,0.20)");
+    r.style.setProperty("--bn-fade-s4",    "rgba(0,0,0,0.38)");
+    r.style.setProperty("--bn-fade-s5",    "rgba(0,0,0,0.60)");
+    r.style.setProperty("--bn-fade-s6",    "rgba(0,0,0,0.80)");
+    r.style.setProperty("--bn-fade-s7",    "rgba(0,0,0,0.93)");
+    r.style.setProperty("--bn-fade-end",   "rgba(0,0,0,1)");
   } else {
     r.style.setProperty("--c-bg",    "#f7f7f7");
     r.style.setProperty("--c-card",  "#ffffff");
@@ -41,6 +55,20 @@ function applyVars(dark: boolean) {
     r.style.setProperty("--c-input", "#fafafa");
     r.style.setProperty("--c-muted", "#f9fafb");
     r.style.setProperty("--c-hdr",   "rgba(247,247,247,0.95)");
+    r.style.setProperty("--bn-circle-bg",  "#ffffff");
+    r.style.setProperty("--bn-icon",       "#374151");
+    r.style.setProperty("--bn-pill-bg",    "#ffffff");
+    r.style.setProperty("--bn-pill-text",  "#9ca3af");
+    r.style.setProperty("--bn-bar-bg",     "transparent");
+    r.style.setProperty("--bn-fade-start", "rgba(255,255,255,0)");
+    r.style.setProperty("--bn-fade-s1",    "rgba(255,255,255,0.03)");
+    r.style.setProperty("--bn-fade-s2",    "rgba(255,255,255,0.09)");
+    r.style.setProperty("--bn-fade-s3",    "rgba(255,255,255,0.20)");
+    r.style.setProperty("--bn-fade-s4",    "rgba(255,255,255,0.38)");
+    r.style.setProperty("--bn-fade-s5",    "rgba(255,255,255,0.60)");
+    r.style.setProperty("--bn-fade-s6",    "rgba(255,255,255,0.80)");
+    r.style.setProperty("--bn-fade-s7",    "rgba(255,255,255,0.93)");
+    r.style.setProperty("--bn-fade-end",   "rgba(255,255,255,1)");
   }
 }
 
