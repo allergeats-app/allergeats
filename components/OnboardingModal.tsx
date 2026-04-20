@@ -127,9 +127,9 @@ export function OnboardingModal() {
         {step === "welcome" && (
           <>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
-              <Image src="/logo.png" alt="AllergEats" width={200} height={46}
+              <Image src="/logo 3d.png" alt="AllergEats" width={200} height={49}
                 sizes="200px"
-                style={{ width: "auto", height: 44, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
+                style={{ width: "auto", height: 48, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
               <div style={{
                 fontSize: 24,
                 fontWeight: 900,
