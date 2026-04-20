@@ -14,7 +14,18 @@ import {
   getAllCorrections,
   exportCorrections,
 } from "@/lib/adminCorrections";
+import { analyzeLine } from "@/lib/engine/analyzerPipeline";
 import type { AllergenId } from "@/lib/types";
+
+const ALL_ALLERGEN_IDS = ALLERGEN_LIST.map(a => a.id);
+
+function detectSuspectedAllergens(name: string, description: string | undefined, officialAllergens: AllergenId[]): AllergenId[] {
+  const text = [name, description].filter(Boolean).join(" ");
+  const analyzed = analyzeLine(text, ALL_ALLERGEN_IDS, "", "scraped");
+  const detected = analyzed.allDetectedAllergens as AllergenId[];
+  const officialSet = new Set(officialAllergens);
+  return detected.filter(a => !officialSet.has(a));
+}
 
 const SESSION_KEY = "allegeats_admin_authed";
 
@@ -26,6 +37,7 @@ function AdminMenuInner() {
   const [authed, setAuthed] = useState(false);
   const [search, setSearch] = useState("");
   const [filterUncorrected, setFilterUncorrected] = useState(false);
+  const [filterMismatch, setFilterMismatch] = useState(false);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [focusedIdx, setFocusedIdx] = useState(0);
 
@@ -115,12 +127,23 @@ function AdminMenuInner() {
     Object.keys(allCorrections).filter((k) => k.startsWith(restaurant.id + "::")).map((k) => k.split("::")[1])
   );
 
+  // Pre-compute AI-suspected mismatches for all items (name+description vs official array)
+  const mismatchMap = new Map<string, AllergenId[]>();
+  for (const item of restaurant.menuItems) {
+    const official = (item.allergens ?? []) as AllergenId[];
+    const suspected = detectSuspectedAllergens(item.name, item.description, official);
+    if (suspected.length > 0) mismatchMap.set(item.id, suspected);
+  }
+
   const items = restaurant.menuItems.filter((item) => {
     const q = search.toLowerCase();
     const match = !q || item.name.toLowerCase().includes(q) || (item.category ?? "").toLowerCase().includes(q);
     const uncorrectedOnly = !filterUncorrected || !correctedIds.has(item.id);
-    return match && uncorrectedOnly;
+    const mismatchOnly = !filterMismatch || mismatchMap.has(item.id);
+    return match && uncorrectedOnly && mismatchOnly;
   });
+
+  const mismatchCount = mismatchMap.size;
 
   const verifiedCount = correctedIds.size;
   const totalCount = restaurant.menuItems.length;
@@ -179,6 +202,12 @@ function AdminMenuInner() {
         >
           {filterUncorrected ? "Showing unverified" : "Show unverified only"}
         </button>
+        <button
+          onClick={() => setFilterMismatch(v => !v)}
+          style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${filterMismatch ? "#f97316" : "#3c3c3e"}`, background: filterMismatch ? "rgba(249,115,22,0.1)" : "transparent", color: filterMismatch ? "#f97316" : "#8e8e93", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+        >
+          {filterMismatch ? `AI suspects (${mismatchCount})` : `AI suspects (${mismatchCount})`}
+        </button>
       </div>
 
       {/* Item list */}
@@ -189,6 +218,7 @@ function AdminMenuInner() {
           const isVerified = correctedIds.has(item.id);
           const isFocused = idx === focusedIdx;
           const originalAllergens = new Set((item.allergens ?? []) as AllergenId[]);
+          const suspected = mismatchMap.get(item.id) ?? [];
 
           return (
             <div key={item.id} onClick={() => setFocusedIdx(idx)} style={{
@@ -206,6 +236,7 @@ function AdminMenuInner() {
                     <span style={{ fontSize: 15, fontWeight: 800, color: "#f2f2f7" }}>{item.name}</span>
                     {isVerified && <span style={{ fontSize: 11, fontWeight: 700, color: "#1fbdcc", background: "rgba(31,189,204,0.12)", border: "1px solid rgba(31,189,204,0.3)", padding: "2px 8px", borderRadius: 999 }}>Verified</span>}
                     {state.dirty && <span style={{ fontSize: 11, fontWeight: 700, color: "#fbbf24", background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)", padding: "2px 8px", borderRadius: 999 }}>Unsaved</span>}
+                    {suspected.length > 0 && !isVerified && <span title={`AI suspects: ${suspected.join(", ")}`} style={{ fontSize: 11, fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.35)", padding: "2px 8px", borderRadius: 999, cursor: "help" }}>⚠ {suspected.join(", ")}</span>}
                   </div>
                   {item.category && <div style={{ fontSize: 12, color: "#8e8e93", marginTop: 2 }}>{item.category}</div>}
                   {item.description && <div style={{ fontSize: 12, color: "#636366", marginTop: 3, lineHeight: 1.4 }}>{item.description}</div>}
