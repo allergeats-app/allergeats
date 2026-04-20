@@ -144,6 +144,8 @@ const CUISINE_PATTERNS: CuisinePattern[] = [
       { allergen: "dairy",    reason: "Cheese, ranch, and blue cheese dressings are staples" },
       { allergen: "egg",      reason: "Mayo-based sauces and dressings contain egg" },
       { allergen: "soy",      reason: "Worcestershire sauce and marinades often contain soy" },
+      { allergen: "mustard",  reason: "BBQ sauces, glazes, and dressings at American restaurants often contain mustard — ask staff" },
+      { allergen: "fish",     reason: "Worcestershire sauce (anchovy-based) is a common ingredient in marinades and sauces" },
     ],
   },
   {

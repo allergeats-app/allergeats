@@ -28,6 +28,11 @@ const PREP_PATTERNS: PrepPattern[] = [
     reason: "Shared fryer oil may be contaminated with wheat from breaded items — ask staff",
   },
   {
+    terms: ["fried in peanut oil", "cooked in peanut oil", "peanut oil fried"],
+    allergens: ["peanut"],
+    reason: "Item is explicitly fried in peanut oil",
+  },
+  {
     terms: ["crispy", "crunchy"],
     allergens: ["wheat", "gluten"],
     reason: "Crispy texture often achieved with flour-based coating",

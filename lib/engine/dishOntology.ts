@@ -2522,10 +2522,51 @@ export const DISH_ONTOLOGY: DishEntry[] = [
     category:  "dish",
     cuisine:   "American",
     ingredients: [
-      { ingredient: "tahini dressing", allergen: "sesame",  confidence: "possible",reason: "Tahini-based dressings are common on grain bowls" },
-      { ingredient: "tofu",            allergen: "soy",     confidence: "possible",reason: "Tofu is a common protein in plant-based bowls" },
-      { ingredient: "edamame",         allergen: "soy",     confidence: "possible",reason: "Edamame is a standard grain bowl topping" },
-      { ingredient: "nuts/seeds",      allergen: "tree-nut",confidence: "possible",reason: "Pumpkin seeds, sunflower seeds, or walnuts are common toppings" },
+      { ingredient: "tahini dressing", allergen: "sesame",  confidence: "possible", reason: "Tahini-based dressings are common on grain bowls" },
+      { ingredient: "tofu",            allergen: "soy",     confidence: "possible", reason: "Tofu is a common protein in plant-based bowls" },
+      { ingredient: "edamame",         allergen: "soy",     confidence: "possible", reason: "Edamame is a standard grain bowl topping" },
+      { ingredient: "nuts/seeds",      allergen: "tree-nut",confidence: "possible", reason: "Pumpkin seeds, sunflower seeds, or walnuts are common toppings" },
+    ],
+  },
+
+  {
+    canonical: "Thai curry",
+    variants:  ["thai curry", "thai coconut curry", "coconut curry", "thai basil curry",
+                "spicy thai curry", "thai curry bowl"],
+    category:  "dish",
+    cuisine:   "Thai",
+    ingredients: [
+      { ingredient: "shrimp paste", allergen: "shellfish", confidence: "common",   reason: "Thai curry paste contains kapi (shrimp paste) — always ask" },
+      { ingredient: "fish sauce",   allergen: "fish",       confidence: "common",   reason: "Fish sauce is a foundational seasoning in Thai curries" },
+      { ingredient: "peanuts",      allergen: "peanut",     confidence: "possible", reason: "Peanuts are a common garnish or paste ingredient in Thai curries" },
+    ],
+  },
+
+  {
+    canonical: "granola bowl",
+    variants:  ["granola bowl", "granola parfait", "acai bowl", "acai granola",
+                "acai smoothie bowl", "smoothie bowl"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "granola",  allergen: "oats",     confidence: "common",   reason: "Granola is made from rolled oats" },
+      { ingredient: "nuts",     allergen: "tree-nut", confidence: "possible", reason: "Granola typically contains mixed nuts or almonds" },
+      { ingredient: "yogurt",   allergen: "dairy",    confidence: "possible", reason: "Parfait-style bowls are made with dairy yogurt" },
+    ],
+  },
+
+  {
+    canonical: "BBQ platter",
+    variants:  ["bbq ribs", "bbq brisket", "bbq chicken", "smoked brisket",
+                "pulled pork", "pulled beef", "bbq platter", "barbecue ribs",
+                "barbecue brisket", "barbecue chicken", "bbq sandwich", "bbq plate"],
+    category:  "dish",
+    cuisine:   "American",
+    ingredients: [
+      { ingredient: "bbq sauce",     allergen: "mustard",         confidence: "possible", reason: "Most BBQ sauces contain mustard — ask staff to confirm" },
+      { ingredient: "dry rub",       allergen: "mustard",         confidence: "possible", reason: "BBQ dry rubs may contain mustard powder or mustard seed" },
+      { ingredient: "worcestershire",allergen: "fish",            confidence: "possible", reason: "Worcestershire sauce (contains anchovies) is common in BBQ marinades" },
+      { ingredient: "soy sauce",     allergen: "soy",             confidence: "possible", reason: "Some BBQ marinades use soy sauce" },
     ],
   },
 ];
