@@ -2257,7 +2257,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: modpizza.com — Allergen Information
   {
     id: "mod-pizza",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/MOD_Pizza_logo.png/640px-MOD_Pizza_logo.png",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/b/b6/Mod_Logo.svg",
     name: "MOD Pizza",
     cuisine: "Fast Casual · Pizza",
     tags: ["pizza", "fast-casual"],
@@ -2547,7 +2547,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: elpolloloco.com — Allergen Information
   {
     id: "el-pollo-loco",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/El_Pollo_Loco_logo.svg/640px-El_Pollo_Loco_logo.svg.png",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/e/e6/El_Pollo_Loco_Logo.jpg",
     name: "El Pollo Loco",
     cuisine: "Fast Casual · Mexican",
     tags: ["mexican", "chicken", "fast-casual"],
