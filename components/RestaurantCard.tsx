@@ -79,7 +79,8 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
     if (!photoSrc) return false;
     if (photoSrc === fallbackSrc) return false; // restaurant-image results are always photos
     if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
-      return /\.svg\.png/i.test(decodeURIComponent(photoSrc));
+      const decoded = decodeURIComponent(photoSrc);
+      return /\.svg(\.png)?$/i.test(decoded) || /[Ll]ogo/.test(decoded);
     }
     return photoSrc.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc);
   })();
