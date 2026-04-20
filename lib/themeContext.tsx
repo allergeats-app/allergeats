@@ -36,7 +36,7 @@ function applyVars(dark: boolean) {
     r.style.setProperty("--bn-icon",       "#e5e7eb");
     r.style.setProperty("--bn-pill-bg",    "#000000");
     r.style.setProperty("--bn-pill-text",  "#6b7280");
-    r.style.setProperty("--bn-bar-bg",     "#000000");
+    r.style.setProperty("--bn-bar-bg",     "transparent");
     r.style.setProperty("--bn-fade-start", "rgba(0,0,0,0)");
     r.style.setProperty("--bn-fade-s1",    "rgba(0,0,0,0.03)");
     r.style.setProperty("--bn-fade-s2",    "rgba(0,0,0,0.09)");
