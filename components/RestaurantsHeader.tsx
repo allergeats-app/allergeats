@@ -118,7 +118,7 @@ export function RestaurantsHeader({
 
             {/* Center: logo */}
             <Link href="/" aria-label="AllergEats home" style={{ display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
-              <Image src="/logo.png" alt="AllergEats" width={120} height={30} sizes="120px" style={{ width: "auto", height: 24 }} priority />
+              <Image src="/logo 3d.png" alt="AllergEats" width={120} height={29} sizes="120px" style={{ width: "auto", height: 28 }} priority />
             </Link>
 
             {/* Right: search + filter + settings */}
