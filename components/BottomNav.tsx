@@ -44,7 +44,14 @@ export function BottomNav({
           --bn-pill-bg: #ffffff;
           --bn-pill-text: #9ca3af;
           --bn-fade-start: rgba(255,255,255,0);
-          --bn-fade-end: rgba(255,255,255,0.97);
+          --bn-fade-s1:    rgba(255,255,255,0.03);
+          --bn-fade-s2:    rgba(255,255,255,0.09);
+          --bn-fade-s3:    rgba(255,255,255,0.20);
+          --bn-fade-s4:    rgba(255,255,255,0.38);
+          --bn-fade-s5:    rgba(255,255,255,0.60);
+          --bn-fade-s6:    rgba(255,255,255,0.80);
+          --bn-fade-s7:    rgba(255,255,255,0.93);
+          --bn-fade-end:   rgba(255,255,255,1);
         }
         [data-theme="dark"] {
           --bn-circle-bg: #000000;
@@ -52,16 +59,34 @@ export function BottomNav({
           --bn-pill-bg: #000000;
           --bn-pill-text: #6b7280;
           --bn-fade-start: rgba(0,0,0,0);
-          --bn-fade-end: rgba(0,0,0,0.97);
+          --bn-fade-s1:    rgba(0,0,0,0.03);
+          --bn-fade-s2:    rgba(0,0,0,0.09);
+          --bn-fade-s3:    rgba(0,0,0,0.20);
+          --bn-fade-s4:    rgba(0,0,0,0.38);
+          --bn-fade-s5:    rgba(0,0,0,0.60);
+          --bn-fade-s6:    rgba(0,0,0,0.80);
+          --bn-fade-s7:    rgba(0,0,0,0.93);
+          --bn-fade-end:   rgba(0,0,0,1);
         }
         .bn-btn:active { transform: scale(0.92) !important; }
       `}</style>
 
-      {/* Gradient fade behind the nav */}
+      {/* Gradient fade — eased multi-stop scrim */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 49,
-        height: "max(120px, calc(96px + env(safe-area-inset-bottom)))",
-        background: "linear-gradient(to bottom, var(--bn-fade-start), var(--bn-fade-end) 55%)",
+        height: "max(160px, calc(130px + env(safe-area-inset-bottom)))",
+        background: `linear-gradient(
+          to bottom,
+          var(--bn-fade-start)  0%,
+          var(--bn-fade-s1)     8%,
+          var(--bn-fade-s2)    18%,
+          var(--bn-fade-s3)    31%,
+          var(--bn-fade-s4)    46%,
+          var(--bn-fade-s5)    62%,
+          var(--bn-fade-s6)    76%,
+          var(--bn-fade-s7)    88%,
+          var(--bn-fade-end)  100%
+        )`,
         pointerEvents: "none",
       }} />
 
