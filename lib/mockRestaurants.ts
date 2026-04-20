@@ -1028,6 +1028,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: longhornsteakhouse.com allergen information
   {
     id: "longhorn-steakhouse",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/7/7f/LongHornSteakhouseLogo.PNG",
     name: "LongHorn Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
@@ -1469,6 +1470,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: pandaexpress.com — Allergen Information
   {
     id: "panda-express",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/7/79/Panda_Express.svg",
     name: "Panda Express",
     cuisine: "Fast Casual · Chinese-American",
     tags: ["chinese", "fast-casual", "asian"],
@@ -1994,6 +1996,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: noodles.com — Allergen Information
   {
     id: "noodles-and-company",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/a/ae/Noodles_%26_Company_logo.png",
     name: "Noodles & Company",
     cuisine: "Fast Casual · Noodles",
     tags: ["noodles", "pasta", "fast-casual"],
@@ -2041,7 +2044,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Outback Steakhouse ──────────────────────────────────────────────────────
   {
     id: "outback",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/9/9f/OutbackLogo.png",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/c/cf/Outback_Steakhouse.svg",
     name: "Outback Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
