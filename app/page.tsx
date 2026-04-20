@@ -580,11 +580,9 @@ function HomeContent() {
       </div>
 
       <BottomNav
-        onLocationPress={() => setShowLocationPicker(true)}
         locationMode={locationMode}
-        onSearchPress={() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
+        onMapPress={() => setLayout(layout === "map" ? "list" : "map")}
+        onSearchPress={() => { window.scrollTo({ top: 0, behavior: "smooth" }); }}
       />
 
     </main>

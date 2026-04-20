@@ -4,23 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function BottomNav({
-  onLocationPress,
   locationMode,
+  onMapPress,
   onSearchPress,
 }: {
-  onLocationPress: () => void;
   locationMode: "precise" | "approximate" | "cached" | "unavailable";
+  onMapPress: () => void;
   onSearchPress: () => void;
 }) {
   const pathname = usePathname();
-
-  const dotColor =
-    locationMode === "precise"     ? "#22c55e" :
-    locationMode === "cached"      ? "#f59e0b" :
-    locationMode === "approximate" ? "#f59e0b" : "#9ca3af";
-
   const activeColor = "#1fbdcc";
-
   const circleShadow = "0 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08)";
 
   const circle: React.CSSProperties = {
@@ -30,7 +23,7 @@ export function BottomNav({
     background: "var(--bn-circle-bg)",
     boxShadow: circleShadow,
     WebkitTapHighlightColor: "transparent",
-    transition: "transform 0.1s, box-shadow 0.1s",
+    transition: "transform 0.1s",
     textDecoration: "none",
     color: "var(--bn-icon)",
   };
@@ -43,6 +36,7 @@ export function BottomNav({
           --bn-icon: #374151;
           --bn-pill-bg: #ffffff;
           --bn-pill-text: #9ca3af;
+          --bn-bar-bg: transparent;
           --bn-fade-start: rgba(255,255,255,0);
           --bn-fade-s1:    rgba(255,255,255,0.03);
           --bn-fade-s2:    rgba(255,255,255,0.09);
@@ -58,6 +52,7 @@ export function BottomNav({
           --bn-icon: #e5e7eb;
           --bn-pill-bg: #000000;
           --bn-pill-text: #6b7280;
+          --bn-bar-bg: #000000;
           --bn-fade-start: rgba(0,0,0,0);
           --bn-fade-s1:    rgba(0,0,0,0.03);
           --bn-fade-s2:    rgba(0,0,0,0.09);
@@ -71,7 +66,7 @@ export function BottomNav({
         .bn-btn:active { transform: scale(0.92) !important; }
       `}</style>
 
-      {/* Gradient fade — eased multi-stop scrim */}
+      {/* Eased gradient scrim (light) / solid bar (dark) */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 49,
         height: "max(160px, calc(130px + env(safe-area-inset-bottom)))",
@@ -98,7 +93,7 @@ export function BottomNav({
           zIndex: 50,
           padding: "10px 16px",
           paddingBottom: "max(18px, calc(14px + env(safe-area-inset-bottom)))",
-          background: "transparent",
+          background: "var(--bn-bar-bg)",
           pointerEvents: "none",
         }}
       >
@@ -117,23 +112,14 @@ export function BottomNav({
             </svg>
           </Link>
 
-          {/* Location */}
-          <button type="button" onClick={onLocationPress} aria-label="Change location" className="bn-btn" style={circle}>
-            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                stroke="var(--bn-icon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.5" fill="var(--bn-icon)" stroke="none"/>
-              </svg>
-              <span style={{
-                position: "absolute", top: -5, right: -5,
-                width: 9, height: 9, borderRadius: "50%",
-                background: dotColor,
-                border: "1.5px solid var(--bn-circle-bg)",
-                boxShadow: locationMode === "precise" ? `0 0 0 2px ${dotColor}55` : "none",
-                transition: "background 0.3s",
-              }} />
-            </span>
+          {/* Map */}
+          <button type="button" onClick={onMapPress} aria-label="Map view" className="bn-btn" style={circle}>
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="var(--bn-icon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+              <line x1="8" y1="2" x2="8" y2="18"/>
+              <line x1="16" y1="6" x2="16" y2="22"/>
+            </svg>
           </button>
 
           {/* Search pill */}
@@ -149,7 +135,7 @@ export function BottomNav({
               padding: "0 22px",
               background: "var(--bn-pill-bg)",
               border: "none",
-              boxShadow: "0 4px 18px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10)",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08)",
               cursor: "text",
               WebkitTapHighlightColor: "transparent",
             }}
@@ -158,11 +144,7 @@ export function BottomNav({
               stroke="var(--bn-pill-text)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <span style={{
-              fontSize: 16, fontWeight: 500,
-              color: "var(--bn-pill-text)",
-              flex: 1, textAlign: "left",
-            }}>
+            <span style={{ fontSize: 16, fontWeight: 500, color: "var(--bn-pill-text)", flex: 1, textAlign: "left" }}>
               Search
             </span>
           </button>
