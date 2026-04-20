@@ -111,7 +111,7 @@ export function RestaurantsHeader({
                 </span>
               )}
               <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--c-sub)"
-                strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"  style={{ flexShrink: 0 }}>
+                strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
             </button>
@@ -125,7 +125,7 @@ export function RestaurantsHeader({
             <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
               <button type="button" onClick={openSearch} aria-label="Search restaurants" style={ICON}>
                 <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" >
+                  strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
               </button>
@@ -143,7 +143,7 @@ export function RestaurantsHeader({
                   position: "relative",
                 }}
               >
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" >
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
                   <line x1="4" y1="6" x2="20" y2="6"/>
                   <line x1="8" y1="12" x2="16" y2="12"/>
                   <line x1="11" y1="18" x2="13" y2="18"/>
@@ -194,7 +194,6 @@ export function RestaurantsHeader({
             <div style={{ flex: 1, position: "relative", minWidth: 0 }}>
               <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
                 stroke="var(--c-sub)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                
                 style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
               >
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -233,7 +232,7 @@ export function RestaurantsHeader({
                   }}
                 >
                   <span style={{ width: 18, height: 18, borderRadius: 999, background: "#9ca3af", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg aria-hidden="true" width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" >
+                    <svg aria-hidden="true" width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round">
                       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
                   </span>
@@ -256,7 +255,7 @@ export function RestaurantsHeader({
                 position: "relative", flexShrink: 0,
               }}
             >
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" >
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
                 <line x1="4" y1="6" x2="20" y2="6"/>
                 <line x1="8" y1="12" x2="16" y2="12"/>
                 <line x1="11" y1="18" x2="13" y2="18"/>

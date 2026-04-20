@@ -16,6 +16,7 @@ import { CameraScanButton } from "@/components/CameraScanButton";
 import { RestaurantsHeader } from "@/components/RestaurantsHeader";
 import { RestaurantsFilterDrawer } from "@/components/RestaurantsFilterDrawer";
 import { LocationPickerSheet } from "@/components/LocationPickerSheet";
+import { BottomNav } from "@/components/BottomNav";
 import { SmartEmptyState } from "@/components/SmartEmptyState";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import { AllergenProfileCard } from "@/components/AllergenProfileCard";
@@ -578,6 +579,13 @@ function HomeContent() {
         )}
       </div>
 
+      <BottomNav
+        onLocationPress={() => setShowLocationPicker(true)}
+        locationMode={locationMode}
+        onSearchPress={() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
 
     </main>
   );
