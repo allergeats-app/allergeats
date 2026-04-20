@@ -28,6 +28,7 @@ import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { AllergenProfileCard } from "@/components/AllergenProfileCard";
 import { useAuth } from "@/lib/authContext";
 import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
+import { getUserMenu, saveUserMenu, clearUserMenu, parseTextToMenuItems } from "@/lib/userMenus";
 import type {
   RestaurantMenuAnalysis,
   RestaurantDetailViewModel,
@@ -93,6 +94,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
+  const [userMenuSource, setUserMenuSource] = useState<"text" | "url" | null>(null);
+  const [menuInputMode, setMenuInputMode]   = useState<"none" | "text" | "url">("none");
+  const [menuInputText, setMenuInputText]   = useState("");
+  const [menuInputUrl, setMenuInputUrl]     = useState("");
+  const [menuInputLoading, setMenuInputLoading] = useState(false);
+  const [menuInputError, setMenuInputError] = useState("");
   const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
   const [showDrinks, setShowDrinks]   = useState(false);
   const [orderedItemIds, setOrderedItemIds] = useState<Set<string>>(new Set());
@@ -115,9 +122,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     setUserAllergens(allergens);
     setSeverities(sevs);
 
-    const analysis = analyzeRestaurant(found, allergens, sevs);
+    // Merge user-contributed menu items when no official data exists
+    const userEntry = getUserMenu(found.id);
+    const effective = (userEntry && found.menuItems.length === 0 && !found.menuIsGenericChainTemplate)
+      ? { ...found, menuItems: userEntry.items }
+      : found;
+    if (userEntry && effective !== found) setUserMenuSource(userEntry.source);
+
+    const analysis = analyzeRestaurant(effective, allergens, sevs);
     setBaseAnalysis(analysis);
-    setRestaurant(found);
+    setRestaurant(effective);
 
     recordView({
       id: found.id, name: found.name, cuisine: found.cuisine,
@@ -446,6 +460,71 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     setTimeout(() => setOrderSaved(false), 2500);
   }
 
+  // ── User menu submission ────────────────────────────────────────────────────
+  async function submitUserMenuText() {
+    if (!restaurant || !menuInputText.trim()) return;
+    setMenuInputLoading(true);
+    setMenuInputError("");
+    const items = parseTextToMenuItems(menuInputText, restaurant.id);
+    if (items.length === 0) {
+      setMenuInputError("No menu items found — paste item names, one per line.");
+      setMenuInputLoading(false);
+      return;
+    }
+    saveUserMenu(restaurant.id, restaurant.name, items, "text");
+    const enriched = { ...restaurant, menuItems: items };
+    const allergens = loadProfileAllergens();
+    const analysis  = analyzeRestaurant(enriched, allergens, severities);
+    setRestaurant(enriched);
+    setBaseAnalysis(analysis);
+    setUserMenuSource("text");
+    setMenuInputMode("none");
+    setMenuInputText("");
+    setMenuInputLoading(false);
+  }
+
+  async function submitUserMenuUrl() {
+    if (!restaurant || !menuInputUrl.trim()) return;
+    setMenuInputLoading(true);
+    setMenuInputError("");
+    try {
+      const res = await fetch("/api/fetch-menu", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: menuInputUrl, restaurantId: restaurant.id, restaurantName: restaurant.name }),
+      });
+      if (!res.ok) { setMenuInputError("Couldn't fetch that URL — try pasting the menu text instead."); setMenuInputLoading(false); return; }
+      const data = await res.json() as { menu?: NormalizedMenu };
+      if (!data.menu) { setMenuInputError("No menu found at that URL — try pasting the menu text instead."); setMenuInputLoading(false); return; }
+      const items = toRawMenuItems(data.menu);
+      if (items.length === 0) { setMenuInputError("Menu page found but no items extracted — try pasting the menu text instead."); setMenuInputLoading(false); return; }
+      saveUserMenu(restaurant.id, restaurant.name, items, "url", menuInputUrl);
+      const enriched = { ...restaurant, menuItems: items };
+      const allergens = loadProfileAllergens();
+      const analysis  = analyzeRestaurant(enriched, allergens, severities);
+      setRestaurant(enriched);
+      setBaseAnalysis(analysis);
+      setUserMenuSource("url");
+      setMenuInputMode("none");
+      setMenuInputUrl("");
+    } catch {
+      setMenuInputError("Something went wrong — try pasting the menu text instead.");
+    }
+    setMenuInputLoading(false);
+  }
+
+  function removeUserMenu() {
+    if (!restaurant) return;
+    const original = findRestaurant(restaurant.id);
+    if (!original) return;
+    clearUserMenu(restaurant.id);
+    const allergens = loadProfileAllergens();
+    const analysis  = analyzeRestaurant(original, allergens, severities);
+    setRestaurant(original);
+    setBaseAnalysis(analysis);
+    setUserMenuSource(null);
+  }
+
   // Shared item renderer — wraps MenuItemCard with the feedback row
   function renderItem(item: AnalyzedMenuItem) {
     return (
@@ -618,44 +697,94 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
 
             {hasNoMenu ? (
-              <div style={{ padding: 16, borderRadius: 14, background: "var(--c-muted)", border: "1px solid var(--c-border)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {crawlStatus === "fetching" ? (
-                  <>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>Checking restaurant website…</div>
-                    <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
-                      Fetching menu data in the background.
-                    </div>
-                  </>
-                ) : crawlStatus === "failed" || crawlStatus === "empty" ? (
-                  <>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>
-                      {crawlStatus === "empty" ? "Menu not found on website" : "Couldn't fetch menu"}
-                    </div>
-                    <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5, marginBottom: 14 }}>
-                      Scan the physical menu to get personalized allergen results.
-                    </div>
-                    <CameraScanButton style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "10px 18px", background: "#1fbdcc", color: "var(--c-brand-fg)",
-                      borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
-                    }}>
-                      Scan Menu →
-                    </CameraScanButton>
-                  </>
+                  <div style={{ padding: "14px 16px", borderRadius: 14, background: "var(--c-muted)", border: "1px solid var(--c-border)", fontSize: 13, color: "var(--c-sub)" }}>
+                    Checking restaurant website for menu data…
+                  </div>
                 ) : (
-                  <>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", marginBottom: 6 }}>No menu data available</div>
-                    <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5, marginBottom: 14 }}>
-                      We found this restaurant but don&apos;t have allergen information yet. Scan the menu to get personalized results.
+                  <div style={{ borderRadius: 16, border: "1px solid var(--c-border)", background: "var(--c-card)", overflow: "hidden" }}>
+                    {/* Header */}
+                    <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid var(--c-border)" }}>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)", marginBottom: 4 }}>Add menu items</div>
+                      <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                        Paste items from the menu or a delivery app. Our engine estimates allergens from item names and descriptions — no official data needed.
+                      </div>
                     </div>
-                    <CameraScanButton style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "10px 18px", background: "#1fbdcc", color: "var(--c-brand-fg)",
-                      borderRadius: 12, fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer",
-                    }}>
-                      Scan Menu →
-                    </CameraScanButton>
-                  </>
+                    {/* Mode selector */}
+                    {menuInputMode === "none" && (
+                      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+                        <button
+                          onClick={() => setMenuInputMode("text")}
+                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: "1.5px solid #1fbdcc", background: "rgba(31,189,204,0.06)", color: "#1fbdcc", fontSize: 14, fontWeight: 700, cursor: "pointer", textAlign: "left" }}
+                        >
+                          Paste menu text →
+                        </button>
+                        <button
+                          onClick={() => setMenuInputMode("url")}
+                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: "1px solid var(--c-border)", background: "var(--c-muted)", color: "var(--c-sub)", fontSize: 14, fontWeight: 700, cursor: "pointer", textAlign: "left" }}
+                        >
+                          Fetch from URL →
+                        </button>
+                      </div>
+                    )}
+                    {menuInputMode === "text" && (
+                      <div style={{ padding: "12px 16px 14px" }}>
+                        <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 6 }}>
+                          One item per line. Include descriptions after a dash for better accuracy. Section headers (APPETIZERS, MAINS) are auto-detected.
+                        </div>
+                        <textarea
+                          autoFocus
+                          value={menuInputText}
+                          onChange={e => setMenuInputText(e.target.value)}
+                          placeholder={"Margherita Pizza - tomato, mozzarella, basil\nGrilled Salmon - lemon butter\nPad Thai - rice noodles, peanuts, egg, fish sauce\nChocolate Lava Cake"}
+                          rows={8}
+                          style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--c-border)", background: "var(--c-muted)", color: "var(--c-text)", fontSize: 13, lineHeight: 1.6, outline: "none", resize: "vertical", fontFamily: "inherit" }}
+                        />
+                        {menuInputError && <div style={{ fontSize: 12, color: "#ef4444", marginTop: 6 }}>{menuInputError}</div>}
+                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                          <button
+                            onClick={submitUserMenuText}
+                            disabled={menuInputLoading || !menuInputText.trim()}
+                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "#1fbdcc", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputText.trim() ? "pointer" : "default", opacity: menuInputText.trim() ? 1 : 0.5 }}
+                          >
+                            {menuInputLoading ? "Analyzing…" : "Analyze Menu"}
+                          </button>
+                          <button onClick={() => { setMenuInputMode("none"); setMenuInputError(""); }} style={{ padding: "11px 16px", borderRadius: 11, border: "1px solid var(--c-border)", background: "transparent", color: "var(--c-sub)", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {menuInputMode === "url" && (
+                      <div style={{ padding: "12px 16px 14px" }}>
+                        <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 6 }}>
+                          Paste the restaurant's menu page URL (e.g. from their website or a delivery app).
+                        </div>
+                        <input
+                          autoFocus
+                          type="url"
+                          value={menuInputUrl}
+                          onChange={e => setMenuInputUrl(e.target.value)}
+                          placeholder="https://restaurant.com/menu"
+                          style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--c-border)", background: "var(--c-muted)", color: "var(--c-text)", fontSize: 13, outline: "none", fontFamily: "inherit" }}
+                        />
+                        {menuInputError && <div style={{ fontSize: 12, color: "#ef4444", marginTop: 6 }}>{menuInputError}</div>}
+                        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                          <button
+                            onClick={submitUserMenuUrl}
+                            disabled={menuInputLoading || !menuInputUrl.trim()}
+                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "#1fbdcc", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputUrl.trim() ? "pointer" : "default", opacity: menuInputUrl.trim() ? 1 : 0.5 }}
+                          >
+                            {menuInputLoading ? "Fetching…" : "Fetch Menu"}
+                          </button>
+                          <button onClick={() => { setMenuInputMode("none"); setMenuInputError(""); }} style={{ padding: "11px 16px", borderRadius: 11, border: "1px solid var(--c-border)", background: "transparent", color: "var(--c-sub)", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             ) : (
@@ -1070,6 +1199,31 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </>
             )}
           </section>
+        )}
+
+        {/* ── User-contributed menu banner ── */}
+        {userMenuSource && (
+          <div style={{
+            marginBottom: 16, borderRadius: 14, padding: "12px 14px",
+            border: "1.5px solid rgba(139,92,246,0.35)",
+            background: "rgba(139,92,246,0.06)",
+            display: "flex", alignItems: "flex-start", gap: 10,
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#a78bfa", marginBottom: 3 }}>
+                Estimated allergens — not officially verified
+              </div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                Allergens are inferred from {userMenuSource === "url" ? "the fetched menu page" : "menu text you provided"} using dish and ingredient pattern matching. Results may be incomplete. Always confirm with staff.
+              </div>
+            </div>
+            <button
+              onClick={removeUserMenu}
+              style={{ flexShrink: 0, padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.3)", background: "transparent", color: "#a78bfa", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Remove
+            </button>
+          </div>
         )}
 
         {/* ── Facility allergen warning ── */}
