@@ -17,13 +17,15 @@ export function BottomNav({
   const circle: React.CSSProperties = {
     width: 60, height: 60, borderRadius: "50%",
     display: "flex", alignItems: "center", justifyContent: "center",
-    flexShrink: 0, border: "none", cursor: "pointer",
+    flexShrink: 0, border: "none",
     background: "var(--bn-circle-bg)",
     boxShadow: circleShadow,
     WebkitTapHighlightColor: "transparent",
-    transition: "transform 0.1s",
+    transition: "transform 0.12s ease",
     textDecoration: "none",
     color: "var(--bn-icon)",
+    WebkitUserSelect: "none",
+    userSelect: "none",
   };
 
   return (
@@ -46,12 +48,19 @@ export function BottomNav({
           --bn-fade-end:   rgba(255,255,255,1);
         }
         .bn-btn:active { transform: scale(0.92) !important; }
+        .bn-btn {
+          touch-action: manipulation;
+          user-select: none;
+          -webkit-user-select: none;
+          will-change: transform;
+          cursor: pointer;
+        }
       `}</style>
 
       {/* Eased gradient scrim (light) / solid bar (dark) */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 49,
-        height: "max(160px, calc(130px + env(safe-area-inset-bottom)))",
+        height: "max(180px, calc(140px + env(safe-area-inset-bottom)))",
         background: `linear-gradient(
           to bottom,
           var(--bn-fade-start)  0%,
@@ -74,7 +83,7 @@ export function BottomNav({
           bottom: 0, left: 0, right: 0,
           zIndex: 50,
           padding: "10px 16px",
-          paddingBottom: "max(18px, calc(14px + env(safe-area-inset-bottom)))",
+          paddingBottom: "max(22px, calc(16px + env(safe-area-inset-bottom)))",
           background: "var(--bn-bar-bg)",
           pointerEvents: "none",
         }}
