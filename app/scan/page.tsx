@@ -515,7 +515,7 @@ function StaffBlock({ row }: { row: Row }) {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(31,189,204,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" >
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
           </div>
@@ -654,7 +654,7 @@ function StaffBlock({ row }: { row: Row }) {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36 }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isScanning ? "var(--c-text)" : "var(--c-brand-fg)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isScanning ? "var(--c-text)" : "var(--c-brand-fg)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                       <circle cx="12" cy="13" r="4"/>
                     </svg>
@@ -750,7 +750,7 @@ function StaffBlock({ row }: { row: Row }) {
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "manual" ? "#1fbdcc" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={activeInput === "manual" ? "#fff" : "var(--c-sub)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={activeInput === "manual" ? "#fff" : "var(--c-sub)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
                         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
                       </svg>
@@ -839,7 +839,7 @@ function StaffBlock({ row }: { row: Row }) {
                 padding: "12px 14px", borderRadius: 12,
                 background: "rgba(251,191,36,0.08)", border: "1.5px solid rgba(251,191,36,0.35)",
               }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }} >
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                   <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3"/>
                 </svg>
@@ -900,7 +900,7 @@ function StaffBlock({ row }: { row: Row }) {
                 width: 40, height: 40, borderRadius: 12, background: "rgba(31,189,204,0.1)",
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                   <circle cx="12" cy="13" r="4"/>
                 </svg>

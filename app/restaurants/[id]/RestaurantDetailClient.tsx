@@ -663,7 +663,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         fontWeight: 600, textDecoration: "none",
                       }}
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                       </svg>
                       {restaurant.address ?? "Get directions"}
@@ -683,7 +683,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   cursor: "pointer", transition: "background 0.15s, border-color 0.15s",
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke={favorited ? "#fff" : "var(--c-sub)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke={favorited ? "#fff" : "var(--c-sub)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
               </button>
@@ -984,7 +984,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       display: "flex", alignItems: "center", gap: 6,
                     }}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" ><polyline points="15 18 9 12 15 6"/></svg>
                     Back to order builder
                   </button>
                 )}
@@ -1089,7 +1089,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }} aria-hidden="true">
+                          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }} >
                             <path d="M8 2h8l1 7H7L8 2z"/><path d="M7 9c0 6 2 11 5 11s5-5 5-11"/>
                           </svg>
                           <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Drinks</span>
@@ -1175,7 +1175,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }} aria-hidden="true">
+                          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }} >
                             <path d="M8 2h8l1 7H7L8 2z"/><path d="M7 9c0 6 2 11 5 11s5-5 5-11"/>
                           </svg>
                           <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Drinks</span>
@@ -1241,7 +1241,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               padding: "12px 14px",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" >
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                   <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
@@ -1284,9 +1284,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   background: isStale ? "rgba(185,28,28,0.1)" : "rgba(234,179,8,0.12)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke={isStale ? "#b91c1c" : "#d97706"} strokeWidth="2.2"
-                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    strokeLinecap="round" strokeLinejoin="round" >
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                     <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
@@ -1460,7 +1460,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               cursor: "pointer", color: "var(--c-sub)", flexShrink: 0,
             }}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+            <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" >
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
@@ -1478,7 +1478,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 16px",
               }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--c-sub)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--c-sub)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" >
                   <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                 </svg>
@@ -1548,7 +1548,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: modifierGroups.length > 0 ? 10 : 0 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 {worstMeta && (worstMeta === RISK_META["likely-safe"] ? (
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+                                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"  style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
                                 ) : (
                                   <div style={{ width: 9, height: 9, borderRadius: "50%", background: worstMeta.color, flexShrink: 0 }} />
                                 ))}
@@ -1601,7 +1601,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                               borderBottom: idx < extraItems.length - 1 ? "1px solid var(--c-border)" : "none",
                             }}>
                               {meta === RISK_META["likely-safe"] ? (
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+                                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"  style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
                               ) : (
                                 <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
                               )}
@@ -1609,7 +1609,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                                 <div style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
                               </div>
                               <button type="button" onClick={() => toggleOrderItem(item.id)} aria-label={`Remove ${item.name}`} style={{ width: 34, height: 34, borderRadius: 999, background: "var(--c-muted)", border: "1px solid var(--c-border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--c-sub)", flexShrink: 0 }}>
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" ><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                               </button>
                             </div>
                           );
@@ -1627,7 +1627,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           borderBottom: idx < orderedItems.length - 1 ? "1px solid var(--c-border)" : "none",
                         }}>
                           {meta === RISK_META["likely-safe"] ? (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-risk-safe)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"  style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
                           ) : (
                             <div style={{ width: 9, height: 9, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
                           )}
@@ -1639,7 +1639,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                             </div>
                           </div>
                           <button type="button" onClick={() => toggleOrderItem(item.id)} aria-label={`Remove ${item.name} from order`} style={{ width: 34, height: 34, borderRadius: 999, background: "var(--c-muted)", border: "1px solid var(--c-border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--c-sub)", flexShrink: 0 }}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" ><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                           </button>
                         </div>
                       );
@@ -1663,7 +1663,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     border: "1px solid rgba(251,191,36,0.28)",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="12"/>
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -1708,14 +1708,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 >
                   {orderSaved ? (
                     <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
                       Order saved!
                     </>
                   ) : (
                     <>
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
                       </svg>
                       Save order
@@ -1734,7 +1734,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       textDecoration: "none", letterSpacing: "-0.01em",
                     }}
                   >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                     </svg>
                     View Saved Orders
@@ -1831,7 +1831,7 @@ function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
         background: isDark ? "rgba(20,83,45,0.35)" : "rgba(220,252,231,0.6)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
@@ -1865,7 +1865,7 @@ function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
               background: isDark ? "#14532d" : "#dcfce7",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" >
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>

@@ -434,7 +434,7 @@ function HomeContent() {
         ) : filtered.length === 0 && locationMode === "unavailable" ? (
           <div style={{ padding: "56px 0 32px", textAlign: "center" }}>
             <div style={{ fontSize: 32, marginBottom: 12, lineHeight: 1 }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--c-border)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }} aria-hidden="true">
+              <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--c-border)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block" }} >
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
               </svg>
             </div>
@@ -446,13 +446,13 @@ function HomeContent() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 300, margin: "0 auto 28px" }}>
               <button type="button" onClick={() => setLayout("map")} style={{ padding: "11px 18px", borderRadius: 14, background: "var(--c-card)", border: "1.5px solid var(--c-border)", color: "var(--c-text)", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" ><polyline points="9 18 15 12 9 6"/></svg>
                 Search the map
               </button>
             </div>
             <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 12 }}>Or scan any menu directly</div>
             <CameraScanButton style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "12px 22px", background: "#1fbdcc", color: "var(--c-brand-fg)", borderRadius: 12, fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" ><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               Scan a Menu
             </CameraScanButton>
           </div>
@@ -603,8 +603,8 @@ function HomeContent() {
           >
             {layout === "list" ? (
               <>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                   <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
                   <line x1="8" y1="2" x2="8" y2="18"/>
                   <line x1="16" y1="6" x2="16" y2="22"/>
@@ -613,8 +613,8 @@ function HomeContent() {
               </>
             ) : (
               <>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2.5" strokeLinecap="round" >
                   <line x1="3" y1="6" x2="21" y2="6"/>
                   <line x1="3" y1="12" x2="21" y2="12"/>
                   <line x1="3" y1="18" x2="21" y2="18"/>

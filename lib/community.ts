@@ -33,6 +33,7 @@ export async function fetchCommunityScores(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ dishes, allergens, restaurantName }),
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return new Map();
     const data = await res.json();

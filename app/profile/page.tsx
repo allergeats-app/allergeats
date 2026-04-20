@@ -12,9 +12,10 @@ export default function ProfilePage() {
   const router = useRouter();
 
   const [signingOut, setSigningOut]       = useState(false);
-  const [firstEdit, setFirstEdit]   = useState("");
-  const [lastEdit,  setLastEdit]    = useState("");
-  const [nameSaved, setNameSaved]   = useState(false);
+  const [firstEdit,  setFirstEdit]  = useState("");
+  const [lastEdit,   setLastEdit]   = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameSaved,  setNameSaved]  = useState(false);
 
 
   useEffect(() => {
@@ -29,7 +30,9 @@ export default function ProfilePage() {
 
 
   async function handleSaveName() {
+    setNameSaving(true);
     await saveName(firstEdit, lastEdit);
+    setNameSaving(false);
     setNameSaved(true);
     setTimeout(() => setNameSaved(false), 2000);
   }
@@ -163,19 +166,19 @@ export default function ProfilePage() {
                   background: "var(--c-input)", outline: "none", boxSizing: "border-box",
                 }}
               />
-              {(firstEdit.trim() !== firstName || lastEdit.trim() !== lastName || nameSaved) && (
+              {(firstEdit.trim() !== firstName || lastEdit.trim() !== lastName || nameSaved || nameSaving) && (
                 <button
                   onClick={handleSaveName}
-                  disabled={!firstEdit.trim() || !lastEdit.trim()}
+                  disabled={!firstEdit.trim() || !lastEdit.trim() || nameSaving}
                   style={{
                     padding: "10px 16px", borderRadius: 10, border: "none",
-                    background: nameSaved ? "#22c55e" : (!firstEdit.trim() || !lastEdit.trim()) ? "var(--c-border)" : "var(--c-text)",
+                    background: nameSaved ? "#22c55e" : nameSaving ? "#9ca3af" : (!firstEdit.trim() || !lastEdit.trim()) ? "var(--c-border)" : "var(--c-text)",
                     color: "var(--c-bg)", fontSize: 13, fontWeight: 700,
-                    cursor: (!firstEdit.trim() || !lastEdit.trim()) ? "not-allowed" : "pointer",
+                    cursor: (!firstEdit.trim() || !lastEdit.trim() || nameSaving) ? "not-allowed" : "pointer",
                     transition: "background 0.2s", whiteSpace: "nowrap",
                   }}
                 >
-                  {nameSaved ? "Saved!" : "Save"}
+                  {nameSaved ? "Saved!" : nameSaving ? "Saving…" : "Save"}
                 </button>
               )}
             </div>

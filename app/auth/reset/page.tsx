@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
               </div>
               <div>
                 <label htmlFor="confirm-password" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-sub)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>Confirm password</label>
-                <input id="confirm-password" type="password" required minLength={6}
+                <input id="confirm-password" type="password" required minLength={8}
                   value={confirm} onChange={(e) => setConfirm(e.target.value)}
                   placeholder="Same password again" style={inputStyle} />
               </div>

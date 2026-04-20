@@ -53,9 +53,15 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
 
   const copyQuestions = useCallback(async () => {
     const text = item.staffQuestions.map((q) => `• ${q}`).join("\n");
-    await navigator.clipboard.writeText(text).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+      // Clipboard unavailable (e.g. non-https) — notify user
+      alert("Copy failed. Please copy the questions manually.");
+    }
   }, [item.staffQuestions]);
 
   const primaryAllergen = item.userAllergenHits[0] ?? item.detectedAllergens[0];
@@ -262,7 +268,13 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
             <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.6 }}>{item.explanation}</div>
           )}
 
-          {/* Staff questions */}
+          {/* Staff questions — generic fallback when risk is ask but no questions were generated */}
+          {item.risk === "ask" && item.staffQuestions.length === 0 && item.userAllergenHits.length > 0 && (
+            <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.6 }}>
+              Ask staff whether this item contains {item.userAllergenHits.map((a) => aLabel(a)).join(" or ")}.
+            </div>
+          )}
+
           {item.staffQuestions.length > 0 && (
             <div>
               <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>

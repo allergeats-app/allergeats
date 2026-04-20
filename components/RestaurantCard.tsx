@@ -62,13 +62,15 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
     if (primarySrc && !photoFailed) return; // primary chain has a URL — don't fire yet
     if (!r.name) return;
     fallbackFiredRef.current = true;
+    const controller = new AbortController();
     const params = new URLSearchParams({ name: r.name });
     if (r.lat  != null) params.set("lat",  String(r.lat));
     if (r.lng  != null) params.set("lng",  String(r.lng));
-    fetch(`/api/restaurant-image?${params}`)
+    fetch(`/api/restaurant-image?${params}`, { signal: controller.signal })
       .then(res => res.ok ? res.json() : null)
       .then((data: { imageUrl?: string } | null) => { if (data?.imageUrl) setFallbackSrc(data.imageUrl); })
       .catch(() => {});
+    return () => controller.abort();
   }, [primarySrc, photoFailed, r.name, r.lat, r.lng]);
 
   // Wiki-thumb images are chain logos — use contain so the full logo is visible.
@@ -200,7 +202,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               transition: "background 0.15s",
             }}
           >
-            <svg width={isRail ? 13 : 16} height={isRail ? 13 : 16} viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width={isRail ? 13 : 16} height={isRail ? 13 : 16} viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
