@@ -2045,7 +2045,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Outback Steakhouse ──────────────────────────────────────────────────────
   {
     id: "outback",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Outback_Steakhouse.jpg/640px-Outback_Steakhouse.jpg",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/9/9f/OutbackLogo.png",
     name: "Outback Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],

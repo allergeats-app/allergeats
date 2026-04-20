@@ -120,7 +120,7 @@ export async function GET(req: Request) {
       if (!imgRes.ok) return new Response(null, { status: 404 });
       const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
       const buffer = await imgRes.arrayBuffer();
-      const isLogoUrl = /\.svg\.png$/i.test(directUrl);
+      const isLogoUrl = /\.svg\.png$/i.test(directUrl) || /[Ll]ogo/.test(directUrl);
       return new Response(buffer, {
         headers: {
           "Content-Type": contentType,
