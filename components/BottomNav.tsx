@@ -47,12 +47,12 @@ export function BottomNav({
           --bn-fade-end: rgba(255,255,255,0.97);
         }
         [data-theme="dark"] {
-          --bn-circle-bg: #1e2128;
-          --bn-icon: #d1d5db;
-          --bn-pill-bg: #1e2128;
+          --bn-circle-bg: #000000;
+          --bn-icon: #e5e7eb;
+          --bn-pill-bg: #000000;
           --bn-pill-text: #6b7280;
-          --bn-fade-start: rgba(12,14,20,0);
-          --bn-fade-end: rgba(12,14,20,0.97);
+          --bn-fade-start: rgba(0,0,0,0);
+          --bn-fade-end: rgba(0,0,0,0.97);
         }
         .bn-btn:active { transform: scale(0.92) !important; }
       `}</style>
@@ -124,7 +124,7 @@ export function BottomNav({
               padding: "0 22px",
               background: "var(--bn-pill-bg)",
               border: "none",
-              boxShadow: circleShadow,
+              boxShadow: "0 4px 18px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10)",
               cursor: "text",
               WebkitTapHighlightColor: "transparent",
             }}
