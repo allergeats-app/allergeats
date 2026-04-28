@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { SettingsButton } from "@/components/SettingsButton";
+import { BottomNav } from "@/components/BottomNav";
 import { recordScan } from "@/lib/scanHistory";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
@@ -546,7 +547,7 @@ function StaffBlock({ row }: { row: Row }) {
   const STEPS = ["Your Allergies", "Load Menu", "Results"];
 
   return (
-    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: 40 }}>
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: "max(120px, calc(88px + env(safe-area-inset-bottom)))" }}>
       <h1 className="sr-only">Menu Scan — AllergEats</h1>
       {/* Sticky header */}
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--c-border)", padding: "12px 16px" }}>
@@ -954,6 +955,7 @@ function StaffBlock({ row }: { row: Row }) {
         </div>
       )}
 
+      <BottomNav />
     </main>
   );
 }

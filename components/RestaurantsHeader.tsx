@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { SettingsButton } from "@/components/SettingsButton";
@@ -22,6 +22,7 @@ export function RestaurantsHeader({
   query, setQuery,
   activeFilterCount, showFilterDrawer, setShowFilterDrawer,
   loading, filteredCount,
+  searchOpen, setSearchOpen,
 }: {
   locationLabel: string;
   locationMode: "precise" | "approximate" | "cached" | "unavailable";
@@ -30,21 +31,32 @@ export function RestaurantsHeader({
   query: string; setQuery: (q: string) => void;
   activeFilterCount: number; showFilterDrawer: boolean; setShowFilterDrawer: (v: boolean) => void;
   loading: boolean; filteredCount: number;
+  searchOpen?: boolean; setSearchOpen?: (v: boolean) => void;
 }) {
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [internalSearchOpen, setInternalSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isSearchActive = searchOpen || query.length > 0;
+  const isSearchActive = (searchOpen ?? internalSearchOpen) || query.length > 0;
 
   function openSearch() {
-    setSearchOpen(true);
+    setInternalSearchOpen(true);
+    setSearchOpen?.(true);
     requestAnimationFrame(() => inputRef.current?.focus());
   }
 
   function closeSearch() {
-    setSearchOpen(false);
+    setInternalSearchOpen(false);
+    setSearchOpen?.(false);
     setQuery("");
   }
+
+  // Respond to external open trigger (e.g. bottom nav search button)
+  useEffect(() => {
+    if (searchOpen && !internalSearchOpen) {
+      setInternalSearchOpen(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [searchOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const dotColor =
     locationMode === "precise"     ? "#22c55e" :

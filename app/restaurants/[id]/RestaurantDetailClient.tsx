@@ -28,6 +28,7 @@ import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { AllergenProfileCard } from "@/components/AllergenProfileCard";
 import { useAuth } from "@/lib/authContext";
 import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
+import { BottomNav } from "@/components/BottomNav";
 import { getUserMenu, saveUserMenu, clearUserMenu, parseTextToMenuItems } from "@/lib/userMenus";
 import type {
   RestaurantMenuAnalysis,
@@ -381,7 +382,50 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   if (!vm || !restaurant) {
-    return <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#9ca3af" }}>Loading…</main>;
+    return (
+      <main style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
+        <style>{`
+          @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+          }
+          .skel {
+            background: linear-gradient(90deg, var(--c-border) 25%, var(--c-card) 50%, var(--c-border) 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite linear;
+            border-radius: 8px;
+          }
+        `}</style>
+        {/* Header skeleton */}
+        <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--c-border)", padding: "max(12px, env(safe-area-inset-top)) 16px 12px" }}>
+          <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="skel" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
+            <div className="skel" style={{ flex: 1, height: 18 }} />
+            <div className="skel" style={{ width: 32, height: 32, borderRadius: 8 }} />
+          </div>
+        </div>
+        {/* Hero skeleton */}
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+            <div className="skel" style={{ width: 72, height: 72, borderRadius: 16, flexShrink: 0 }} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+              <div className="skel" style={{ height: 22, width: "60%" }} />
+              <div className="skel" style={{ height: 14, width: "40%" }} />
+              <div className="skel" style={{ height: 26, width: 90, borderRadius: 999 }} />
+            </div>
+          </div>
+          {/* Stats bar */}
+          <div className="skel" style={{ height: 56, borderRadius: 14 }} />
+          {/* Section header */}
+          <div className="skel" style={{ height: 16, width: "35%", marginTop: 8 }} />
+          {/* Menu items */}
+          {[1,2,3,4].map(i => (
+            <div key={i} className="skel" style={{ height: 70, borderRadius: 12 }} />
+          ))}
+        </div>
+        <BottomNav />
+      </main>
+    );
   }
 
   const { hero, summary, coverage, whyThisWorks, aggregatedStaffQuestions, bestOptions } = vm;
@@ -553,8 +597,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
       // When order bar is visible: bar height (74px) + safe-area + extra breathing room
       // When no order bar: just safe-area + base padding
       paddingBottom: orderedItemIds.size > 0
-        ? "max(140px, calc(74px + env(safe-area-inset-bottom) + 20px))"
-        : "max(60px, calc(32px + env(safe-area-inset-bottom)))",
+        ? "max(200px, calc(74px + env(safe-area-inset-bottom) + 100px))"
+        : "max(120px, calc(88px + env(safe-area-inset-bottom)))",
     }}>
 
       {showStaffCard && (
@@ -1759,6 +1803,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
+      <BottomNav />
     </main>
   );
 }

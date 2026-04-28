@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useTheme, type ThemeMode } from "@/lib/themeContext";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function ProfilePage() {
   const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
@@ -57,7 +58,7 @@ export default function ProfilePage() {
         minHeight: "100dvh",
         background: "var(--c-bg)",
         fontFamily: "Inter, Arial, sans-serif",
-        paddingBottom: "max(48px, calc(32px + env(safe-area-inset-bottom)))",
+        paddingBottom: "max(120px, calc(88px + env(safe-area-inset-bottom)))",
       }}
     >
       {/* Sticky header */}
@@ -217,6 +218,7 @@ export default function ProfilePage() {
 
 
       </div>
+      <BottomNav />
     </main>
   );
 }

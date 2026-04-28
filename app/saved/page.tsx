@@ -8,6 +8,7 @@ import { getRecentlyViewed, type RecentView } from "@/lib/recentlyViewed";
 import { getScanHistory, type ScanEntry } from "@/lib/scanHistory";
 import { loadSavedOrders, deleteSavedOrder, type SavedOrder } from "@/lib/savedOrders";
 import { CameraScanButton } from "@/components/CameraScanButton";
+import { BottomNav } from "@/components/BottomNav";
 
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
@@ -185,7 +186,7 @@ function SavedContent() {
   const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || scanHistory.length > 0 || savedOrders.length > 0;
 
   return (
-    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: "max(80px, calc(60px + env(safe-area-inset-bottom)))" }}>
+    <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: "max(120px, calc(90px + env(safe-area-inset-bottom)))" }}>
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 100,
@@ -317,6 +318,7 @@ function SavedContent() {
           </>
         )}
       </div>
+      <BottomNav />
     </main>
   );
 }

@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function BottomNav({
   onMapPress,
   onSearchPress,
 }: {
-  onMapPress: () => void;
-  onSearchPress: () => void;
+  onMapPress?: () => void;
+  onSearchPress?: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const activeColor = "#1fbdcc";
+
+  const handleMap    = onMapPress    ?? (() => router.push("/"));
+  const handleSearch = onSearchPress ?? (() => router.push("/"));
   const circleShadow = "0 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08)";
 
   const circle: React.CSSProperties = {
@@ -104,7 +108,7 @@ export function BottomNav({
           </Link>
 
           {/* Map */}
-          <button type="button" onClick={onMapPress} aria-label="Map view" className="bn-btn" style={circle}>
+          <button type="button" onClick={handleMap} aria-label="Map view" className="bn-btn" style={circle}>
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"
               stroke="var(--bn-icon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
@@ -116,7 +120,7 @@ export function BottomNav({
           {/* Search pill */}
           <button
             type="button"
-            onClick={onSearchPress}
+            onClick={handleSearch}
             aria-label="Search restaurants"
             className="bn-btn"
             style={{
