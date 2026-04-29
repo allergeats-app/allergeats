@@ -6,7 +6,7 @@ import Image from "next/image";
 import { SettingsButton } from "@/components/SettingsButton";
 
 const ICON: React.CSSProperties = {
-  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+  width: 34, height: 34, borderRadius: 9, flexShrink: 0,
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "var(--c-card)", border: "1px solid var(--c-border)",
   cursor: "pointer", color: "var(--c-text)",
@@ -85,7 +85,7 @@ export function RestaurantsHeader({
             style={{
               position: "absolute", inset: 0,
               display: "grid",
-              gridTemplateColumns: "1fr auto 1fr",
+              gridTemplateColumns: "minmax(0,1fr) auto minmax(0,auto)",
               alignItems: "center",
               opacity: isSearchActive ? 0 : 1,
               transform: isSearchActive ? "scale(0.96) translateY(-3px)" : "scale(1) translateY(0)",
@@ -134,7 +134,7 @@ export function RestaurantsHeader({
             </Link>
 
             {/* Right: search + filter + settings */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
               <button type="button" onClick={openSearch} aria-label="Search restaurants" style={ICON}>
                 <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

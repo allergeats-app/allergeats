@@ -51,7 +51,7 @@ export function FeedbackButton() {
         aria-label="Send feedback"
         style={{
           position: "fixed",
-          bottom: "max(24px, calc(16px + env(safe-area-inset-bottom)))",
+          bottom: "max(108px, calc(80px + env(safe-area-inset-bottom)))",
           right: 16,
           zIndex: 900,
           width: 44, height: 44,

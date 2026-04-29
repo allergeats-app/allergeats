@@ -16,10 +16,10 @@ export function BottomNav({
 
   const handleMap    = onMapPress    ?? (() => router.push("/"));
   const handleSearch = onSearchPress ?? (() => router.push("/"));
-  const circleShadow = "0 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08)";
+  const circleShadow = "0 2px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.07)";
 
   const circle: React.CSSProperties = {
-    width: 60, height: 60, borderRadius: "50%",
+    width: 48, height: 48, borderRadius: "50%",
     display: "flex", alignItems: "center", justifyContent: "center",
     flexShrink: 0, border: "none",
     background: "var(--bn-circle-bg)",
@@ -51,7 +51,7 @@ export function BottomNav({
           --bn-fade-s7:    rgba(255,255,255,0.93);
           --bn-fade-end:   rgba(255,255,255,1);
         }
-        .bn-btn:active { transform: scale(0.92) !important; }
+        .bn-btn:active { transform: scale(0.90) !important; }
         .bn-btn {
           touch-action: manipulation;
           user-select: none;
@@ -61,10 +61,10 @@ export function BottomNav({
         }
       `}</style>
 
-      {/* Eased gradient scrim (light) / solid bar (dark) */}
+      {/* Eased gradient scrim */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 49,
-        height: "max(180px, calc(140px + env(safe-area-inset-bottom)))",
+        height: "max(160px, calc(120px + env(safe-area-inset-bottom)))",
         background: `linear-gradient(
           to bottom,
           var(--bn-fade-start)  0%,
@@ -86,21 +86,21 @@ export function BottomNav({
           position: "fixed",
           bottom: 0, left: 0, right: 0,
           zIndex: 50,
-          padding: "10px 16px",
-          paddingBottom: "max(22px, calc(16px + env(safe-area-inset-bottom)))",
+          padding: "8px 12px",
+          paddingBottom: "max(18px, calc(12px + env(safe-area-inset-bottom)))",
           background: "var(--bn-bar-bg)",
           pointerEvents: "none",
         }}
       >
         <div style={{
-          maxWidth: 560, margin: "0 auto",
-          display: "flex", alignItems: "center", gap: 12,
+          maxWidth: 540, margin: "0 auto",
+          display: "flex", alignItems: "center", gap: 8,
           pointerEvents: "auto",
         }}>
 
           {/* Home */}
           <Link href="/" aria-label="Home" className="bn-btn" style={circle}>
-            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"
               fill={pathname === "/" ? activeColor : "var(--bn-icon)"}
               stroke="none">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
@@ -109,7 +109,7 @@ export function BottomNav({
 
           {/* Map */}
           <button type="button" onClick={handleMap} aria-label="Map view" className="bn-btn" style={circle}>
-            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="var(--bn-icon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
               <line x1="8" y1="2" x2="8" y2="18"/>
@@ -125,28 +125,31 @@ export function BottomNav({
             className="bn-btn"
             style={{
               flex: 1,
-              height: 60, borderRadius: 999,
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "0 22px",
+              minWidth: 0,
+              height: 48, borderRadius: 999,
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "0 16px",
               background: "var(--bn-pill-bg)",
               border: "none",
-              boxShadow: "0 4px 18px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.08)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.07)",
               cursor: "text",
               WebkitTapHighlightColor: "transparent",
+              overflow: "hidden",
             }}
           >
-            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="var(--bn-pill-text)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="var(--bn-pill-text)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ flexShrink: 0 }}>
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <span style={{ fontSize: 16, fontWeight: 500, color: "var(--bn-pill-text)", flex: 1, textAlign: "left" }}>
+            <span style={{ fontSize: 15, fontWeight: 500, color: "var(--bn-pill-text)", flex: 1, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               Search
             </span>
           </button>
 
           {/* Saved */}
           <Link href="/saved" aria-label="My Saved Items" className="bn-btn" style={circle}>
-            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24"
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"
               fill={pathname === "/saved" ? activeColor : "none"}
               stroke={pathname === "/saved" ? activeColor : "var(--bn-icon)"}
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -156,7 +159,7 @@ export function BottomNav({
 
           {/* Profile */}
           <Link href="/profile" aria-label="Profile" className="bn-btn" style={circle}>
-            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke={pathname === "/profile" ? activeColor : "var(--bn-icon)"}
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
