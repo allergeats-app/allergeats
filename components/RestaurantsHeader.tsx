@@ -85,7 +85,7 @@ export function RestaurantsHeader({
             style={{
               position: "absolute", inset: 0,
               display: "grid",
-              gridTemplateColumns: "minmax(0,1fr) auto minmax(0,auto)",
+              gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)",
               alignItems: "center",
               opacity: isSearchActive ? 0 : 1,
               transform: isSearchActive ? "scale(0.96) translateY(-3px)" : "scale(1) translateY(0)",
