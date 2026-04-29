@@ -110,9 +110,9 @@ export function FeedbackButton() {
                       onClick={() => setType(val)}
                       style={{
                         padding: "7px 14px", borderRadius: 999, fontSize: 13, fontWeight: 600,
-                        border: type === val ? "2px solid #1fbdcc" : "1.5px solid var(--c-border)",
-                        background: type === val ? (isDark ? "rgba(31,189,204,0.15)" : "rgba(31,189,204,0.07)") : "transparent",
-                        color: type === val ? "#1fbdcc" : "var(--c-sub)",
+                        border: type === val ? "2px solid var(--c-brand)" : "1.5px solid var(--c-border)",
+                        background: type === val ? "var(--c-brand-bg)" : "transparent",
+                        color: type === val ? "var(--c-brand)" : "var(--c-sub)",
                         cursor: "pointer",
                       }}
                     >
@@ -148,7 +148,7 @@ export function FeedbackButton() {
                   disabled={sending || !message.trim()}
                   style={{
                     width: "100%", padding: "14px 0", borderRadius: 14, border: "none",
-                    background: sending || !message.trim() ? "#9ca3af" : "#1fbdcc",
+                    background: sending || !message.trim() ? "#9ca3af" : "var(--c-brand)",
                     color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 800,
                     cursor: sending || !message.trim() ? "not-allowed" : "pointer",
                   }}

@@ -149,8 +149,8 @@ export function RestaurantsHeader({
                 aria-label={`Filters${activeFilterCount > 0 ? ` · ${activeFilterCount} active` : ""}`}
                 style={{
                   ...ICON,
-                  background: activeFilterCount > 0 ? "#1fbdcc" : "var(--c-card)",
-                  borderColor: activeFilterCount > 0 ? "#1fbdcc" : "var(--c-border)",
+                  background: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-card)",
+                  borderColor: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-border)",
                   color: activeFilterCount > 0 ? "#fff" : "var(--c-text)",
                   position: "relative",
                 }}
@@ -164,7 +164,7 @@ export function RestaurantsHeader({
                   <span style={{
                     position: "absolute", top: -5, right: -5,
                     minWidth: 16, height: 16, borderRadius: 999,
-                    background: "#fff", color: "#1fbdcc",
+                    background: "#fff", color: "var(--c-brand)",
                     fontSize: 9, fontWeight: 900, lineHeight: 1,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     padding: "0 3px", boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
@@ -227,7 +227,7 @@ export function RestaurantsHeader({
                   transition: "border-color 0.15s",
                   WebkitAppearance: "none",
                 }}
-                onFocus={(e)  => (e.currentTarget.style.borderColor = "#1fbdcc")}
+                onFocus={(e)  => (e.currentTarget.style.borderColor = "var(--c-brand)")}
                 onBlur={(e)   => (e.currentTarget.style.borderColor = "var(--c-border)")}
               />
               {query && (
@@ -261,8 +261,8 @@ export function RestaurantsHeader({
               aria-label={`Filters${activeFilterCount > 0 ? ` · ${activeFilterCount} active` : ""}`}
               style={{
                 ...ICON,
-                background: activeFilterCount > 0 ? "#1fbdcc" : "var(--c-card)",
-                borderColor: activeFilterCount > 0 ? "#1fbdcc" : "var(--c-border)",
+                background: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-card)",
+                borderColor: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-border)",
                 color: activeFilterCount > 0 ? "#fff" : "var(--c-text)",
                 position: "relative", flexShrink: 0,
               }}
@@ -276,7 +276,7 @@ export function RestaurantsHeader({
                 <span style={{
                   position: "absolute", top: -5, right: -5,
                   minWidth: 16, height: 16, borderRadius: 999,
-                  background: "#fff", color: "#1fbdcc",
+                  background: "#fff", color: "var(--c-brand)",
                   fontSize: 9, fontWeight: 900, lineHeight: 1,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   padding: "0 3px", boxShadow: "0 1px 4px rgba(0,0,0,0.2)",

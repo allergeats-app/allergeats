@@ -55,6 +55,9 @@ function applyVars(dark: boolean) {
     r.style.setProperty("--c-input", "#fafafa");
     r.style.setProperty("--c-muted", "#f9fafb");
     r.style.setProperty("--c-hdr",   "rgba(247,247,247,0.95)");
+    r.style.setProperty("--c-brand",    "#1fbdcc");
+    r.style.setProperty("--c-brand-fg", "#001f26");
+    r.style.setProperty("--c-brand-bg", "rgba(31,189,204,0.09)");
     r.style.setProperty("--bn-circle-bg",  "#ffffff");
     r.style.setProperty("--bn-icon",       "#374151");
     r.style.setProperty("--bn-pill-bg",    "#ffffff");

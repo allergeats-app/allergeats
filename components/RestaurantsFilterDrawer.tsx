@@ -63,7 +63,7 @@ function ToggleSwitch({ checked, onChange, label }: {
       onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
       style={{
         width: 46, height: 28, borderRadius: 999, flexShrink: 0,
-        background: checked ? "#1fbdcc" : "var(--c-border)",
+        background: checked ? "var(--c-brand)" : "var(--c-border)",
         border: "none", cursor: "pointer", padding: 0,
         position: "relative", transition: "background 0.2s",
       }}
@@ -175,7 +175,7 @@ export function RestaurantsFilterDrawer({
             <div>
               <div style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", lineHeight: 1 }}>Filters</div>
               {activeFilterCount > 0 && (
-                <div style={{ fontSize: 12, color: "#1fbdcc", fontWeight: 700, marginTop: 3 }}>
+                <div style={{ fontSize: 12, color: "var(--c-brand)", fontWeight: 700, marginTop: 3 }}>
                   {activeFilterCount} active
                 </div>
               )}
@@ -237,9 +237,9 @@ export function RestaurantsFilterDrawer({
                   aria-pressed={radiusMiles === mi}
                   style={{
                     flex: 1, padding: "12px 0", borderRadius: 14,
-                    border: `1.5px solid ${radiusMiles === mi ? "#1fbdcc" : "var(--c-border)"}`,
+                    border: `1.5px solid ${radiusMiles === mi ? "var(--c-brand)" : "var(--c-border)"}`,
                     background: radiusMiles === mi ? "#fef2f2" : "transparent",
-                    color: radiusMiles === mi ? "#1fbdcc" : "var(--c-sub)",
+                    color: radiusMiles === mi ? "var(--c-brand)" : "var(--c-sub)",
                     fontSize: 14, fontWeight: 800, cursor: "pointer",
                     transition: "all 0.15s",
                   }}

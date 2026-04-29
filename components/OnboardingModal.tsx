@@ -153,7 +153,7 @@ export function OnboardingModal() {
                 {
                   text: "Find Nearby Restaurants",
                   icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                     </svg>
                   ),
@@ -161,7 +161,7 @@ export function OnboardingModal() {
                 {
                   text: "Know What's Safe Instantly",
                   icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
                     </svg>
                   ),
@@ -169,7 +169,7 @@ export function OnboardingModal() {
                 {
                   text: "Save Your Go-To Meals",
                   icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                     </svg>
                   ),
@@ -245,7 +245,7 @@ export function OnboardingModal() {
                   onClick={handleSkip}
                   style={{
                     ...iosTap,
-                    color: "#1fbdcc", fontWeight: 700, textDecoration: "none",
+                    color: "var(--c-brand)", fontWeight: 700, textDecoration: "none",
                     display: "inline", minHeight: 44, padding: "10px 0",
                   }}
                 >
@@ -389,7 +389,7 @@ export function OnboardingModal() {
                       ...iosTap,
                       minHeight: 48, padding: "13px 14px",
                       borderRadius: 14,
-                      border: active ? "2px solid #1fbdcc" : "1.5px solid var(--c-border)",
+                      border: active ? "2px solid var(--c-brand)" : "1.5px solid var(--c-border)",
                       background: active ? (isDark ? "rgba(31,189,204,0.15)" : "rgba(31,189,204,0.07)") : "var(--c-card)",
                       color: active ? "#1fbdcc" : "var(--c-text)",
                       fontSize: 14, fontWeight: active ? 700 : 500,
@@ -409,7 +409,7 @@ export function OnboardingModal() {
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
                 borderRadius: 16, border: "none",
-                background: "#1fbdcc", color: "var(--c-brand-fg)",
+                background: "var(--c-brand)", color: "var(--c-brand-fg)",
                 fontSize: 17, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
               }}

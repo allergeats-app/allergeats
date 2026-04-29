@@ -12,7 +12,7 @@ export function BottomNav({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const activeColor = "#1fbdcc";
+  const activeColor = "var(--c-brand)";
 
   const handleMap    = onMapPress    ?? (() => router.push("/"));
   const handleSearch = onSearchPress ?? (() => router.push("/"));
