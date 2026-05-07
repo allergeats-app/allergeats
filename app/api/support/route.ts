@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 
-const client = new Anthropic();
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // 20 messages per 10 minutes per IP — generous for support chat
 const WINDOW_MS = 10 * 60 * 1000;
@@ -37,7 +37,13 @@ AllergEats is a mobile web app that helps people with food allergies discover sa
 ## Tone
 Be warm, clear, and concise. If you're unsure of a specific answer, say so honestly and direct the user to the 💬 feedback button or to confirm with the restaurant. Never guess at specific menu item safety.`;
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response("ANTHROPIC_API_KEY is not configured.", { status: 503 });
+  }
+
   const ip = getClientIp(req);
   if (await isRateLimited(ip, WINDOW_MS, MAX_PER_WINDOW)) {
     return new Response("Too many messages — please wait a moment.", { status: 429 });

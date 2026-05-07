@@ -2,7 +2,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 
-const client = new Anthropic();
+export const maxDuration = 60; // allow streaming on Vercel Pro; ignored on Hobby
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_PER_WINDOW = 60;
@@ -65,6 +67,10 @@ When asked for a pitch, produce it ready to copy-paste. Include any subject line
 Always remind the user to personalize anything in [brackets] before sending.`;
 
 export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response("ANTHROPIC_API_KEY is not set — add it to your .env.local or Vercel environment variables.", { status: 503 });
+  }
+
   const ip = getClientIp(req);
   if (await isRateLimited(ip, WINDOW_MS, MAX_PER_WINDOW)) {
     return new Response("Rate limit reached — try again later.", { status: 429 });
