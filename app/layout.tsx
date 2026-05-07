@@ -11,6 +11,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { FeedbackButton } from "@/components/FeedbackButton";
+import { SupportChat } from "@/components/SupportChat";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,6 +92,7 @@ export default function RootLayout({
                 <OfflineBanner />
                 <OnboardingModal />
                 <FeedbackButton />
+                <SupportChat />
                 {children}
                 <footer style={{
                   textAlign: "center",
