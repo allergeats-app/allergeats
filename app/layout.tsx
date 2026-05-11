@@ -91,7 +91,6 @@ export default function RootLayout({
               <ErrorBoundary>
                 <OfflineBanner />
                 <OnboardingModal />
-                <FeedbackButton />
                 <SupportChat />
                 {children}
                 <footer style={{
@@ -118,6 +117,7 @@ export default function RootLayout({
                   <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 20 }}>
                     <Link href="/privacy" style={{ color: "var(--c-sub)", textDecoration: "none", fontWeight: 600 }}>Privacy Policy</Link>
                     <Link href="/terms" style={{ color: "var(--c-sub)", textDecoration: "none", fontWeight: 600 }}>Terms of Service</Link>
+                    <FeedbackButton />
                   </div>
                 </footer>
               </ErrorBoundary>

@@ -45,25 +45,16 @@ export function FeedbackButton() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Footer text trigger */}
       <button
         onClick={() => setOpen(true)}
-        aria-label="Send feedback"
         style={{
-          position: "fixed",
-          bottom: "max(108px, calc(80px + env(safe-area-inset-bottom)))",
-          right: 16,
-          zIndex: 900,
-          width: 44, height: 44,
-          borderRadius: "50%",
-          background: isDark ? "#2c2c2e" : "#fff",
-          border: "1.5px solid var(--c-border)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", fontSize: 18,
+          background: "none", border: "none", padding: 0,
+          color: "var(--c-sub)", fontSize: 13, fontWeight: 600,
+          cursor: "pointer", WebkitTapHighlightColor: "transparent",
         }}
       >
-        💬
+        Give Feedback
       </button>
 
       {/* Sheet */}
