@@ -94,7 +94,6 @@ function HomeContent() {
   const [radiusMiles, setRadiusMiles]   = useState(10);
   const [showFilterDrawer, setShowFilterDrawer]     = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [headerSearchOpen, setHeaderSearchOpen]     = useState(false);
 
   const [rawRestaurants, setRawRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading]               = useState(true);
@@ -360,12 +359,6 @@ function HomeContent() {
         locationMode={locationMode}
         resultsSource={resultsSource}
         onLocationPress={() => setShowLocationPicker(true)}
-        query={query}
-        setQuery={setQuery}
-        loading={loading}
-        filteredCount={filtered.length}
-        searchOpen={headerSearchOpen}
-        setSearchOpen={setHeaderSearchOpen}
       />
 
       {layout !== "map" && <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
@@ -629,7 +622,8 @@ function HomeContent() {
 
       <BottomNav
         onMapPress={() => setLayout(layout === "map" ? "list" : "map")}
-        onSearchPress={() => { window.scrollTo({ top: 0, behavior: "instant" }); setHeaderSearchOpen(true); }}
+        query={query}
+        setQuery={setQuery}
       />
 
     </main>
