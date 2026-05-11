@@ -20,7 +20,6 @@ export function RestaurantsHeader({
   resultsSource,
   onLocationPress,
   query, setQuery,
-  activeFilterCount, showFilterDrawer, setShowFilterDrawer,
   loading, filteredCount,
   searchOpen, setSearchOpen,
 }: {
@@ -29,7 +28,6 @@ export function RestaurantsHeader({
   resultsSource: "live" | "mock";
   onLocationPress: () => void;
   query: string; setQuery: (q: string) => void;
-  activeFilterCount: number; showFilterDrawer: boolean; setShowFilterDrawer: (v: boolean) => void;
   loading: boolean; filteredCount: number;
   searchOpen?: boolean; setSearchOpen?: (v: boolean) => void;
 }) {
@@ -133,46 +131,13 @@ export function RestaurantsHeader({
               <Image src="/logo 3d.png" alt="AllergEats" width={120} height={29} sizes="120px" style={{ width: "auto", height: 28 }} priority />
             </Link>
 
-            {/* Right: search + filter + settings */}
+            {/* Right: search + settings */}
             <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
               <button type="button" onClick={openSearch} aria-label="Search restaurants" style={ICON}>
                 <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFilterDrawer(!showFilterDrawer)}
-                aria-expanded={showFilterDrawer}
-                aria-haspopup="dialog"
-                aria-label={`Filters${activeFilterCount > 0 ? ` · ${activeFilterCount} active` : ""}`}
-                style={{
-                  ...ICON,
-                  background: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-card)",
-                  borderColor: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-border)",
-                  color: activeFilterCount > 0 ? "#fff" : "var(--c-text)",
-                  position: "relative",
-                }}
-              >
-                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
-                  <line x1="4" y1="6" x2="20" y2="6"/>
-                  <line x1="8" y1="12" x2="16" y2="12"/>
-                  <line x1="11" y1="18" x2="13" y2="18"/>
-                </svg>
-                {activeFilterCount > 0 && (
-                  <span style={{
-                    position: "absolute", top: -5, right: -5,
-                    minWidth: 16, height: 16, borderRadius: 999,
-                    background: "#fff", color: "var(--c-brand)",
-                    fontSize: 9, fontWeight: 900, lineHeight: 1,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    padding: "0 3px", boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-                    animation: "popIn 0.15s ease",
-                  }}>
-                    {activeFilterCount}
-                  </span>
-                )}
               </button>
               <SettingsButton />
             </div>
@@ -252,40 +217,6 @@ export function RestaurantsHeader({
               )}
             </div>
 
-            {/* Filter visible in search mode */}
-            <button
-              type="button"
-              onClick={() => setShowFilterDrawer(!showFilterDrawer)}
-              aria-expanded={showFilterDrawer}
-              aria-haspopup="dialog"
-              aria-label={`Filters${activeFilterCount > 0 ? ` · ${activeFilterCount} active` : ""}`}
-              style={{
-                ...ICON,
-                background: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-card)",
-                borderColor: activeFilterCount > 0 ? "var(--c-brand)" : "var(--c-border)",
-                color: activeFilterCount > 0 ? "#fff" : "var(--c-text)",
-                position: "relative", flexShrink: 0,
-              }}
-            >
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
-                <line x1="4" y1="6" x2="20" y2="6"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-                <line x1="11" y1="18" x2="13" y2="18"/>
-              </svg>
-              {activeFilterCount > 0 && (
-                <span style={{
-                  position: "absolute", top: -5, right: -5,
-                  minWidth: 16, height: 16, borderRadius: 999,
-                  background: "#fff", color: "var(--c-brand)",
-                  fontSize: 9, fontWeight: 900, lineHeight: 1,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  padding: "0 3px", boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-                  animation: "popIn 0.15s ease",
-                }}>
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
           </div>
         </div>
       </div>
