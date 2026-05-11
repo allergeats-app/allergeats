@@ -107,10 +107,11 @@ export default function RootLayout({
                     fontFamily: "'Georgia', 'Times New Roman', serif",
                     letterSpacing: "-0.02em",
                     lineHeight: 1.1,
-                    background: "linear-gradient(135deg, #b45309 0%, #ef4444 100%)",
+                    background: "linear-gradient(to right, #bf953f 0%, #fcf6ba 30%, #b38728 50%, #fbf5b7 70%, #aa771c 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
+                    filter: "drop-shadow(0 1px 2px rgba(180,130,0,0.3))",
                     marginBottom: 4,
                   }}>Always confirm with staff before ordering.</span>
                   AllergEats is a decision-support tool, not medical advice.
