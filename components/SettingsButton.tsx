@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
+import { SupportChat } from "@/components/SupportChat";
 
 export function SettingsButton() {
   const [open, setOpen] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const { user, displayName, signOut } = useAuth();
   const { isDark, toggle } = useTheme();
   const router = useRouter();
@@ -154,6 +156,12 @@ export function SettingsButton() {
                 </div>
               </button>
 
+              {/* Contact Support */}
+              <button onClick={() => { setOpen(false); setShowSupport(true); }} style={itemStyle}>
+                <span>Contact Support</span>
+                <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
+              </button>
+
               {/* Divider + Sign out */}
               <div style={{ borderTop: "1px solid var(--c-border)", marginTop: 4, paddingTop: 4 }}>
                 <button onClick={handleSignOut} style={{ ...itemStyle, color: "#b91c1c" }}>
@@ -195,9 +203,15 @@ export function SettingsButton() {
                 </div>
               </button>
 
+              {/* Contact Support */}
+              <button onClick={() => { setOpen(false); setShowSupport(true); }} style={itemStyle}>
+                <span>Contact Support</span>
+                <span style={{ fontSize: 13, color: "var(--c-sub)" }}>→</span>
+              </button>
+
               {/* Sign in */}
               <div style={{ borderTop: "1px solid var(--c-border)", marginTop: 4, paddingTop: 4 }}>
-                <Link href="/auth" onClick={() => setOpen(false)} style={{ ...itemStyle, fontWeight: 700, color: "#1fbdcc" }}>
+                <Link href="/auth" onClick={() => setOpen(false)} style={{ ...itemStyle, fontWeight: 700, color: "var(--c-brand)" }}>
                   Sign In / Create Account
                 </Link>
               </div>
@@ -212,6 +226,8 @@ export function SettingsButton() {
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
+
+      <SupportChat open={showSupport} onClose={() => setShowSupport(false)} />
     </div>
   );
 }
