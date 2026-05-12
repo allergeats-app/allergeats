@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useTheme, type ThemeMode } from "@/lib/themeContext";
 import { BottomNav } from "@/components/BottomNav";
+import { SupportChat } from "@/components/SupportChat";
 
 export default function ProfilePage() {
   const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
@@ -13,6 +14,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   const [signingOut, setSigningOut]       = useState(false);
+  const [showSupport, setShowSupport]     = useState(false);
   const [firstEdit,  setFirstEdit]  = useState("");
   const [lastEdit,   setLastEdit]   = useState("");
   const [nameSaving, setNameSaving] = useState(false);
@@ -216,8 +218,45 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* Support */}
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 10 }}>Help</div>
+          <button
+            onClick={() => setShowSupport(true)}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 14,
+              padding: "14px 16px", borderRadius: 16, border: "none",
+              background: "var(--c-card)", cursor: "pointer",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              outline: "1px solid var(--c-border)",
+              WebkitTapHighlightColor: "transparent",
+              textAlign: "left",
+            }}
+          >
+            <span style={{
+              width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
+              background: "var(--c-brand-bg)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="var(--c-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </span>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)" }}>Contact Support</div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 1 }}>Chat with our AI assistant</div>
+            </div>
+            <svg style={{ marginLeft: "auto" }} width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="var(--c-sub)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
 
       </div>
+
+      <SupportChat open={showSupport} onClose={() => setShowSupport(false)} />
       <BottomNav />
     </main>
   );

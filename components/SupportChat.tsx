@@ -13,9 +13,12 @@ const SUGGESTIONS = [
   "How do I scan a menu?",
 ];
 
-export function SupportChat() {
+export function SupportChat({ open: controlledOpen, onClose }: { open?: boolean; onClose?: () => void } = {}) {
   const { isDark } = useTheme();
-  const [open, setOpen]         = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput]       = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -84,38 +87,14 @@ export function SupportChat() {
 
   function close() {
     abortRef.current?.abort();
-    setOpen(false);
+    if (isControlled) onClose?.();
+    else setInternalOpen(false);
   }
 
   const isEmpty = messages.length === 0;
 
   return (
     <>
-      {/* Floating trigger */}
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Get support"
-        style={{
-          position: "fixed",
-          bottom: "max(108px, calc(80px + env(safe-area-inset-bottom)))",
-          left: 16,
-          zIndex: 900,
-          width: 44, height: 44,
-          borderRadius: "50%",
-          background: isDark ? "#1c1c1e" : "#fff",
-          border: "1.5px solid var(--c-border)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.14)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer",
-          WebkitTapHighlightColor: "transparent",
-        }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="var(--c-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-      </button>
-
       {/* Backdrop + sheet */}
       {open && (
         <div
