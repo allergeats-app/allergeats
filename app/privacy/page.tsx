@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "How AllergEats collects, uses, and protects your personal information.",
 };
 
-const EFFECTIVE_DATE = "April 7, 2026";
+const EFFECTIVE_DATE = "May 12, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -43,6 +43,12 @@ export default function PrivacyPage() {
           <SubHead>Saved scans and orders</SubHead>
           Menu scans you save and orders you save are stored locally on your device and, if you are signed in, associated with your account.
 
+          <SubHead>Feedback and reports</SubHead>
+          When you submit feedback or report incorrect allergen data through the app, we store your message along with your IP address. Your IP address is used solely for abuse prevention and is not shared with third parties or used for tracking.
+
+          <SubHead>Menu scans</SubHead>
+          When you use the AI-powered menu scan feature, menu text or photos are sent to Anthropic (Claude) for analysis. We do not attach your account identity or personal information to these requests.
+
           <SubHead>Usage data</SubHead>
           We use Vercel Analytics to collect anonymized, aggregated data about page views and navigation. No personal identifiers are included.
 
@@ -68,8 +74,10 @@ export default function PrivacyPage() {
           <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
             <li><strong>Supabase</strong> — authentication and database</li>
             <li><strong>Google OAuth</strong> — optional sign-in</li>
+            <li><strong>Anthropic (Claude)</strong> — AI-powered menu scanning and support chat. Menu text/photos and support messages are processed by Claude. No personal account data is included in these requests.</li>
             <li><strong>Vercel Analytics</strong> — anonymized usage analytics</li>
             <li><strong>OpenStreetMap / Overpass API</strong> — restaurant location data</li>
+            <li><strong>Google Places API</strong> — nearby restaurant discovery</li>
           </ul>
           Each third party has its own privacy policy. We encourage you to review them.
         </Section>
