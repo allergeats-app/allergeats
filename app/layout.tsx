@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "leaflet/dist/leaflet.css";
 import { AuthProvider } from "@/lib/authContext";
 import { FavoritesProvider } from "@/lib/favoritesContext";
 import { ThemeProvider } from "@/lib/themeContext";

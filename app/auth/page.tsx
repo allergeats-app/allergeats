@@ -115,7 +115,7 @@ export default function AuthPage() {
 
   const inputStyle: React.CSSProperties = {
     width: "100%", boxSizing: "border-box",
-    padding: "13px 14px", borderRadius: 12, fontSize: 15,
+    padding: "13px 14px", borderRadius: 12, fontSize: 16,
     color: "var(--c-text)", background: "var(--c-input)", outline: "none",
     border: "1.5px solid var(--c-border)", transition: "border-color 0.15s",
   };

@@ -235,7 +235,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
             onClick={(e) => { e.stopPropagation(); onToggleOrder(); }}
             aria-label={inOrder ? "Remove from order" : "Add to order"}
             style={{
-              width: 40, height: 40, borderRadius: 999, border: "none",
+              width: 44, height: 44, borderRadius: 999, border: "none",
               background: inOrder ? "#22c55e" : "var(--c-brand)",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", transition: "background 0.15s",
@@ -349,10 +349,10 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 13, color: "var(--c-sub)", fontWeight: 600 }}>Was this right?</span>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={handleConfirm} title="Yes" style={{ width: 40, height: 40, borderRadius: 999, border: "1.5px solid #d1fae5", background: "#f0fdf4", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#15803d" }}>
+                    <button onClick={handleConfirm} title="Yes" style={{ width: 44, height: 44, borderRadius: 999, border: "1.5px solid #d1fae5", background: "#f0fdf4", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#15803d" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                     </button>
-                    <button onClick={() => setFeedbackState("open")} title="No" style={{ width: 40, height: 40, borderRadius: 999, border: "1.5px solid #fecaca", background: "#fff1f0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#b91c1c" }}>
+                    <button onClick={() => setFeedbackState("open")} title="No" style={{ width: 44, height: 44, borderRadius: 999, border: "1.5px solid #fecaca", background: "#fff1f0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#b91c1c" }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                   </div>

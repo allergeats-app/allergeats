@@ -50,7 +50,7 @@ export function SettingsButton() {
         aria-label="Open settings"
         aria-expanded={open}
         style={{
-          width: 36, height: 36, borderRadius: 999,
+          width: 44, height: 44, borderRadius: 999,
           background: open ? "var(--c-border)" : "var(--c-card)",
           border: "1px solid var(--c-border)",
           display: "flex", alignItems: "center", justifyContent: "center",

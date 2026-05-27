@@ -25,7 +25,8 @@ export function OfflineBanner() {
       aria-live="polite"
       style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-        background: "#1c1c1e", color: "#f2f2f7",
+        background: "var(--c-card)", color: "var(--c-text)",
+        borderBottom: "1px solid var(--c-border)",
         fontSize: 13, fontWeight: 600, textAlign: "center",
         padding: `max(10px, calc(8px + env(safe-area-inset-top))) 16px 10px`,
         letterSpacing: "0.01em",

@@ -28,8 +28,8 @@ export async function POST(req: Request) {
     .eq("email", email.toLowerCase().trim());
 
   if (!creds?.length) {
-    // Return 404 so the client can show a helpful message
-    return NextResponse.json({ error: "No passkey registered for this account" }, { status: 404 });
+    // Return 401 (not 404) to prevent email enumeration via response code timing
+    return NextResponse.json({ error: "Passkey authentication unavailable" }, { status: 401 });
   }
 
   const userId = creds[0].user_id as string;

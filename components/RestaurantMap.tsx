@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import "leaflet/dist/leaflet.css";
 import type { ScoredRestaurant } from "@/lib/types";
 
 type Props = {
