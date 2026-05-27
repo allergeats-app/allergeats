@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Scan a Menu — AllergEats",
-  description: "Point your camera at any restaurant menu for instant allergen detection across all major food allergies.",
+  title: "Menu Scan | AllergEats",
+  description: "Upload a menu photo or paste a URL to instantly analyze any restaurant's menu for your allergens.",
 };
 
 export default function ScanLayout({ children }: { children: React.ReactNode }) {

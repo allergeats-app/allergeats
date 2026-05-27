@@ -6,13 +6,13 @@ import { correctionCount, exportCorrections, clearAllCorrections, getAllCorrecti
 import { MOCK_RESTAURANTS, MENU_DATA_VERIFIED_DATE } from "@/lib/mockRestaurants";
 import { ALLERGEN_SOURCE_URLS } from "@/lib/allergenSourceUrls";
 
-const PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "";
 const SESSION_KEY = "allegeats_admin_authed";
 
 export default function AdminPage() {
   const [input, setInput] = useState("");
   const [authed, setAuthed] = useState(false);
   const [error, setError] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [count, setCount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -22,13 +22,25 @@ export default function AdminPage() {
     setTotalItems(MOCK_RESTAURANTS.reduce((acc, r) => acc + r.menuItems.length, 0));
   }, []);
 
-  function login() {
-    if (input === PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "1");
-      setAuthed(true);
-      setError(false);
-    } else {
+  async function login() {
+    setChecking(true);
+    try {
+      const res = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: input }),
+      });
+      if (res.ok) {
+        sessionStorage.setItem(SESSION_KEY, "1");
+        setAuthed(true);
+        setError(false);
+      } else {
+        setError(true);
+      }
+    } catch {
       setError(true);
+    } finally {
+      setChecking(false);
     }
   }
 
@@ -67,9 +79,10 @@ export default function AdminPage() {
           {error && <div style={{ fontSize: 13, color: "#f87171", marginBottom: 12 }}>Incorrect password.</div>}
           <button
             onClick={login}
-            style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: "var(--c-brand)", color: "#001f26", fontSize: 15, fontWeight: 800, cursor: "pointer" }}
+            disabled={checking}
+            style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: checking ? "#9ca3af" : "var(--c-brand)", color: "#001f26", fontSize: 15, fontWeight: 800, cursor: checking ? "not-allowed" : "pointer" }}
           >
-            Enter
+            {checking ? "Checking…" : "Enter"}
           </button>
         </div>
       </div>

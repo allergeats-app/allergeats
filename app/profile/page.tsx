@@ -20,7 +20,6 @@ export default function ProfilePage() {
   const [nameSaving, setNameSaving] = useState(false);
   const [nameSaved,  setNameSaved]  = useState(false);
 
-
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
   }, [loading, user, router]);
@@ -29,8 +28,6 @@ export default function ProfilePage() {
     setFirstEdit(firstName); // eslint-disable-line react-hooks/set-state-in-effect
     setLastEdit(lastName);
   }, [firstName, lastName]);
-
-
 
   async function handleSaveName() {
     setNameSaving(true);
