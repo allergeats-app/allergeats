@@ -112,12 +112,34 @@ export async function GET(req: Request) {
     if (!directUrl.startsWith("https://upload.wikimedia.org/")) {
       return new Response(null, { status: 400 });
     }
-    try {
-      const imgRes = await fetch(directUrl, {
-        headers: { "User-Agent": "AllergEats/1.0 (food-allergy-app; contact@allegeats.com)" },
+
+    // Wikipedia's /thumb/ CDN paths now return 400 for many files.
+    // When the thumb URL fails, fall back to the original direct file URL:
+    //   .../thumb/A/AB/File.svg/640px-File.svg.png  →  .../A/AB/File.svg
+    function deThumb(url: string): string | null {
+      if (!url.includes("/thumb/")) return null;
+      return url
+        .replace(/\/thumb\//, "/")          // remove /thumb/
+        .replace(/\/\d+px-[^/]+$/, "");     // remove trailing /640px-filename.ext
+    }
+
+    const tryFetch = async (url: string) =>
+      fetch(url, {
+        headers: { "User-Agent": "AllergEats/1.0 (food-allergy-app; contact@allergeats.com)" },
         next: { revalidate: 86400 },
       });
+
+    try {
+      let imgRes = await tryFetch(directUrl);
+
+      // Retry with de-thumbified URL if the thumb path failed
+      if (!imgRes.ok && directUrl.includes("/thumb/")) {
+        const fallback = deThumb(directUrl);
+        if (fallback) imgRes = await tryFetch(fallback);
+      }
+
       if (!imgRes.ok) return new Response(null, { status: 404 });
+
       const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
       const buffer = await imgRes.arrayBuffer();
       const isLogoUrl = /\.svg(\.png)?$/i.test(directUrl) || /[Ll]ogo/.test(directUrl);
