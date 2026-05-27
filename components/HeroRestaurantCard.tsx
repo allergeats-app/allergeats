@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
-import { fitLevel, fitBadge, fitExplanation } from "@/lib/fitLevel";
+import { fitLevel, fitBadge } from "@/lib/fitLevel";
 import { coverageTier } from "@/lib/scoring";
 import type { ScoredRestaurant } from "@/lib/types";
 import { trackEvent } from "@/lib/analytics";
@@ -17,15 +17,11 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
   const { isDark } = useTheme();
   const { summary } = r;
 
-  const safePercent  = useMemo(() => summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0, [summary]);
-  const askPercent   = useMemo(() => summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0, [summary]);
-  const avoidPercent = useMemo(() => summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0, [summary]);
-  const safeItemNames = useMemo(() => r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name), [r.scoredItems]);
-  const cover  = useMemo(() => coverGradient(r.cuisine, r.name), [r.cuisine, r.name]);
-  const level  = useMemo(() => fitLevel(safePercent, summary.avoid, summary.ask, summary.total), [safePercent, summary]);
-  const badge  = useMemo(() => fitBadge(level), [level]);
-  const explanation = useMemo(() => fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe), [level, summary]);
-  const tier   = useMemo(() => coverageTier(summary.total), [summary.total]);
+  const safePercent = useMemo(() => summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0, [summary]);
+  const cover = useMemo(() => coverGradient(r.cuisine, r.name), [r.cuisine, r.name]);
+  const level = useMemo(() => fitLevel(safePercent, summary.avoid, summary.ask, summary.total), [safePercent, summary]);
+  const badge = useMemo(() => fitBadge(level), [level]);
+  const tier  = useMemo(() => coverageTier(summary.total), [summary.total]);
 
   const [photoFailed, setPhotoFailed] = useState(false);
   const [photoLoaded, setPhotoLoaded] = useState(false);
@@ -238,60 +234,13 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
             </div>
           )}
 
-          {/* Explanation */}
-          <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 14, lineHeight: 1.5 }}>
-            {explanation}
-          </div>
-
-          {/* ── Stats bar ── */}
+          {/* ── Big stat blocks ── */}
           {summary.total > 0 && (
-            <>
-              {/* Glowing progress bar */}
-              <div style={{ position: "relative", height: 8, marginBottom: 12 }}>
-                <div style={{
-                  position: "absolute", inset: "-4px 0", borderRadius: 999,
-                  display: "flex", overflow: "hidden",
-                  filter: "blur(5px)", opacity: isDark ? 0.8 : 0.55,
-                }}>
-                  {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e" }} />}
-                  {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b" }} />}
-                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />}
-                </div>
-                <div style={{
-                  position: "absolute", inset: 0, borderRadius: 999,
-                  background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                  overflow: "hidden", display: "flex",
-                }}>
-                  {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s" }} />}
-                  {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s" }} />}
-                  {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)", transition: "width 0.5s" }} />}
-                </div>
-              </div>
-
-              {/* Stat pills */}
-              <div style={{ display: "flex", gap: 7, marginBottom: safeItemNames.length > 0 ? 12 : 0 }}>
-                <StatPill count={summary.likelySafe} label="Safe"  rgb="22,163,74"  isDark={isDark} />
-                <StatPill count={summary.ask}        label="Ask"   rgb="217,119,6"  isDark={isDark} />
-                <StatPill count={summary.avoid}      label="Avoid" rgb="220,38,38"  isDark={isDark} />
-              </div>
-
-              {/* Safe item tags */}
-              {safeItemNames.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-                  {safeItemNames.map((name) => (
-                    <span key={name} style={{
-                      fontSize: 13, fontWeight: 700,
-                      color: isDark ? "#86efac" : "#15803d",
-                      background: isDark ? "#0a2414" : "#f0fdf4",
-                      border: `1px solid ${isDark ? "#14532d" : "#bbf7d0"}`,
-                      padding: "4px 10px", borderRadius: 999,
-                    }}>
-                      ✓ {name}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+              <StatBlock count={summary.likelySafe} label="Safe"      color="#22c55e" rgb="34,197,94"   isDark={isDark} />
+              <StatBlock count={summary.ask}        label="Ask Staff" color="#f59e0b" rgb="245,158,11"  isDark={isDark} />
+              <StatBlock count={summary.avoid}      label="Avoid"     color="#ef4444" rgb="239,68,68"   isDark={isDark} />
+            </div>
           )}
 
           {/* CTA row */}
@@ -319,17 +268,18 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
   );
 }
 
-function StatPill({ count, label, rgb, isDark }: { count: number; label: string; rgb: string; isDark: boolean }) {
+function StatBlock({ count, label, color, rgb, isDark }: { count: number; label: string; color: string; rgb: string; isDark: boolean }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 5,
-      padding: "5px 12px", borderRadius: 999,
-      background: `rgba(${rgb},${isDark ? "0.18" : "0.10"})`,
-      border: `1.5px solid rgba(${rgb},${isDark ? "0.4" : "0.25"})`,
-      boxShadow: count > 0 ? `0 2px 10px rgba(${rgb},${isDark ? "0.3" : "0.18"})` : "none",
+      textAlign: "center",
+      padding: "13px 8px",
+      borderRadius: 16,
+      background: `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
+      border: `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
+      boxShadow: count > 0 ? `0 4px 16px rgba(${rgb},${isDark ? "0.25" : "0.12"})` : "none",
     }}>
-      <span style={{ fontSize: 16, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.03em" }}>{count}</span>
-      <span style={{ fontSize: 12, fontWeight: 800, color: `rgba(${rgb},${isDark ? "0.9" : "0.8"})` }}>{label}</span>
+      <div style={{ fontSize: 32, fontWeight: 900, color, letterSpacing: "-0.04em", lineHeight: 1 }}>{count}</div>
+      <div style={{ fontSize: 11, fontWeight: 800, color, opacity: 0.8, marginTop: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
     </div>
   );
 }
