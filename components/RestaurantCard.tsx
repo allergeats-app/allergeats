@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
-import { coverageTier, coverageTierLabel, coverageTierColor } from "@/lib/scoring";
-import { fitLevel, fitBadge, fitExplanation } from "@/lib/fitLevel";
+import { coverageTier } from "@/lib/scoring";
+import { fitLevel, fitBadge } from "@/lib/fitLevel";
 import type { ScoredRestaurant } from "@/lib/types";
 import { trackEvent } from "@/lib/analytics";
 import { coverGradient } from "@/lib/coverGradient";
@@ -13,24 +13,17 @@ import { chainLogoUrl } from "@/lib/chainLogos";
 
 type Props = { restaurant: ScoredRestaurant; variant?: "default" | "rail" | "compact" };
 
-
 export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const { isDark } = useTheme();
   const { summary } = r;
   const isRail    = variant === "rail";
   const isCompact = variant === "compact";
 
-  const safePercent  = useMemo(() => summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0, [summary]);
-  const askPercent   = useMemo(() => summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0, [summary]);
-  const avoidPercent = useMemo(() => summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0, [summary]);
-  const safeItemNames = useMemo(() => r.scoredItems.filter((i) => i.risk === "likely-safe").slice(0, 3).map((i) => i.name), [r.scoredItems]);
-  const cover        = useMemo(() => ({ bg: coverGradient(r.cuisine, r.name) }), [r.cuisine, r.name]);
-  const level        = useMemo(() => fitLevel(safePercent, summary.avoid, summary.ask, summary.total), [safePercent, summary]);
-  const badge        = useMemo(() => fitBadge(level), [level]);
-  const explanation  = useMemo(() => fitExplanation(level, summary.avoid, summary.ask, summary.likelySafe), [level, summary]);
-  const tier         = useMemo(() => coverageTier(summary.total), [summary.total]);
-  const tierLabel    = useMemo(() => coverageTierLabel(summary.total), [summary.total]);
-  const tierColor    = useMemo(() => coverageTierColor(tier), [tier]);
+  const safePercent = useMemo(() => summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0, [summary]);
+  const cover       = useMemo(() => ({ bg: coverGradient(r.cuisine, r.name) }), [r.cuisine, r.name]);
+  const level       = useMemo(() => fitLevel(safePercent, summary.avoid, summary.ask, summary.total), [safePercent, summary]);
+  const badge       = useMemo(() => fitBadge(level), [level]);
+  const tier        = useMemo(() => coverageTier(summary.total), [summary.total]);
 
   const [photoFailed, setPhotoFailed] = useState(false);
   const [photoLoaded, setPhotoLoaded] = useState(false);
@@ -39,11 +32,6 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(r.id);
 
-  // Image priority:
-  //   1. r.imageUrl   — pre-enriched URL from the image enrichment pipeline
-  //   2. chainLogoUrl — Wikipedia photo via /api/wiki-thumb (free, no API key)
-  //   3. places-photo — Google Places proxy (requires API key, best for OSM restaurants)
-  //   4. restaurant-image — Google Places → Yelp → website og:image (last resort, async)
   const wikiUrl  = chainLogoUrl(r.name);
   const primarySrc = !photoFailed
     ? (r.imageUrl ?? wikiUrl
@@ -56,10 +44,9 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
 
   const photoSrc = primarySrc ?? fallbackSrc;
 
-  // Fire the restaurant-image fallback when the primary chain has nothing to show
   useEffect(() => {
     if (fallbackFiredRef.current) return;
-    if (primarySrc && !photoFailed) return; // primary chain has a URL — don't fire yet
+    if (primarySrc && !photoFailed) return;
     if (!r.name) return;
     fallbackFiredRef.current = true;
     const controller = new AbortController();
@@ -73,11 +60,9 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
     return () => controller.abort();
   }, [primarySrc, photoFailed, r.name, r.lat, r.lng]);
 
-  // Wiki-thumb images are chain logos — use contain so the full logo is visible.
-  // Places photos, fallback images, and pre-enriched photos use cover.
   const isLogo = (() => {
     if (!photoSrc) return false;
-    if (photoSrc === fallbackSrc) return false; // restaurant-image results are always photos
+    if (photoSrc === fallbackSrc) return false;
     if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
       const decoded = decodeURIComponent(photoSrc);
       return /\.svg(\.png)?$/i.test(decoded) || /[Ll]ogo/.test(decoded);
@@ -88,7 +73,11 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const imgHeight = isRail ? 108 : isCompact ? 108 : 148;
 
   return (
-    <Link href={`/restaurants/${r.id}`} onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+    <Link
+      href={`/restaurants/${r.id}`}
+      onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })}
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
+    >
       <div style={{
         background: "var(--c-card)",
         border: "1px solid var(--c-border)",
@@ -98,7 +87,8 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
         cursor: "pointer",
         transition: "box-shadow 0.15s, transform 0.1s",
       }}>
-        {/* Cover image area */}
+
+        {/* ── Cover image ── */}
         <div style={{
           height: imgHeight,
           background: isLogo && photoLoaded ? "#fff" : photoLoaded ? "var(--c-card)" : cover.bg,
@@ -106,12 +96,9 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
           position: "relative", overflow: "hidden",
           transition: "background 0.3s ease",
         }}>
-          {/* Initial logo — shown when no photo has loaded */}
+          {/* Placeholder initial */}
           {!photoLoaded && (
-            <div style={{
-              position: "absolute", inset: 0,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{
                 width: isRail || isCompact ? 48 : 60,
                 height: isRail || isCompact ? 48 : 60,
@@ -123,17 +110,15 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               }}>
                 <span style={{
                   fontSize: isRail || isCompact ? 22 : 28,
-                  fontWeight: 900,
-                  color: "rgba(255,255,255,0.9)",
-                  lineHeight: 1,
-                  fontFamily: "Georgia, serif",
-                  letterSpacing: "-0.02em",
+                  fontWeight: 900, color: "rgba(255,255,255,0.9)",
+                  lineHeight: 1, fontFamily: "Georgia, serif", letterSpacing: "-0.02em",
                 }}>
                   {r.name.trim().charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
           )}
+
           {photoSrc && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -153,7 +138,8 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               }}
             />
           )}
-          {/* Gradient scrim on photos */}
+
+          {/* Gradient scrim */}
           {!isLogo && photoLoaded && (
             <div style={{
               position: "absolute", inset: 0,
@@ -161,6 +147,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               pointerEvents: "none",
             }} />
           )}
+
           {/* Fit badge */}
           <div style={{
             position: "absolute", top: 8, right: 8,
@@ -176,6 +163,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               </div>
             )}
           </div>
+
           {/* Distance badge */}
           {r.distance != null && (
             <div style={{
@@ -187,9 +175,14 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               {r.distance} mi
             </div>
           )}
+
           {/* Save button */}
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier }); toggleFavorite(r.id, { name: r.name, cuisine: r.cuisine }); }}
+            onClick={(e) => {
+              e.preventDefault(); e.stopPropagation();
+              trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier });
+              toggleFavorite(r.id, { name: r.name, cuisine: r.cuisine });
+            }}
             aria-label={favorited ? `Remove ${r.name} from saved` : `Save ${r.name}`}
             title={favorited ? "Remove from saved" : "Save restaurant"}
             style={{
@@ -199,105 +192,59 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               width: isRail ? 36 : 44, height: isRail ? 36 : 44,
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", backdropFilter: "blur(4px)",
-              fontSize: 18, lineHeight: 1,
               transition: "background 0.15s",
             }}
           >
-            <svg aria-hidden="true" width={isRail ? 13 : 16} height={isRail ? 13 : 16} viewBox="0 0 24 24" fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width={isRail ? 13 : 16} height={isRail ? 13 : 16} viewBox="0 0 24 24"
+              fill={favorited ? "#fff" : "none"} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
         </div>
 
-        {/* Card body */}
-        <div style={{ padding: isRail ? "11px 13px 13px" : isCompact ? "12px 14px 14px" : "16px 18px 18px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: isRail ? 2 : 4 }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontWeight: 900,
-                fontSize: isRail ? 15 : isCompact ? 16 : 19,
-                color: "var(--c-text)", lineHeight: 1.2,
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              }}>{r.name}</div>
-              <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{r.cuisine}</div>
+        {/* ── Card body ── */}
+        <div style={{ padding: isRail ? "11px 13px 13px" : isCompact ? "12px 14px 14px" : "14px 16px 16px" }}>
+
+          {/* Name + cuisine */}
+          <div style={{ marginBottom: isRail ? 8 : 10 }}>
+            <div style={{
+              fontWeight: 900,
+              fontSize: isRail ? 15 : isCompact ? 16 : 18,
+              color: "var(--c-text)", lineHeight: 1.2,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {r.name}
             </div>
-            {!isRail && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-brand)", flexShrink: 0, paddingTop: 2 }}>→</div>
-            )}
+            <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>
+              {r.cuisine}
+            </div>
           </div>
 
-          {/* Explanation — default: 2 lines; compact: 1 line; rail: hidden */}
-          {!isRail && (
-            <div style={{
-              fontSize: 13, color: "var(--c-sub)", marginBottom: isCompact ? 8 : 12, lineHeight: 1.45,
-              ...(isCompact ? { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } : {}),
-            }}>
-              {explanation}
-            </div>
-          )}
-
+          {/* ── Stat blocks ── */}
           {summary.total > 0 ? (
-            <div>
-              {/* Progress bar — hidden on rail */}
-              {!isRail && (
-                <div style={{ position: "relative", height: 7, marginBottom: isCompact ? 8 : 8 }}>
-                  {/* Blurred glow layer */}
-                  <div style={{
-                    position: "absolute", inset: "-4px 0", borderRadius: 999,
-                    display: "flex", overflow: "hidden",
-                    filter: "blur(5px)",
-                    opacity: isDark ? 0.75 : 0.5,
-                  }}>
-                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e" }} />}
-                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b" }} />}
-                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444" }} />}
-                  </div>
-                  {/* Actual bar */}
-                  <div style={{
-                    position: "absolute", inset: 0, borderRadius: 999,
-                    background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                    overflow: "hidden", display: "flex",
-                  }}>
-                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)" }} />}
-                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)" }} />}
-                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)" }} />}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", gap: isRail ? 5 : 7 }}>
-                  <Stat count={summary.likelySafe} label="Safe"  rgb="22,163,74"  isDark={isDark} small={isRail} />
-                  <Stat count={summary.ask}        label="Ask"   rgb="217,119,6"  isDark={isDark} small={isRail} />
-                  <Stat count={summary.avoid}      label="Avoid" rgb="220,38,38"  isDark={isDark} small={isRail} />
-                </div>
-                {!isRail && !isCompact && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{tierLabel}</span>
-                  </div>
-                )}
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: isRail ? 5 : 6 }}>
+                <StatBlock count={summary.likelySafe} label="Safe"      color="#22c55e" rgb="34,197,94"   isDark={isDark} isRail={isRail} isCompact={isCompact} />
+                <StatBlock count={summary.ask}        label="Ask Staff" color="#f59e0b" rgb="245,158,11"  isDark={isDark} isRail={isRail} isCompact={isCompact} />
+                <StatBlock count={summary.avoid}      label="Avoid"     color="#ef4444" rgb="239,68,68"   isDark={isDark} isRail={isRail} isCompact={isCompact} />
               </div>
 
-              {/* Safe item tags — default only */}
-              {!isRail && !isCompact && safeItemNames.length > 0 && (
-                <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {safeItemNames.map((name, i) => (
-                    <span key={`${i}-${name}`} style={{
-                      fontSize: 13, fontWeight: 700,
-                      color: isDark ? "#86efac" : "#15803d",
-                      background: isDark ? "#0a2414" : "#f0fdf4",
-                      border: `1px solid ${isDark ? "#14532d" : "#bbf7d0"}`,
-                      padding: "4px 10px", borderRadius: 999,
-                      maxWidth: "100%", overflow: "hidden",
-                      textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>
-                      ✓ {name}
-                    </span>
-                  ))}
+              {/* CTA — default variant only */}
+              {!isRail && !isCompact && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--c-border)",
+                }}>
+                  <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{summary.total} items analyzed</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-brand)", display: "flex", alignItems: "center", gap: 4 }}>
+                    See menu fit
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </span>
                 </div>
               )}
-            </div>
+            </>
           ) : (
             <div style={{ fontSize: 12, color: "var(--c-sub)" }}>
               {isRail ? "No menu yet" : "Menu not analyzed yet — tap to scan"}
@@ -309,17 +256,27 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   );
 }
 
-function Stat({ count, label, rgb, isDark, small }: { count: number; label: string; rgb: string; isDark: boolean; small?: boolean }) {
+function StatBlock({
+  count, label, color, rgb, isDark, isRail, isCompact,
+}: {
+  count: number; label: string; color: string; rgb: string; isDark: boolean; isRail?: boolean; isCompact?: boolean;
+}) {
+  const numSize    = isRail ? 20 : isCompact ? 24 : 28;
+  const labelSize  = isRail ?  9 : isCompact ? 10 : 11;
+  const topMargin  = isRail ?  3 : isCompact ?  4 :  5;
+  const padding    = isRail ? "8px 4px" : isCompact ? "10px 6px" : "12px 8px";
+  const radius     = isRail ? 10 : isCompact ? 12 : 14;
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: small ? 3 : 5,
-      padding: small ? "4px 9px" : "5px 12px", borderRadius: 999,
-      background: `rgba(${rgb},${isDark ? "0.18" : "0.10"})`,
-      border: `1.5px solid rgba(${rgb},${isDark ? "0.4" : "0.25"})`,
-      boxShadow: count > 0 ? `0 2px 10px rgba(${rgb},${isDark ? "0.3" : "0.18"})` : "none",
+      textAlign: "center",
+      padding,
+      borderRadius: radius,
+      background: `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
+      border: `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
+      boxShadow: count > 0 ? `0 4px 16px rgba(${rgb},${isDark ? "0.25" : "0.12"})` : "none",
     }}>
-      <span style={{ fontSize: small ? 13 : 16, fontWeight: 900, color: `rgb(${rgb})`, letterSpacing: "-0.03em" }}>{count}</span>
-      <span style={{ fontSize: small ? 10 : 12, fontWeight: 800, color: `rgba(${rgb},${isDark ? "0.9" : "0.8"})` }}>{label}</span>
+      <div style={{ fontSize: numSize, fontWeight: 900, color, letterSpacing: "-0.04em", lineHeight: 1 }}>{count}</div>
+      <div style={{ fontSize: labelSize, fontWeight: 800, color, opacity: 0.8, marginTop: topMargin, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
     </div>
   );
 }
