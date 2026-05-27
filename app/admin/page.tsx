@@ -53,7 +53,7 @@ export default function AdminPage() {
     return (
       <div style={{ minHeight: "100dvh", background: "#0f0f0f", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div style={{ width: "100%", maxWidth: 360, background: "#1c1c1e", border: "1px solid #2c2c2e", borderRadius: 20, padding: 32 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: "#1fbdcc", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>AllergEats Admin</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: "var(--c-brand)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>AllergEats Admin</div>
           <div style={{ fontSize: 22, fontWeight: 900, color: "#f2f2f7", marginBottom: 24 }}>Menu Audit Tool</div>
           <input
             type="password"
@@ -67,7 +67,7 @@ export default function AdminPage() {
           {error && <div style={{ fontSize: 13, color: "#f87171", marginBottom: 12 }}>Incorrect password.</div>}
           <button
             onClick={login}
-            style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: "#1fbdcc", color: "#001f26", fontSize: 15, fontWeight: 800, cursor: "pointer" }}
+            style={{ width: "100%", padding: "13px 0", borderRadius: 12, border: "none", background: "var(--c-brand)", color: "#001f26", fontSize: 15, fontWeight: 800, cursor: "pointer" }}
           >
             Enter
           </button>
@@ -82,7 +82,7 @@ export default function AdminPage() {
     <div style={{ minHeight: "100dvh", background: "#0f0f0f", color: "#f2f2f7", padding: "32px 24px", maxWidth: 800, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 800, color: "#1fbdcc", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>AllergEats Admin</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-brand)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>AllergEats Admin</div>
           <div style={{ fontSize: 26, fontWeight: 900 }}>Menu Audit Dashboard</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -106,8 +106,8 @@ export default function AdminPage() {
           { label: "Total Items", value: totalItems },
           { label: "Corrections Saved", value: count, highlight: count > 0 },
         ].map(({ label, value, highlight }) => (
-          <div key={label} style={{ background: "#1c1c1e", border: `1px solid ${highlight ? "#1fbdcc" : "#2c2c2e"}`, borderRadius: 16, padding: "18px 20px" }}>
-            <div style={{ fontSize: 28, fontWeight: 900, color: highlight ? "#1fbdcc" : "#f2f2f7", letterSpacing: "-0.03em" }}>{value}</div>
+          <div key={label} style={{ background: "#1c1c1e", border: `1px solid ${highlight ? "var(--c-brand)" : "#2c2c2e"}`, borderRadius: 16, padding: "18px 20px" }}>
+            <div style={{ fontSize: 28, fontWeight: 900, color: highlight ? "var(--c-brand)" : "#f2f2f7", letterSpacing: "-0.03em" }}>{value}</div>
             <div style={{ fontSize: 12, color: "#8e8e93", marginTop: 4, fontWeight: 600 }}>{label}</div>
           </div>
         ))}
@@ -129,7 +129,7 @@ export default function AdminPage() {
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 15, fontWeight: 800, color: "#f2f2f7" }}>{r.name}</span>
-                    {verified > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: "#1fbdcc", background: "rgba(31,189,204,0.12)", border: "1px solid rgba(31,189,204,0.3)", padding: "1px 7px", borderRadius: 999 }}>{verified}/{r.menuItems.length}</span>}
+                    {verified > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--c-brand)", background: "rgba(31,189,204,0.12)", border: "1px solid rgba(31,189,204,0.3)", padding: "1px 7px", borderRadius: 999 }}>{verified}/{r.menuItems.length}</span>}
                   </div>
                   <div style={{ fontSize: 12, color: "#8e8e93", marginTop: 2 }}>{r.cuisine} · {r.menuItems.length} items</div>
                 </div>
@@ -137,8 +137,8 @@ export default function AdminPage() {
               </Link>
               {sourceUrl && (
                 <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", borderTop: "1px solid #2c2c2e", textDecoration: "none", background: "rgba(31,189,204,0.04)" }}>
-                  <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                  <span style={{ fontSize: 11, color: "#1fbdcc", fontWeight: 700 }}>Open official allergen page</span>
+                  <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  <span style={{ fontSize: 11, color: "var(--c-brand)", fontWeight: 700 }}>Open official allergen page</span>
                 </a>
               )}
             </div>

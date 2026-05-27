@@ -19,7 +19,7 @@ function escHtml(s: string): string {
 }
 
 function safeColor(r: ScoredRestaurant): string {
-  if (r.summary.total === 0) return "#9ca3af";
+  if (r.summary.total === 0) return "var(--c-sub)";
   const pct = (r.summary.likelySafe / r.summary.total) * 100;
   if (pct >= 70) return "#22c55e";
   if (pct >= 40) return "#f59e0b";
@@ -31,7 +31,7 @@ function makeMarkerHtml(r: ScoredRestaurant, dark: boolean): string {
   return `<div style="
     width:16px;height:16px;border-radius:50%;
     background:${color};
-    border:2.5px solid ${dark ? "#1c1c1e" : "#fff"};
+    border:2.5px solid ${dark ? "var(--c-card)" : "#fff"};
     box-shadow:0 1px 8px rgba(0,0,0,${dark ? "0.55" : "0.28"});
     cursor:pointer;
   "></div>`;
@@ -43,7 +43,7 @@ function makeTooltipHtml(r: ScoredRestaurant, dark: boolean): string {
     ? Math.round((r.summary.likelySafe / r.summary.total) * 100)
     : null;
   const bg        = dark ? "rgba(28,28,30,0.96)" : "rgba(255,255,255,0.97)";
-  const textColor = dark ? "#f2f2f7" : "#111";
+  const textColor = dark ? "var(--c-text)" : "#111";
   const label     = safePct != null ? `${safePct}% safe` : "No menu data";
   return `<div style="
     display:flex;align-items:center;gap:6px;
@@ -65,14 +65,14 @@ function makePopupHtml(r: ScoredRestaurant, dark: boolean): string {
   const avoidPct   = total > 0 ? Math.round((r.summary.avoid      / total) * 100) : 0;
   const distStr    = r.distance != null ? ` · ${r.distance} mi` : "";
 
-  const textPrimary = dark ? "#f2f2f7"  : "#111111";
+  const textPrimary = "var(--c-text)";
   const textSub     = dark ? "#8e8e93"  : "#6b7280";
-  const barTrack    = dark ? "#2c2c2e"  : "#e5e7eb";
-  const noDataBg    = dark ? "#2c2c2e"  : "#f3f4f6";
+  const barTrack    = "var(--c-border)";
+  const noDataBg    = "var(--c-muted)";
   const safeClr     = dark ? "#34d399"  : "#15803d";
   const askClr      = dark ? "#fbbf24"  : "#b45309";
   const avoidClr    = dark ? "#f87171"  : "#b91c1c";
-  const ctaBg       = dark ? "#29d5e8"  : "#1fbdcc";
+  const ctaBg       = "var(--c-brand)";
   const ctaFg       = dark ? "#ffffff"  : "#001f26";
 
   const badgeHtml = safePct != null
@@ -133,7 +133,7 @@ const POPUP_STYLES = `
   .leaflet-popup-tip-container { display: none !important; }
   .leaflet-popup-close-button {
     top: 10px !important; right: 12px !important;
-    font-size: 18px !important; color: #9ca3af !important;
+    font-size: 18px !important; color: var(--c-sub) !important;
     font-weight: 400 !important;
   }
 `;
@@ -327,7 +327,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
 
   const menuCount = restaurants.filter((r) => r.scoredItems.length > 0).length;
   const chipBg    = isDark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.92)";
-  const chipText  = isDark ? "#f2f2f7" : "#374151";
+  const chipText  = "var(--c-text)";
 
   return (
     <div style={{ position: "relative", overflow: "hidden", isolation: "isolate" }}>
@@ -352,7 +352,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
             style={{
               display: "flex", alignItems: "center", gap: 7,
               padding: "10px 20px",
-              background: "#1fbdcc", color: "var(--c-brand-fg)",
+              background: "var(--c-brand)", color: "var(--c-brand-fg)",
               border: "none", borderRadius: 999,
               fontSize: 13, fontWeight: 800,
               cursor: "pointer",
@@ -378,7 +378,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
           aria-pressed={!menuOnly}
           style={{
             padding: "7px 13px", borderRadius: 999,
-            background: !menuOnly ? (isDark ? "#f2f2f7" : "#111827") : chipBg,
+            background: !menuOnly ? "var(--c-text)" : chipBg,
             color:      !menuOnly ? (isDark ? "#111827" : "#fff")    : chipText,
             border: "none",
             fontSize: 12, fontWeight: 700, cursor: "pointer",
@@ -394,7 +394,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
           aria-pressed={menuOnly}
           style={{
             padding: "7px 13px", borderRadius: 999,
-            background: menuOnly ? "#1fbdcc" : chipBg,
+            background: menuOnly ? "var(--c-brand)" : chipBg,
             color:      menuOnly ? "#fff"    : chipText,
             border: "none",
             fontSize: 12, fontWeight: 700, cursor: "pointer",
@@ -449,7 +449,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
           { color: "#22c55e", label: "≥70% safe" },
           { color: "#f59e0b", label: "40–69%" },
           { color: "#ef4444", label: "<40%" },
-          { color: "#9ca3af", label: "No data" },
+          { color: "var(--c-sub)", label: "No data" },
         ] as const).map(({ color, label }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />

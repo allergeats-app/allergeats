@@ -32,6 +32,12 @@ function applyVars(dark: boolean) {
     r.style.setProperty("--c-input", "#252528");
     r.style.setProperty("--c-muted", "#2c2c2e");
     r.style.setProperty("--c-hdr",   "rgba(15,15,15,0.95)");
+    r.style.setProperty("--c-brand",    "#29d5e8");
+    r.style.setProperty("--c-brand-fg", "#ffffff");
+    r.style.setProperty("--c-brand-bg", "rgba(41,213,232,0.12)");
+    r.style.setProperty("--c-risk-safe",  "#34d399");
+    r.style.setProperty("--c-risk-ask",   "#fbbf24");
+    r.style.setProperty("--c-risk-avoid", "#f87171");
     r.style.setProperty("--bn-circle-bg",  "#000000");
     r.style.setProperty("--bn-icon",       "#e5e7eb");
     r.style.setProperty("--bn-pill-bg",    "#000000");

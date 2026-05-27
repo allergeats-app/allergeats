@@ -78,7 +78,7 @@ export default function AuthCallbackPage() {
         </div>
         <button onClick={() => router.replace("/auth")} style={{
           padding: "12px 24px", borderRadius: 12, border: "none",
-          background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 700, cursor: "pointer",
+          background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 700, cursor: "pointer",
         }}>
           Try again
         </button>
@@ -95,7 +95,7 @@ export default function AuthCallbackPage() {
       <div style={{
         width: 36, height: 36, borderRadius: "50%",
         border: "3px solid var(--c-border)",
-        borderTopColor: "#1fbdcc",
+        borderTopColor: "var(--c-brand)",
         animation: "spin 0.8s linear infinite",
       }} />
       <div style={{ fontSize: 15, color: "var(--c-sub)" }}>Signing you in…</div>

@@ -236,7 +236,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
             aria-label={inOrder ? "Remove from order" : "Add to order"}
             style={{
               width: 40, height: 40, borderRadius: 999, border: "none",
-              background: inOrder ? "#22c55e" : "#1fbdcc",
+              background: inOrder ? "#22c55e" : "var(--c-brand)",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", transition: "background 0.15s",
               flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.15)",

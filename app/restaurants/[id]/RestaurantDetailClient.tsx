@@ -375,7 +375,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         <EmptyState
           title="Restaurant not found"
           subtitle="This restaurant isn't in our database."
-          action={<Link href="/" style={{ padding: "12px 20px", background: "#1fbdcc", color: "var(--c-brand-fg)", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
+          action={<Link href="/" style={{ padding: "12px 20px", background: "var(--c-brand)", color: "var(--c-brand-fg)", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>Browse restaurants</Link>}
         />
       </main>
     );
@@ -703,7 +703,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       rel="noopener noreferrer"
                       style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
-                        marginTop: 6, fontSize: 13, color: "#1fbdcc",
+                        marginTop: 6, fontSize: 13, color: "var(--c-brand)",
                         fontWeight: 600, textDecoration: "none",
                       }}
                     >
@@ -721,8 +721,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
                   flexShrink: 0, width: 48, height: 48, borderRadius: 999,
-                  background: favorited ? "#1fbdcc" : "var(--c-muted)",
-                  border: `1.5px solid ${favorited ? "#1fbdcc" : "var(--c-border)"}`,
+                  background: favorited ? "var(--c-brand)" : "var(--c-muted)",
+                  border: `1.5px solid ${favorited ? "var(--c-brand)" : "var(--c-border)"}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", transition: "background 0.15s, border-color 0.15s",
                 }}
@@ -760,7 +760,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
                         <button
                           onClick={() => setMenuInputMode("text")}
-                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: "1.5px solid #1fbdcc", background: "rgba(31,189,204,0.06)", color: "#1fbdcc", fontSize: 14, fontWeight: 700, cursor: "pointer", textAlign: "left" }}
+                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: "1.5px solid var(--c-brand)", background: "rgba(31,189,204,0.06)", color: "var(--c-brand)", fontSize: 14, fontWeight: 700, cursor: "pointer", textAlign: "left" }}
                         >
                           Paste menu text →
                         </button>
@@ -790,7 +790,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           <button
                             onClick={submitUserMenuText}
                             disabled={menuInputLoading || !menuInputText.trim()}
-                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "#1fbdcc", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputText.trim() ? "pointer" : "default", opacity: menuInputText.trim() ? 1 : 0.5 }}
+                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "var(--c-brand)", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputText.trim() ? "pointer" : "default", opacity: menuInputText.trim() ? 1 : 0.5 }}
                           >
                             {menuInputLoading ? "Analyzing…" : "Analyze Menu"}
                           </button>
@@ -818,7 +818,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           <button
                             onClick={submitUserMenuUrl}
                             disabled={menuInputLoading || !menuInputUrl.trim()}
-                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "#1fbdcc", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputUrl.trim() ? "pointer" : "default", opacity: menuInputUrl.trim() ? 1 : 0.5 }}
+                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "var(--c-brand)", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputUrl.trim() ? "pointer" : "default", opacity: menuInputUrl.trim() ? 1 : 0.5 }}
                           >
                             {menuInputLoading ? "Fetching…" : "Fetch Menu"}
                           </button>
@@ -912,7 +912,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </div>
                 <Link href="/allergies" style={{
                   flexShrink: 0, padding: "11px 18px", borderRadius: 12,
-                  background: "#1fbdcc", color: "var(--c-brand-fg)",
+                  background: "var(--c-brand)", color: "var(--c-brand-fg)",
                   fontSize: 15, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
                 }}>
                   Set Allergies
@@ -989,7 +989,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       fontWeight: 900,
                       fontFamily: "'Georgia', 'Times New Roman', serif",
                       letterSpacing: "-0.02em",
-                      background: "linear-gradient(135deg, #1fbdcc 0%, #ffffff 100%)",
+                      background: "linear-gradient(135deg, var(--c-brand) 0%, #ffffff 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
@@ -1004,7 +1004,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </div>
                 <ErrorBoundary fallback={
                   <div style={{ padding: "24px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>
-                    Couldn't load the order builder. <button onClick={() => setBuilderBrowseMode(true)} style={{ background: "none", border: "none", color: "#1fbdcc", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Browse full menu instead</button>
+                    Couldn't load the order builder. <button onClick={() => setBuilderBrowseMode(true)} style={{ background: "none", border: "none", color: "var(--c-brand)", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Browse full menu instead</button>
                   </div>
                 }>
                   <GuidedOrderBuilder
@@ -1024,7 +1024,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     onClick={() => setBuilderBrowseMode(false)}
                     style={{
                       background: "none", border: "none", padding: "0 0 16px",
-                      fontSize: 14, fontWeight: 700, color: "#1fbdcc", cursor: "pointer",
+                      fontSize: 14, fontWeight: 700, color: "var(--c-brand)", cursor: "pointer",
                       display: "flex", alignItems: "center", gap: 6,
                     }}
                   >
@@ -1051,8 +1051,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     {RISK_CHIPS.map((c) => (
                       <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
                         padding: "11px 18px", borderRadius: 999,
-                        border: `1.5px solid ${riskFilter === c.value ? "#1fbdcc" : "var(--c-border)"}`,
-                        background: riskFilter === c.value ? "#1fbdcc" : "var(--c-card)",
+                        border: `1.5px solid ${riskFilter === c.value ? "var(--c-brand)" : "var(--c-border)"}`,
+                        background: riskFilter === c.value ? "var(--c-brand)" : "var(--c-card)",
                         color: riskFilter === c.value ? "#fff" : "var(--c-text)",
                         fontSize: 15, fontWeight: 700, whiteSpace: "nowrap",
                         cursor: "pointer", flexShrink: 0, minHeight: 44,
@@ -1395,7 +1395,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             onClick={() => setShowOrderSheet(true)}
             style={{
               width: "100%", height: 54, borderRadius: 16, padding: "0 6px",
-              background: "#1fbdcc", border: "none", cursor: "pointer",
+              background: "var(--c-brand)", border: "none", cursor: "pointer",
               position: "relative", display: "flex", alignItems: "center",
             }}
           >
@@ -1481,7 +1481,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </h2>
               {orderedItems.length > 0 && (
                 <div style={{
-                  background: "#1fbdcc", borderRadius: 999,
+                  background: "var(--c-brand)", borderRadius: 999,
                   minWidth: 22, height: 22, padding: "0 6px",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
@@ -1742,7 +1742,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   onClick={saveOrderToAccount}
                   style={{
                     width: "100%", height: 54, borderRadius: 16,
-                    background: orderSaved ? "#16a34a" : "#1fbdcc",
+                    background: orderSaved ? "#16a34a" : "var(--c-brand)",
                     color: "var(--c-brand-fg)", border: "none",
                     fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em",
                     cursor: "pointer",

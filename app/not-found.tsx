@@ -25,7 +25,7 @@ export default function NotFound() {
         margin: "0 auto 20px",
       }}>
         <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="#1fbdcc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          stroke="var(--c-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="12"/>
           <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
@@ -36,7 +36,7 @@ export default function NotFound() {
         fontSize: 28, fontWeight: 900,
         fontFamily: "'Georgia', 'Times New Roman', serif",
         letterSpacing: "-0.02em", lineHeight: 1.15,
-        background: "linear-gradient(135deg, #149aab 0%, #1fbdcc 50%, #35d4e4 100%)",
+        background: "linear-gradient(135deg, #149aab 0%, var(--c-brand) 50%, #35d4e4 100%)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
@@ -59,7 +59,7 @@ export default function NotFound() {
           style={{
             display: "block", textAlign: "center",
             padding: "14px 0", borderRadius: 14,
-            background: "linear-gradient(135deg, #149aab 0%, #1fbdcc 50%, #35d4e4 100%)",
+            background: "linear-gradient(135deg, #149aab 0%, var(--c-brand) 50%, #35d4e4 100%)",
             boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(0,150,165,0.3)",
             color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 800,
             textDecoration: "none", letterSpacing: "-0.01em",

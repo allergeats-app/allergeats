@@ -90,7 +90,7 @@ export function SettingsButton() {
               }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%",
-                  background: "#1fbdcc", color: "var(--c-brand-fg)",
+                  background: "var(--c-brand)", color: "var(--c-brand-fg)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 13, fontWeight: 900, flexShrink: 0,
                 }}>
@@ -144,7 +144,7 @@ export function SettingsButton() {
                 </span>
                 <div style={{
                   width: 36, height: 22, borderRadius: 999, flexShrink: 0,
-                  background: isDark ? "#1fbdcc" : "var(--c-border)",
+                  background: isDark ? "var(--c-brand)" : "var(--c-border)",
                   position: "relative", transition: "background 0.2s",
                 }}>
                   <div style={{
@@ -191,7 +191,7 @@ export function SettingsButton() {
                 </span>
                 <div style={{
                   width: 36, height: 22, borderRadius: 999, flexShrink: 0,
-                  background: isDark ? "#1fbdcc" : "var(--c-border)",
+                  background: isDark ? "var(--c-brand)" : "var(--c-border)",
                   position: "relative", transition: "background 0.2s",
                 }}>
                   <div style={{

@@ -57,7 +57,7 @@ function RecentViewCard({ view }: { view: RecentView }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, paddingLeft: 12 }}>
           <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{timeAgo(view.viewedAt)}</span>
-          <span style={{ fontSize: 13, color: "#1fbdcc", fontWeight: 700 }}>→</span>
+          <span style={{ fontSize: 13, color: "var(--c-brand)", fontWeight: 700 }}>→</span>
         </div>
       </div>
     </Link>
@@ -111,7 +111,7 @@ function SavedOrderCard({ order, onDelete }: { order: SavedOrder; onDelete: () =
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
             <Link href={`/restaurants/${order.restaurantId}`} style={{ textDecoration: "none" }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#1fbdcc" }}>{order.restaurantName}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-brand)" }}>{order.restaurantName}</span>
             </Link>
             <span style={{ fontSize: 11, color: "var(--c-sub)" }}>· {timeAgo(order.savedAt)}</span>
           </div>
@@ -219,7 +219,7 @@ function SavedContent() {
               <Link href="/" style={{
                 display: "block", textAlign: "center",
                 padding: "13px 0", borderRadius: 14,
-                background: "#1fbdcc", color: "var(--c-brand-fg)",
+                background: "var(--c-brand)", color: "var(--c-brand-fg)",
                 fontSize: 14, fontWeight: 800, textDecoration: "none",
               }}>
                 Browse Restaurants
@@ -275,7 +275,7 @@ function SavedContent() {
                           boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                         }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="#1fbdcc" stroke="none" style={{ flexShrink: 0 }}>
+                            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="var(--c-brand)" stroke="none" style={{ flexShrink: 0 }}>
                               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                             </svg>
                             {meta ? (

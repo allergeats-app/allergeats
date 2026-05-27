@@ -172,7 +172,7 @@ function AdminMenuInner() {
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
           {sourceUrl && (
-            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid rgba(31,189,204,0.4)", background: "rgba(31,189,204,0.08)", color: "#1fbdcc", fontSize: 13, fontWeight: 700, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
+            <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid rgba(31,189,204,0.4)", background: "rgba(31,189,204,0.08)", color: "var(--c-brand)", fontSize: 13, fontWeight: 700, textDecoration: "none", display: "flex", alignItems: "center", gap: 5 }}>
               <svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Allergen Page
             </a>
@@ -185,7 +185,7 @@ function AdminMenuInner() {
 
       {/* Progress bar */}
       <div style={{ height: 3, background: "#2c2c2e" }}>
-        <div style={{ height: "100%", width: `${pct}%`, background: "#1fbdcc", transition: "width 0.3s" }} />
+        <div style={{ height: "100%", width: `${pct}%`, background: "var(--c-brand)", transition: "width 0.3s" }} />
       </div>
 
       {/* Filters */}
@@ -198,7 +198,7 @@ function AdminMenuInner() {
         />
         <button
           onClick={() => setFilterUncorrected(v => !v)}
-          style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${filterUncorrected ? "#1fbdcc" : "#3c3c3e"}`, background: filterUncorrected ? "rgba(31,189,204,0.1)" : "transparent", color: filterUncorrected ? "#1fbdcc" : "#8e8e93", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+          style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${filterUncorrected ? "var(--c-brand)" : "#3c3c3e"}`, background: filterUncorrected ? "rgba(31,189,204,0.1)" : "transparent", color: filterUncorrected ? "var(--c-brand)" : "#8e8e93", fontSize: 13, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
         >
           {filterUncorrected ? "Showing unverified" : "Show unverified only"}
         </button>
@@ -223,7 +223,7 @@ function AdminMenuInner() {
           return (
             <div key={item.id} onClick={() => setFocusedIdx(idx)} style={{
               background: "#1c1c1e",
-              border: `1.5px solid ${isFocused ? "#1fbdcc" : isVerified ? "rgba(31,189,204,0.35)" : "#2c2c2e"}`,
+              border: `1.5px solid ${isFocused ? "var(--c-brand)" : isVerified ? "rgba(31,189,204,0.35)" : "#2c2c2e"}`,
               borderRadius: 16,
               padding: 16,
               cursor: "default",
@@ -234,7 +234,7 @@ function AdminMenuInner() {
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <span style={{ fontSize: 15, fontWeight: 800, color: "#f2f2f7" }}>{item.name}</span>
-                    {isVerified && <span style={{ fontSize: 11, fontWeight: 700, color: "#1fbdcc", background: "rgba(31,189,204,0.12)", border: "1px solid rgba(31,189,204,0.3)", padding: "2px 8px", borderRadius: 999 }}>Verified</span>}
+                    {isVerified && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--c-brand)", background: "rgba(31,189,204,0.12)", border: "1px solid rgba(31,189,204,0.3)", padding: "2px 8px", borderRadius: 999 }}>Verified</span>}
                     {state.dirty && <span style={{ fontSize: 11, fontWeight: 700, color: "#fbbf24", background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)", padding: "2px 8px", borderRadius: 999 }}>Unsaved</span>}
                     {suspected.length > 0 && !isVerified && <span title={`AI suspects: ${suspected.join(", ")}`} style={{ fontSize: 11, fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.35)", padding: "2px 8px", borderRadius: 999, cursor: "help" }}>⚠ {suspected.join(", ")}</span>}
                   </div>
@@ -252,7 +252,7 @@ function AdminMenuInner() {
                     disabled={!state.dirty && isVerified}
                     style={{
                       padding: "6px 12px", borderRadius: 8, border: "none",
-                      background: saved[item.id] ? "#22c55e" : state.dirty ? "#1fbdcc" : "#2c2c2e",
+                      background: saved[item.id] ? "#22c55e" : state.dirty ? "var(--c-brand)" : "#2c2c2e",
                       color: saved[item.id] || state.dirty ? "#001f26" : "#636366",
                       fontSize: 12, fontWeight: 800, cursor: state.dirty ? "pointer" : "default",
                       transition: "background 0.2s",
@@ -275,9 +275,9 @@ function AdminMenuInner() {
                       onClick={() => toggleAllergen(item.id, id)}
                       style={{
                         padding: "6px 12px", borderRadius: 999,
-                        border: `1.5px solid ${checked ? (changed ? "#fbbf24" : "#1fbdcc") : "#3c3c3e"}`,
+                        border: `1.5px solid ${checked ? (changed ? "#fbbf24" : "var(--c-brand)") : "#3c3c3e"}`,
                         background: checked ? (changed ? "rgba(251,191,36,0.15)" : "rgba(31,189,204,0.15)") : "transparent",
-                        color: checked ? (changed ? "#fbbf24" : "#1fbdcc") : "#636366",
+                        color: checked ? (changed ? "#fbbf24" : "var(--c-brand)") : "#636366",
                         fontSize: 12, fontWeight: 700, cursor: "pointer",
                         transition: "all 0.1s",
                       }}

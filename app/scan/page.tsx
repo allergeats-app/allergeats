@@ -516,7 +516,7 @@ function StaffBlock({ row }: { row: Row }) {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(31,189,204,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" >
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" >
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
           </div>
@@ -529,7 +529,7 @@ function StaffBlock({ row }: { row: Row }) {
           onClick={handleCopy}
           style={{
             width: "100%", padding: "13px 0", borderRadius: 12, border: "none",
-            background: copied ? "#22c55e" : "#1fbdcc",
+            background: copied ? "#22c55e" : "var(--c-brand)",
             color: copied ? "#fff" : "var(--c-brand-fg)",
             fontSize: 14, fontWeight: 800, cursor: "pointer",
             transition: "background 0.2s",
@@ -580,7 +580,7 @@ function StaffBlock({ row }: { row: Row }) {
                 <div style={{
                   width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 12, fontWeight: 900,
-                  background: done ? "#22c55e" : active ? "#1fbdcc" : "var(--c-muted)",
+                  background: done ? "#22c55e" : active ? "var(--c-brand)" : "var(--c-muted)",
                   color: done || active ? "#fff" : "var(--c-sub)",
                   transition: "background 0.2s",
                 }}>
@@ -609,7 +609,7 @@ function StaffBlock({ row }: { row: Row }) {
               </div>
               <button
                 onClick={() => setStep(2)}
-                style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+                style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
               >
                 Continue →
               </button>
@@ -646,8 +646,8 @@ function StaffBlock({ row }: { row: Row }) {
                 disabled={isScanning}
                 style={{
                   width: "100%", padding: "20px", textAlign: "left",
-                  background: isScanning ? "var(--c-card)" : "#1fbdcc",
-                  border: `1.5px solid ${isScanning ? "var(--c-border)" : "#1fbdcc"}`,
+                  background: isScanning ? "var(--c-card)" : "var(--c-brand)",
+                  border: `1.5px solid ${isScanning ? "var(--c-border)" : "var(--c-brand)"}`,
                   borderRadius: 20, cursor: isScanning ? "default" : "pointer",
                   boxShadow: isScanning ? "none" : "0 4px 14px rgba(31,189,204,0.25)",
                   transition: "background 0.15s",
@@ -703,12 +703,12 @@ function StaffBlock({ row }: { row: Row }) {
               {/* ── Secondary options ── */}
               <div style={{ background: "var(--c-card)", border: "1px solid var(--c-border)", borderRadius: 20, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                 {/* Option: Load a Restaurant */}
-                <div style={{ borderBottom: `1px solid ${activeInput === "preloaded" ? "#1fbdcc" : "var(--c-border)"}`, transition: "border-color 0.15s" }}>
+                <div style={{ borderBottom: `1px solid ${activeInput === "preloaded" ? "var(--c-brand)" : "var(--c-border)"}`, transition: "border-color 0.15s" }}>
                   <button
                     onClick={() => setActiveInput(v => v === "preloaded" ? null : "preloaded")}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                   >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "preloaded" ? "#1fbdcc" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>🏪</div>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "preloaded" ? "var(--c-brand)" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0, transition: "background 0.15s" }}>🏪</div>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)" }}>Load a Restaurant</div>
                       <div style={{ fontSize: 12, color: "var(--c-sub)" }}>Pick from our database</div>
@@ -736,7 +736,7 @@ function StaffBlock({ row }: { row: Row }) {
                       <button
                         onClick={loadSelectedRestaurant}
                         disabled={!selectedMenu}
-                        style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: selectedMenu ? "#1fbdcc" : "#e5e7eb", color: selectedMenu ? "#fff" : "#9ca3af", fontWeight: 800, fontSize: 14, cursor: selectedMenu ? "pointer" : "not-allowed" }}
+                        style={{ width: "100%", padding: "11px 0", borderRadius: 10, border: "none", background: selectedMenu ? "var(--c-brand)" : "#e5e7eb", color: selectedMenu ? "#fff" : "#9ca3af", fontWeight: 800, fontSize: 14, cursor: selectedMenu ? "pointer" : "not-allowed" }}
                       >
                         Load Menu
                       </button>
@@ -750,7 +750,7 @@ function StaffBlock({ row }: { row: Row }) {
                     onClick={() => setActiveInput(v => v === "manual" ? null : "manual")}
                     style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                   >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "manual" ? "#1fbdcc" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: activeInput === "manual" ? "var(--c-brand)" : "var(--c-muted)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background 0.15s" }}>
                       <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={activeInput === "manual" ? "#fff" : "var(--c-sub)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
                         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
@@ -800,7 +800,7 @@ function StaffBlock({ row }: { row: Row }) {
                   )}
                   <button
                     onClick={() => { setAnalyzed(true); setStep(3); }}
-                    style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "#1fbdcc", color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
+                    style={{ padding: "15px 0", borderRadius: 14, border: "none", background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 15, fontWeight: 900, cursor: "pointer" }}
                   >
                     Analyze Menu →
                   </button>
@@ -901,7 +901,7 @@ function StaffBlock({ row }: { row: Row }) {
                 width: 40, height: 40, borderRadius: 12, background: "rgba(31,189,204,0.1)",
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
               }}>
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                   <circle cx="12" cy="13" r="4"/>
                 </svg>
@@ -943,7 +943,7 @@ function StaffBlock({ row }: { row: Row }) {
                 }}
                 style={{
                   flex: 2, padding: "13px", borderRadius: 14,
-                  background: "#1fbdcc", border: "none",
+                  background: "var(--c-brand)", border: "none",
                   fontSize: 15, fontWeight: 800, color: "var(--c-brand-fg)", cursor: "pointer",
                   boxShadow: "0 4px 14px rgba(31,189,204,0.25)",
                 }}
