@@ -109,6 +109,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [showStaffCard, setShowStaffCard]   = useState(false);
   const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
 
+  const { isDark } = useTheme();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { user } = useAuth();
   const { allergens: profileAllergens, saveState, setAllergens: setProfileAllergens } = useAllergenProfile();
@@ -431,8 +432,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const { hero, summary, coverage, whyThisWorks, aggregatedStaffQuestions, bestOptions } = vm;
   const badge        = { bg: hero.fitBadgeBg, color: hero.fitBadgeColor };
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
-  const askPercent   = summary.total > 0 ? (summary.ask        / summary.total) * 100 : 0;
-  const avoidPercent = summary.total > 0 ? (summary.avoid      / summary.total) * 100 : 0;
   const tierColor    = coverageTierColor(coverage.tier);
   const favorited    = isFavorite(restaurant.id);
   const hasNoMenu    = summary.total === 0;
@@ -833,35 +832,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </div>
             ) : (
               <>
-                {/* Safety bar — per-section colored glow */}
-                <div style={{ position: "relative", height: 8, marginBottom: 12 }}>
-                  {/* Blurred glow layer */}
-                  <div style={{
-                    position: "absolute", inset: "-4px 0", borderRadius: 999,
-                    display: "flex", overflow: "hidden",
-                    filter: "blur(5px)", opacity: 0.6,
-                  }}>
-                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "#22c55e", transition: "width 0.5s" }} />}
-                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "#f59e0b", transition: "width 0.5s" }} />}
-                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "#ef4444", transition: "width 0.5s" }} />}
-                  </div>
-                  {/* Actual bar */}
-                  <div style={{
-                    position: "absolute", inset: 0, borderRadius: 999,
-                    background: "var(--c-muted)",
-                    overflow: "hidden", display: "flex",
-                  }}>
-                    {safePercent  > 0 && <div style={{ width: `${safePercent}%`,  background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s" }} />}
-                    {askPercent   > 0 && <div style={{ width: `${askPercent}%`,   background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s" }} />}
-                    {avoidPercent > 0 && <div style={{ width: `${avoidPercent}%`, background: "linear-gradient(90deg,#dc2626,#ef4444)", transition: "width 0.5s" }} />}
-                  </div>
-                </div>
-
-                {/* ── 2. Quick stats row ── */}
-                <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-                  <StatPill count={summary.likelySafe} label="Safe"  color="#15803d" bg="#f0fdf4" rgb="21,128,61"  active={riskFilter === "likely-safe"} onClick={() => { setRiskFilter("likely-safe"); document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
-                  <StatPill count={summary.ask}        label="Ask"   color="#854d0e" bg="#fefce8" rgb="133,77,14"  active={riskFilter === "ask"}         onClick={() => { setRiskFilter("ask");          document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
-                  <StatPill count={summary.avoid}      label="Avoid" color="#b91c1c" bg="#fff1f0" rgb="185,28,28"  active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                {/* ── 2. Interactive stat blocks ── */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+                  <StatBlock count={summary.likelySafe} label="Safe"      color="#22c55e" rgb="34,197,94"  isDark={isDark} active={riskFilter === "likely-safe"} onClick={() => { setRiskFilter("likely-safe"); document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatBlock count={summary.ask}        label="Ask Staff" color="#f59e0b" rgb="245,158,11" isDark={isDark} active={riskFilter === "ask"}         onClick={() => { setRiskFilter("ask");          document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+                  <StatBlock count={summary.avoid}      label="Avoid"     color="#ef4444" rgb="239,68,68"  isDark={isDark} active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                 </div>
 
                 {/* Coverage trust signal */}
@@ -1810,8 +1785,10 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
 // ── Helper components ─────────────────────────────────────────────────────────
 
-function StatPill({ count, label, color, bg: _bg, rgb, active, onClick }: {
-  count: number; label: string; color: string; bg: string; rgb: string;
+function StatBlock({
+  count, label, color, rgb, isDark, active, onClick,
+}: {
+  count: number; label: string; color: string; rgb: string; isDark: boolean;
   active?: boolean; onClick?: () => void;
 }) {
   return (
@@ -1820,17 +1797,24 @@ function StatPill({ count, label, color, bg: _bg, rgb, active, onClick }: {
       onClick={onClick}
       title={`Show ${label.toLowerCase()} items`}
       style={{
-        flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-        padding: "10px 6px", borderRadius: 12,
-        background: active ? `rgba(${rgb},0.08)` : "var(--c-card)",
-        border: active ? `1.5px solid rgba(${rgb},0.5)` : "1px solid var(--c-border)",
+        textAlign: "center",
+        padding: "12px 8px",
+        borderRadius: 14,
+        background: active
+          ? `rgba(${rgb},${isDark ? "0.22" : "0.14"})`
+          : `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
+        border: active
+          ? `1.5px solid rgba(${rgb},${isDark ? "0.65" : "0.50"})`
+          : `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
+        boxShadow: active
+          ? `0 4px 20px rgba(${rgb},${isDark ? "0.35" : "0.20"})`
+          : count > 0 ? `0 4px 16px rgba(${rgb},${isDark ? "0.25" : "0.12"})` : "none",
         cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.15s, background 0.15s",
-        gap: 2,
+        transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
       }}
     >
-      <span style={{ fontWeight: 800, fontSize: 22, color, lineHeight: 1, letterSpacing: "-0.03em" }}>{count}</span>
-      <span style={{ fontSize: 11, color: "var(--c-sub)", fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase" }}>{label}</span>
+      <div style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.04em", lineHeight: 1 }}>{count}</div>
+      <div style={{ fontSize: 11, fontWeight: 800, color, opacity: 0.8, marginTop: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
     </button>
   );
 }

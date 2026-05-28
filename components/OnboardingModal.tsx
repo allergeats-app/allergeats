@@ -360,7 +360,7 @@ export function OnboardingModal() {
         {step === "allergens" && (
           <>
             <button
-              onClick={() => setStep("welcome")}
+              onClick={() => setStep("safety")}
               style={{
                 ...iosTap,
                 background: "none", border: "none",
