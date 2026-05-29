@@ -862,29 +862,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   <StatBlock count={summary.avoid}      label="Avoid"     color="#ef4444" rgb="239,68,68"  isDark={isDark} active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                 </div>
 
-                {/* ── Fit banner ── */}
-                {userAllergens.length > 0 && (() => {
-                  const good    = hero.fitLevel === "Great Match" || hero.fitLevel === "Good Option";
-                  const caution = hero.fitLevel === "Use Caution";
-                  const color   = good ? "#22c55e" : caution ? "#f59e0b" : "#ef4444";
-                  const rgb     = good ? "34,197,94" : caution ? "245,158,11" : "239,68,68";
-                  const mark    = good ? "✓" : caution ? "⚠" : "✗";
-                  const label   = hero.fitLevel === "Great Match" ? "Safe to eat here"
-                    : hero.fitLevel === "Good Option"  ? "Looks good for you"
-                    : caution                          ? "Check with staff first"
-                    :                                    "Contains your allergens";
-                  return (
-                    <div style={{
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                      padding: "9px 16px", borderRadius: 14, marginTop: 4,
-                      background: `rgba(${rgb},${isDark ? "0.07" : "0.05"})`,
-                      border: `1.5px solid rgba(${rgb},${isDark ? "0.28" : "0.2"})`,
-                    }}>
-                      <span style={{ fontSize: 20, fontWeight: 900, color, lineHeight: 1 }}>{mark}</span>
-                      <span style={{ fontSize: 15, fontWeight: 900, color, letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</span>
-                    </div>
-                  );
-                })()}
               </>
             )}
 
