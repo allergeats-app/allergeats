@@ -894,7 +894,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         {/* ── 3. Best Options for You ── */}
         {!hasNoMenu && (
           <section style={{ marginBottom: 28 }}>
-            <SectionHeader label="Best Options for You" />
+            <SectionHeader label="Safe Picks" />
             {noAllergens ? (
               <div style={{
                 background: "var(--c-card)", border: "1px solid var(--c-border)",
@@ -927,36 +927,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         )}
 
 
-        {/* ── 4b. Questions to ask staff ── */}
-        {!hasNoMenu && aggregatedStaffQuestions.length > 0 && (
-          <section style={{ marginBottom: 28 }}>
-            <SectionHeader label="Questions to ask staff" count={aggregatedStaffQuestions.length} />
-            <div style={{
-              background: "#fff7db", border: "1px solid #f4dd8d",
-              borderRadius: 16, padding: "14px 16px",
-            }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 12 }}>
-                {aggregatedStaffQuestions.map((q, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ color: "#854d0e", fontWeight: 700, fontSize: 15, lineHeight: "1.6", flexShrink: 0 }}>•</span>
-                    <span style={{ fontSize: 15, color: "#374151", lineHeight: 1.6 }}>{q}</span>
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={copyQuestions}
-                style={{
-                  width: "100%", padding: "13px 16px", borderRadius: 12,
-                  border: "1px solid #f4dd8d", background: "#fff",
-                  color: "#374151", fontSize: 15, fontWeight: 700,
-                  cursor: "pointer", minHeight: 48,
-                }}
-              >
-                {questionsCopied ? "Copied!" : "Copy all questions"}
-              </button>
-            </div>
-          </section>
-        )}
 
         {/* ── 4c. Community Knowledge (memory insights from the learning system) ── */}
         {!hasNoMenu && vm.memoryInsights.length > 0 && (
@@ -1851,9 +1821,17 @@ function isDrinkSection(name: string): boolean {
 
 function SectionHeader({ label, count }: { label: string; count?: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "0 0 14px" }}>
-      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
-      {count != null && <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{count}</span>}
+    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 12px" }}>
+      <span style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em" }}>{label}</span>
+      {count != null && (
+        <span style={{
+          fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
+          background: "var(--c-muted)", borderRadius: 999,
+          padding: "2px 8px",
+        }}>
+          {count}
+        </span>
+      )}
     </div>
   );
 }
