@@ -618,7 +618,35 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
       }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontSize: 15, fontWeight: 700, color: "var(--c-sub)", textDecoration: "none", padding: "8px 0", minHeight: 44, display: "flex", alignItems: "center" }}>← Restaurants</Link>
-          <SettingsButton />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {userAllergens.length > 0 && (
+              <button
+                onClick={() => setShowStaffCard(true)}
+                aria-label="Show allergy card to staff"
+                title="Show Allergy Card to Staff"
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "7px 12px", borderRadius: 999,
+                  border: isDark ? "1px solid rgba(200,210,220,0.35)" : "1px solid rgba(160,175,190,0.5)",
+                  background: isDark
+                    ? "linear-gradient(135deg, #2a2f35 0%, #3a4048 40%, #2e333a 60%, #252a30 100%)"
+                    : "linear-gradient(135deg, #e8ecf0 0%, #f4f6f8 30%, #ffffff 50%, #dde3e8 70%, #e8ecf0 100%)",
+                  color: isDark ? "#c8d4de" : "#4a5568", fontSize: 12, fontWeight: 800,
+                  cursor: "pointer", minHeight: 36,
+                  boxShadow: isDark
+                    ? "0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)"
+                    : "0 1px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="2" y="5" width="20" height="14" rx="2"/>
+                  <line x1="2" y1="10" x2="22" y2="10"/>
+                </svg>
+                Allergy Card
+              </button>
+            )}
+            <SettingsButton />
+          </div>
         </div>
       </div>
 
@@ -860,28 +888,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </>
             )}
 
-            {/* Show Staff Card button — visible whenever user has allergens */}
-            {userAllergens.length > 0 && (
-              <button
-                onClick={() => setShowStaffCard(true)}
-                style={{
-                  marginTop: hasNoMenu ? 0 : 16,
-                  width: "100%", padding: "13px 0",
-                  borderRadius: 14,
-                  border: "1px solid #b8962e",
-                  background: "linear-gradient(135deg, #f5d060 0%, #e8b923 30%, #fce97a 50%, #d4a017 70%, #f5d060 100%)",
-                  backgroundSize: "200% 200%",
-                  color: "#5c3d00",
-                  fontSize: 14, fontWeight: 800, cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  minHeight: 48,
-                  boxShadow: "0 1px 4px rgba(180,130,0,0.35), inset 0 1px 0 rgba(255,255,255,0.45)",
-                  textShadow: "0 1px 0 rgba(255,255,255,0.3)",
-                }}
-              >
-                Show Allergy Card to Staff
-              </button>
-            )}
           </div>
         </div>
 
