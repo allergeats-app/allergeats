@@ -876,7 +876,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   return (
                     <div style={{
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                      padding: "13px 16px", borderRadius: 14, marginTop: 4,
+                      padding: "9px 16px", borderRadius: 14, marginTop: 4,
                       background: `rgba(${rgb},${isDark ? "0.07" : "0.05"})`,
                       border: `1.5px solid rgba(${rgb},${isDark ? "0.28" : "0.2"})`,
                     }}>
