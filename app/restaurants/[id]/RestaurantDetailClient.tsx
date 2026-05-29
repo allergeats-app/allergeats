@@ -796,7 +796,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           <button
                             onClick={submitUserMenuText}
                             disabled={menuInputLoading || !menuInputText.trim()}
-                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "var(--c-brand)", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputText.trim() ? "pointer" : "default", opacity: menuInputText.trim() ? 1 : 0.5 }}
+                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 800, cursor: menuInputText.trim() ? "pointer" : "default", opacity: menuInputText.trim() ? 1 : 0.5 }}
                           >
                             {menuInputLoading ? "Analyzing…" : "Analyze Menu"}
                           </button>
@@ -824,7 +824,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           <button
                             onClick={submitUserMenuUrl}
                             disabled={menuInputLoading || !menuInputUrl.trim()}
-                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "var(--c-brand)", color: "#001f26", fontSize: 14, fontWeight: 800, cursor: menuInputUrl.trim() ? "pointer" : "default", opacity: menuInputUrl.trim() ? 1 : 0.5 }}
+                            style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "none", background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 800, cursor: menuInputUrl.trim() ? "pointer" : "default", opacity: menuInputUrl.trim() ? 1 : 0.5 }}
                           >
                             {menuInputLoading ? "Fetching…" : "Fetch Menu"}
                           </button>

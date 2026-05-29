@@ -13,6 +13,7 @@ import {
 } from "@/lib/allergenProfile";
 import { ShowStaffCard } from "@/components/ShowStaffCard";
 import type { AllergenId, AllergenSeverity } from "@/lib/types";
+import { useTheme } from "@/lib/themeContext";
 
 export default function AllergiesPage() {
   const { user, loading, allergens: authAllergens, severities: authSeverities, saveAllergens, saveSeverities } = useAuth();
@@ -22,6 +23,7 @@ export default function AllergiesPage() {
   const [localSeverities, setLocalSeverities]       = useState<Partial<Record<AllergenId, AllergenSeverity>>>({});
   const [saved, setSaved]                           = useState(false);
   const [showStaffCard, setShowStaffCard]           = useState(false);
+  const { isDark } = useTheme();
   const [hydrated, setHydrated]                     = useState(false);
 
   // Hydrate: use auth profile when signed in, localStorage when anonymous
@@ -211,8 +213,8 @@ export default function AllergiesPage() {
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                       padding: "12px 14px", borderRadius: 14,
-                      background: isAnaphylactic ? "#fff1f0" : "var(--c-muted)",
-                      border: `1.5px solid ${isAnaphylactic ? "#f3c5c0" : "var(--c-border)"}`,
+                      background: isAnaphylactic ? (isDark ? "rgba(185,28,28,0.12)" : "#fff1f0") : "var(--c-muted)",
+                      border: `1.5px solid ${isAnaphylactic ? (isDark ? "rgba(185,28,28,0.35)" : "#f3c5c0") : "var(--c-border)"}`,
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -220,7 +222,7 @@ export default function AllergiesPage() {
                         {a!.label}
                       </span>
                       {isAnaphylactic && (
-                        <span style={{ fontSize: 10, fontWeight: 900, color: "#b91c1c", background: "#fde8e8", border: "1px solid #fca5a5", borderRadius: 6, padding: "2px 7px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <span style={{ fontSize: 10, fontWeight: 900, color: isDark ? "#fca5a5" : "#b91c1c", background: isDark ? "rgba(185,28,28,0.2)" : "#fde8e8", border: `1px solid ${isDark ? "rgba(185,28,28,0.4)" : "#fca5a5"}`, borderRadius: 6, padding: "2px 7px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                           Severe
                         </span>
                       )}
