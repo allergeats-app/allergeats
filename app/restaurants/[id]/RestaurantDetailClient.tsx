@@ -891,41 +891,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           </div>
         </div>
 
-        {/* ── 3. Best Options for You ── */}
-        {!hasNoMenu && (
-          <section style={{ marginBottom: 28 }}>
-            <SectionHeader label="Safe Picks" />
-            {noAllergens ? (
-              <div style={{
-                background: "var(--c-card)", border: "1px solid var(--c-border)",
-                borderRadius: 14, padding: "14px 16px",
-                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-              }}>
-                <div style={{ fontSize: 15, color: "var(--c-sub)", lineHeight: 1.6 }}>
-                  Set your allergies to see which dishes are safe for you.
-                </div>
-                <Link href="/allergies" style={{
-                  flexShrink: 0, padding: "11px 18px", borderRadius: 12,
-                  background: "var(--c-brand)", color: "var(--c-brand-fg)",
-                  fontSize: 15, fontWeight: 700, textDecoration: "none", whiteSpace: "nowrap",
-                }}>
-                  Set Allergies
-                </Link>
-              </div>
-            ) : bestOptions.length === 0 ? (
-              <div style={{
-                background: "var(--c-card)", border: "1px solid var(--c-border)",
-                borderRadius: 14, padding: "14px 16px",
-                fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5,
-              }}>
-                No items in our analysis are flagged safe for your allergy profile at this restaurant.
-              </div>
-            ) : (
-              <BestOptionsCombo recs={bestOptions} />
-            )}
-          </section>
-        )}
-
 
 
         {/* ── 4c. Community Knowledge (memory insights from the learning system) ── */}

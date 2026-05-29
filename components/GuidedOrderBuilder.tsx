@@ -54,7 +54,8 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
   const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
 
-  const isSingle = step?.maxSelect === 1;
+  const isSingle  = step?.maxSelect === 1;
+  const allAvoid  = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
   // Items in this step that are currently in the order
   const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
@@ -247,6 +248,21 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         </div>
       </div>
 
+      {/* ── All-avoid banner ── */}
+      {allAvoid && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "12px 16px", borderRadius: 14,
+          background: `rgba(220,38,38,${isDark ? "0.12" : "0.07"})`,
+          border: `1.5px solid rgba(220,38,38,${isDark ? "0.35" : "0.22"})`,
+        }}>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>✗</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--c-risk-avoid)", lineHeight: 1.4 }}>
+            All items in this step contain your allergens — skip it.
+          </span>
+        </div>
+      )}
+
       {/* ── Item list ── */}
       <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: "hidden" }}>
         {sortedItems.length === 0 ? (
@@ -361,28 +377,41 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         ) : <div />}
 
         {isSingle ? (
-          !step?.required && (
+          (allAvoid || !step?.required) && (
             <button onClick={advance} style={{
-              background: "none", border: "none",
-              fontSize: 14, fontWeight: 600, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0",
+              background: allAvoid ? "rgba(220,38,38,0.1)" : "none",
+              border: allAvoid ? "1.5px solid rgba(220,38,38,0.3)" : "none",
+              borderRadius: allAvoid ? 12 : 0,
+              padding: allAvoid ? "11px 18px" : "8px 0",
+              fontSize: 14, fontWeight: 700,
+              color: allAvoid ? "var(--c-risk-avoid)" : "var(--c-sub)",
+              cursor: "pointer",
             }}>
-              Skip →
+              {allAvoid ? "Skip this step →" : "Skip →"}
             </button>
           )
         ) : (
           <button
             onClick={advance}
+            disabled={step?.required && !allAvoid && picksForStep.length === 0}
             style={{
-              flex: 1, padding: "13px 0", borderRadius: 12, border: "none",
-              background: picksForStep.length > 0 ? "var(--c-brand)" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
-              color: picksForStep.length > 0 ? "#fff" : "var(--c-sub)",
-              fontSize: 15, fontWeight: 800, cursor: "pointer", minHeight: 48,
+              flex: 1, padding: "13px 0", borderRadius: 12,
+              border: allAvoid ? "1.5px solid rgba(220,38,38,0.3)" : "none",
+              background: allAvoid
+                ? "rgba(220,38,38,0.1)"
+                : picksForStep.length > 0 ? "var(--c-brand)" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
+              color: allAvoid
+                ? "var(--c-risk-avoid)"
+                : picksForStep.length > 0 ? "#fff" : "var(--c-sub)",
+              fontSize: 15, fontWeight: 800, cursor: allAvoid || picksForStep.length > 0 ? "pointer" : "default", minHeight: 48,
               transition: "background 0.15s, color 0.15s",
             }}
           >
-            {picksForStep.length > 0
-              ? `Continue with ${picksForStep.length} item${picksForStep.length !== 1 ? "s" : ""} →`
-              : step?.required ? "Select at least one" : "Skip this step →"}
+            {allAvoid
+              ? "Skip this step →"
+              : picksForStep.length > 0
+                ? `Continue with ${picksForStep.length} item${picksForStep.length !== 1 ? "s" : ""} →`
+                : step?.required ? "Select at least one" : "Skip this step →"}
           </button>
         )}
       </div>
