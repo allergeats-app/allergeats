@@ -5,9 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { use } from "react";
 import { SettingsButton } from "@/components/SettingsButton";
-import { MOCK_RESTAURANTS, MENU_DATA_VERIFIED_DATE } from "@/lib/mockRestaurants";
+import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
 import { loadProfileAllergens } from "@/lib/allergenProfile";
-import { coverageTierColor } from "@/lib/scoring";
 import { fitLevel } from "@/lib/fitLevel";
 import { recordView } from "@/lib/recentlyViewed";
 import { bumpInteraction, registerForCrawl, markCrawled } from "@/lib/menu-crawl";
@@ -17,7 +16,6 @@ import { useFavorites } from "@/lib/favoritesContext";
 import { saveOrder } from "@/lib/savedOrders";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { GuidedOrderBuilder } from "@/components/GuidedOrderBuilder";
-import { CameraScanButton } from "@/components/CameraScanButton";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ShowStaffCard } from "@/components/ShowStaffCard";
@@ -25,15 +23,12 @@ import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
 import { useTheme } from "@/lib/themeContext";
 import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
-import { AllergenProfileCard } from "@/components/AllergenProfileCard";
-import { useAuth } from "@/lib/authContext";
 import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
 import { BottomNav } from "@/components/BottomNav";
 import { getUserMenu, saveUserMenu, clearUserMenu, parseTextToMenuItems } from "@/lib/userMenus";
 import type {
   RestaurantMenuAnalysis,
   RestaurantDetailViewModel,
-  SafeOrderRecommendation,
   AnalyzedMenuItem,
   MemoryInsight,
 } from "@/lib/analysis";
@@ -91,7 +86,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [photoFailed, setPhotoFailed]     = useState(false);
   const [photoLoaded, setPhotoLoaded]     = useState(false);
-  const [questionsCopied, setQuestionsCopied] = useState(false);
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
@@ -111,8 +105,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
   const { isDark } = useTheme();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { user } = useAuth();
-  const { allergens: profileAllergens, saveState, setAllergens: setProfileAllergens } = useAllergenProfile();
+  const { allergens: profileAllergens } = useAllergenProfile();
 
   // ── Load restaurant + base analysis ────────────────────────────────────────
   useEffect(() => {
@@ -429,13 +422,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const { hero, summary, coverage, whyThisWorks, aggregatedStaffQuestions, bestOptions } = vm;
+  const { hero, summary, coverage } = vm;
   const badge        = { bg: hero.fitBadgeBg, color: hero.fitBadgeColor };
   const safePercent  = summary.total > 0 ? (summary.likelySafe / summary.total) * 100 : 0;
-  const tierColor    = coverageTierColor(coverage.tier);
   const favorited    = isFavorite(restaurant.id);
   const hasNoMenu    = summary.total === 0;
-  const noAllergens  = userAllergens.length === 0;
 
   const wikiUrl  = chainLogoUrl(restaurant.name);
   const photoSrc = !photoFailed
@@ -461,13 +452,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     { value: "likely-safe", label: `Safe (${summary.likelySafe})` },
     ...(summary.unknown > 0 ? [{ value: "unknown" as RiskFilter, label: `Unknown (${summary.unknown})` }] : []),
   ];
-
-  async function copyQuestions() {
-    const text = aggregatedStaffQuestions.map((q) => `• ${q}`).join("\n");
-    await navigator.clipboard.writeText(text).catch(() => {});
-    setQuestionsCopied(true);
-    setTimeout(() => setQuestionsCopied(false), 2000);
-  }
 
   function toggleOrderItem(itemId: string) {
     setOrderedItemIds((prev) => {
@@ -1695,108 +1679,6 @@ function SectionHeader({ label, count }: { label: string; count?: number }) {
         }}>
           {count}
         </span>
-      )}
-    </div>
-  );
-}
-
-function BestOptionsCombo({ recs }: { recs: SafeOrderRecommendation[] }) {
-  const { isDark } = useTheme();
-  const topLabel = recs[0]?.reasonLabel ?? "Safe Picks";
-  const topExplanation = recs[0]?.explanation;
-  const allAskNotes = [...new Set(recs.flatMap((r) => r.askNotes))].slice(0, 2);
-
-  return (
-    <div style={{
-      borderRadius: 18,
-      border: isDark ? "1px solid #166534" : "1px solid #bbf7d0",
-      background: isDark ? "var(--c-card)" : "#f0fdf4",
-      overflow: "hidden",
-    }}>
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "8px 12px",
-        borderBottom: isDark ? "1px solid rgba(22,101,52,0.5)" : "1px solid #bbf7d0",
-        background: isDark ? "rgba(20,83,45,0.35)" : "rgba(220,252,231,0.6)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-          <span style={{ fontSize: 12, fontWeight: 800, color: isDark ? "#86efac" : "#15803d", letterSpacing: "0.01em" }}>
-            Suggested Order
-          </span>
-        </div>
-        <span style={{
-          padding: "2px 8px", borderRadius: 999,
-          background: isDark ? "#14532d" : "#dcfce7",
-          color: isDark ? "#86efac" : "#15803d",
-          fontSize: 11, fontWeight: 700,
-        }}>
-          {topLabel}
-        </span>
-      </div>
-
-      {/* Items */}
-      <div style={{ padding: "2px 0" }}>
-        {recs.map((rec, i) => (
-          <div key={rec.item.id} style={{
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "8px 12px",
-            borderBottom: i < recs.length - 1
-              ? isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(0,0,0,0.05)"
-              : "none",
-          }}>
-            {/* Check icon */}
-            <div style={{
-              width: 18, height: 18, borderRadius: 999, flexShrink: 0,
-              background: isDark ? "#14532d" : "#dcfce7",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" >
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-            {/* Name */}
-            <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: "var(--c-text)", lineHeight: 1.3, minWidth: 0 }}>
-              {rec.item.name}
-            </span>
-            {/* Category pill */}
-            {rec.item.category && (
-              <span style={{
-                flexShrink: 0, fontSize: 11, fontWeight: 700,
-                color: isDark ? "#86efac" : "#16a34a",
-                background: isDark ? "rgba(20,83,45,0.4)" : "rgba(220,252,231,0.8)",
-                padding: "2px 7px", borderRadius: 999,
-                border: isDark ? "1px solid rgba(22,101,52,0.4)" : "1px solid #bbf7d0",
-              }}>
-                {rec.item.category}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Footer — explanation + ask notes */}
-      {(topExplanation || allAskNotes.length > 0) && (
-        <div style={{
-          padding: "8px 12px 10px",
-          borderTop: isDark ? "1px solid rgba(22,101,52,0.5)" : "1px solid #bbf7d0",
-          background: isDark ? "rgba(20,83,45,0.2)" : "rgba(240,253,244,0.7)",
-        }}>
-          {topExplanation && (
-            <div style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.5 }}>
-              {topExplanation}
-            </div>
-          )}
-          {allAskNotes.length > 0 && (
-            <div style={{ fontSize: 12, color: isDark ? "#fbbf24" : "#92400e", marginTop: topExplanation ? 4 : 0, fontWeight: 600 }}>
-              Ask staff: {allAskNotes.join(" · ")}
-            </div>
-          )}
-        </div>
       )}
     </div>
   );
