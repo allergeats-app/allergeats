@@ -877,11 +877,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     <div style={{
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                       padding: "13px 16px", borderRadius: 14, marginTop: 4,
-                      background: `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
-                      border: `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
+                      background: `rgba(${rgb},${isDark ? "0.07" : "0.05"})`,
+                      border: `1.5px solid rgba(${rgb},${isDark ? "0.28" : "0.2"})`,
                     }}>
-                      <span style={{ fontSize: 22, fontWeight: 900, color, lineHeight: 1 }}>{mark}</span>
-                      <span style={{ fontSize: 17, fontWeight: 900, color, letterSpacing: "-0.02em" }}>{label}</span>
+                      <span style={{ fontSize: 20, fontWeight: 900, color, lineHeight: 1 }}>{mark}</span>
+                      <span style={{ fontSize: 15, fontWeight: 900, color, letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</span>
                     </div>
                   );
                 })()}
