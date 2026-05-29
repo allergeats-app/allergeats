@@ -953,7 +953,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       fontWeight: 900,
                       fontFamily: "'Georgia', 'Times New Roman', serif",
                       letterSpacing: "-0.02em",
-                      background: "linear-gradient(135deg, var(--c-brand) 0%, #ffffff 100%)",
+                      background: isDark
+                        ? "linear-gradient(135deg, #a8b4c0 0%, #dde6ee 30%, #f0f4f7 50%, #c8d4de 70%, #9aaab8 100%)"
+                        : "linear-gradient(135deg, #6b7a8a 0%, #9aaab8 25%, #dde6ee 50%, #8899aa 75%, #5a6a7a 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
