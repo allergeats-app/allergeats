@@ -106,7 +106,7 @@ export default function RootLayout({
                     fontFamily: "'Georgia', 'Times New Roman', serif",
                     letterSpacing: "-0.02em",
                     lineHeight: 1.1,
-                    background: "linear-gradient(to right, #bf953f 0%, #fcf6ba 30%, #b38728 50%, #fbf5b7 70%, #aa771c 100%)",
+                    background: "linear-gradient(to right, #92702a 0%, #c9a030 30%, #8b6914 50%, #c49a35 70%, #7a5c0f 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
