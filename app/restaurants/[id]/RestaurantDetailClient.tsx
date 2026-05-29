@@ -732,11 +732,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </button>
             </div>
 
-            {!hasNoMenu && (
-              <div style={{ fontSize: 15, color: "var(--c-sub)", marginBottom: 18, lineHeight: 1.6 }}>
-                {hero.fitExplanation}
-              </div>
-            )}
 
 
             {hasNoMenu ? (
@@ -839,11 +834,29 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   <StatBlock count={summary.avoid}      label="Avoid"     color="#ef4444" rgb="239,68,68"  isDark={isDark} active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                 </div>
 
-                {/* Coverage trust signal */}
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 999, background: tierColor, flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{coverage.coverageLine}</span>
-                </div>
+                {/* ── Fit banner ── */}
+                {userAllergens.length > 0 && (() => {
+                  const good    = hero.fitLevel === "Great Match" || hero.fitLevel === "Good Option";
+                  const caution = hero.fitLevel === "Use Caution";
+                  const color   = good ? "#22c55e" : caution ? "#f59e0b" : "#ef4444";
+                  const rgb     = good ? "34,197,94" : caution ? "245,158,11" : "239,68,68";
+                  const mark    = good ? "✓" : caution ? "⚠" : "✗";
+                  const label   = hero.fitLevel === "Great Match" ? "Safe to eat here"
+                    : hero.fitLevel === "Good Option"  ? "Looks good for you"
+                    : caution                          ? "Check with staff first"
+                    :                                    "Contains your allergens";
+                  return (
+                    <div style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                      padding: "13px 16px", borderRadius: 14, marginTop: 4,
+                      background: `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
+                      border: `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
+                    }}>
+                      <span style={{ fontSize: 22, fontWeight: 900, color, lineHeight: 1 }}>{mark}</span>
+                      <span style={{ fontSize: 17, fontWeight: 900, color, letterSpacing: "-0.02em" }}>{label}</span>
+                    </div>
+                  );
+                })()}
               </>
             )}
 
