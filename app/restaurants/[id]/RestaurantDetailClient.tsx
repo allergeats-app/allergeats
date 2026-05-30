@@ -963,15 +963,18 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   borderBottom: "1px solid var(--c-border)",
                   marginBottom: 16,
                 }}>
-                  <div className="chip-row" style={{ display: "flex", gap: 8, paddingBottom: 2 }}>
+                  <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
                     {RISK_CHIPS.map((c) => (
                       <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
-                        padding: "11px 18px", borderRadius: 999,
+                        padding: "8px 14px", borderRadius: 999, minHeight: 36,
                         border: `1.5px solid ${riskFilter === c.value ? "var(--c-brand)" : "var(--c-border)"}`,
-                        background: riskFilter === c.value ? "var(--c-brand)" : "var(--c-card)",
-                        color: riskFilter === c.value ? "#fff" : "var(--c-text)",
-                        fontSize: 15, fontWeight: 700, whiteSpace: "nowrap",
-                        cursor: "pointer", flexShrink: 0, minHeight: 44,
+                        background: riskFilter === c.value ? "var(--c-brand)" : isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.8)",
+                        color: riskFilter === c.value ? "var(--c-brand-fg)" : "var(--c-text)",
+                        fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
+                        cursor: "pointer", flexShrink: 0,
+                        backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                        boxShadow: riskFilter === c.value ? "0 2px 8px rgba(31,189,204,0.3)" : "none",
+                        transition: "all 0.15s",
                       }}>
                         {c.label}
                       </button>
@@ -979,16 +982,17 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   </div>
                   {/* Category sub-filter */}
                   {vm.sections.filter((s) => !isDrinkSection(s.sectionName)).length > 1 && (
-                    <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2, marginTop: 8 }}>
+                    <div className="chip-row" style={{ display: "flex", gap: 5, paddingBottom: 2, marginTop: 6 }}>
                       {[{ key: "all", label: "All" }, ...vm.sections.filter((s) => !isDrinkSection(s.sectionName)).map((s) => ({ key: s.sectionName, label: s.sectionName }))].map((c) => (
                         <button key={c.key} onClick={() => setCategoryFilter(c.key)} style={{
-                          padding: "8px 14px", borderRadius: 999, minHeight: 36,
+                          padding: "6px 12px", borderRadius: 999, minHeight: 30,
                           border: `1px solid ${categoryFilter === c.key ? "var(--c-text)" : "var(--c-border)"}`,
                           background: categoryFilter === c.key ? "var(--c-text)" : "transparent",
                           color: categoryFilter === c.key ? "var(--c-bg)" : "var(--c-sub)",
-                          fontSize: 13, fontWeight: 700, whiteSpace: "nowrap",
+                          fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
                           cursor: "pointer", flexShrink: 0,
                           display: "flex", alignItems: "center",
+                          transition: "all 0.15s",
                         }}>
                           {c.label}
                         </button>
@@ -1018,14 +1022,15 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       if (categoryFilter !== "all" && section.sectionName !== categoryFilter) return null;
                       return (
                         <div key={section.sectionName}>
-                          <div style={{ marginBottom: 8 }}>
-                            <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", margin: "0 0 2px", letterSpacing: "-0.01em" }}>{section.sectionName}</h2>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <span style={{ fontSize: 12, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</span>
-                              {section.safeCount > 0 && riskFilter === "all" && (
-                                <span style={{ fontSize: 12, color: "#15803d", fontWeight: 700 }}>· {section.safeCount} safe for you</span>
-                              )}
-                            </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, paddingTop: 4 }}>
+                            <h2 style={{ fontSize: 11, fontWeight: 900, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0, whiteSpace: "nowrap" }}>{section.sectionName}</h2>
+                            <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+                            <span style={{ fontSize: 11, color: "var(--c-sub)", whiteSpace: "nowrap" }}>{items.length}</span>
+                            {section.safeCount > 0 && riskFilter === "all" && (
+                              <span style={{ fontSize: 11, fontWeight: 700, color: isDark ? "#4ade80" : "#15803d", whiteSpace: "nowrap" }}>
+                                · {section.safeCount} safe
+                              </span>
+                            )}
                           </div>
                           <div style={{ display: "grid", gap: 6 }}>
                             {items.map(renderItem)}
