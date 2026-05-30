@@ -5,7 +5,7 @@ import type { BuilderStep } from "@/lib/types";
 import type { AnalyzedMenuSection, AnalyzedMenuItem } from "@/lib/analysis";
 import { useTheme } from "@/lib/themeContext";
 
-const RISK_DOT: Record<string, string> = {
+const RISK_COLOR: Record<string, string> = {
   "likely-safe": "#16a34a",
   "ask":         "#d97706",
   "avoid":       "#dc2626",
@@ -13,13 +13,12 @@ const RISK_DOT: Record<string, string> = {
 };
 
 const RISK_BADGE: Record<string, { bg: string; color: string; label: string }> = {
-  "likely-safe": { bg: "rgba(22,163,74,0.1)",  color: "var(--c-risk-safe)",  label: "Safe"      },
-  "ask":         { bg: "rgba(217,119,6,0.1)",  color: "var(--c-risk-ask)",   label: "Ask staff" },
-  "avoid":       { bg: "rgba(220,38,38,0.08)", color: "var(--c-risk-avoid)", label: "Avoid"     },
-  "unknown":     { bg: "var(--c-muted)",        color: "var(--c-sub)",        label: "Unknown"   },
+  "likely-safe": { bg: "rgba(22,163,74,0.12)",  color: "#16a34a", label: "Safe"      },
+  "ask":         { bg: "rgba(217,119,6,0.12)",  color: "#d97706", label: "Ask staff" },
+  "avoid":       { bg: "rgba(220,38,38,0.1)",   color: "#dc2626", label: "Avoid"     },
+  "unknown":     { bg: "rgba(156,163,175,0.12)", color: "#9ca3af", label: "Unknown"   },
 };
 
-// Label cleanup for the review summary
 function stepSummaryLabel(label: string): string {
   return label
     .replace(/^Choose your /i, "")
@@ -41,25 +40,20 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   const [currentStep, setCurrentStep] = useState(0);
   const [done, setDone]               = useState(false);
 
-  const step    = steps[currentStep];
-  // Support multi-category steps (sit-down restaurants: "Choose your entrée" spans Steaks + Seafood + Chicken)
+  const step = steps[currentStep];
   const stepItems = step
     ? step.categories
       ? sections.filter((s) => step.categories!.includes(s.sectionName)).flatMap((s) => s.items)
       : (sections.find((s) => s.sectionName === step.category)?.items ?? [])
     : [];
 
-  // Always derive selection state directly from orderedItemIds — never from local state.
-  // This prevents stale-closure bugs and keeps the UI in sync with the order at all times.
   const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
   const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
 
-  const isSingle  = step?.maxSelect === 1;
-  const allAvoid  = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
-  // Items in this step that are currently in the order
+  const isSingle     = step?.maxSelect === 1;
+  const allAvoid     = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
   const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
-  // Helper: get all items for a step (handles both single-category and multi-category steps)
   function getStepItems(s: BuilderStep): AnalyzedMenuItem[] {
     if (s.categories) {
       return sections.filter((sec) => s.categories!.includes(sec.sectionName)).flatMap((sec) => sec.items);
@@ -67,45 +61,29 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
     return sections.find((sec) => sec.sectionName === s.category)?.items ?? [];
   }
 
-  // Count total builder-selected items (items from any step that are in the order)
   const totalBuilderItems = steps.reduce((n, s) => {
     return n + getStepItems(s).filter((i) => orderedItemIds.has(i.id)).length;
   }, 0);
 
   function selectItem(item: AnalyzedMenuItem) {
     if (item.risk === "avoid") return;
-
     if (isSingle) {
-      // Remove any other item from this step currently in the order
       for (const stepItem of stepItems) {
-        if (stepItem.id !== item.id && orderedItemIds.has(stepItem.id)) {
-          onToggleOrder(stepItem.id);
-        }
+        if (stepItem.id !== item.id && orderedItemIds.has(stepItem.id)) onToggleOrder(stepItem.id);
       }
-      // Add new item (if not already selected)
-      if (!orderedItemIds.has(item.id)) {
-        onToggleOrder(item.id);
-      }
-      // Auto-advance
+      if (!orderedItemIds.has(item.id)) onToggleOrder(item.id);
       setTimeout(() => {
-        if (currentStep < steps.length - 1) {
-          setCurrentStep((s) => s + 1);
-        } else {
-          setDone(true);
-        }
+        if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
+        else setDone(true);
       }, 280);
     } else {
-      // Multi-select: simple toggle
       onToggleOrder(item.id);
     }
   }
 
   function advance() {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep((s) => s + 1);
-    } else {
-      setDone(true);
-    }
+    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
+    else setDone(true);
   }
 
   function goBack() {
@@ -114,7 +92,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   }
 
   function startOver() {
-    // Remove every builder item from the order (across all steps, including multi-category)
     for (const s of steps) {
       for (const item of getStepItems(s)) {
         if (orderedItemIds.has(item.id)) onToggleOrder(item.id);
@@ -124,35 +101,52 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
     setDone(false);
   }
 
-  const cardBg     = isDark ? "var(--c-card)" : "#fff";
-  const cardBorder = isDark ? "var(--c-border)" : "#f0f0f0";
+  // Shared glass card style
+  const glass = {
+    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.82)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
+    borderRadius: 20,
+    boxShadow: isDark
+      ? "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
+      : "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+  } as React.CSSProperties;
 
-  // ── Done / review state ────────────────────────────────────────────────────
+  // ── Done / review state ───────────────────────────────────────────────────
   if (done) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", paddingBottom: 4 }}>
-          <div style={{ fontSize: 28, marginBottom: 6 }}>✓</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>Your order is built!</div>
-          <div style={{ fontSize: 14, color: "var(--c-sub)" }}>
-            {totalBuilderItems} item{totalBuilderItems !== 1 ? "s" : ""} added to your order
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Success header */}
+        <div style={{ ...glass, padding: "24px 20px", textAlign: "center" }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 999, margin: "0 auto 14px",
+            background: "rgba(22,163,74,0.12)",
+            border: "1.5px solid rgba(22,163,74,0.3)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", marginBottom: 4, letterSpacing: "-0.02em" }}>Order built!</div>
+          <div style={{ fontSize: 13, color: "var(--c-sub)" }}>
+            {totalBuilderItems} item{totalBuilderItems !== 1 ? "s" : ""} selected
           </div>
         </div>
 
-        {/* Summary by step — derived from orderedItemIds, always accurate */}
-        <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: "hidden" }}>
+        {/* Summary */}
+        <div style={{ ...glass, overflow: "hidden" }}>
           {steps.map((s, i) => {
             const pickedItems = getStepItems(s).filter((item) => orderedItemIds.has(item.id));
             if (!pickedItems.length) return null;
             const isLast = i === steps.length - 1;
             return (
               <div key={i} style={{
-                padding: "14px 16px",
-                borderBottom: isLast ? "none" : `1px solid ${cardBorder}`,
-                display: "flex", flexDirection: "column", gap: 6,
+                padding: "14px 18px",
+                borderBottom: isLast ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
               }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
                   {stepSummaryLabel(s.label)}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -162,9 +156,10 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                       <span key={item.id} style={{
                         fontSize: 13, fontWeight: 700, color: "var(--c-text)",
                         background: badge.bg, borderRadius: 999,
-                        padding: "4px 10px", display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "5px 11px", display: "inline-flex", alignItems: "center", gap: 6,
+                        border: `1px solid ${badge.bg}`,
                       }}>
-                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: RISK_DOT[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
+                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: RISK_COLOR[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
                         {item.name}
                       </span>
                     );
@@ -176,22 +171,20 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         </div>
 
         {/* CTAs */}
-        <button
-          onClick={onOpenOrder}
-          style={{
-            width: "100%", padding: "15px 0", borderRadius: 14, border: "none",
-            background: "var(--c-brand)", color: "var(--c-brand-fg)",
-            fontSize: 16, fontWeight: 800, cursor: "pointer", minHeight: 54,
-          }}
-        >
+        <button onClick={onOpenOrder} style={{
+          width: "100%", padding: "15px 0", borderRadius: 16, border: "none",
+          background: "var(--c-brand)", color: "var(--c-brand-fg)",
+          fontSize: 16, fontWeight: 800, cursor: "pointer", minHeight: 54,
+          letterSpacing: "-0.01em",
+        }}>
           View order →
         </button>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 4 }}>
-          <button onClick={startOver} style={{ background: "none", border: "none", fontSize: 14, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0", fontWeight: 600 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button onClick={startOver} style={{ background: "none", border: "none", fontSize: 13, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0", fontWeight: 600 }}>
             ← Start over
           </button>
-          <button onClick={onBrowse} style={{ background: "none", border: "none", fontSize: 14, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0", fontWeight: 600 }}>
+          <button onClick={onBrowse} style={{ background: "none", border: "none", fontSize: 13, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0", fontWeight: 600 }}>
             Browse full menu →
           </button>
         </div>
@@ -199,83 +192,107 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
     );
   }
 
-  // ── Step state ─────────────────────────────────────────────────────────────
+  // ── Step state ────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
-      {/* ── Progress dots ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0 }}>
+      {/* ── Progress bar ── */}
+      <div style={{ display: "flex", gap: 5 }}>
         {steps.map((_, i) => {
-          const isActive  = i === currentStep;
-          const isStepDone = i < currentStep;
+          const isComplete = i < currentStep;
+          const isCurrent  = i === currentStep;
           return (
-            <div key={i} style={{ display: "flex", alignItems: "center" }}>
-              <div style={{
-                width: isActive ? 32 : 10, height: 10, borderRadius: 999,
-                background: isActive ? "var(--c-brand)" : isStepDone ? "var(--c-brand)" : (isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb"),
-                transition: "all 0.25s ease",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                {isStepDone && (
-                  <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </div>
-              {i < steps.length - 1 && (
-                <div style={{
-                  width: 18, height: 2,
-                  background: isStepDone ? "var(--c-brand)" : (isDark ? "rgba(255,255,255,0.1)" : "#e5e7eb"),
-                  transition: "background 0.25s ease",
-                }} />
-              )}
-            </div>
+            <div key={i} style={{
+              flex: 1, height: 4, borderRadius: 999,
+              background: isComplete
+                ? "var(--c-brand)"
+                : isCurrent
+                  ? isDark ? "rgba(31,189,204,0.45)" : "rgba(31,189,204,0.35)"
+                  : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+              transition: "all 0.3s ease",
+            }} />
           );
         })}
       </div>
 
       {/* ── Step header ── */}
-      <div>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
-          Step {currentStep + 1} of {steps.length}
+      <div style={{ ...glass, padding: "18px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <span style={{
+            fontSize: 11, fontWeight: 900, letterSpacing: "0.08em",
+            color: "var(--c-brand)", textTransform: "uppercase",
+          }}>
+            Step {currentStep + 1} of {steps.length}
+          </span>
+          {!step?.required && (
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: "var(--c-sub)",
+              background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+              borderRadius: 999, padding: "2px 8px", letterSpacing: "0.04em", textTransform: "uppercase",
+            }}>
+              Optional
+            </span>
+          )}
         </div>
-        <div style={{ fontSize: 24, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.01em", lineHeight: 1.2, marginBottom: 4 }}>
+        <div style={{ fontSize: 26, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: 6 }}>
           {step?.label}
         </div>
-        <div style={{ fontSize: 13, color: "var(--c-sub)" }}>
-          {isSingle ? "Pick one" : step?.maxSelect && step.maxSelect < 99 ? `Pick up to ${step.maxSelect}` : "Pick as many as you'd like"}
-          {!step?.required && " · optional"}
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 5,
+          fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
+          background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
+          borderRadius: 999, padding: "4px 10px",
+        }}>
+          {isSingle
+            ? "Pick one"
+            : step?.maxSelect && step.maxSelect < 99
+              ? `Pick up to ${step.maxSelect}`
+              : "Pick as many as you like"}
         </div>
       </div>
 
       {/* ── All-avoid banner ── */}
       {allAvoid && (
         <div style={{
-          display: "flex", alignItems: "center", gap: 10,
-          padding: "12px 16px", borderRadius: 14,
-          background: `rgba(220,38,38,${isDark ? "0.12" : "0.07"})`,
-          border: `1.5px solid rgba(220,38,38,${isDark ? "0.35" : "0.22"})`,
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "14px 18px", borderRadius: 16,
+          background: isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)",
+          border: `1.5px solid rgba(220,38,38,${isDark ? "0.3" : "0.2"})`,
+          backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         }}>
-          <span style={{ fontSize: 18, lineHeight: 1 }}>✗</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--c-risk-avoid)", lineHeight: 1.4 }}>
-            All items in this step contain your allergens — skip it.
-          </span>
+          <div style={{
+            width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+            background: "rgba(220,38,38,0.12)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#dc2626", lineHeight: 1.3 }}>
+              No safe options here
+            </div>
+            <div style={{ fontSize: 12, color: isDark ? "rgba(220,38,38,0.7)" : "rgba(185,28,28,0.65)", marginTop: 2 }}>
+              All items contain your allergens — skip this step.
+            </div>
+          </div>
         </div>
       )}
 
       {/* ── Item list ── */}
-      <div style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 16, overflow: "hidden" }}>
+      <div style={{ ...glass, overflow: "hidden" }}>
         {sortedItems.length === 0 ? (
-          <div style={{ padding: "20px 16px", color: "var(--c-sub)", fontSize: 14, textAlign: "center" }}>
+          <div style={{ padding: "24px 18px", color: "var(--c-sub)", fontSize: 14, textAlign: "center" }}>
             No items available
           </div>
         ) : sortedItems.map((item, idx) => {
           const isSelected = orderedItemIds.has(item.id);
           const isAvoid    = item.risk === "avoid";
           const badge      = RISK_BADGE[item.risk] ?? RISK_BADGE["unknown"];
-          const dot        = RISK_DOT[item.risk] ?? "#9ca3af";
+          const riskColor  = RISK_COLOR[item.risk] ?? "#9ca3af";
           const isLast     = idx === sortedItems.length - 1;
-          // Combo number = 1-based position in the original (unsorted) step items list
           const comboNum   = step?.showAsCombo
             ? (stepItems.findIndex((i) => i.id === item.id) + 1)
             : null;
@@ -287,90 +304,104 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               onClick={() => selectItem(item)}
               disabled={isAvoid}
               style={{
-                display: "flex", alignItems: "center", gap: 12,
+                display: "flex", alignItems: "center",
                 width: "100%", textAlign: "left",
-                padding: "14px 16px",
+                padding: 0,
                 background: isSelected
-                  ? (isDark ? "rgba(31,189,204,0.1)" : "rgba(31,189,204,0.04)")
-                  : isAvoid
-                    ? (isDark ? "rgba(255,255,255,0.02)" : "#fafafa")
-                    : "transparent",
+                  ? isDark ? "rgba(31,189,204,0.1)" : "rgba(31,189,204,0.06)"
+                  : "transparent",
                 border: "none",
-                borderBottom: isLast ? "none" : `1px solid ${cardBorder}`,
+                borderBottom: isLast ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
                 cursor: isAvoid ? "not-allowed" : "pointer",
-                opacity: isAvoid ? 0.45 : 1,
+                opacity: isAvoid ? 0.4 : 1,
                 transition: "background 0.15s",
-                minHeight: 56,
+                minHeight: 62,
               }}
             >
-              {/* Combo number badge OR safety dot */}
-              {comboNum ? (
-                <div style={{
-                  width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                  background: isSelected ? "var(--c-brand)" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "background 0.15s",
-                }}>
-                  <span style={{
-                    fontSize: 13, fontWeight: 900, lineHeight: 1,
-                    color: isSelected ? "#fff" : "var(--c-sub)",
-                  }}>
-                    #{comboNum}
-                  </span>
-                </div>
-              ) : (
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: dot, flexShrink: 0 }} />
-              )}
+              {/* Risk color strip */}
+              <div style={{
+                width: 3, alignSelf: "stretch",
+                background: riskColor,
+                flexShrink: 0,
+                borderRadius: "0",
+              }} />
 
-              {/* Name + allergen hits */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: isAvoid ? "var(--c-sub)" : "var(--c-text)", lineHeight: 1.3 }}>
-                  {item.name}
+              {/* Content */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, padding: "14px 16px" }}>
+                {/* Combo badge OR risk dot */}
+                {comboNum ? (
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 12, flexShrink: 0,
+                    background: isSelected ? "var(--c-brand)" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "background 0.15s",
+                    border: `1px solid ${isSelected ? "transparent" : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
+                  }}>
+                    <span style={{ fontSize: 12, fontWeight: 900, color: isSelected ? "#fff" : "var(--c-sub)" }}>
+                      #{comboNum}
+                    </span>
+                  </div>
+                ) : (
+                  <div style={{
+                    width: 10, height: 10, borderRadius: "50%",
+                    background: riskColor, flexShrink: 0,
+                    boxShadow: `0 0 6px ${riskColor}66`,
+                  }} />
+                )}
+
+                {/* Name + allergen hits */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: isAvoid ? "var(--c-sub)" : "var(--c-text)", lineHeight: 1.3, letterSpacing: "-0.01em" }}>
+                    {item.name}
+                  </div>
+                  {item.userAllergenHits.length > 0 && (
+                    <div style={{ fontSize: 11, color: "#dc2626", fontWeight: 600, marginTop: 3, letterSpacing: "0.01em" }}>
+                      Contains: {item.userAllergenHits.map((a) => a.replace(/-/g, " ")).join(", ")}
+                    </div>
+                  )}
                 </div>
-                {item.userAllergenHits.length > 0 && (
-                  <div style={{ fontSize: 12, color: "var(--c-risk-avoid)", fontWeight: 600, marginTop: 2 }}>
-                    Contains: {item.userAllergenHits.map((a) => a.replace(/-/g, " ")).join(", ")}
+
+                {/* Safety badge */}
+                <span style={{
+                  fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999,
+                  background: badge.bg, color: badge.color, flexShrink: 0,
+                  letterSpacing: "0.02em", border: `1px solid ${badge.bg}`,
+                }}>
+                  {badge.label}
+                </span>
+
+                {/* Check/radio indicator */}
+                {!isAvoid && (
+                  <div style={{
+                    width: 22, height: 22, borderRadius: isSingle ? 999 : 7, flexShrink: 0,
+                    border: isSelected ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)"}`,
+                    background: isSelected ? "var(--c-brand)" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "all 0.15s",
+                    boxShadow: isSelected ? "0 2px 8px rgba(31,189,204,0.4)" : "none",
+                  }}>
+                    {isSelected && (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
                   </div>
                 )}
               </div>
-
-              {/* Safety badge */}
-              <span style={{
-                fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999,
-                background: badge.bg, color: badge.color,
-                flexShrink: 0, letterSpacing: "0.01em",
-              }}>
-                {badge.label}
-              </span>
-
-              {/* Check indicator */}
-              {!isAvoid && (
-                <div style={{
-                  width: 22, height: 22, borderRadius: isSingle ? 999 : 6, flexShrink: 0,
-                  border: isSelected ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.2)" : "#d1d5db"}`,
-                  background: isSelected ? "var(--c-brand)" : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.15s",
-                }}>
-                  {isSelected && (
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  )}
-                </div>
-              )}
             </button>
           );
         })}
       </div>
 
       {/* ── Navigation ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {currentStep > 0 ? (
           <button onClick={goBack} style={{
-            background: "none", border: `1px solid ${cardBorder}`,
-            borderRadius: 12, padding: "11px 18px",
-            fontSize: 14, fontWeight: 700, color: "var(--c-text)", cursor: "pointer", minHeight: 44,
+            padding: "13px 18px", borderRadius: 14,
+            border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+            background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+            fontSize: 14, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer", minHeight: 48,
+            backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
           }}>
             ← Back
           </button>
@@ -379,13 +410,17 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         {isSingle ? (
           (allAvoid || !step?.required) && (
             <button onClick={advance} style={{
-              background: allAvoid ? "rgba(220,38,38,0.1)" : "none",
-              border: allAvoid ? "1.5px solid rgba(220,38,38,0.3)" : "none",
-              borderRadius: allAvoid ? 12 : 0,
-              padding: allAvoid ? "11px 18px" : "8px 0",
+              flex: 1, padding: "13px 0", borderRadius: 14, minHeight: 48,
+              border: allAvoid
+                ? "1.5px solid rgba(220,38,38,0.25)"
+                : `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+              background: allAvoid
+                ? isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)"
+                : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
               fontSize: 14, fontWeight: 700,
-              color: allAvoid ? "var(--c-risk-avoid)" : "var(--c-sub)",
+              color: allAvoid ? "#dc2626" : "var(--c-sub)",
               cursor: "pointer",
+              backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
             }}>
               {allAvoid ? "Skip this step →" : "Skip →"}
             </button>
@@ -395,16 +430,21 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             onClick={advance}
             disabled={step?.required && !allAvoid && picksForStep.length === 0}
             style={{
-              flex: 1, padding: "13px 0", borderRadius: 12,
-              border: allAvoid ? "1.5px solid rgba(220,38,38,0.3)" : "none",
+              flex: 1, padding: "13px 0", borderRadius: 14, minHeight: 48,
+              border: allAvoid ? "1.5px solid rgba(220,38,38,0.25)" : "none",
               background: allAvoid
-                ? "rgba(220,38,38,0.1)"
-                : picksForStep.length > 0 ? "var(--c-brand)" : (isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6"),
+                ? isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)"
+                : picksForStep.length > 0
+                  ? "var(--c-brand)"
+                  : isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
               color: allAvoid
-                ? "var(--c-risk-avoid)"
-                : picksForStep.length > 0 ? "#fff" : "var(--c-sub)",
-              fontSize: 15, fontWeight: 800, cursor: allAvoid || picksForStep.length > 0 ? "pointer" : "default", minHeight: 48,
-              transition: "background 0.15s, color 0.15s",
+                ? "#dc2626"
+                : picksForStep.length > 0 ? "var(--c-brand-fg)" : "var(--c-sub)",
+              fontSize: 15, fontWeight: 800,
+              cursor: allAvoid || picksForStep.length > 0 ? "pointer" : "default",
+              transition: "all 0.15s",
+              boxShadow: picksForStep.length > 0 && !allAvoid ? "0 4px 16px rgba(31,189,204,0.35)" : "none",
+              letterSpacing: "-0.01em",
             }}
           >
             {allAvoid
