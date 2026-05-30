@@ -255,7 +255,8 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                 onClick={() => setOpen((v) => !v)}
                 aria-label={open ? "Collapse" : "Expand"}
                 style={{
-                  background: "none", border: "none", padding: "4px",
+                  background: "none", border: "none",
+                  padding: "13px 8px", margin: "-9px -4px",
                   cursor: "pointer", color: "var(--c-sub)",
                   display: "flex", alignItems: "center",
                 }}

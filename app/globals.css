@@ -32,6 +32,9 @@ html {
   /* Block accidental horizontal scroll from any overflowing child */
   overflow-x: hidden;
   height: 100%;
+  /* Prevent iOS from auto-scaling text in landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -68,6 +71,16 @@ input,
 select,
 textarea {
   font-size: 16px !important;
+  /* Remove native OS styling on iOS/Android */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Prevent iOS long-press callout on images (save / search / share sheet) */
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ── Restaurants page responsive layout ─────────────────────────────────── */
@@ -149,12 +162,17 @@ a:focus-visible,
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Firefox */
+  overscroll-behavior-x: contain;
+  padding-right: 16px; /* Trailing gap so last chip isn't flush against edge */
 }
 .chip-row::-webkit-scrollbar {
   display: none; /* Chrome, Safari, iOS */
 }
 
 /* ── Restaurant swipe rail — hide scrollbar ──────────────────────────────── */
+.restaurant-rail {
+  overscroll-behavior-x: contain;
+}
 .restaurant-rail::-webkit-scrollbar {
   display: none;
 }

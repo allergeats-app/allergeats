@@ -385,6 +385,7 @@ function HomeContent() {
           display: "flex", gap: 8,
           overflowX: "auto", scrollbarWidth: "none",
           WebkitOverflowScrolling: "touch" as never,
+          overscrollBehavior: "contain auto",
         }}>
           {([
             { value: "all",        label: "All" },
@@ -550,6 +551,7 @@ function HomeContent() {
                   padding: "2px 16px 10px",
                   scrollbarWidth: "none",
                   WebkitOverflowScrolling: "touch" as never,
+                  overscrollBehavior: "contain auto",
                 }}>
                   {nearbyFiltered.slice(1, 5).map((r) => (
                     <div key={r.id} style={{
@@ -601,6 +603,7 @@ function HomeContent() {
                   padding: "2px 16px 10px",
                   scrollbarWidth: "none",
                   WebkitOverflowScrolling: "touch" as never,
+                  overscrollBehavior: "contain auto",
                 }}>
                   {chainTemplates.map((r) => (
                     <div key={r.id} style={{
