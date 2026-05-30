@@ -416,25 +416,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         )}
       </div>
 
-      {/* Browse button */}
-      <div style={{ paddingTop: 8 }}>
-        <button onClick={onBrowse} style={{
-          width: "100%", padding: "13px 0",
-          borderRadius: 14,
-          border: isDark ? "1px solid rgba(200,210,220,0.3)" : "1px solid rgba(160,175,190,0.45)",
-          background: isDark
-            ? "linear-gradient(135deg, #2a2f35 0%, #3a4048 40%, #2e333a 60%, #252a30 100%)"
-            : "linear-gradient(135deg, #e8ecf0 0%, #f4f6f8 30%, #ffffff 50%, #dde3e8 70%, #e8ecf0 100%)",
-          color: isDark ? "#c8d4de" : "#4a5568",
-          fontSize: 14, fontWeight: 900, cursor: "pointer",
-          letterSpacing: "0.06em", textTransform: "uppercase",
-          boxShadow: isDark
-            ? "0 1px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07)"
-            : "0 1px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9)",
-        }}>
-          Browse Full Menu
-        </button>
-      </div>
     </div>
   );
 }
