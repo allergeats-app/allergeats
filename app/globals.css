@@ -68,12 +68,15 @@ a,
   only where explicitly set — so we use !important here as a universal floor.
 */
 input,
-select,
 textarea {
   font-size: 16px !important;
-  /* Remove native OS styling on iOS/Android */
+  /* Remove native OS styling on iOS/Android (not select — would strip the dropdown arrow) */
   -webkit-appearance: none;
   appearance: none;
+}
+
+select {
+  font-size: 16px !important;
 }
 
 /* Prevent iOS long-press callout on images (save / search / share sheet) */

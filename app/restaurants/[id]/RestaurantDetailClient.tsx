@@ -966,7 +966,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
                     {RISK_CHIPS.map((c) => (
                       <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
-                        padding: "8px 14px", borderRadius: 999, minHeight: 36,
+                        padding: "8px 14px", borderRadius: 999, minHeight: 44,
                         border: `1.5px solid ${riskFilter === c.value ? "var(--c-brand)" : "var(--c-border)"}`,
                         background: riskFilter === c.value ? "var(--c-brand)" : isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.8)",
                         color: riskFilter === c.value ? "var(--c-brand-fg)" : "var(--c-text)",
@@ -985,7 +985,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     <div className="chip-row" style={{ display: "flex", gap: 5, paddingBottom: 2, marginTop: 6 }}>
                       {[{ key: "all", label: "All" }, ...vm.sections.filter((s) => !isDrinkSection(s.sectionName)).map((s) => ({ key: s.sectionName, label: s.sectionName }))].map((c) => (
                         <button key={c.key} onClick={() => setCategoryFilter(c.key)} style={{
-                          padding: "6px 12px", borderRadius: 999, minHeight: 30,
+                          padding: "6px 12px", borderRadius: 999, minHeight: 36,
                           border: `1px solid ${categoryFilter === c.key ? "var(--c-text)" : "var(--c-border)"}`,
                           background: categoryFilter === c.key ? "var(--c-text)" : "transparent",
                           color: categoryFilter === c.key ? "var(--c-bg)" : "var(--c-sub)",

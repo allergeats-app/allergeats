@@ -379,13 +379,10 @@ function HomeContent() {
         />
 
         {/* ── 3. Quick cuisine chips ────────────────────────────────────── */}
-        <div style={{
+        <div className="chip-row" style={{
           margin: "12px -16px 0",
           padding: "2px 16px 4px",
           display: "flex", gap: 8,
-          overflowX: "auto", scrollbarWidth: "none",
-          WebkitOverflowScrolling: "touch" as never,
-          overscrollBehavior: "contain auto",
         }}>
           {([
             { value: "all",        label: "All" },

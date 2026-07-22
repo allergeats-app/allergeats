@@ -6,6 +6,7 @@ import { ConfidenceBadge } from "./ConfidenceBadge";
 import { submitFeedback } from "@/lib/learning/learningEngine";
 import type { FeedbackType } from "@/lib/learning/types";
 import { useTheme } from "@/lib/themeContext";
+import { RISK_COLOR } from "@/lib/riskColors";
 
 const ALLERGEN_LABEL: Record<string, string> = {
   dairy: "Dairy", egg: "Egg", wheat: "Wheat", gluten: "Gluten",
@@ -16,13 +17,6 @@ const ALLERGEN_LABEL: Record<string, string> = {
 function aLabel(id: string): string {
   return ALLERGEN_LABEL[id] ?? id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
-
-const RISK_STRIP: Record<string, string> = {
-  "likely-safe": "#16a34a",
-  "ask":         "#d97706",
-  "avoid":       "#dc2626",
-  "unknown":     "#9ca3af",
-};
 
 function getSafety(risk: string, isDark: boolean) {
   const map: Record<string, { label: string; bg: string; color: string; border: string }> = {
@@ -78,7 +72,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
   }, [open]);
 
   const safety       = getSafety(item.risk, isDark);
-  const stripColor   = RISK_STRIP[item.risk] ?? "#9ca3af";
+  const stripColor   = RISK_COLOR[item.risk] ?? "#9ca3af";
   const primaryAllergen = item.userAllergenHits[0] ?? item.detectedAllergens[0];
 
   const hasExpandable = item.staffQuestions.length > 0 || !!(
@@ -256,7 +250,7 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
                 aria-label={open ? "Collapse" : "Expand"}
                 style={{
                   background: "none", border: "none",
-                  padding: "13px 8px", margin: "-9px -4px",
+                  padding: "15px 8px", margin: "-11px -4px",
                   cursor: "pointer", color: "var(--c-sub)",
                   display: "flex", alignItems: "center",
                 }}

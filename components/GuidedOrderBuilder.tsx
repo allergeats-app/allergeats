@@ -1,16 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { BuilderStep } from "@/lib/types";
 import type { AnalyzedMenuSection, AnalyzedMenuItem } from "@/lib/analysis";
 import { useTheme } from "@/lib/themeContext";
-
-const RISK_COLOR: Record<string, string> = {
-  "likely-safe": "#16a34a",
-  "ask":         "#d97706",
-  "avoid":       "#dc2626",
-  "unknown":     "#9ca3af",
-};
+import { RISK_COLOR } from "@/lib/riskColors";
 
 const RISK_BADGE: Record<string, { bg: string; color: string; label: string }> = {
   "likely-safe": { bg: "rgba(22,163,74,0.12)",  color: "#16a34a", label: "Safe"      },
@@ -39,20 +33,11 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   const { isDark } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
   const [done, setDone]               = useState(false);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current); }, []);
 
   const step = steps[currentStep];
-  const stepItems = step
-    ? step.categories
-      ? sections.filter((s) => step.categories!.includes(s.sectionName)).flatMap((s) => s.items)
-      : (sections.find((s) => s.sectionName === step.category)?.items ?? [])
-    : [];
-
-  const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
-  const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
-
-  const isSingle     = step?.maxSelect === 1;
-  const allAvoid     = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
-  const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
   function getStepItems(s: BuilderStep): AnalyzedMenuItem[] {
     if (s.categories) {
@@ -60,6 +45,15 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
     }
     return sections.find((sec) => sec.sectionName === s.category)?.items ?? [];
   }
+
+  const stepItems = step ? getStepItems(step) : [];
+
+  const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
+  const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
+
+  const isSingle     = step?.maxSelect === 1;
+  const allAvoid     = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
+  const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
   const totalBuilderItems = steps.reduce((n, s) => {
     return n + getStepItems(s).filter((i) => orderedItemIds.has(i.id)).length;
@@ -72,7 +66,8 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         if (stepItem.id !== item.id && orderedItemIds.has(stepItem.id)) onToggleOrder(stepItem.id);
       }
       if (!orderedItemIds.has(item.id)) onToggleOrder(item.id);
-      setTimeout(() => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = setTimeout(() => {
         if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
         else setDone(true);
       }, 280);
@@ -92,11 +87,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   }
 
   function startOver() {
-    for (const s of steps) {
-      for (const item of getStepItems(s)) {
-        if (orderedItemIds.has(item.id)) onToggleOrder(item.id);
-      }
-    }
+    for (const id of Array.from(orderedItemIds)) onToggleOrder(id);
     setCurrentStep(0);
     setDone(false);
   }
@@ -293,9 +284,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           const badge      = RISK_BADGE[item.risk] ?? RISK_BADGE["unknown"];
           const riskColor  = RISK_COLOR[item.risk] ?? "#9ca3af";
           const isLast     = idx === sortedItems.length - 1;
-          const comboNum   = step?.showAsCombo
-            ? (stepItems.findIndex((i) => i.id === item.id) + 1)
-            : null;
+          const comboNum   = step?.showAsCombo ? idx + 1 : null;
 
           return (
             <button
