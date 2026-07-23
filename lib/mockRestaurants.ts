@@ -51,7 +51,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "mcd-burger",    name: "Hamburger",                      category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","sesame"] },
       // Chicken & Fish
       { id: "mcd-fof",       name: "Filet-O-Fish",                   category: "Entrée",      sourceType: "official", allergens: ["fish","dairy","wheat","soy","egg"] },
-      { id: "mcd-mcchicken", name: "McChicken",                      category: "Entrée",   sourceType: "official", allergens: ["egg","wheat","soy"] },
+      { id: "mcd-mcchicken", name: "McChicken",                      category: "Entrée",   sourceType: "official", allergens: ["egg","wheat","soy","sesame"] },
       { id: "mcd-crispy",    name: "Crispy Chicken Sandwich",        category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
       { id: "mcd-spicycrispy", name: "Spicy Crispy Chicken Sandwich",category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
       { id: "mcd-nuggets",   name: "10 Piece Chicken McNuggets",     category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
@@ -59,7 +59,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "mcd-nuggets4",  name: "4 Piece Chicken McNuggets",      category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
       // Sides
       { id: "mcd-fries",     name: "World Famous Fries",             category: "Side",     sourceType: "official", allergens: ["dairy","wheat"] },
-      { id: "mcd-hashbrown", name: "Hash Browns",                    category: "Side",     sourceType: "official", allergens: [] },
+      { id: "mcd-hashbrown", name: "Hash Browns",                    category: "Side",     sourceType: "official", allergens: ["dairy"] },
       { id: "mcd-side-salad",name: "Side Salad",                     category: "Side",     sourceType: "official", allergens: [] },
       { id: "mcd-applesli",  name: "Apple Slices",                   category: "Side",     sourceType: "official", allergens: [] },
       // Breakfast
@@ -414,7 +414,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       // Burgers
       { id: "bk-whopper",        name: "Whopper",                            category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
       { id: "bk-whopper-cheese", name: "Whopper with Cheese",               category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
-      { id: "bk-double-whopper", name: "Double Whopper",                     category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      { id: "bk-double-whopper", name: "Double Whopper",                     category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame","egg"] },
       { id: "bk-bacon-king",     name: "Bacon King",                         category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
       { id: "bk-cheeseburger",   name: "Cheeseburger",                       category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
       { id: "bk-hamburger",      name: "Hamburger",                          category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
@@ -654,12 +654,12 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "pop-classic-sand",   name: "Classic Chicken Sandwich",         category: "Entrée",sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       { id: "pop-spicy-sand",     name: "Spicy Chicken Sandwich",           category: "Entrée",sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       { id: "pop-blackened-sand", name: "Blackened Ranch Chicken Sandwich", category: "Entrée",sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
-      { id: "pop-tenders-3",      name: "3 Piece Chicken Tenders",          category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "pop-tenders-5",      name: "5 Piece Chicken Tenders",          category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "pop-mild-2pc",       name: "2 Piece Mild Chicken",             category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "pop-mild-3pc",       name: "3 Piece Mild Chicken",             category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "pop-spicy-2pc",      name: "2 Piece Spicy Chicken",            category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "pop-spicy-3pc",      name: "3 Piece Spicy Chicken",            category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "pop-tenders-3",      name: "3 Piece Chicken Tenders",          category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "pop-tenders-5",      name: "5 Piece Chicken Tenders",          category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "pop-mild-2pc",       name: "2 Piece Mild Chicken",             category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "pop-mild-3pc",       name: "3 Piece Mild Chicken",             category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "pop-spicy-2pc",      name: "2 Piece Spicy Chicken",            category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "pop-spicy-3pc",      name: "3 Piece Spicy Chicken",            category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
       { id: "pop-shrimp",         name: "Popcorn Shrimp",                   category: "Seafood",   sourceType: "official", allergens: ["shellfish","wheat","soy","dairy"] },
       { id: "pop-mac-cheese",     name: "Mac & Cheese",                     category: "Side",     sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "pop-red-beans",      name: "Red Beans & Rice",                 category: "Side",     sourceType: "official", allergens: ["soy"] },
@@ -667,7 +667,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "pop-coleslaw",       name: "Coleslaw",                         category: "Side",     sourceType: "official", allergens: ["egg","soy"] },
       { id: "pop-biscuit",        name: "Biscuit",                          category: "Side",     sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "pop-corn-cobbette",  name: "Corn on the Cob",                  category: "Side",     sourceType: "official", allergens: ["corn"] },
-      { id: "pop-apple-pie",      name: "Cinnamon Apple Pie",               category: "Desserts",  sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "pop-apple-pie",      name: "Cinnamon Apple Pie",               category: "Desserts",  sourceType: "official", allergens: ["wheat","soy","dairy"] },
     ],
   },
 
@@ -704,7 +704,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "kfc-biscuit",        name: "Biscuit",                          category: "Side",     sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "kfc-corn",           name: "Corn on the Cob",                  category: "Side",     sourceType: "official", allergens: ["corn"] },
       { id: "kfc-green-beans",    name: "Green Beans",                      category: "Side",     sourceType: "official", allergens: [] },
-      { id: "kfc-secret-fries",   name: "Secret Recipe Fries",              category: "Side",     sourceType: "official", allergens: ["soy"] },
+      { id: "kfc-secret-fries",   name: "Secret Recipe Fries",              category: "Side",     sourceType: "official", allergens: ["soy","wheat"] },
     ],
   },
 
@@ -729,7 +729,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "dom-thin-cheese",    name: "Cheese Pizza (Thin Crust)",        category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
       { id: "dom-gf-cheese",      name: "Cheese Pizza (Gluten Free Crust)", category: "Pizza",     sourceType: "official", allergens: ["dairy","soy"], description: "Gluten-free crust, but made in shared kitchen — not safe for celiac." },
       // Chicken
-      { id: "dom-wings-plain",    name: "Plain Wings",                      category: "Chicken",   sourceType: "official", allergens: [] },
+      { id: "dom-wings-plain",    name: "Plain Wings",                      category: "Chicken",   sourceType: "official", allergens: ["soy"] },
       { id: "dom-wings-buffalo",  name: "Buffalo Wings",                    category: "Chicken",   sourceType: "official", allergens: ["dairy","soy"] },
       { id: "dom-wings-bbq",      name: "BBQ Wings",                        category: "Chicken",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
       { id: "dom-boneless",       name: "Boneless Chicken (Plain)",         category: "Chicken",   sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
