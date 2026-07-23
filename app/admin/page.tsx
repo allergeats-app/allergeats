@@ -32,6 +32,7 @@ export default function AdminPage() {
       });
       if (res.ok) {
         sessionStorage.setItem(SESSION_KEY, "1");
+        sessionStorage.setItem("allegeats_admin_token", input);
         setAuthed(true);
         setError(false);
       } else {
@@ -126,8 +127,28 @@ export default function AdminPage() {
         ))}
       </div>
 
+      {/* AI Employees */}
+      <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>AI Employees</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 32 }}>
+        {[
+          { emoji: "📋", name: "Menu Manager",     href: "/admin/employees/menu-manager",    desc: "Flags stale & missing menus" },
+          { emoji: "🔍", name: "Allergen Auditor",  href: "/admin/employees/allergen-audit",  desc: "Catches allergen data gaps" },
+          { emoji: "🏪", name: "Restaurant Ops",    href: "/admin/employees/restaurant-ops",  desc: "Audits registry for duplicates" },
+          { emoji: "🗂️", name: "Feedback Triager",  href: "/admin/employees/feedback-triage", desc: "Promotes & rejects learned rules" },
+        ].map(({ emoji, name, href, desc }) => (
+          <Link key={href} href={href} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12, background: "#1c1c1e", border: "1px solid #2c2c2e", borderRadius: 14, padding: "14px 16px" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 11, background: "rgba(31,189,204,0.1)", border: "1px solid rgba(31,189,204,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{emoji}</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#f2f2f7" }}>{name}</div>
+              <div style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>{desc}</div>
+            </div>
+            <span style={{ marginLeft: "auto", fontSize: 16, color: "#3c3c3e", flexShrink: 0 }}>→</span>
+          </Link>
+        ))}
+      </div>
+
       <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 16, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-        Official data last verified: {MENU_DATA_VERIFIED_DATE}
+        Manual Audit · Data last verified: {MENU_DATA_VERIFIED_DATE}
       </div>
 
       {/* Restaurant list */}

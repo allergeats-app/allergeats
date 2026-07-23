@@ -1,0 +1,84 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { NextRequest } from "next/server";
+
+export const maxDuration = 120;
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const SYSTEM = `You are the Restaurant Ops AI employee for AllergEats.
+
+Your job: audit the restaurant registry for data quality issues.
+
+You will receive a list of CanonicalRestaurant records discovered by users.
+
+Look for:
+1. Obvious duplicates — same name and very similar address/coordinates
+2. Records missing critical fields (no address, no cuisine)
+3. Records not seen recently (lastSeenAt > 90 days ago) — may have closed
+4. Suspiciously low-confidence records (confidence: "low") with no corroboration
+
+Keep analysis direct and under 300 words.
+
+After your analysis, output proposed actions in this EXACT format:
+
+ACTIONS:
+\`\`\`json
+{"actions":[]}
+\`\`\`
+
+Valid action shapes:
+{"type":"flag_duplicate","id1":"...","name1":"...","id2":"...","name2":"...","reason":"..."}
+{"type":"flag_missing_data","restaurantId":"...","displayName":"...","missingFields":["cuisine","address"],"reason":"..."}
+{"type":"flag_stale","restaurantId":"...","displayName":"...","lastSeenAt":"...","reason":"..."}
+
+If the registry is empty or nothing needs attention, output {"actions":[]} and say so clearly.`;
+
+function verifyAdmin(req: NextRequest): boolean {
+  const auth = req.headers.get("authorization") ?? "";
+  const token = auth.replace(/^Bearer\s+/i, "");
+  return !!process.env.ADMIN_PASSWORD && token === process.env.ADMIN_PASSWORD;
+}
+
+export async function POST(req: NextRequest) {
+  if (!verifyAdmin(req)) return new Response("Unauthorized", { status: 401 });
+  if (!process.env.ANTHROPIC_API_KEY) return new Response("API key not configured", { status: 503 });
+
+  const body = await req.json() as { registry?: unknown[] };
+
+  const userMessage = JSON.stringify({
+    registry: body.registry ?? [],
+    analyzedAt: new Date().toISOString(),
+  });
+
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        const s = client.messages.stream({
+          model: process.env.CLAUDE_MODEL ?? "claude-sonnet-4-6",
+          max_tokens: 2048,
+          system: SYSTEM,
+          messages: [{ role: "user", content: userMessage }],
+        });
+        for await (const event of s) {
+          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`));
+          }
+        }
+      } catch (err) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: `\n\nError: ${String(err)}` })}\n\n`));
+      } finally {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    },
+  });
+}
