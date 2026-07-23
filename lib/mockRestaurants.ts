@@ -50,7 +50,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "mcd-cheese",    name: "Cheeseburger",                   category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg","sesame"] },
       { id: "mcd-burger",    name: "Hamburger",                      category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","sesame"] },
       // Chicken & Fish
-      { id: "mcd-fof",       name: "Filet-O-Fish",                   category: "Entrée",      sourceType: "official", allergens: ["fish","dairy","wheat","soy","egg"] },
+      { id: "mcd-fof",       name: "Filet-O-Fish",                   category: "Entrée",      sourceType: "official", allergens: ["fish","dairy","wheat","soy","egg","sesame"] },
       { id: "mcd-mcchicken", name: "McChicken",                      category: "Entrée",   sourceType: "official", allergens: ["egg","wheat","soy","sesame"] },
       { id: "mcd-crispy",    name: "Crispy Chicken Sandwich",        category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
       { id: "mcd-spicycrispy", name: "Spicy Crispy Chicken Sandwich",category: "Entrée",   sourceType: "official", allergens: ["dairy","wheat","soy","egg"] },
@@ -412,7 +412,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     },
     menuItems: [
       // Burgers
-      { id: "bk-whopper",        name: "Whopper",                            category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      { id: "bk-whopper",        name: "Whopper",                            category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame","egg"] },
       { id: "bk-whopper-cheese", name: "Whopper with Cheese",               category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
       { id: "bk-double-whopper", name: "Double Whopper",                     category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame","egg"] },
       { id: "bk-bacon-king",     name: "Bacon King",                         category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
@@ -420,9 +420,9 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "bk-hamburger",      name: "Hamburger",                          category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","sesame"] },
       { id: "bk-rodeo",          name: "Rodeo Burger",                       category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
       // Chicken & Fish
-      { id: "bk-crispy-ch",      name: "Crispy Chicken Sandwich",            category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
-      { id: "bk-spicy-crispy",   name: "Spicy Crispy Chicken Sandwich",      category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
-      { id: "bk-orig-chicken",   name: "Original Chicken Sandwich",          category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg","sesame"] },
+      { id: "bk-crispy-ch",      name: "Crispy Chicken Sandwich",            category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg","sesame","dairy"] },
+      { id: "bk-spicy-crispy",   name: "Spicy Crispy Chicken Sandwich",      category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg","sesame","dairy"] },
+      { id: "bk-orig-chicken",   name: "Original Chicken Sandwich",          category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg","sesame","dairy"] },
       { id: "bk-nuggets",        name: "Chicken Nuggets (8 pc)",             category: "Entrée",    sourceType: "official", allergens: ["wheat","soy","egg"] },
       { id: "bk-fish",           name: "Big Fish Sandwich",                  category: "Entrée",       sourceType: "official", allergens: ["fish","wheat","soy","egg"] },
       // Sides
@@ -687,9 +687,9 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       ],
     },
     menuItems: [
-      { id: "kfc-orig-breast",    name: "Original Recipe Chicken Breast",   category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "kfc-orig-thigh",     name: "Original Recipe Chicken Thigh",    category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "kfc-orig-drum",      name: "Original Recipe Drumstick",        category: "Entrée",   sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "kfc-orig-breast",    name: "Original Recipe Chicken Breast",   category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "kfc-orig-thigh",     name: "Original Recipe Chicken Thigh",    category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "kfc-orig-drum",      name: "Original Recipe Drumstick",        category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","egg"] },
       { id: "kfc-crispy-breast",  name: "Extra Crispy Chicken Breast",      category: "Entrée",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
       { id: "kfc-grilled-breast", name: "Kentucky Grilled Chicken Breast",  category: "Entrée",   sourceType: "official", allergens: ["soy"] },
       { id: "kfc-sand-classic",   name: "Classic Chicken Sandwich",         category: "Entrée",sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
@@ -1294,7 +1294,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
       { id: "ihop-short-stack",    name: "Short Stack (2 Buttermilk)",       category: "Pancakes",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "ihop-spinach-omelet", name: "Spinach & Mushroom Omelette",      category: "Eggs",       sourceType: "official", allergens: ["egg","dairy","wheat","soy"] },
       { id: "ihop-steak-eggs",     name: "Steak & Eggs",                     category: "Breakfast",  sourceType: "official", allergens: ["egg","dairy","wheat","soy"] },
-      { id: "ihop-oatmeal",        name: "Hearty Oatmeal",                   category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","soy","tree-nut"] },
+      { id: "ihop-oatmeal",        name: "Hearty Oatmeal",                   category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","soy","tree-nut","oats"] },
       // Sides
       { id: "ihop-hash-browns",    name: "Hash Browns",                      category: "Sides",      sourceType: "official", allergens: ["soy"] },
       { id: "ihop-sausage-links",  name: "Pork Sausage Links",               category: "Sides",      sourceType: "official", allergens: ["soy"] },
