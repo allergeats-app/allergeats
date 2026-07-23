@@ -18,7 +18,8 @@ export default function RestaurantOpsPage() {
   );
 
   useEffect(() => {
-    if (sessionStorage.getItem(SESSION_KEY) !== "1") {
+    if (sessionStorage.getItem(SESSION_KEY) !== "1" || !sessionStorage.getItem("allegeats_admin_token")) {
+      sessionStorage.removeItem(SESSION_KEY);
       router.replace("/admin");
       return;
     }
