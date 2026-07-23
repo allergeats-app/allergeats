@@ -127,6 +127,19 @@ export default function AdminPage() {
         ))}
       </div>
 
+      {/* Registry Ops */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Data Ops</div>
+        <Link href="/admin/registry" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12, background: "#1c1c1e", border: "1px solid #2c2c2e", borderRadius: 14, padding: "14px 16px" }}>
+          <div style={{ width: 38, height: 38, borderRadius: 11, background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>🗺️</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#f2f2f7" }}>Registry Operations</div>
+            <div style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>Geo purge · Chain URL seeding · Crawl queue · Anomaly scanner</div>
+          </div>
+          <span style={{ marginLeft: "auto", fontSize: 16, color: "#3c3c3e", flexShrink: 0 }}>→</span>
+        </Link>
+      </div>
+
       {/* AI Employees */}
       <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>AI Employees</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 32 }}>
