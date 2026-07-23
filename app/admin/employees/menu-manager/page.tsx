@@ -36,14 +36,25 @@ export default function MenuManagerPage() {
   }, [router]);
 
   function handleRun() {
-    const registry   = safeJson<unknown[]>("allegeats_registry", []);
+    const raw        = safeJson<Record<string, unknown>[]>("allegeats_registry", []);
     const crawlQueue = safeJson<Record<string, unknown>>("allegeats_crawl_queue", {});
+    // Slim to URL-relevant fields only — hashes/sourceEvents waste context
+    const registry = raw.map(r => ({
+      registryId:  r.registryId,
+      displayName: r.displayName,
+      website:     r.website,
+      lat:         r.lat,
+      lng:         r.lng,
+      address:     r.address,
+      cuisine:     r.cuisine,
+      lastSeenAt:  r.lastSeenAt,
+    }));
     const mockRestaurants = MOCK_RESTAURANTS.map(r => ({
       id: r.id,
       name: r.name,
       itemCount: r.menuItems.length,
     }));
-    run({ registry, crawlQueue, mockRestaurants });
+    run({ registry, crawlQueue, mockRestaurants, totalRecords: raw.length });
   }
 
   function handleApprove(action: AgentAction) {

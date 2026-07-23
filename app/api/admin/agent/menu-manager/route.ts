@@ -20,7 +20,7 @@ Analyze and report:
 3. Mock/seeded restaurants that may need manual allergen updates
 4. Any data gaps or anomalies worth flagging
 
-Be direct and specific. Use restaurant names, not IDs. Keep analysis under 300 words.
+Be thorough — surface ALL meaningful findings. Do not cut your analysis short to save space. Use restaurant names, not IDs.
 
 After your analysis, output proposed actions in this EXACT format — no exceptions:
 

@@ -12,12 +12,13 @@ Your job: audit the restaurant registry for data quality issues.
 You will receive a list of CanonicalRestaurant records discovered by users.
 
 Look for:
-1. Obvious duplicates — same name and very similar address/coordinates
+1. Obvious duplicates — same name and very similar address/coordinates, or same registryId used for different locations
 2. Records missing critical fields (no address, no cuisine)
 3. Records not seen recently (lastSeenAt > 90 days ago) — may have closed
 4. Suspiciously low-confidence records (confidence: "low") with no corroboration
+5. Records with out-of-region coordinates (not in Florida, especially NYC/NJ lat/lng)
 
-Keep analysis direct and under 300 words.
+Be thorough — surface ALL meaningful findings. Do not cut your analysis short to save space. Work through the full dataset.
 
 After your analysis, output proposed actions in this EXACT format:
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
       try {
         const s = client.messages.stream({
           model: process.env.CLAUDE_MODEL ?? "claude-sonnet-4-6",
-          max_tokens: 2048,
+          max_tokens: 8192,
           system: SYSTEM,
           messages: [{ role: "user", content: userMessage }],
         });

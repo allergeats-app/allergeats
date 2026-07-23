@@ -29,8 +29,23 @@ export default function RestaurantOpsPage() {
   }, [router]);
 
   function handleRun() {
-    const registry = safeJson<unknown[]>("allegeats_registry", []);
-    run({ registry });
+    const raw = safeJson<Record<string, unknown>[]>("allegeats_registry", []);
+    // Slim to only audit-relevant fields — full records waste context on hashes/sourceEvents
+    const registry = raw.map(r => ({
+      registryId:       r.registryId,
+      displayName:      r.displayName,
+      lat:              r.lat,
+      lng:              r.lng,
+      address:          r.address,
+      normalizedAddress: r.normalizedAddress,
+      cuisine:          r.cuisine,
+      website:          r.website,
+      confidence:       r.confidence,
+      lastSeenAt:       r.lastSeenAt,
+      firstSeenAt:      r.firstSeenAt,
+      sourceCount:      Array.isArray(r.sourceEvents) ? (r.sourceEvents as unknown[]).length : r.sourceCount,
+    }));
+    run({ registry, totalRecords: raw.length });
   }
 
   function handleApprove(action: AgentAction) {
