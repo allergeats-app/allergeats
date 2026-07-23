@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       try {
         const s = client.messages.stream({
           model: process.env.CLAUDE_MODEL ?? "claude-sonnet-4-6",
-          max_tokens: 2048,
+          max_tokens: 4096,
           system: SYSTEM,
           messages: [{ role: "user", content: userMessage }],
         });
