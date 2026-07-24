@@ -82,6 +82,7 @@ export default function FeedbackTriagePage() {
       onRun={handleRun}
       onApprove={handleApprove}
       onReject={a => resolve(a.id, "rejected")}
+      backHref="/admin"
     />
   );
 }

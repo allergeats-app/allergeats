@@ -35,6 +35,11 @@ export default function MenuManagerPage() {
     setReady(true);
   }, [router]);
 
+  function sanitizeForPrompt(s: unknown): string | undefined {
+    if (typeof s !== "string") return undefined;
+    return s.replace(/[\x00-\x1F\x7F]/g, " ").slice(0, 200).trim() || undefined;
+  }
+
   function handleRun() {
     const raw        = safeJson<Record<string, unknown>[]>("allegeats_registry", []);
     const crawlQueue = safeJson<Record<string, unknown>>("allegeats_crawl_queue", {});
@@ -46,12 +51,12 @@ export default function MenuManagerPage() {
       .slice(0, 400)
       .map(r => ({
         registryId:  r.registryId,
-        displayName: r.displayName,
+        displayName: sanitizeForPrompt(r.displayName),
         website:     r.website,
         lat:         r.lat,
         lng:         r.lng,
-        address:     r.address,
-        cuisine:     r.cuisine,
+        address:     sanitizeForPrompt(r.address),
+        cuisine:     sanitizeForPrompt(r.cuisine),
         lastSeenAt:  r.lastSeenAt,
       }));
 
@@ -100,6 +105,7 @@ export default function MenuManagerPage() {
       onRun={handleRun}
       onApprove={handleApprove}
       onReject={a => resolve(a.id, "rejected")}
+      backHref="/admin"
     />
   );
 }

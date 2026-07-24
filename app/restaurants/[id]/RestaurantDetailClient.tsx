@@ -854,6 +854,25 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
 
 
+        {/* ── Chain template disclaimer (safety-critical) ── */}
+        {restaurant.menuIsGenericChainTemplate && (
+          <div style={{
+            background: isDark ? "rgba(217,119,6,0.12)" : "#FEF3C7",
+            border: `1px solid ${isDark ? "rgba(217,119,6,0.4)" : "#F59E0B"}`,
+            borderLeft: "4px solid #D97706",
+            padding: "12px 16px",
+            marginBottom: "16px",
+            borderRadius: "4px",
+          }}>
+            <strong style={{ fontSize: "13px", color: isDark ? "#fbbf24" : "#92400E" }}>
+              Sample menu — not location-confirmed
+            </strong>
+            <p style={{ fontSize: "13px", color: isDark ? "#d97706" : "#78350F", marginTop: "4px", lineHeight: 1.5, margin: "4px 0 0" }}>
+              This is a national chain menu. Items, ingredients, and allergen info may vary at this specific location. Always confirm with staff before ordering.
+            </p>
+          </div>
+        )}
+
         {/* ── 4c. Community Knowledge (memory insights from the learning system) ── */}
         {!hasNoMenu && vm.memoryInsights.length > 0 && (
           <section style={{ marginBottom: 28 }}>
@@ -1774,10 +1793,12 @@ function FeedbackRow({
           onClick={() => setExpanded(true)}
           style={{
             background: "none", border: "none", cursor: "pointer",
-            fontSize: 13, color: "var(--c-sub)", padding: "8px 4px", minHeight: 40,
+            fontSize: 13, color: "#6b7280", padding: "8px 4px",
+            minHeight: 44, display: "inline-flex", alignItems: "center",
+            textDecoration: "underline", textUnderlineOffset: "2px",
           }}
         >
-          Report
+          &#9873; Report issue
         </button>
       </div>
     );

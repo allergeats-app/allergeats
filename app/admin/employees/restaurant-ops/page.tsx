@@ -28,6 +28,11 @@ export default function RestaurantOpsPage() {
     setReady(true);
   }, [router]);
 
+  function sanitizeForPrompt(s: unknown): string | undefined {
+    if (typeof s !== "string") return undefined;
+    return s.replace(/[\x00-\x1F\x7F]/g, " ").slice(0, 200).trim() || undefined;
+  }
+
   function handleRun() {
     const raw = safeJson<Record<string, unknown>[]>("allegeats_registry", []);
     const nintyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
@@ -50,11 +55,11 @@ export default function RestaurantOpsPage() {
 
     const combined = [...suspicious, ...sample].map(r => ({
       registryId:       r.registryId,
-      displayName:      r.displayName,
+      displayName:      sanitizeForPrompt(r.displayName),
       lat:              r.lat,
       lng:              r.lng,
-      address:          r.address,
-      cuisine:          r.cuisine,
+      address:          sanitizeForPrompt(r.address),
+      cuisine:          sanitizeForPrompt(r.cuisine),
       website:          r.website,
       confidence:       r.confidence,
       lastSeenAt:       r.lastSeenAt,
@@ -93,6 +98,7 @@ export default function RestaurantOpsPage() {
       onRun={handleRun}
       onApprove={handleApprove}
       onReject={a => resolve(a.id, "rejected")}
+      backHref="/admin"
     />
   );
 }

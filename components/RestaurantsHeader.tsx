@@ -9,11 +9,13 @@ export function RestaurantsHeader({
   locationMode,
   resultsSource,
   onLocationPress,
+  onRetry,
 }: {
   locationLabel: string;
   locationMode: "precise" | "approximate" | "cached" | "unavailable";
   resultsSource: "live" | "mock";
   onLocationPress: () => void;
+  onRetry?: () => void;
 }) {
   const dotColor =
     locationMode === "precise"     ? "#22c55e" :
@@ -89,6 +91,23 @@ export function RestaurantsHeader({
 
         </div>
       </div>
+      {resultsSource === "mock" && (
+        <div style={{
+          background: "#FEF3C7", border: "1px solid #F59E0B",
+          padding: "8px 16px", fontSize: "13px", color: "#92400E",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+          <span>Showing sample restaurants — live location data unavailable</span>
+          {onRetry && (
+            <button onClick={onRetry} style={{
+              fontSize: "12px", fontWeight: 600, color: "#D97706",
+              background: "none", border: "none", cursor: "pointer", padding: "0 8px",
+            }}>
+              Retry
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 }

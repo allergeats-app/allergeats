@@ -394,6 +394,16 @@ export default function RegistryPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "#0f0f0f", color: "#f2f2f7", padding: "32px 24px", maxWidth: 860, margin: "0 auto" }}>
 
+      {/* Back link */}
+      <a href="/admin" style={{
+        display: "inline-flex", alignItems: "center", gap: "6px",
+        fontSize: "13px", color: "#8e8e93",
+        textDecoration: "none", marginBottom: "16px",
+        padding: "8px 0",
+      }}>
+        ← Admin Dashboard
+      </a>
+
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-brand)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>
