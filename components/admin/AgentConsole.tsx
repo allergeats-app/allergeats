@@ -21,6 +21,7 @@ type Props = {
   onRun: () => void;
   onApprove: (action: AgentAction) => void;
   onReject: (action: AgentAction) => void;
+  backHref?: string;
 };
 
 const S = {
@@ -37,7 +38,7 @@ const S = {
   amber:  "#d97706",
 };
 
-export function AgentConsole({ name, emoji, role, contextLabel, running, streamText, actions, onRun, onApprove, onReject }: Props) {
+export function AgentConsole({ name, emoji, role, contextLabel, running, streamText, actions, onRun, onApprove, onReject, backHref }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +51,16 @@ export function AgentConsole({ name, emoji, role, contextLabel, running, streamT
 
   return (
     <div style={{ minHeight: "100dvh", background: S.bg, color: S.text, padding: "24px 20px", maxWidth: 760, margin: "0 auto" }}>
+
+      {backHref && (
+        <a href={backHref} style={{
+          display: "inline-flex", alignItems: "center", gap: "6px",
+          fontSize: "13px", color: S.sub, marginBottom: "16px",
+          textDecoration: "none",
+        }}>
+          ← Admin Dashboard
+        </a>
+      )}
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 12 }}>

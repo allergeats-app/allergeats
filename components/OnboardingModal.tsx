@@ -209,7 +209,7 @@ export function OnboardingModal() {
 
             {/* CTA */}
             <button
-              onClick={() => setStep("safety")}
+              onClick={() => setStep("allergens")}
               style={{
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
@@ -360,7 +360,7 @@ export function OnboardingModal() {
         {step === "allergens" && (
           <>
             <button
-              onClick={() => setStep("safety")}
+              onClick={() => setStep("welcome")}
               style={{
                 ...iosTap,
                 background: "none", border: "none",
@@ -401,6 +401,22 @@ export function OnboardingModal() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Compact safety note */}
+            <div style={{
+              display: "flex", alignItems: "flex-start", gap: 8,
+              padding: "10px 12px", borderRadius: 10, marginBottom: 12,
+              background: isDark ? "rgba(217,119,6,0.10)" : "rgba(253,230,138,0.4)",
+              border: `1px solid ${isDark ? "rgba(217,119,6,0.3)" : "rgba(251,191,36,0.5)"}`,
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#fbbf24" : "#92400E"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <span style={{ fontSize: 12, color: isDark ? "#fbbf24" : "#92400E", lineHeight: 1.5 }}>
+                This app provides guidance only — always confirm allergen info with restaurant staff before ordering.
+              </span>
             </div>
 
             <button

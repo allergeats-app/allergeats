@@ -45,7 +45,7 @@ export function AllergenProfileCard({ allergens, saveState, isSignedIn, onChange
         <div style={{
           marginTop: 10, display: "flex", alignItems: "center", gap: 6,
           padding: "8px 12px", borderRadius: 10,
-          background: "#fef2f2", border: "1px solid #fecaca",
+          background: "rgba(220, 38, 38, 0.08)", border: "1px solid rgba(220, 38, 38, 0.22)",
         }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"/>

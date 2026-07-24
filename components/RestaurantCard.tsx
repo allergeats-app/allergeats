@@ -189,7 +189,8 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               position: "absolute", bottom: 6, right: 6,
               background: favorited ? "var(--c-brand)" : "rgba(0,0,0,0.38)",
               border: "none", borderRadius: 999,
-              width: isRail ? 36 : 44, height: isRail ? 36 : 44,
+              width: 44, height: 44,
+              padding: isRail ? 4 : 0,
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", backdropFilter: "blur(4px)",
               transition: "background 0.15s",
@@ -218,6 +219,18 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
             <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>
               {r.cuisine}
             </div>
+            {r.menuIsGenericChainTemplate && (
+              <div style={{
+                display: "inline-block", marginTop: 5,
+                background: isDark ? "rgba(217,119,6,0.15)" : "#FEF3C7",
+                color: isDark ? "#fbbf24" : "#92400E",
+                fontSize: 10, fontWeight: 700, padding: "2px 8px",
+                borderRadius: 999,
+                border: `1px solid ${isDark ? "rgba(217,119,6,0.4)" : "#F59E0B"}`,
+              }}>
+                Generic menu
+              </div>
+            )}
           </div>
 
           {/* ── Stat blocks ── */}

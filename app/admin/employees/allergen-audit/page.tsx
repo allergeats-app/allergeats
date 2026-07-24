@@ -69,6 +69,7 @@ export default function AllergenAuditPage() {
       onRun={handleRun}
       onApprove={handleApprove}
       onReject={a => resolve(a.id, "rejected")}
+      backHref="/admin"
     />
   );
 }

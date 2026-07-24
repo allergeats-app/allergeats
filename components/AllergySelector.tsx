@@ -66,7 +66,7 @@ export function AllergySelector({ selected, onChange, limit }: Props) {
             minHeight: 44,
           }}
         >
-          {expanded ? "Show Less" : "+ Add More"}
+          {expanded ? "Show Less" : `+ ${rest.length} more allergens`}
         </button>
       )}
     </div>

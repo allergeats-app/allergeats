@@ -185,7 +185,7 @@ export function RestaurantsFilterDrawer({
               onClick={onClose}
               aria-label="Close filters"
               style={{
-                width: 32, height: 32, borderRadius: 999,
+                width: 44, height: 44, borderRadius: 999,
                 background: "var(--c-muted)", border: "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", color: "var(--c-sub)",
