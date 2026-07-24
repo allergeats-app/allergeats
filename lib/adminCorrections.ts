@@ -24,14 +24,20 @@ export type AdminCorrection = {
 
 const STORAGE_KEY = "allegeats_admin_corrections";
 
+// Module-level cache — avoids repeated localStorage reads during scoring.
+// Invalidated on every write so corrections take effect immediately.
+let _cache: Record<string, AdminCorrection> | null = null;
+
 function correctionKey(restaurantId: string, itemId: string): string {
   return `${restaurantId}::${itemId}`;
 }
 
 export function getAllCorrections(): Record<string, AdminCorrection> {
   if (typeof window === "undefined") return {};
+  if (_cache !== null) return _cache;
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+    _cache = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+    return _cache!;
   } catch {
     return {};
   }
@@ -45,18 +51,23 @@ export function getCorrectionForItem(
 }
 
 export function saveCorrection(correction: AdminCorrection): void {
+  _cache = null;
   const all = getAllCorrections();
   all[correctionKey(correction.restaurantId, correction.itemId)] = correction;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  _cache = null; // ensure post-write reads hit localStorage
 }
 
 export function removeCorrection(restaurantId: string, itemId: string): void {
+  _cache = null;
   const all = getAllCorrections();
   delete all[correctionKey(restaurantId, itemId)];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  _cache = null;
 }
 
 export function clearAllCorrections(): void {
+  _cache = null;
   localStorage.removeItem(STORAGE_KEY);
 }
 

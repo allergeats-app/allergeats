@@ -378,6 +378,13 @@ function detectMayContainSignals(normalized: string, userAllergens: AllergenId[]
   return signals;
 }
 
+// All allergens — used to collect informational "also detected" data beyond user's profile.
+// Defined at module scope so it isn't re-allocated on every analyzeDish call.
+const ALL_ALLERGENS: AllergenId[] = [
+  "dairy", "egg", "wheat", "gluten", "soy", "peanut", "tree-nut",
+  "sesame", "fish", "shellfish", "mustard", "corn", "legumes", "oats",
+];
+
 /** Analyze a single parsed dish */
 function analyzeDish(
   dish: ParsedDish,
@@ -386,6 +393,11 @@ function analyzeDish(
   sourceType?: SourceType
 ): AnalyzedItem {
   const allSignals: RiskSignal[] = [];
+
+  // Run vocab signals once for ALL allergens then partition — avoids running the full
+  // SORTED_VOCAB regex loop twice (once for user allergens, once for all allergens).
+  const allVocabSignals  = detectVocabSignals(dish.normalized, ALL_ALLERGENS);
+  const userVocabSignals = allVocabSignals.filter((s) => userAllergens.includes(s.allergen));
 
   // Layer 0a: precautionary "may contain..." / "made in a facility with..." labels — weight-2
   // Collected separately so we can identify allergens that are ONLY precautionary below.
@@ -396,7 +408,7 @@ function analyzeDish(
   allSignals.push(...detectContainsLabelSignals(dish.normalized, userAllergens));
 
   // Layer 1 + 2: direct ingredients + synonyms + dish/sauce inference (via vocab)
-  allSignals.push(...detectVocabSignals(dish.normalized, userAllergens));
+  allSignals.push(...userVocabSignals);
 
   // Layer 3: structured dish/ingredient ontology (ingredient-chain reasoning)
   allSignals.push(...detectIngredientSignals(dish.normalized, userAllergens));
@@ -425,11 +437,7 @@ function analyzeDish(
 
   // Collect ALL detected allergens (not just user's profile) for informational display
   // (e.g. "also contains shellfish" even if the user only set peanut allergy).
-  const ALL_ALLERGENS: AllergenId[] = [
-    "dairy", "egg", "wheat", "gluten", "soy", "peanut", "tree-nut",
-    "sesame", "fish", "shellfish", "mustard", "corn", "legumes", "oats",
-  ];
-  const allVocabSignals = detectVocabSignals(dish.normalized, ALL_ALLERGENS);
+  // allVocabSignals already covers ALL_ALLERGENS — reuse it here.
   const allOntologySignals = detectIngredientSignals(dish.normalized, ALL_ALLERGENS);
   const allDetected = [...new Set([
     ...allVocabSignals.map((s) => s.allergen),

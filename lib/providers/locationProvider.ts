@@ -446,8 +446,8 @@ out body center 100;`;
       if (!name) continue;
 
       const elLat = el.center?.lat ?? el.lat;
-      const elLng = el.center?.lon ?? el.lon ?? 0;
-      if (!elLat) continue;
+      const elLng = el.center?.lon ?? el.lon;
+      if (elLat == null || elLng == null) continue;
 
       const distance = Math.round(haversineDistance(lat, lng, elLat, elLng) * 10) / 10;
 
