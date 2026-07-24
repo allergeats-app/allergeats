@@ -71,7 +71,7 @@ const FETCH_TIMEOUT_MS = 15_000;
 
 // ─── Rate limiting ────────────────────────────────────────────────────────────
 const WINDOW_MS              = 60_000;
-const MAX_REQUESTS_PER_WINDOW = 30; // 30 calls/min per IP (5 searches × ~6/min)
+const MAX_REQUESTS_PER_WINDOW = 60; // 60 calls/min per IP (5 searches × ~12/min)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

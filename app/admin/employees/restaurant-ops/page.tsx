@@ -30,14 +30,30 @@ export default function RestaurantOpsPage() {
 
   function handleRun() {
     const raw = safeJson<Record<string, unknown>[]>("allegeats_registry", []);
-    // Slim to only audit-relevant fields — full records waste context on hashes/sourceEvents
-    const registry = raw.map(r => ({
+    const nintyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
+
+    // Pre-filter to suspicious records only — agents can't review thousands of entries.
+    // FL bounding box: lat 24.4–31.1, lng -87.7–-79.8
+    const suspicious = raw.filter(r => {
+      const lat = Number(r.lat);
+      const lng = Number(r.lng);
+      const outOfRegion = (lat && lng) && (lat < 24.4 || lat > 31.1 || lng < -87.7 || lng > -79.8);
+      const stale = r.lastSeenAt && new Date(r.lastSeenAt as string).getTime() < nintyDaysAgo;
+      const missingData = !r.address || !r.cuisine;
+      const lowConf = r.confidence === "low";
+      return outOfRegion || stale || missingData || lowConf;
+    });
+
+    // Also include a 75-record random sample of clean records for duplicate detection.
+    const clean = raw.filter(r => !suspicious.includes(r));
+    const sample = clean.sort(() => Math.random() - 0.5).slice(0, 75);
+
+    const combined = [...suspicious, ...sample].map(r => ({
       registryId:       r.registryId,
       displayName:      r.displayName,
       lat:              r.lat,
       lng:              r.lng,
       address:          r.address,
-      normalizedAddress: r.normalizedAddress,
       cuisine:          r.cuisine,
       website:          r.website,
       confidence:       r.confidence,
@@ -45,7 +61,13 @@ export default function RestaurantOpsPage() {
       firstSeenAt:      r.firstSeenAt,
       sourceCount:      Array.isArray(r.sourceEvents) ? (r.sourceEvents as unknown[]).length : r.sourceCount,
     }));
-    run({ registry, totalRecords: raw.length });
+
+    run({
+      registry: combined,
+      totalRecords: raw.length,
+      suspiciousCount: suspicious.length,
+      note: `Showing ${suspicious.length} suspicious + ${sample.length} sampled clean records out of ${raw.length} total.`,
+    });
   }
 
   function handleApprove(action: AgentAction) {

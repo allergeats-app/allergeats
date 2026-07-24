@@ -38,23 +38,44 @@ export default function MenuManagerPage() {
   function handleRun() {
     const raw        = safeJson<Record<string, unknown>[]>("allegeats_registry", []);
     const crawlQueue = safeJson<Record<string, unknown>>("allegeats_crawl_queue", {});
-    // Slim to URL-relevant fields only — hashes/sourceEvents waste context
-    const registry = raw.map(r => ({
-      registryId:  r.registryId,
-      displayName: r.displayName,
-      website:     r.website,
-      lat:         r.lat,
-      lng:         r.lng,
-      address:     r.address,
-      cuisine:     r.cuisine,
-      lastSeenAt:  r.lastSeenAt,
-    }));
+
+    // Only send records missing a website — those are the actionable ones for Menu Manager.
+    // Sending the full registry would exceed the Claude API context window.
+    const noUrl = raw
+      .filter(r => !r.website)
+      .slice(0, 400)
+      .map(r => ({
+        registryId:  r.registryId,
+        displayName: r.displayName,
+        website:     r.website,
+        lat:         r.lat,
+        lng:         r.lng,
+        address:     r.address,
+        cuisine:     r.cuisine,
+        lastSeenAt:  r.lastSeenAt,
+      }));
+
     const mockRestaurants = MOCK_RESTAURANTS.map(r => ({
       id: r.id,
       name: r.name,
       itemCount: r.menuItems.length,
     }));
-    run({ registry, crawlQueue, mockRestaurants, totalRecords: raw.length });
+
+    // Slim crawl queue to just IDs + source URLs — remove large metadata blobs
+    const slimQueue: Record<string, unknown> = {};
+    for (const [id, rec] of Object.entries(crawlQueue)) {
+      const r = rec as Record<string, unknown>;
+      slimQueue[id] = { sourceUrl: r.sourceUrl, lastCrawledAt: r.lastCrawledAt, status: r.status };
+    }
+
+    run({
+      registry: noUrl,
+      crawlQueue: slimQueue,
+      mockRestaurants,
+      totalRecords: raw.length,
+      noUrlCount: raw.filter(r => !r.website).length,
+      note: `Showing ${noUrl.length} records missing a website URL (out of ${raw.filter(r => !r.website).length} total without URL, ${raw.length} total records).`,
+    });
   }
 
   function handleApprove(action: AgentAction) {

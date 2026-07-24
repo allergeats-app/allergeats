@@ -166,14 +166,11 @@ export class GooglePlacesLocationProvider implements LocationProvider {
   ): Promise<Restaurant[]> {
     const cacheKey = placesCacheKey(lat, lng, radiusMiles);
 
-    // Return cached result immediately
+    // Return cached result immediately — do NOT await Overpass on a cache hit.
+    // The previous pattern blocked for up to 20s on Overpass even with fresh cache.
     const cached = readPlacesCache(cacheKey);
     if (cached) {
-      // Skip Overpass for dense areas — avoids parsing thousands of OSM nodes
-      const overpassResults = cached.length < MIN_GOOGLE_FOR_OVERPASS
-        ? await this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy).catch(() => [] as Restaurant[])
-        : [];
-      return this._mergeResults(lat, lng, cached, overpassResults)
+      return this._mergeResults(lat, lng, cached, [])
         .filter((r) => r.distance == null || r.distance <= radiusMiles * 1.2);
     }
 
@@ -209,7 +206,8 @@ export class GooglePlacesLocationProvider implements LocationProvider {
         // "cafe" is a keyword search (not in the broad Nearby types) so coffee shops
         // appear in results without crowding out food restaurants.
         const keywords = ["casual dining", "fine dining", "steakhouse", "cafe coffee"];
-        const [mainRes, ...keywordResponses] = await Promise.all([
+        // allSettled so a slow/failed keyword search never blocks the main result.
+        const [mainResult, ...keywordResults] = await Promise.allSettled([
           fetch("/api/places-nearby", {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
@@ -221,13 +219,13 @@ export class GooglePlacesLocationProvider implements LocationProvider {
               method:  "POST",
               headers: { "Content-Type": "application/json" },
               body:    JSON.stringify({ lat, lng, radiusMeters, keyword }),
-              signal:  AbortSignal.timeout(20_000),
+              signal:  AbortSignal.timeout(8_000),
             })
           ),
         ]);
 
-        if (mainRes.ok) {
-          const data = await mainRes.json() as { places: PlaceResult[] };
+        if (mainResult.status === "fulfilled" && mainResult.value.ok) {
+          const data = await mainResult.value.json() as { places: PlaceResult[] };
           googlePlaces = data.places ?? [];
         } else {
           googleFailed = true;
@@ -235,9 +233,9 @@ export class GooglePlacesLocationProvider implements LocationProvider {
 
         // Merge all keyword results by placeId — non-fatal if any fail
         const seen = new Set(googlePlaces.map((p) => p.placeId));
-        for (const supplementalRes of keywordResponses) {
-          if (supplementalRes.ok) {
-            const supplementalData = await supplementalRes.json() as { places: PlaceResult[] };
+        for (const result of keywordResults) {
+          if (result.status === "fulfilled" && result.value.ok) {
+            const supplementalData = await result.value.json() as { places: PlaceResult[] };
             for (const p of supplementalData.places ?? []) {
               if (!seen.has(p.placeId)) {
                 googlePlaces.push(p);
