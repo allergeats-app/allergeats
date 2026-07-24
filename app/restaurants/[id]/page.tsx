@@ -44,6 +44,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const safeJsonLd = (data: unknown) =>
+  JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
+
 export default async function RestaurantDetailPage({ params }: Props) {
   const { id } = await params;
   const restaurant = await getRestaurantMeta(id);
@@ -70,7 +76,7 @@ export default async function RestaurantDetailPage({ params }: Props) {
       {jsonLd && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
       )}
       <Suspense fallback={

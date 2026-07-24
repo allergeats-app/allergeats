@@ -21,7 +21,8 @@
 interface Entry { count: number; windowStart: number }
 const memMap = new Map<string, Entry>();
 let lastPrune = Date.now();
-const PRUNE_EVERY_MS = 5 * 60_000;
+const WINDOW_MS = 60_000;
+const PRUNE_EVERY_MS = WINDOW_MS; // prune at same cadence as expiry
 
 function maybePrune(): void {
   const now = Date.now();
@@ -97,5 +98,9 @@ export async function isRateLimited(
 
 /** Convenience: extract the best available IP from a Request header. */
 export function getClientIp(req: Request): string {
-  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  return (
+    req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim() ??
+    "unknown"
+  );
 }

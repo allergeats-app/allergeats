@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
+import { verifyAdminRequest } from "@/lib/adminAuth";
 
 export const maxDuration = 120;
 
@@ -34,14 +35,8 @@ Valid action shapes:
 
 If the registry is empty or nothing needs attention, output {"actions":[]} and say so clearly.`;
 
-function verifyAdmin(req: NextRequest): boolean {
-  const auth = req.headers.get("authorization") ?? "";
-  const token = auth.replace(/^Bearer\s+/i, "");
-  return !!process.env.ADMIN_PASSWORD && token === process.env.ADMIN_PASSWORD;
-}
-
 export async function POST(req: NextRequest) {
-  if (!verifyAdmin(req)) return new Response("Unauthorized", { status: 401 });
+  if (!verifyAdminRequest(req)) return new Response("Unauthorized", { status: 401 });
   if (!process.env.ANTHROPIC_API_KEY) return new Response("API key not configured", { status: 503 });
 
   const body = await req.json() as { registry?: unknown[] };
@@ -67,7 +62,10 @@ export async function POST(req: NextRequest) {
           }
         }
       } catch (err) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: `\n\nError: ${String(err)}` })}\n\n`));
+        const msg = (err instanceof Error && err.message.includes("status"))
+          ? "Anthropic API error — check server configuration"
+          : "An error occurred processing your request";
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: `\n\nError: ${msg}` })}\n\n`));
       } finally {
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         controller.close();

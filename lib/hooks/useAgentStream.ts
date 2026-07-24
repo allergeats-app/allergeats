@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import type { AgentAction } from "@/components/admin/AgentConsole";
 
 function actionDescription(a: Record<string, unknown>): string {
@@ -39,11 +39,25 @@ export function useAgentStream(endpoint: string) {
   const [running, setRunning]       = useState(false);
   const [streamText, setStreamText] = useState("");
   const [actions, setActions]       = useState<AgentAction[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+    setRunning(false);
+  }, []);
+
+  useEffect(() => {
+    return () => { stop(); };
+  }, [stop]);
 
   const run = useCallback(async (body: Record<string, unknown>) => {
     const token = typeof sessionStorage !== "undefined"
       ? (sessionStorage.getItem("allegeats_admin_token") ?? "")
       : "";
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setRunning(true);
     setStreamText("");
@@ -54,6 +68,7 @@ export function useAgentStream(endpoint: string) {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
 
       if (!res.ok || !res.body) {
@@ -64,12 +79,15 @@ export function useAgentStream(endpoint: string) {
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       let full = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           const payload = line.slice(6);
           if (payload === "[DONE]") continue;
@@ -82,15 +100,16 @@ export function useAgentStream(endpoint: string) {
 
       setActions(parseActions(full));
     } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
       setStreamText(`Error: ${String(err)}`);
     } finally {
       setRunning(false);
     }
   }, [endpoint]);
 
-  function resolve(id: string, status: "approved" | "rejected") {
+  const resolve = useCallback((id: string, status: "approved" | "rejected") => {
     setActions(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-  }
+  }, []);
 
-  return { running, streamText, actions, run, resolve };
+  return { running, streamText, actions, run, resolve, stop };
 }

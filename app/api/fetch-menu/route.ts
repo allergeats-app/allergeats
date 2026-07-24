@@ -45,6 +45,7 @@ export async function POST(req: Request) {
     // Block SSRF targets: loopback, private ranges, link-local (AWS metadata), reserved
     const hostname = parsed.hostname.toLowerCase();
     const ssrfBlocked =
+      /^\[::ffff:/i.test(hostname) ||           // IPv4-mapped IPv6 bypass
       hostname === "localhost" ||
       /^127\./.test(hostname) ||
       /^0\.0\.0\.0/.test(hostname) ||
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
     let res: Response;
     try {
       res = await fetch(url, {
+        redirect: "error",   // prevent SSRF via redirect following
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
@@ -75,6 +77,10 @@ export async function POST(req: Request) {
         signal: controller.signal,
       });
     } catch (err) {
+      // redirect: "error" throws TypeError on redirect — treat as non-scrapable
+      if (err instanceof TypeError) {
+        return NextResponse.json({ url, menuLines: [] });
+      }
       const msg = err instanceof Error && err.name === "AbortError"
         ? "Request timed out — the menu page took too long to respond"
         : (err instanceof Error ? err.message : "Network error");
@@ -111,14 +117,27 @@ export async function POST(req: Request) {
     const isPdf = contentType.includes("application/pdf") || parsed.pathname.toLowerCase().endsWith(".pdf");
 
     if (isPdf) {
-      const arrayBuffer = await res.arrayBuffer();
-      if (arrayBuffer.byteLength > MAX_BODY_BYTES) {
-        return NextResponse.json({ error: "PDF is too large to process (max 5 MB)" }, { status: 413 });
+      // Stream body with byte counter to guard against chunked responses without content-length
+      const reader = res.body?.getReader();
+      if (!reader) return NextResponse.json({ menuLines: [] });
+      const chunks: Buffer[] = [];
+      let totalBytes = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.length;
+        if (totalBytes > MAX_BODY_BYTES) {
+          reader.cancel();
+          return NextResponse.json({ menuLines: [] });
+        }
+        chunks.push(Buffer.from(value));
       }
+      const pdfBuffer = Buffer.concat(chunks);
+
       let menu: NormalizedMenu;
       try {
         const pdfAdapter = new PdfAdapter();
-        menu = await pdfAdapter.ingest(Buffer.from(arrayBuffer), ingestionMeta);
+        menu = await pdfAdapter.ingest(pdfBuffer, ingestionMeta);
       } catch (err) {
         console.error("[fetch-menu] PDF ingestion error:", err);
         return NextResponse.json({ error: "Could not extract menu from this PDF" }, { status: 422 });

@@ -25,14 +25,15 @@ export default function AdminPage() {
   async function login() {
     setChecking(true);
     try {
-      const res = await fetch("/api/admin/verify", {
+      const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: input }),
       });
       if (res.ok) {
+        const { token } = await res.json() as { token: string };
         sessionStorage.setItem(SESSION_KEY, "1");
-        sessionStorage.setItem("allegeats_admin_token", input);
+        sessionStorage.setItem("allegeats_admin_token", token);
         setAuthed(true);
         setError(false);
       } else {
