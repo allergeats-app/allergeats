@@ -31,16 +31,27 @@ const REGISTRY_KEY = "allegeats_registry";
 // Usage: beginRegistryBatch() → many upsertRestaurant() → endRegistryBatch()
 
 let _batchRegistry: CanonicalRestaurant[] | null = null;
+// Nesting counter — prevents silent data loss when beginRegistryBatch is called
+// while a batch is already in progress (e.g. _mapPlaces inside _fetchFromOverpass).
+let _batchDepth = 0;
 
 /** Load the registry once and buffer all writes in memory. */
 export function beginRegistryBatch(): void {
-  _batchRegistry = loadRegistry();
+  _batchDepth++;
+  if (_batchDepth === 1) {
+    _batchRegistry = loadRegistry();
+  }
+  // For depth > 1, the outer batch is still active — don't re-load from localStorage.
 }
 
 /** Flush the buffered registry to localStorage and clear the buffer. */
 export function endRegistryBatch(): void {
-  if (_batchRegistry) saveRegistry(_batchRegistry);
-  _batchRegistry = null;
+  _batchDepth = Math.max(0, _batchDepth - 1);
+  if (_batchDepth === 0) {
+    if (_batchRegistry) saveRegistry(_batchRegistry);
+    _batchRegistry = null;
+  }
+  // For depth > 0, the outer batch is still active — don't flush yet.
 }
 
 // ─── ID generation ────────────────────────────────────────────────────────────
@@ -170,7 +181,10 @@ export function upsertRestaurant(candidate: RestaurantCandidate): CanonicalResta
     // Update the matched record
     const updated = {
       ...mergeIntoRecord(existing.record, candidate, now),
-      lastDedupeSignal: existing.signal,
+      // Cast needed: findByExternalId returns specific external-ID signal strings
+      // (e.g. "google_place_id") that are not in the DedupeSignal union but are
+      // intentionally stored for auditability. findMatch always returns DedupeSignal.
+      lastDedupeSignal: existing.signal as import("./types").DedupeSignal,
     };
     const idx = records.findIndex((r) => r.registryId === existing.record.registryId);
     records[idx] = updated;
@@ -280,13 +294,13 @@ export function pruneStaleRecords(maxAgeDays: number): number {
 function findByExternalId(
   candidate: RestaurantCandidate,
   records: CanonicalRestaurant[],
-): { record: CanonicalRestaurant; signal: "name+address" } | null {
+): { record: CanonicalRestaurant; signal: string } | null {
   for (const r of records) {
-    if (candidate.googlePlaceId    && r.googlePlaceId    === candidate.googlePlaceId)    return { record: r, signal: "name+address" };
-    if (candidate.yelpBusinessId   && r.yelpBusinessId   === candidate.yelpBusinessId)   return { record: r, signal: "name+address" };
-    if (candidate.osmId            && r.osmId            === candidate.osmId)            return { record: r, signal: "name+address" };
-    if (candidate.toastGuid        && r.toastGuid        === candidate.toastGuid)        return { record: r, signal: "name+address" };
-    if (candidate.squareLocationId && r.squareLocationId === candidate.squareLocationId) return { record: r, signal: "name+address" };
+    if (candidate.googlePlaceId    && r.googlePlaceId    === candidate.googlePlaceId)    return { record: r, signal: "google_place_id" };
+    if (candidate.yelpBusinessId   && r.yelpBusinessId   === candidate.yelpBusinessId)   return { record: r, signal: "yelp_business_id" };
+    if (candidate.osmId            && r.osmId            === candidate.osmId)            return { record: r, signal: "osm_id" };
+    if (candidate.toastGuid        && r.toastGuid        === candidate.toastGuid)        return { record: r, signal: "toast_guid" };
+    if (candidate.squareLocationId && r.squareLocationId === candidate.squareLocationId) return { record: r, signal: "square_location_id" };
   }
   return null;
 }

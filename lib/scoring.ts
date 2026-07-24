@@ -30,6 +30,21 @@ function mapConfidence(c: "high" | "medium" | "low"): Confidence {
   return "Low";
 }
 
+// ─── Scoring cache ────────────────────────────────────────────────────────────
+// scoreMenuItem is deterministic for a given (item content + allergens) pair and
+// is called hundreds of times per scoreRestaurant call. The cache eliminates
+// redundant engine passes when the same item is scored repeatedly in a session.
+
+const _scoreCache = new Map<string, ScoredMenuItem>();
+const SCORE_CACHE_MAX = 2000;
+
+function scoreCacheKey(item: RawMenuItem, srcType: SourceType, allergens: AllergenId[], cuisineContext: string): string {
+  // Include the text content so items with the same id but different corrections
+  // get distinct cache entries.
+  const text = item.normalizedText || [item.name, item.description].filter(Boolean).join(" ");
+  return `${item.id}::${srcType}::${cuisineContext}::${[...allergens].sort().join(",")}::${text.length}`;
+}
+
 /**
  * Scores a single raw menu item against the user's allergen list.
  * Uses the new 5-layer detection engine (direct → synonym → dish/sauce → prep → cuisine/ambiguity).
@@ -42,6 +57,11 @@ export function scoreMenuItem(
   severities: Partial<Record<AllergenId, AllergenSeverity>> = {}
 ): ScoredMenuItem {
   const srcType = item.sourceType ?? restaurantSource;
+
+  // Check cache before running the engine
+  const cacheKey = scoreCacheKey(item, srcType, userAllergens, cuisineContext);
+  const cached = _scoreCache.get(cacheKey);
+  if (cached) return cached;
 
   // Prefer pre-cleaned normalizedText from the ingestion layer when available.
   // Falls back to joining name + description (same as before) for legacy items.
@@ -158,7 +178,7 @@ export function scoreMenuItem(
     ? "avoid"
     : riskAfterPrecautionary;
 
-  return {
+  const result: ScoredMenuItem = {
     id:          item.id,
     name:        item.name,
     description: item.description,
@@ -197,6 +217,13 @@ export function scoreMenuItem(
     sectionIndex:   item.sectionIndex,
     sourceSignals:  item.sourceSignals,
   };
+
+  // Store in cache — evict oldest entry when full (Map preserves insertion order)
+  if (_scoreCache.size >= SCORE_CACHE_MAX) {
+    _scoreCache.delete(_scoreCache.keys().next().value!);
+  }
+  _scoreCache.set(cacheKey, result);
+  return result;
 }
 
 // ─── Data quality / coverage tiers ───────────────────────────────────────────

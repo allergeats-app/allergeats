@@ -48,8 +48,9 @@ const MAX_PER_CHAIN = 4;
 // moves only slightly or re-mounts the page within the same session.
 
 function placesCacheKey(lat: number, lng: number, radiusMiles: number): string {
-  // v2: invalidates caches written when type=restaurant was in use
-  return `gpf2_${lat.toFixed(3)}_${lng.toFixed(3)}_${radiusMiles}`;
+  // v3: toFixed(2) buckets at ~1.1km — absorbs GPS jitter without sacrificing freshness.
+  // v2→v3 prefix bump intentionally invalidates old caches.
+  return `gpf3_${lat.toFixed(2)}_${lng.toFixed(2)}_${radiusMiles}`;
 }
 
 function readPlacesCache(key: string): PlaceResult[] | null {
@@ -197,49 +198,50 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     let googleFailed = false;
 
     try {
-        // Run all searches in parallel to overcome prominence-ranking bias.
-        // Each keyword targets a category that fast-food chains suppress:
-        //   casual dining      → Chili's, Applebee's, Outback
-        //   fine dining        → upscale restaurants
-        //   steakhouse         → Ruth's Chris, LongHorn, etc.
-        //   winery restaurant  → Cooper's Hawk, etc.
-        // "cafe" is a keyword search (not in the broad Nearby types) so coffee shops
-        // appear in results without crowding out food restaurants.
-        const keywords = ["casual dining", "fine dining", "steakhouse", "cafe coffee"];
-        // allSettled so a slow/failed keyword search never blocks the main result.
-        const [mainResult, ...keywordResults] = await Promise.allSettled([
-          fetch("/api/places-nearby", {
-            method:  "POST",
-            headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ lat, lng, radiusMeters }),
-            signal:  AbortSignal.timeout(20_000),
-          }),
-          ...keywords.map((keyword) =>
-            fetch("/api/places-nearby", {
-              method:  "POST",
-              headers: { "Content-Type": "application/json" },
-              body:    JSON.stringify({ lat, lng, radiusMeters, keyword }),
-              signal:  AbortSignal.timeout(8_000),
-            })
-          ),
-        ]);
+        // Await the main search first. Keyword supplemental searches only fire when
+        // the main result is sparse (< MIN_GOOGLE_FOR_OVERPASS) — this avoids 4
+        // excess API calls in dense cities where the main result already has plenty.
+        const mainResponse = await fetch("/api/places-nearby", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ lat, lng, radiusMeters }),
+          signal:  AbortSignal.timeout(20_000),
+        }).catch(() => null);
 
-        if (mainResult.status === "fulfilled" && mainResult.value.ok) {
-          const data = await mainResult.value.json() as { places: PlaceResult[] };
+        if (mainResponse?.ok) {
+          const data = await mainResponse.json() as { places: PlaceResult[] };
           googlePlaces = data.places ?? [];
         } else {
           googleFailed = true;
         }
 
-        // Merge all keyword results by placeId — non-fatal if any fail
-        const seen = new Set(googlePlaces.map((p) => p.placeId));
-        for (const result of keywordResults) {
-          if (result.status === "fulfilled" && result.value.ok) {
-            const supplementalData = await result.value.json() as { places: PlaceResult[] };
-            for (const p of supplementalData.places ?? []) {
-              if (!seen.has(p.placeId)) {
-                googlePlaces.push(p);
-                seen.add(p.placeId);
+        // Only fire keyword searches when the main result is sparse (rural / small towns).
+        // Each keyword targets a category that fast-food chains suppress:
+        //   casual dining → Chili's, Applebee's, Outback
+        //   fine dining   → upscale restaurants
+        //   steakhouse    → Ruth's Chris, LongHorn, etc.
+        //   cafe coffee   → coffee shops not in broad Nearby types
+        if (!googleFailed && googlePlaces.length < MIN_GOOGLE_FOR_OVERPASS) {
+          const keywords = ["casual dining", "fine dining", "steakhouse", "cafe coffee"];
+          const keywordResults = await Promise.allSettled(
+            keywords.map((keyword) =>
+              fetch("/api/places-nearby", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ lat, lng, radiusMeters, keyword }),
+                signal:  AbortSignal.timeout(8_000),
+              })
+            )
+          );
+          const seen = new Set(googlePlaces.map((p) => p.placeId));
+          for (const result of keywordResults) {
+            if (result.status === "fulfilled" && result.value.ok) {
+              const supplementalData = await result.value.json() as { places: PlaceResult[] };
+              for (const p of supplementalData.places ?? []) {
+                if (!seen.has(p.placeId)) {
+                  googlePlaces.push(p);
+                  seen.add(p.placeId);
+                }
               }
             }
           }
@@ -348,6 +350,10 @@ export class GooglePlacesLocationProvider implements LocationProvider {
   /**
    * Merge Google results (primary) with Overpass results (supplemental).
    * Google results take precedence — Overpass adds any restaurant not already present.
+   *
+   * Dedup key is (chain-name, ~1.1km grid cell) so different locations of the same
+   * chain (e.g. two McDonald's) are treated as distinct, while the exact same location
+   * seen in both sources is correctly deduplicated.
    */
   private _mergeResults(
     userLat: number,
@@ -356,12 +362,27 @@ export class GooglePlacesLocationProvider implements LocationProvider {
     overpassResults: Restaurant[],
   ): Restaurant[] {
     const googleMapped = this._mapPlaces(userLat, userLng, googlePlaces);
-    const seen = new Set(googleMapped.map((r) => dedupKey(r.name)));
+
+    // Build seen set keyed by (normalised chain name, ~1.1km location bucket).
+    // toFixed(2) ≈ 1.1km resolution — close enough to catch same-location dupes
+    // while still allowing two different McDonald's across town to both appear.
+    const seen = new Set(
+      googleMapped.map((r) => {
+        const locKey = r.lat != null && r.lng != null
+          ? `${r.lat.toFixed(2)}_${r.lng.toFixed(2)}`
+          : "no-coords";
+        return `${dedupKey(r.name)}::${locKey}`;
+      })
+    );
 
     for (const r of overpassResults) {
-      if (!seen.has(dedupKey(r.name))) {
+      const locKey = r.lat != null && r.lng != null
+        ? `${r.lat.toFixed(2)}_${r.lng.toFixed(2)}`
+        : "no-coords";
+      const key = `${dedupKey(r.name)}::${locKey}`;
+      if (!seen.has(key)) {
         googleMapped.push(r);
-        seen.add(dedupKey(r.name));
+        seen.add(key);
       }
     }
 

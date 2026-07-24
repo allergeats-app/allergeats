@@ -134,13 +134,20 @@ export const CHAIN_ALLERGEN_URLS: Record<string, string> = {
   "tropical smoothie":       "https://www.tropicalsmoothiecafe.com/menu",
 };
 
+// Precomputed at module init — sorted longest-key-first so more specific names
+// (e.g. "olive garden italian restaurant") match before shorter prefixes ("olive garden").
+// Using startsWith only (not includes) avoids false positives on partial substrings.
+const SORTED_CHAINS: [string, string][] = Object.entries(CHAIN_ALLERGEN_URLS)
+  .sort(([a], [b]) => b.length - a.length);
+
 /** Return the known allergen URL for a restaurant name, or undefined if unknown. */
 export function getChainUrl(displayName: string): string | undefined {
   const key = displayName.toLowerCase().trim();
+  // Exact match first (O(1))
   if (CHAIN_ALLERGEN_URLS[key]) return CHAIN_ALLERGEN_URLS[key];
-  // Partial match for names like "McDonald's #4521" or "Subway (Marco Island)"
-  for (const [chain, url] of Object.entries(CHAIN_ALLERGEN_URLS)) {
-    if (key.startsWith(chain) || key.includes(chain)) return url;
+  // Prefix match for names like "McDonald's #4521" or "Starbucks (Airport Terminal 2)"
+  for (const [chain, url] of SORTED_CHAINS) {
+    if (key.startsWith(chain)) return url;
   }
   return undefined;
 }
