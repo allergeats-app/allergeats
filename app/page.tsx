@@ -269,19 +269,19 @@ function HomeContent() {
     [rawRestaurants, localAllergens, severities]
   );
 
-  function handleAllergenChange(next: AllergenId[]) {
+  const handleAllergenChange = useCallback((next: AllergenId[]) => {
     trackEvent("filters_allergens_changed", { count: next.length });
     setLocalAllergens(next);
-  }
+  }, [setLocalAllergens]);
 
-  function resetFilters() {
+  const resetFilters = useCallback(() => {
     setSort("best-match");
     setTypeFilter("all");
     setOnlySaved(false);
     setOnlyWithMenu(true);
     setRadiusMiles(10);
     setSearchCenter(null);
-  }
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -332,7 +332,7 @@ function HomeContent() {
   const closeDrawer       = useCallback(() => setShowFilterDrawer(false), []);
   const clearSearchCenter = useCallback(() => setSearchCenter(null), []);
 
-  function handleSelectLocation(lat: number, lng: number, label: string) {
+  const handleSelectLocation = useCallback((lat: number, lng: number, label: string) => {
     // Batch all state changes together: loading=true prevents the empty-state flash
     // that would otherwise appear between clearing results and the load effect starting.
     setRawRestaurants([]);
@@ -340,16 +340,16 @@ function HomeContent() {
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     setSearchCenter({ lat, lng, label });
     setLocationLabel(label);
-  }
+  }, []);
 
-  function handleUseCurrentLocation() {
+  const handleUseCurrentLocation = useCallback(() => {
     setRawRestaurants([]);
     setLoading(true);
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     setSearchCenter(null);
     setLocationLabel("Locating…");
     setLocationRefresh((n) => n + 1); // force load effect to re-run even if searchCenter was already null
-  }
+  }, []);
 
   return (
     <main className={layout !== "map" ? "safe-pb" : undefined} style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
@@ -403,8 +403,9 @@ function HomeContent() {
               <button
                 key={value}
                 onClick={() => { trackEvent("cuisine_chip_tap", { cuisine: value }); setTypeFilter(value); }}
+                aria-pressed={active}
                 style={{
-                  flexShrink: 0, height: 34,
+                  flexShrink: 0, height: 44,
                   padding: "0 14px",
                   borderRadius: 999, border: "none",
                   background: active ? "var(--c-brand)" : "var(--c-card)",
@@ -528,6 +529,29 @@ function HomeContent() {
             </div>
           }>
           <>
+            {/* ── Location blocked compact notice ─────────────────── */}
+            {locationMode === "unavailable" && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "10px 14px", marginBottom: 16,
+                borderRadius: 12, background: "var(--c-card)",
+                border: "1.5px solid var(--c-border)",
+                fontSize: 13, color: "var(--c-sub)", lineHeight: 1.4,
+              }}>
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
+                </svg>
+                <span style={{ flex: 1 }}>Location access is unavailable. Enable location to find restaurants near you.</span>
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  style={{ flexShrink: 0, padding: "5px 10px", borderRadius: 8, border: "1px solid var(--c-border)", background: "var(--c-bg)", color: "var(--c-text)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
             {/* ── Best Match for You (hero) ───────────────────────── */}
             {nearbyFiltered.length > 0 && (
               <div style={{ marginBottom: 20 }}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
 import { getSupabaseClient } from "./supabaseClient";
 
@@ -57,9 +57,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       });
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function isFavorite(id: string): boolean {
-    return favorites.has(id);
-  }
+  const isFavorite = useCallback((id: string): boolean => favorites.has(id), [favorites]);
 
   function toggleFavorite(id: string, meta?: FavoriteMeta): void {
     setFavorites((prev) => {

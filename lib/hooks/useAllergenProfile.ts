@@ -33,6 +33,8 @@ export function useAllergenProfile() {
   const authOverriddenRef  = useRef(false); // true after auth allergens have been applied once
   const debounceRef        = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveSeqRef         = useRef(0);
+  const saveAllergensRef   = useRef(saveAllergens);
+  useEffect(() => { saveAllergensRef.current = saveAllergens; }, [saveAllergens]);
 
   // Hydrate from localStorage after mount (browser-only)
   useEffect(() => {
@@ -61,7 +63,7 @@ export function useAllergenProfile() {
       const seq = ++saveSeqRef.current;
       setSaveState("saving");
       try {
-        await saveAllergens(allergens);
+        await saveAllergensRef.current(allergens);
         if (seq !== saveSeqRef.current) return;
         setSaveState("saved");
         setTimeout(() => setSaveState("idle"), 2000);
@@ -72,7 +74,7 @@ export function useAllergenProfile() {
       }
     }, 800);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [allergens, user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allergens, user, saveAllergensRef]);
 
   function setAllergens(next: AllergenId[]) {
     setAllergensState(next);
