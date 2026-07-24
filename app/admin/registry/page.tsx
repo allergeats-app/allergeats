@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getChainUrl } from "@/lib/chainUrls";
 import type { CanonicalRestaurant } from "@/lib/registry/types";
-import type { CrawlRecord, CrawlResult } from "@/lib/menu-crawl/types";
+import type { CrawlRecord, CrawlResult, CrawlSourcePriority, RefreshTier } from "@/lib/menu-crawl/types";
 
 const SESSION_KEY  = "allegeats_admin_authed";
 const REGISTRY_KEY = "allegeats_registry";
@@ -193,7 +193,37 @@ export default function RegistryPage() {
     computeStats();
   }
 
-  // ── Crawl batch ───────────────────────────────────────────────────────────
+  // ── Sync website URLs → crawl queue ──────────────────────────────────────
+
+  function syncWebsitesToQueue(): number {
+    const reg   = loadRegistry();
+    const queue = loadQueue();
+    let synced  = 0;
+    for (const r of reg) {
+      if (!r.website) continue;
+      if (!queue[r.registryId]) {
+        queue[r.registryId] = {
+          registryId:          r.registryId,
+          bestSourcePriority:  "F" as CrawlSourcePriority,
+          sourceUrl:           r.website,
+          nextCrawlDue:        new Date().toISOString(),
+          refreshTier:         "stale" as RefreshTier,
+          interactionCount:    0,
+          hasPosIntegration:   false,
+          consecutiveFailures: 0,
+        };
+        synced++;
+      } else if (!queue[r.registryId].sourceUrl) {
+        queue[r.registryId].sourceUrl    = r.website;
+        queue[r.registryId].nextCrawlDue = new Date().toISOString();
+        synced++;
+      }
+    }
+    saveQueue(queue);
+    return synced;
+  }
+
+  // ── Crawl batch (quick — 5 entries) ──────────────────────────────────────
 
   async function handleRunCrawl() {
     setCrawling(true);
@@ -204,11 +234,81 @@ export default function RegistryPage() {
       const results: CrawlResult[] = await runCrawlBatch({
         batchSize: 5,
         onResult: (r: CrawlResult) => {
-          const icon = r.outcome === "updated" ? "✓ updated" : r.outcome === "failed" ? "✗ failed" : "— " + r.outcome;
-          addCrawlLog(`${r.registryId}: ${icon}${r.error ? ` — ${r.error}` : ""}`);
+          const icon = r.outcome === "updated" ? "✓" : r.outcome === "failed" ? "✗" : "—";
+          addCrawlLog(`${icon} ${r.registryId}: ${r.outcome}${r.error ? ` — ${r.error}` : ""}`);
         },
       });
       addCrawlLog(`Done. ${results.length} crawled — ${results.filter(r => r.outcome === "updated").length} updated, ${results.filter(r => r.outcome === "failed").length} failed.`);
+    } catch (e) {
+      addCrawlLog(`Error: ${String(e)}`);
+    } finally {
+      setCrawling(false);
+      computeStats();
+    }
+  }
+
+  // ── Bulk scrape all ───────────────────────────────────────────────────────
+
+  async function handleBulkScrape() {
+    setCrawling(true);
+    setCrawlLog([]);
+    try {
+      // 1. Seed chain URLs into registry
+      const reg = loadRegistry();
+      let seeded = 0;
+      for (const r of reg) {
+        if (r.website) continue;
+        const url = getChainUrl(r.displayName ?? "");
+        if (url) {
+          r.website = url;
+          r.websiteDomain = new URL(url).hostname.replace(/^www\./, "");
+          seeded++;
+        }
+      }
+      if (seeded > 0) saveRegistry(reg);
+      addCrawlLog(`Seeded ${seeded} chain URLs into registry`);
+
+      // 2. Sync all registry website fields → crawl queue sourceUrls
+      const synced = syncWebsitesToQueue();
+      addCrawlLog(`Synced ${synced} new URLs into crawl queue`);
+      computeStats();
+
+      // 3. Batch-run until no overdue entries remain
+      const { runCrawlBatch, getNextCrawlBatch } = await import("@/lib/menu-crawl");
+      let totalCrawled = 0, totalUpdated = 0, totalFailed = 0, batch = 0;
+
+      while (true) {
+        const pending = getNextCrawlBatch(1).length;
+        if (pending === 0) break;
+
+        batch++;
+        const remaining = getNextCrawlBatch(9999).length;
+        addCrawlLog(`Batch ${batch} — ${remaining} overdue remaining…`);
+
+        const results: CrawlResult[] = await runCrawlBatch({ batchSize: 10 });
+        if (results.length === 0) break;
+
+        const up  = results.filter(r => r.outcome === "updated").length;
+        const fail= results.filter(r => r.outcome === "failed").length;
+        const unch= results.filter(r => r.outcome === "unchanged").length;
+        totalCrawled  += results.length;
+        totalUpdated  += up;
+        totalFailed   += fail;
+
+        addCrawlLog(`  → ${up} updated · ${unch} unchanged · ${fail} failed`);
+
+        // Log failures with reason
+        for (const r of results) {
+          if (r.outcome === "failed" && r.error) {
+            addCrawlLog(`    ✗ ${r.registryId}: ${r.error}`);
+          }
+        }
+
+        // 2s pause between batches — be polite to external servers
+        await new Promise(res => setTimeout(res, 2000));
+      }
+
+      addCrawlLog(`✓ Bulk scrape complete. ${totalCrawled} crawled — ${totalUpdated} menus updated, ${totalFailed} failed.`);
     } catch (e) {
       addCrawlLog(`Error: ${String(e)}`);
     } finally {
@@ -351,7 +451,11 @@ export default function RegistryPage() {
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: crawlLog.length > 0 ? 14 : 0 }}>
           {btn(`Clean ${stats.queueOrphaned} orphaned entries`, handleCleanOrphans, stats.queueOrphaned > 0 ? "danger" : "dim", stats.queueOrphaned === 0)}
-          {btn(crawling ? "Running…" : "Run Crawl Batch (5)", handleRunCrawl, crawling ? "dim" : "brand", crawling)}
+          {btn(crawling ? "Running…" : "Run Batch (5)", handleRunCrawl, crawling ? "dim" : "default", crawling)}
+          {btn(crawling ? "Running…" : "⚡ Bulk Scrape All", handleBulkScrape, crawling ? "dim" : "brand", crawling)}
+        </div>
+        <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: crawlLog.length > 0 ? 10 : 0 }}>
+          Bulk Scrape seeds chain URLs, syncs all website fields to the crawl queue, then runs every entry until no overdue remain. ~2s between batches of 10.
         </div>
         {crawlLog.length > 0 && logBox(crawlLog)}
       </div>
