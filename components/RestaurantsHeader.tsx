@@ -31,9 +31,9 @@ export function RestaurantsHeader({
         WebkitBackdropFilter: "blur(24px)",
         borderBottom: "1px solid var(--c-border)",
         paddingTop: "max(8px, env(safe-area-inset-top))",
-        paddingBottom: 8,
-        paddingLeft:  "max(16px, env(safe-area-inset-left))",
-        paddingRight: "max(16px, env(safe-area-inset-right))",
+        paddingBottom: 10,
+        paddingLeft:  "max(12px, env(safe-area-inset-left))",
+        paddingRight: "max(12px, env(safe-area-inset-right))",
       }}
     >
       <div style={{ maxWidth: 600, margin: "0 auto" }}>

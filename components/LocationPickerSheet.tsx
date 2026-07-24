@@ -39,19 +39,26 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
   const [searching, setSearching] = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [locating, setLocating]   = useState(false);
-  const inputRef    = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Set to true when user hits Enter while results are still loading — auto-picks first result on arrival
-  const autoPickRef = useRef(false);
+  const inputRef      = useRef<HTMLInputElement>(null);
+  const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoPickRef   = useRef(false);
+  const autoLocatedRef = useRef(false);
 
-  // Lock body scroll while open
+  // Lock body scroll while open + auto-trigger GPS on every open
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      autoLocatedRef.current = false;
+      return;
+    }
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    requestAnimationFrame(() => inputRef.current?.focus());
+    // Auto-start GPS the first time this open session fires
+    if (!autoLocatedRef.current) {
+      autoLocatedRef.current = true;
+      handleCurrentLocation();
+    }
     return () => { document.body.style.overflow = prev; };
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Escape to close
   useEffect(() => {
@@ -157,29 +164,36 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
         }}
       />
 
-      {/* Sheet */}
+      {/* Centered popup */}
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Change location"
         style={{
-          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 201,
-          background: "var(--c-card)",
-          borderTopLeftRadius: 28, borderTopRightRadius: 28,
-          boxShadow: "0 -16px 56px rgba(0,0,0,0.2)",
-          transform: open ? "translateY(0)" : "translateY(100%)",
-          transition: open
-            ? "transform 0.38s cubic-bezier(0.22,1,0.36,1)"
-            : "transform 0.28s cubic-bezier(0.4,0,1,1)",
-          maxHeight: "min(80dvh, calc(100dvh - 60px))",
-          display: "flex", flexDirection: "column",
-          paddingBottom: "env(safe-area-inset-bottom)",
+          position: "fixed", inset: 0, zIndex: 201,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "20px 16px",
+          pointerEvents: open ? "auto" : "none",
         }}
       >
-        {/* Drag handle */}
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, flexShrink: 0 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 999, background: "var(--c-border)" }} />
-        </div>
+      <div
+        style={{
+          width: "100%", maxWidth: 420,
+          background: "var(--c-hdr)",
+          backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 24,
+          border: "1px solid var(--c-border)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+          transform: open ? "scale(1) translateY(0)" : "scale(0.95) translateY(12px)",
+          opacity: open ? 1 : 0,
+          transition: open
+            ? "transform 0.28s cubic-bezier(0.22,1,0.36,1), opacity 0.2s ease"
+            : "transform 0.2s ease, opacity 0.18s ease",
+          maxHeight: "min(80dvh, calc(100dvh - 80px))",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
 
         {/* Header */}
         <div style={{
@@ -216,11 +230,11 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: 12,
               padding: "13px 16px", borderRadius: 16, marginBottom: 16,
-              background: locating ? "#fff5f5" : "#fef2f2",
+              background: "var(--c-brand-bg)",
               border: "1.5px solid var(--c-brand)",
               color: "var(--c-brand)", fontSize: 14, fontWeight: 800,
               cursor: locating ? "default" : "pointer", textAlign: "left",
-              opacity: locating ? 0.8 : 1,
+              opacity: locating ? 0.7 : 1,
             }}
           >
             {locating ? (
@@ -341,6 +355,7 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
             </div>
           )}
         </div>
+      </div>
       </div>
     </>
   );

@@ -255,23 +255,22 @@ export function RestaurantsFilterDrawer({
           <DrawerSection title="Show only" last>
             <div>
               {toggleRows.map(({ checked, onChange, label, hint }, i) => (
-                <button
+                <div
                   key={label}
-                  type="button"
-                  onClick={() => onChange(!checked)}
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     gap: 12, padding: "14px 0", width: "100%",
-                    background: "none", border: "none", textAlign: "left", cursor: "pointer",
                     borderBottom: i < toggleRows.length - 1 ? "1px solid var(--c-border)" : "none",
+                    cursor: "pointer",
                   }}
+                  onClick={() => onChange(!checked)}
                 >
-                  <div>
+                  <div style={{ flex: 1, textAlign: "left" }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)" }}>{label}</div>
                     <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>{hint}</div>
                   </div>
                   <ToggleSwitch checked={checked} onChange={onChange} label={label} />
-                </button>
+                </div>
               ))}
             </div>
           </DrawerSection>
