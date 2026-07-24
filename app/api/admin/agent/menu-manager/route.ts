@@ -15,12 +15,12 @@ You will receive:
 - mockRestaurants: array of pre-seeded chain restaurants with their menu counts
 
 Analyze and report:
-1. Registry restaurants missing menu URLs (can't be scraped)
+1. Registry restaurants missing menu URLs (can't be scraped) — list only the ones MISSING a URL; do NOT list or annotate entries that have one
 2. Restaurants whose menus haven't been crawled in >30 days
 3. Mock/seeded restaurants that may need manual allergen updates
 4. Any data gaps or anomalies worth flagging
 
-Be thorough — surface ALL meaningful findings. Do not cut your analysis short to save space. Use restaurant names, not IDs.
+Be thorough — surface ALL meaningful findings. Skip entries that are fine. Do not annotate or comment on entries that pass — only report problems.
 
 After your analysis, output proposed actions in this EXACT format — no exceptions:
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       try {
         const s = client.messages.stream({
           model: process.env.CLAUDE_MODEL ?? "claude-sonnet-4-6",
-          max_tokens: 4096,
+          max_tokens: 8192,
           system: SYSTEM,
           messages: [{ role: "user", content: userMessage }],
         });

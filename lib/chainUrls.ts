@@ -119,6 +119,19 @@ export const CHAIN_ALLERGEN_URLS: Record<string, string> = {
   "church's chicken":        "https://www.churchs.com/menu",
   "zaxby's":                 "https://www.zaxbys.com/nutrition",
   "bojangles":               "https://www.bojangles.com/menu",
+  "firehouse subs":          "https://www.firehousesubs.com/menu/allergen-information/",
+  "boston market":           "https://www.bostonmarket.com/food/",
+  "famous dave's":           "https://www.famousdaves.com/menu",
+  "famous daves":            "https://www.famousdaves.com/menu",
+  "bahama breeze":           "https://www.bahamabreeze.com/menu",
+  "bahama breeze island grille": "https://www.bahamabreeze.com/menu",
+  "smoothie king":           "https://www.smoothieking.com/menu",
+  "ruby tuesday":            "https://www.rubytuesday.com/menu",
+  "pollo tropical":          "https://www.pollotropical.com/menu",
+  "bowlero":                 "https://www.bowlero.com/food-and-drink",
+  "moe's":                   "https://www.moes.com/menu",
+  "tropical smoothie cafe":  "https://www.tropicalsmoothiecafe.com/menu",
+  "tropical smoothie":       "https://www.tropicalsmoothiecafe.com/menu",
 };
 
 /** Return the known allergen URL for a restaurant name, or undefined if unknown. */
