@@ -8,7 +8,7 @@ import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
 import { locationProvider, MockLocationProvider, checkLocationPermission, loadLastLocation } from "@/lib/providers/locationProvider";
 import type { Coordinates } from "@/lib/providers/locationProvider";
-import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
+import { getMockRestaurants, loadMockRestaurants } from "@/lib/mockRestaurantsLazy";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { HeroRestaurantCard } from "@/components/HeroRestaurantCard";
 import { RestaurantMap } from "@/components/RestaurantMap";
@@ -41,7 +41,7 @@ function withAllChains(list: Restaurant[]): Restaurant[] {
   const liveOnly = list.filter((r) => !r.menuIsGenericChainTemplate || r.address);
 
   const names = new Set(liveOnly.filter((r) => r.menuItems.length > 0).map((r) => r.name.toLowerCase()));
-  const missing = MOCK_RESTAURANTS
+  const missing = getMockRestaurants()
     .filter((m) => !names.has(m.name.toLowerCase()))
     .map((m) => ({
       ...m,
@@ -109,6 +109,10 @@ function HomeContent() {
   const { user, firstName, severities } = useAuth();
   const { isFavorite } = useFavorites();
   const { allergens: localAllergens, saveState, setAllergens: setLocalAllergens } = useAllergenProfile();
+
+  // Kick off lazy load of 258KB chain menu data — withAllChains returns []
+  // templates until this resolves, which is fine since live results also load async.
+  useEffect(() => { loadMockRestaurants(); }, []);
 
   // Hydrate sessionStorage cache after mount
   useEffect(() => {

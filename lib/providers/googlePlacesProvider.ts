@@ -23,7 +23,7 @@
 import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
 import type { LocationProvider, Coordinates }         from "./locationProvider";
 import { LiveLocationProvider }                       from "./locationProvider";
-import { MOCK_RESTAURANTS }                           from "@/lib/mockRestaurants";
+import { getMockRestaurants, loadMockRestaurants }     from "@/lib/mockRestaurantsLazy";
 import { upsertRestaurant, beginRegistryBatch, endRegistryBatch } from "@/lib/registry";
 import type { PlaceResult }                           from "@/app/api/places-nearby/route";
 
@@ -127,9 +127,13 @@ function cuisineFromTypes(types: string[]): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Pre-fetch mock data when the provider module loads so findMockMatch
+// has it ready by the time the first Places results arrive.
+loadMockRestaurants();
+
 function findMockMatch(name: string): Restaurant | undefined {
   const lower = name.toLowerCase();
-  return MOCK_RESTAURANTS.find((m) => {
+  return getMockRestaurants().find((m) => {
     const mockLower = m.name.toLowerCase();
     return lower.includes(mockLower) || mockLower.includes(lower);
   });
