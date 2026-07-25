@@ -26,7 +26,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── McDonald's ─────────────────────────────────────────────────────────────
   {
     id: "mcdonalds",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/640px-McDonald%27s_Golden_Arches.svg.png",
+    imageUrl: "/logos/mcdonalds.svg",
     name: "McDonald's",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
@@ -85,7 +85,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Chipotle ───────────────────────────────────────────────────────────────
   {
     id: "chipotle",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Chipotle_Mexican_Grill_logo.svg/640px-Chipotle_Mexican_Grill_logo.svg.png",
+    imageUrl: "/logos/chipotle.svg",
     name: "Chipotle Mexican Grill",
     cuisine: "Fast Casual · Mexican",
     tags: ["mexican"],
@@ -143,7 +143,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Chick-fil-A ────────────────────────────────────────────────────────────
   {
     id: "chickfila",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Chick-fil-A.jpg/640px-Chick-fil-A.jpg",
+    imageUrl: "/logos/chick-fil-a.svg",
     name: "Chick-fil-A",
     cuisine: "Fast Food · Chicken",
     tags: ["chicken"],
@@ -196,7 +196,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Starbucks ──────────────────────────────────────────────────────────────
   {
     id: "starbucks",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/640px-Starbucks_Corporation_Logo_2011.svg.png",
+    imageUrl: "/logos/starbucks.svg",
     name: "Starbucks",
     cuisine: "Café · Coffee",
     tags: ["coffee"],
@@ -244,7 +244,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "shakeshack",
     name: "Shake Shack",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/9/96/Shake_Shack_logo.svg",
+    imageUrl: "/logos/shake-shack.svg",
     cuisine: "Burgers · Shakes",
     tags: ["burgers"],
     distance: 2.1,
@@ -284,7 +284,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: subway.com/en-US/MenuNutrition/Nutrition/AllergenInformation
   {
     id: "subway",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/5/5c/Subway_2016_logo.svg",
+    imageUrl: "/logos/subway.svg",
     name: "Subway",
     cuisine: "Fast Casual · Sandwiches",
     tags: ["sandwiches"],
@@ -361,7 +361,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: tacobell.com/allergens
   {
     id: "tacobell",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/b/b7/Taco_Bell_2023.svg/640px-Taco_Bell_2023.svg.png",
+    imageUrl: "/logos/taco-bell.svg",
     name: "Taco Bell",
     cuisine: "Fast Food · Mexican",
     tags: ["mexican"],
@@ -397,7 +397,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: bk.com/allergen-information
   {
     id: "burgerking",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Burger_King_2020.svg/640px-Burger_King_2020.svg.png",
+    imageUrl: "/logos/burger-king.svg",
     name: "Burger King",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
@@ -443,7 +443,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: wendys.com/allergens
   {
     id: "wendys",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/3/32/Wendy%27s_full_logo_2012.svg/640px-Wendy%27s_full_logo_2012.svg.png",
+    imageUrl: "/logos/wendys.svg",
     name: "Wendy's",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
@@ -485,7 +485,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: panerabread.com/en-us/menu/nutrition-allergen-information.html
   {
     id: "panera",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/4/49/Panera_Bread_wordmark.svg",
+    imageUrl: "/logos/panera.svg",
     name: "Panera Bread",
     cuisine: "Fast Casual · Bakery · Café",
     tags: ["coffee", "sandwiches"],
@@ -533,7 +533,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: dunkindonuts.com/en/nutrition/allergen-info
   {
     id: "dunkin",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/2/22/Dunkin%27_logo.svg",
+    imageUrl: "/logos/dunkin.svg",
     name: "Dunkin'",
     cuisine: "Café · Donuts · Coffee",
     tags: ["coffee"],
@@ -569,7 +569,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── In-N-Out Burger ─────────────────────────────────────────────────────────
   {
     id: "innout",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/InNOut_2021_logo.svg/640px-InNOut_2021_logo.svg.png",
+    imageUrl: "/logos/in-n-out.svg",
     name: "In-N-Out Burger",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers"],
@@ -600,7 +600,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Cross-contact risk for peanut allergy is extremely high at all locations.
   {
     id: "fiveguys",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/8/80/Five_Guys_logo.svg",
+    imageUrl: "/logos/five-guys.svg",
     name: "Five Guys",
     cuisine: "Fast Casual · Burgers",
     tags: ["burgers"],
@@ -638,7 +638,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Popeyes ──────────────────────────────────────────────────────────────────
   {
     id: "popeyes",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/7/73/Popeyes_logo.svg",
+    imageUrl: "/logos/popeyes.svg",
     name: "Popeyes",
     cuisine: "Fast Food · Chicken",
     tags: ["chicken"],
@@ -674,7 +674,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── KFC ─────────────────────────────────────────────────────────────────────
   {
     id: "kfc",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/5/57/KFC_logo-image.svg/640px-KFC_logo-image.svg.png",
+    imageUrl: "/logos/kfc.svg",
     name: "KFC",
     cuisine: "Fast Food · Chicken",
     tags: ["chicken"],
@@ -711,7 +711,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Domino's ────────────────────────────────────────────────────────────────
   {
     id: "dominos",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/3/3e/Domino%27s_pizza_logo.svg",
+    imageUrl: "/logos/dominos.svg",
     name: "Domino's",
     cuisine: "Pizza",
     tags: ["sandwiches"],
@@ -749,7 +749,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Jersey Mike's ───────────────────────────────────────────────────────────
   {
     id: "jerseymikes",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Jersey_Mike%27s_logo.svg/640px-Jersey_Mike%27s_logo.svg.png",
+    imageUrl: "/logos/jersey-mikes.svg",
     name: "Jersey Mike's",
     cuisine: "Fast Casual · Sandwiches",
     tags: ["sandwiches"],
@@ -811,7 +811,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Jimmy John's ────────────────────────────────────────────────────────────
   {
     id: "jimmyjohns",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/Jimmy_John%27s_%28logo%29.svg/640px-Jimmy_John%27s_%28logo%29.svg.png",
+    imageUrl: "/logos/jimmy-johns.svg",
     name: "Jimmy John's",
     cuisine: "Fast Casual · Sandwiches",
     tags: ["sandwiches"],
@@ -867,7 +867,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: chilis.com/allergen-information
   {
     id: "chilis",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Chili%27s_Logo.svg/640px-Chili%27s_Logo.svg.png",
+    imageUrl: "/logos/chilis.svg",
     name: "Chili's Grill & Bar",
     cuisine: "Casual Dining · American",
     tags: ["casual"],
@@ -922,7 +922,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: applebees.com/en/menu (allergen information)
   {
     id: "applebees",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/AB_Brand_Refresh_Logo_R.svg/640px-AB_Brand_Refresh_Logo_R.svg.png",
+    imageUrl: "/logos/applebees.svg",
     name: "Applebee's",
     cuisine: "Casual Dining · American",
     tags: ["casual"],
@@ -981,7 +981,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "texas-roadhouse",
     name: "Texas Roadhouse",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/b/b0/Texas_Roadhouse.svg/640px-Texas_Roadhouse.svg.png",
+    imageUrl: "/logos/texas-roadhouse.svg",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
     distance: 1.8,
@@ -1028,7 +1028,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: longhornsteakhouse.com allergen information
   {
     id: "longhorn-steakhouse",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/7/7f/LongHornSteakhouseLogo.PNG",
+    imageUrl: "/logos/longhorn.png",
     name: "LongHorn Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
@@ -1112,7 +1112,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: ruthschris.com — all steaks finished with butter on 500-degree plates
   {
     id: "ruths-chris",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Ruths_Chris_Logo.svg/640px-Ruths_Chris_Logo.svg.png",
+    imageUrl: "/logos/ruths-chris.svg",
     name: "Ruths Chris Steak House",
     cuisine: "Fine Dining · Steakhouse",
     tags: ["steakhouse", "fine-dining"],
@@ -1208,7 +1208,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: olivegarden.com — Allergen Information PDF
   {
     id: "olive-garden",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/6/6d/Olive_Garden_Logo.svg/640px-Olive_Garden_Logo.svg.png",
+    imageUrl: "/logos/olive-garden.svg",
     name: "Olive Garden",
     cuisine: "Casual Dining · Italian",
     tags: ["italian", "pasta", "casual"],
@@ -1240,7 +1240,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "red-lobster",
     name: "Red Lobster",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/b/b1/Redlobster_logocopia.png",
+    imageUrl: "/logos/red-lobster.png",
     cuisine: "Casual Dining · Seafood",
     tags: ["seafood", "casual"],
     distance: 1.5,
@@ -1268,7 +1268,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "ihop",
     name: "IHOP",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/IHOP_logo.svg/640px-IHOP_logo.svg.png",
+    imageUrl: "/logos/ihop.svg",
     cuisine: "Casual Dining · Breakfast",
     tags: ["breakfast", "brunch", "pancakes"],
     distance: 0.9,
@@ -1309,7 +1309,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: dennys.com — Allergen Menu
   {
     id: "dennys",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Denny%27s_Logo_06.2022.svg/640px-Denny%27s_Logo_06.2022.svg.png",
+    imageUrl: "/logos/dennys.svg",
     name: "Denny's",
     cuisine: "Casual Dining · American Breakfast",
     tags: ["breakfast", "american", "24-hour"],
@@ -1350,7 +1350,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: thecheesecakefactory.com — Allergen Information
   {
     id: "cheesecake-factory",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/b/b1/The_Cheesecake_Factory_logo.svg",
+    imageUrl: "/logos/cheesecake-factory.svg",
     name: "The Cheesecake Factory",
     cuisine: "Casual Dining · American",
     tags: ["american", "casual", "cheesecake"],
@@ -1382,7 +1382,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "buffalo-wild-wings",
     name: "Buffalo Wild Wings",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/2/2c/Buffalo_Wild_Wings_%28logo%2C_vertical%29.svg",
+    imageUrl: "/logos/buffalo-ww.svg",
     cuisine: "Casual Dining · Wings & Sports Bar",
     tags: ["wings", "sports-bar", "casual"],
     distance: 1.3,
@@ -1432,7 +1432,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "wingstop",
     name: "Wingstop",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/0/0f/Wingstop_logo.svg/640px-Wingstop_logo.svg.png",
+    imageUrl: "/logos/wingstop.svg",
     cuisine: "Fast Casual · Wings",
     tags: ["wings", "fast-casual"],
     distance: 0.8,
@@ -1472,7 +1472,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: pandaexpress.com — Allergen Information
   {
     id: "panda-express",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/7/79/Panda_Express.svg",
+    imageUrl: "/logos/panda-express.svg",
     name: "Panda Express",
     cuisine: "Fast Casual · Chinese-American",
     tags: ["chinese", "fast-casual", "asian"],
@@ -1509,7 +1509,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: pfchangs.com — Allergen Information
   {
     id: "pf-changs",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/8/87/P.F._Chang%27s_logo.svg",
+    imageUrl: "/logos/pf-changs.svg",
     name: "P.F. Chang's",
     cuisine: "Casual Dining · Asian",
     tags: ["asian", "chinese", "casual"],
@@ -1537,7 +1537,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "raising-canes",
     name: "Raising Cane's",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Raising_Cane%27s_Chicken_Fingers_logo.svg/640px-Raising_Cane%27s_Chicken_Fingers_logo.svg.png",
+    imageUrl: "/logos/raising-canes.svg",
     cuisine: "Fast Casual · Chicken",
     tags: ["chicken", "fast-casual"],
     distance: 0.6,
@@ -1559,7 +1559,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "sonic",
     name: "Sonic Drive-In",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/SONIC_New_Logo_2020.svg/640px-SONIC_New_Logo_2020.svg.png",
+    imageUrl: "/logos/sonic.svg",
     cuisine: "Fast Food · American",
     tags: ["fast-food", "american", "drive-in"],
     distance: 1.0,
@@ -1597,7 +1597,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: arbys.com — Allergen & Nutrition Info
   {
     id: "arbys",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Arby%27s_logo.svg/640px-Arby%27s_logo.svg.png",
+    imageUrl: "/logos/arbys.svg",
     name: "Arby's",
     cuisine: "Fast Food · Roast Beef & Sandwiches",
     tags: ["fast-food", "sandwiches", "roast-beef"],
@@ -1628,7 +1628,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: whataburger.com — Allergen Listing
   {
     id: "whataburger",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Whataburger_logo.svg/640px-Whataburger_logo.svg.png",
+    imageUrl: "/logos/whataburger.svg",
     name: "Whataburger",
     cuisine: "Fast Food · Burgers",
     tags: ["fast-food", "burgers", "texas"],
@@ -1658,7 +1658,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: dairyqueen.com — Allergen Info
   {
     id: "dairy-queen",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Dairy_Queen_logo.svg/640px-Dairy_Queen_logo.svg.png",
+    imageUrl: "/logos/dairy-queen.svg",
     name: "Dairy Queen",
     cuisine: "Fast Food · Burgers & Ice Cream",
     tags: ["fast-food", "ice-cream", "burgers"],
@@ -1706,7 +1706,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: pizzahut.com — Allergen Information
   {
     id: "pizza-hut",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Pizza_Hut_2025.svg/640px-Pizza_Hut_2025.svg.png",
+    imageUrl: "/logos/pizza-hut.svg",
     name: "Pizza Hut",
     cuisine: "Fast Casual · Pizza",
     tags: ["pizza", "fast-casual"],
@@ -1730,7 +1730,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: papajohns.com — Allergen Menu
   {
     id: "papa-johns",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/9/92/Papa_Johns_logo.svg",
+    imageUrl: "/logos/papa-johns.svg",
     name: "Papa John's",
     cuisine: "Fast Casual · Pizza",
     tags: ["pizza", "fast-casual"],
@@ -1753,7 +1753,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: qdoba.com — Allergen Information
   {
     id: "qdoba",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/9/9c/Qdoba_Logo.svg",
+    imageUrl: "/logos/qdoba.svg",
     name: "Qdoba Mexican Eats",
     cuisine: "Fast Casual · Mexican",
     tags: ["mexican", "fast-casual", "burritos"],
@@ -1808,7 +1808,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: tgifridays.com — Allergen Menu
   {
     id: "tgi-fridays",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Tgi_fridays_logo13.svg/640px-Tgi_fridays_logo13.svg.png",
+    imageUrl: "/logos/tgi-fridays.svg",
     name: "TGI Fridays",
     cuisine: "Casual Dining · American",
     tags: ["casual", "american", "bar"],
@@ -1862,7 +1862,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: redrobin.com — Allergen Information
   {
     id: "red-robin",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/8/8f/Red_Robin_logo.svg",
+    imageUrl: "/logos/red-robin.svg",
     name: "Red Robin",
     cuisine: "Casual Dining · Burgers",
     tags: ["burgers", "casual", "american"],
@@ -1913,7 +1913,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: crackerbarrel.com — Allergen Menu
   {
     id: "cracker-barrel",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Cracker_Barrel_logo.svg/640px-Cracker_Barrel_logo.svg.png",
+    imageUrl: "/logos/cracker-barrel.svg",
     name: "Cracker Barrel Old Country Store",
     cuisine: "Casual Dining · Southern American",
     tags: ["southern", "breakfast", "comfort-food", "casual"],
@@ -1945,7 +1945,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: jackinthebox.com — Allergen Information
   {
     id: "jack-in-the-box",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Jack_in_the_Box_2022_logo.svg/640px-Jack_in_the_Box_2022_logo.svg.png",
+    imageUrl: "/logos/jack-in-the-box.svg",
     name: "Jack in the Box",
     cuisine: "Fast Food · Burgers",
     tags: ["fast-food", "burgers", "tacos"],
@@ -1976,7 +1976,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "culvers",
     name: "Culver's",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/c/cc/Culver%27s_logo.svg",
+    imageUrl: "/logos/culvers.svg",
     cuisine: "Fast Casual · Burgers & Custard",
     tags: ["burgers", "custard", "fast-casual"],
     distance: 1.0,
@@ -1998,7 +1998,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: noodles.com — Allergen Information
   {
     id: "noodles-and-company",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/a/ae/Noodles_%26_Company_logo.png",
+    imageUrl: "/logos/noodles-co.png",
     name: "Noodles & Company",
     cuisine: "Fast Casual · Noodles",
     tags: ["noodles", "pasta", "fast-casual"],
@@ -2021,7 +2021,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: yardhouse.com — Allergen Menu
   {
     id: "yard-house",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Yard_House_logo.svg/480px-Yard_House_logo.svg.png",
+    imageUrl: "/logos/yard-house.svg",
     name: "Yard House",
     cuisine: "Casual Dining · American & Craft Beer",
     tags: ["american", "bar", "craft-beer", "casual"],
@@ -2046,7 +2046,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Outback Steakhouse ──────────────────────────────────────────────────────
   {
     id: "outback",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/c/cf/Outback_Steakhouse.svg",
+    imageUrl: "/logos/outback.svg",
     name: "Outback Steakhouse",
     cuisine: "Casual Dining · Steakhouse",
     tags: ["steakhouse", "casual"],
@@ -2081,7 +2081,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Sweetgreen ──────────────────────────────────────────────────────────────
   {
     id: "sweetgreen",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Sweetgreen_logo.svg/640px-Sweetgreen_logo.svg.png",
+    imageUrl: "/logos/sweetgreen.svg",
     name: "Sweetgreen",
     cuisine: "Fast Casual · Salads & Bowls",
     tags: ["salads", "healthy", "fast-casual"],
@@ -2110,7 +2110,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── The Capital Grille ──────────────────────────────────────────────────────
   {
     id: "capital-grille",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/The_Capital_Grille_logo.svg/640px-The_Capital_Grille_logo.svg.png",
+    imageUrl: "/logos/capital-grille.svg",
     name: "The Capital Grille",
     cuisine: "Fine Dining · Steakhouse",
     tags: ["steakhouse", "fine-dining"],
@@ -2141,7 +2141,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Steak n Shake ───────────────────────────────────────────────────────────
   {
     id: "steak-n-shake",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Steak_n_Shake_logo.svg/640px-Steak_n_Shake_logo.svg.png",
+    imageUrl: "/logos/steak-n-shake.svg",
     name: "Steak n Shake",
     cuisine: "Fast Casual · Burgers & Shakes",
     tags: ["burgers", "fast-casual"],
@@ -2169,7 +2169,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: bojangles.com — Nutrition & Allergen Info
   {
     id: "bojangles",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Bojangles_logo.svg/640px-Bojangles_logo.svg.png",
+    imageUrl: "/logos/bojangles.png",
     name: "Bojangles",
     cuisine: "Fast Food · Southern Chicken",
     tags: ["chicken", "fast-food"],
@@ -2216,7 +2216,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: carlsjr.com — Allergen Information
   {
     id: "carls-jr",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Carl%27s_Jr._logo.svg/640px-Carl%27s_Jr._logo.svg.png",
+    imageUrl: "/logos/carls-jr.svg",
     name: "Carl's Jr.",
     cuisine: "Fast Food · Burgers",
     tags: ["burgers", "fast-food"],
@@ -2259,7 +2259,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: modpizza.com — Allergen Information
   {
     id: "mod-pizza",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/b/b6/Mod_Logo.svg",
+    imageUrl: "/logos/mod-pizza.svg",
     name: "MOD Pizza",
     cuisine: "Fast Casual · Pizza",
     tags: ["pizza", "fast-casual"],
@@ -2309,7 +2309,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: smashburger.com — Allergen Information
   {
     id: "smashburger",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Smashburger_logo.svg/640px-Smashburger_logo.svg.png",
+    imageUrl: "/logos/smashburger.png",
     name: "Smashburger",
     cuisine: "Fast Casual · Burgers",
     tags: ["burgers", "fast-casual"],
@@ -2349,7 +2349,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Zaxby's ─────────────────────────────────────────────────────────────────
   {
     id: "zaxbys",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Zaxby%27s_logo.svg/640px-Zaxby%27s_logo.svg.png",
+    imageUrl: "/logos/zaxbys.png",
     name: "Zaxby's",
     cuisine: "Fast Casual · Chicken",
     tags: ["chicken", "fast-casual"],
@@ -2375,7 +2375,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: habitburger.com — Allergen Information
   {
     id: "habit-burger",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/The_Habit_Burger_Grill_logo.svg/640px-The_Habit_Burger_Grill_logo.svg.png",
+    imageUrl: "/logos/habit-burger.png",
     name: "The Habit Burger Grill",
     cuisine: "Fast Casual · Burgers",
     tags: ["burgers", "fast-casual"],
@@ -2417,7 +2417,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Pei Wei ─────────────────────────────────────────────────────────────────
   {
     id: "pei-wei",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Pei_Wei_logo.svg/640px-Pei_Wei_logo.svg.png",
+    imageUrl: "/logos/pei-wei.png",
     name: "Pei Wei",
     cuisine: "Fast Casual · Asian",
     tags: ["asian", "fast-casual"],
@@ -2437,7 +2437,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // ─── Freddy's Frozen Custard ─────────────────────────────────────────────────
   {
     id: "freddys",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Freddy%27s_Frozen_Custard_logo.svg/640px-Freddy%27s_Frozen_Custard_logo.svg.png",
+    imageUrl: "/logos/freddys.svg",
     name: "Freddy's Frozen Custard & Steakburgers",
     cuisine: "Fast Casual · Burgers & Custard",
     tags: ["burgers", "fast-casual"],
@@ -2464,7 +2464,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: portillos.com — Allergen Information
   {
     id: "portillos",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Portillo%27s_logo.svg/640px-Portillo%27s_logo.svg.png",
+    imageUrl: "/logos/portillos.png",
     name: "Portillo's",
     cuisine: "Fast Casual · Chicago Classics",
     tags: ["burgers", "fast-casual", "american"],
@@ -2506,7 +2506,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: goldencorral.com — Allergen Information
   {
     id: "golden-corral",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Golden_Corral_logo.svg/640px-Golden_Corral_logo.svg.png",
+    imageUrl: "/logos/golden-corral.svg",
     name: "Golden Corral",
     cuisine: "Casual Dining · Buffet",
     tags: ["american", "casual", "buffet"],
@@ -2549,7 +2549,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   // Source: elpolloloco.com — Allergen Information
   {
     id: "el-pollo-loco",
-    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/commons/e/e6/El_Pollo_Loco_Logo.jpg",
+    imageUrl: "/logos/el-pollo-loco.png",
     name: "El Pollo Loco",
     cuisine: "Fast Casual · Mexican",
     tags: ["mexican", "chicken", "fast-casual"],
