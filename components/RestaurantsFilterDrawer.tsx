@@ -86,7 +86,6 @@ export function RestaurantsFilterDrawer({
   sort, setSort,
   typeFilter, setTypeFilter,
   radiusMiles, setRadiusMiles, clearSearchCenter,
-  onlyWithMenu, setOnlyWithMenu,
   onlySaved, setOnlySaved,
   onReset,
 }: {
@@ -95,7 +94,6 @@ export function RestaurantsFilterDrawer({
   sort: SortOption; setSort: (v: SortOption) => void;
   typeFilter: TypeFilter; setTypeFilter: (v: TypeFilter) => void;
   radiusMiles: number; setRadiusMiles: (v: number) => void; clearSearchCenter: () => void;
-  onlyWithMenu: boolean; setOnlyWithMenu: (v: boolean) => void;
   onlySaved: boolean; setOnlySaved: (v: boolean) => void;
   onReset: () => void;
 }) {
@@ -116,8 +114,7 @@ export function RestaurantsFilterDrawer({
   }, [open, onClose]);
 
   const toggleRows = [
-    { checked: onlyWithMenu, onChange: setOnlyWithMenu, label: "Available Menus Only", hint: "Only restaurants with scored menu items" },
-    { checked: onlySaved,    onChange: setOnlySaved,    label: "Saved restaurants",    hint: "Only places you've hearted" },
+    { checked: onlySaved, onChange: setOnlySaved, label: "Saved restaurants", hint: "Only places you've hearted" },
   ];
 
   return (

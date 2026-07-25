@@ -7,23 +7,20 @@ interface SmartEmptyStateProps {
   query: string;
   radiusMiles: number;
   onlySaved: boolean;
-  onlyWithMenu: boolean;
   typeFilter: TypeFilter;
   onClearQuery: () => void;
   onClearSaved: () => void;
-  onShowAll: () => void;
   onClearCuisine: () => void;
   onOpenMap: () => void;
 }
 
 export function SmartEmptyState({
-  query, radiusMiles, onlySaved, onlyWithMenu, typeFilter,
-  onClearQuery, onClearSaved, onShowAll, onClearCuisine, onOpenMap,
+  query, radiusMiles, onlySaved, typeFilter,
+  onClearQuery, onClearSaved, onClearCuisine, onOpenMap,
 }: SmartEmptyStateProps) {
   const suggestions: { label: string; action: () => void }[] = [];
   if (query)                suggestions.push({ label: `Clear search "${query}"`,       action: onClearQuery   });
   if (onlySaved)            suggestions.push({ label: "Turn off Saved Places",          action: onClearSaved  });
-  if (onlyWithMenu)         suggestions.push({ label: "Show restaurants without menus", action: onShowAll     });
   if (typeFilter !== "all") suggestions.push({ label: "Show all cuisines",              action: onClearCuisine });
   suggestions.push(         { label: "Switch to map view",                              action: onOpenMap     });
 

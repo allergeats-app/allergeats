@@ -89,7 +89,6 @@ function HomeContent() {
   const [query, setQuery]               = useState("");
   const [sort, setSort]                 = useState<SortOption>("best-match");
   const [typeFilter, setTypeFilter]     = useState<TypeFilter>("all");
-  const [onlyWithMenu, setOnlyWithMenu] = useState(true);
   const [onlySaved, setOnlySaved]       = useState(false);
   const [radiusMiles, setRadiusMiles]   = useState(10);
   const [showFilterDrawer, setShowFilterDrawer]     = useState(false);
@@ -130,7 +129,6 @@ function HomeContent() {
     sort !== "best-match",
     typeFilter !== "all",
     onlySaved,
-    !onlyWithMenu,
     radiusMiles !== 10,
   ].filter(Boolean).length;
 
@@ -282,7 +280,6 @@ function HomeContent() {
     setSort("best-match");
     setTypeFilter("all");
     setOnlySaved(false);
-    setOnlyWithMenu(true);
     setRadiusMiles(10);
     setSearchCenter(null);
   }, []);
@@ -290,10 +287,8 @@ function HomeContent() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     let list = restaurants.filter((r) => matchesType(r, typeFilter));
-    if (onlySaved)                         list = list.filter((r) => isFavorite(r.id));
-    if (onlyWithMenu && layout !== "map")  list = list.filter((r) =>
-      r.scoredItems.length > 0 || (r.distance != null && !r.menuIsGenericChainTemplate)
-    );
+    if (onlySaved)       list = list.filter((r) => isFavorite(r.id));
+    if (layout !== "map") list = list.filter((r) => r.menuItems.length > 0);
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
     switch (sort) {
@@ -327,7 +322,7 @@ function HomeContent() {
         break;
     }
     return list;
-  }, [restaurants, query, sort, typeFilter, onlyWithMenu, onlySaved, isFavorite, layout]);
+  }, [restaurants, query, sort, typeFilter, onlySaved, isFavorite, layout]);
 
   // Split live-location results (real address + real distance) from chain-only templates
   const nearbyFiltered  = useMemo(() => filtered.filter((r) => !r.menuIsGenericChainTemplate || r.address), [filtered]);
@@ -446,8 +441,6 @@ function HomeContent() {
         radiusMiles={radiusMiles}
         setRadiusMiles={setRadiusMiles}
         clearSearchCenter={clearSearchCenter}
-        onlyWithMenu={onlyWithMenu}
-        setOnlyWithMenu={setOnlyWithMenu}
         onlySaved={onlySaved}
         setOnlySaved={setOnlySaved}
         onReset={resetFilters}
@@ -508,11 +501,9 @@ function HomeContent() {
             query={query}
             radiusMiles={radiusMiles}
             onlySaved={onlySaved}
-            onlyWithMenu={onlyWithMenu}
             typeFilter={typeFilter}
             onClearQuery={() => setQuery("")}
             onClearSaved={() => setOnlySaved(false)}
-            onShowAll={() => setOnlyWithMenu(false)}
             onClearCuisine={() => setTypeFilter("all")}
             onOpenMap={() => setLayout("map")}
           />
