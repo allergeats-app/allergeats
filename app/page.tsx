@@ -288,7 +288,9 @@ function HomeContent() {
     const q = query.toLowerCase().trim();
     let list = restaurants.filter((r) => matchesType(r, typeFilter));
     if (onlySaved)       list = list.filter((r) => isFavorite(r.id));
-    if (layout !== "map") list = list.filter((r) => r.menuItems.length > 0);
+    if (layout !== "map") list = list.filter((r) =>
+      r.scoredItems.length > 0 || (r.distance != null && !r.menuIsGenericChainTemplate)
+    );
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q));
 
     switch (sort) {

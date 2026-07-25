@@ -63,6 +63,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const isLogo = (() => {
     if (!photoSrc) return false;
     if (photoSrc === fallbackSrc) return false;
+    if (photoSrc.startsWith("/logos/")) return true;
     if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
       const decoded = decodeURIComponent(photoSrc);
       return /\.svg(\.png)?$/i.test(decoded) || /[Ll]ogo/.test(decoded);
@@ -91,7 +92,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
         {/* ── Cover image ── */}
         <div style={{
           height: imgHeight,
-          background: isLogo && photoLoaded ? "#fff" : photoLoaded ? "var(--c-card)" : cover.bg,
+          background: isLogo && photoLoaded ? (isDark ? "#1a1a1a" : "#f8f8f8") : photoLoaded ? "var(--c-card)" : cover.bg,
           display: "flex", alignItems: "center", justifyContent: "center",
           position: "relative", overflow: "hidden",
           transition: "background 0.3s ease",

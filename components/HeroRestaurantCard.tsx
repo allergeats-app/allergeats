@@ -58,6 +58,7 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
   const isLogo = (() => {
     if (!photoSrc) return false;
     if (photoSrc === fallbackSrc) return false;
+    if (photoSrc.startsWith("/logos/")) return true;
     if (photoSrc.startsWith("/api/wiki-thumb?url=")) return /\.svg\.png/i.test(decodeURIComponent(photoSrc));
     return photoSrc.startsWith("/api/wiki-thumb") || /\.svg\.png(\?|$)/i.test(photoSrc);
   })();
