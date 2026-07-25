@@ -603,8 +603,8 @@ function HomeContent() {
               </>
             )}
 
-            {/* ── Chain menus (no confirmed nearby location) ───────── */}
-            {chainTemplates.length > 0 && (
+            {/* ── Chain menus — only when no live nearby results ───── */}
+            {chainTemplates.length > 0 && nearbyFiltered.length === 0 && (
               <div style={{ marginTop: nearbyFiltered.length > 0 ? 28 : 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
