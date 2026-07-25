@@ -220,18 +220,6 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
             <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>
               {r.cuisine}
             </div>
-            {r.menuIsGenericChainTemplate && (
-              <div style={{
-                display: "inline-block", marginTop: 5,
-                background: isDark ? "rgba(217,119,6,0.15)" : "#FEF3C7",
-                color: isDark ? "#fbbf24" : "#92400E",
-                fontSize: 10, fontWeight: 700, padding: "2px 8px",
-                borderRadius: 999,
-                border: `1px solid ${isDark ? "rgba(217,119,6,0.4)" : "#F59E0B"}`,
-              }}>
-                Generic menu
-              </div>
-            )}
           </div>
 
           {/* ── Stat blocks ── */}
