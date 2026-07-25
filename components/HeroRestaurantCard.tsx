@@ -129,8 +129,7 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 5,
               background: "rgba(0,0,0,0.48)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)", backdropFilter: "blur(10px)",
               border: "1px solid rgba(255,255,255,0.15)",
               borderRadius: 999, padding: "5px 11px",
             }}>
@@ -151,8 +150,7 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
               style={{
                 width: 40, height: 40, borderRadius: 999,
                 background: favorited ? "var(--c-brand)" : "rgba(0,0,0,0.4)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)",
                 border: "1px solid rgba(255,255,255,0.18)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", transition: "background 0.15s",

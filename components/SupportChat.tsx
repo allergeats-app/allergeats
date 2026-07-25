@@ -100,7 +100,7 @@ export function SupportChat({ open: controlledOpen, onClose }: { open?: boolean;
         <div
           style={{
             position: "fixed", inset: 0, zIndex: 9997,
-            background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)",
+            background: "rgba(0,0,0,0.4)", WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
             display: "flex", alignItems: "flex-end", justifyContent: "center",
           }}
           onClick={e => { if (e.target === e.currentTarget) close(); }}

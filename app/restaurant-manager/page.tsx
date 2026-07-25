@@ -144,7 +144,7 @@ export default function RestaurantManagerPage() {
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "var(--c-hdr)", backdropFilter: "blur(24px)",
+        background: "var(--c-hdr)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)",
         borderBottom: "1px solid var(--c-border)",
         paddingTop: "max(12px, env(safe-area-inset-top))",
         paddingBottom: 12, paddingLeft: 16, paddingRight: 16,

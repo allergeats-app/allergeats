@@ -383,7 +383,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
             color:      !menuOnly ? (isDark ? "#111827" : "#fff")    : chipText,
             border: "none",
             fontSize: 12, fontWeight: 700, cursor: "pointer",
-            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)",
             boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
             whiteSpace: "nowrap",
           }}
@@ -399,7 +399,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
             color:      menuOnly ? "#fff"    : chipText,
             border: "none",
             fontSize: 12, fontWeight: 700, cursor: "pointer",
-            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)",
             boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
             whiteSpace: "nowrap",
             opacity: menuCount === 0 ? 0.5 : 1,
@@ -418,7 +418,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
             padding: "7px 13px", borderRadius: 999,
             background: chipBg, color: chipText,
             border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer",
-            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)",
             boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
             display: "flex", alignItems: "center", gap: 5,
           }}
@@ -441,7 +441,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       <div style={{
         position: "absolute", bottom: 54, left: 14,
         zIndex: 1000,
-        background: chipBg, backdropFilter: "blur(8px)",
+        background: chipBg, WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)",
         borderRadius: 10, padding: "6px 10px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
         display: "flex", flexDirection: "column", gap: 3,

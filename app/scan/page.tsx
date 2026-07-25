@@ -550,7 +550,7 @@ function StaffBlock({ row }: { row: Row }) {
     <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: "max(120px, calc(88px + env(safe-area-inset-bottom)))" }}>
       <h1 className="sr-only">Menu Scan — AllergEats</h1>
       {/* Sticky header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--c-border)", padding: "12px 16px" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", WebkitBackdropFilter: "blur(12px)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--c-border)", padding: "12px 16px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {step > 1 ? (
             <button onClick={() => { if (step === 3) { clearMenu(); } else { setStep((s) => (s - 1) as 1 | 2 | 3); } }} style={{ fontSize: 13, fontWeight: 700, color: "var(--c-sub)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>← Back</button>
@@ -885,7 +885,7 @@ function StaffBlock({ row }: { row: Row }) {
           aria-labelledby="consent-title"
           style={{
             position: "fixed", inset: 0, zIndex: 1000,
-            background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)",
+            background: "rgba(0,0,0,0.55)", WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
             display: "flex", alignItems: "flex-end", justifyContent: "center",
             padding: "0 0 env(safe-area-inset-bottom, 0)",
           }}

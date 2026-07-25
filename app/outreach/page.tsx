@@ -115,7 +115,7 @@ export default function OutreachPage() {
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "var(--c-hdr)", backdropFilter: "blur(24px)",
+        background: "var(--c-hdr)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)",
         borderBottom: "1px solid var(--c-border)",
         paddingTop: "max(12px, env(safe-area-inset-top))",
         paddingBottom: 12, paddingLeft: 16, paddingRight: 16,
@@ -213,7 +213,7 @@ export default function OutreachPage() {
       {/* Sticky input */}
       <div style={{
         position: "sticky", bottom: 0,
-        background: "var(--c-hdr)", backdropFilter: "blur(24px)",
+        background: "var(--c-hdr)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)",
         borderTop: "1px solid var(--c-border)",
         padding: "12px 16px",
         paddingBottom: "max(16px, calc(10px + env(safe-area-inset-bottom)))",

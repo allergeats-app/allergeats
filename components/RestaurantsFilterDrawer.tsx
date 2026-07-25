@@ -126,7 +126,7 @@ export function RestaurantsFilterDrawer({
         style={{
           position: "fixed", inset: 0, zIndex: 100,
           background: "rgba(0,0,0,0.45)",
-          backdropFilter: "blur(3px)",
+          WebkitBackdropFilter: "blur(3px)", backdropFilter: "blur(3px)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 0.28s ease",

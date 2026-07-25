@@ -95,8 +95,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   // Shared glass card style
   const glass = {
     background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.82)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)", backdropFilter: "blur(20px)",
     border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
     borderRadius: 20,
     boxShadow: isDark

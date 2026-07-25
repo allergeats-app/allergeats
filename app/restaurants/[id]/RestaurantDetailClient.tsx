@@ -391,7 +391,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           }
         `}</style>
         {/* Header skeleton */}
-        <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--c-border)", padding: "max(12px, env(safe-area-inset-top)) 16px 12px" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-hdr)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--c-border)", padding: "max(12px, env(safe-area-inset-top)) 16px 12px" }}>
           <div style={{ maxWidth: 600, margin: "0 auto", display: "flex", alignItems: "center", gap: 10 }}>
             <div className="skel" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
             <div className="skel" style={{ flex: 1, height: 18 }} />
@@ -596,7 +596,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
       {/* ── Sticky header ── */}
       <div style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: "var(--c-hdr)", backdropFilter: "blur(12px)",
+        background: "var(--c-hdr)", WebkitBackdropFilter: "blur(12px)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--c-border)",
         paddingTop: "max(12px, calc(12px + env(safe-area-inset-top)))",
         paddingBottom: 12, paddingLeft: 16, paddingRight: 16,
@@ -1299,7 +1299,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         onClick={() => setShowOrderSheet(false)}
         style={{
           position: "fixed", inset: 0, zIndex: 199,
-          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)",
+          background: "rgba(0,0,0,0.5)", WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
           opacity: showOrderSheet ? 1 : 0,
           pointerEvents: showOrderSheet ? "auto" : "none",
           transition: "opacity 0.25s ease",

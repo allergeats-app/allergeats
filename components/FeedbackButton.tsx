@@ -62,7 +62,7 @@ export function FeedbackButton() {
         <div
           style={{
             position: "fixed", inset: 0, zIndex: 9998,
-            background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)",
+            background: "rgba(0,0,0,0.45)", WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
             display: "flex", alignItems: "flex-end", justifyContent: "center",
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}

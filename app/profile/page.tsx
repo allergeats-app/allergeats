@@ -64,7 +64,7 @@ export default function ProfilePage() {
       <div
         style={{
           position: "sticky", top: 0, zIndex: 50,
-          background: "var(--c-hdr)", backdropFilter: "blur(12px)",
+          background: "var(--c-hdr)", WebkitBackdropFilter: "blur(12px)", backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--c-border)",
           paddingTop: "max(12px, calc(12px + env(safe-area-inset-top)))",
           paddingBottom: 12, paddingLeft: 16, paddingRight: 16,

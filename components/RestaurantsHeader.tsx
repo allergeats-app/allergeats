@@ -27,8 +27,7 @@ export function RestaurantsHeader({
       role="banner"
       style={{
         position: "sticky", top: 0, zIndex: 50,
-        background: "var(--c-hdr)", backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
+        background: "var(--c-hdr)", WebkitBackdropFilter: "blur(24px)", backdropFilter: "blur(24px)",
         borderBottom: "1px solid var(--c-border)",
         paddingTop: "max(8px, env(safe-area-inset-top))",
         paddingBottom: 10,

@@ -25,7 +25,7 @@ export function HowItWorksSheet({ open, onClose }: { open: boolean; onClose: () 
         onClick={onClose}
         style={{
           position: "fixed", inset: 0, zIndex: 200,
-          background: "rgba(0,0,0,0.45)", backdropFilter: "blur(3px)",
+          background: "rgba(0,0,0,0.45)", WebkitBackdropFilter: "blur(3px)", backdropFilter: "blur(3px)",
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 0.28s ease",

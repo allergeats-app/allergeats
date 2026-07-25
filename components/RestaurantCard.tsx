@@ -107,7 +107,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
                 background: "rgba(255,255,255,0.12)",
                 border: "1.5px solid rgba(255,255,255,0.22)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
               }}>
                 <span style={{
                   fontSize: isRail || isCompact ? 22 : 28,
@@ -171,7 +171,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               position: "absolute", bottom: 8, left: 10,
               background: "rgba(0,0,0,0.45)", color: "#fff",
               padding: "3px 8px", borderRadius: 999,
-              fontSize: 10, fontWeight: 700, backdropFilter: "blur(4px)",
+              fontSize: 10, fontWeight: 700, WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
             }}>
               {r.distance} mi
             </div>
@@ -193,7 +193,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
               width: 44, height: 44,
               padding: isRail ? 4 : 0,
               display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", backdropFilter: "blur(4px)",
+              cursor: "pointer", WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
               transition: "background 0.15s",
             }}
           >

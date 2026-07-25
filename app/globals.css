@@ -2,6 +2,7 @@
 
 /* ── Theme tokens (light) ────────────────────────────────────────────────── */
 :root {
+  color-scheme: light;
   --c-bg:     #f9f8f6;
   --c-card:   #ffffff;
   --c-border: #e5e7eb;
@@ -49,6 +50,22 @@ body {
   -webkit-tap-highlight-color: transparent;
   /* Smooth momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
+  /* Crisp text rendering on Retina/ProMotion displays */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  /* Native form elements (checkboxes etc.) use brand color */
+  accent-color: var(--c-brand);
+}
+
+/* Brand-tinted text selection */
+::selection {
+  background: rgba(31, 189, 204, 0.22);
+  color: var(--c-text);
+}
+::-webkit-selection {
+  background: rgba(31, 189, 204, 0.22);
 }
 
 /* Remove tap flash on interactive elements */
