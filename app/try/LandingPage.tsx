@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: "What if my favorite restaurant isn't listed?",
-    a: "You can paste in a menu URL and AllergEats will scan it for you on the spot. We're adding new restaurants all the time.",
+    a: "We're adding new restaurants all the time. Major chains are already covered, and local restaurants are discovered automatically based on your location.",
   },
   {
     q: "Do I need to make an account?",
@@ -80,7 +80,7 @@ export function LandingPage() {
           </h1>
 
           <p className={s.heroSub}>
-            AllergEats scans restaurant menus for your food allergies — and shows you exactly what&rsquo;s safe to order before you even sit down.
+            AllergEats checks restaurant menus for your food allergies — and shows you exactly what&rsquo;s safe to order before you even sit down.
           </p>
 
           <div className={s.heroCtaGroup}>
@@ -188,7 +188,7 @@ export function LandingPage() {
           <div className={s.steps}>
             {[
               { n: "1", title: "Tell us your allergies", body: "Pick from a list — dairy, peanuts, gluten, eggs, shellfish, and more. Takes 20 seconds. Your choices stay private on your phone." },
-              { n: "2", title: "See restaurants near you", body: "AllergEats finds real restaurants close by and automatically scans their menus for your allergens." },
+              { n: "2", title: "See restaurants near you", body: "AllergEats finds real restaurants close by and automatically checks their menus against your allergens." },
               { n: "3", title: "Know what's safe before you go", body: "Every item gets a color-coded safety rating. Green means go. You pick where to eat feeling confident — not scared." },
             ].map((step) => (
               <div key={step.n} className={`${s.step} ${s.fadeUp}`}>
