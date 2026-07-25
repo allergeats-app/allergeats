@@ -107,16 +107,12 @@ export default function RootLayout({
                 }}>
                   <span style={{
                     display: "block",
-                    fontSize: 18,
-                    fontWeight: 900,
-                    fontFamily: "'Georgia', 'Times New Roman', serif",
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.1,
-                    background: "linear-gradient(to right, #92702a 0%, #c9a030 30%, #8b6914 50%, #c49a35 70%, #7a5c0f 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                    filter: "drop-shadow(0 1px 2px rgba(180,130,0,0.3))",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--c-brand)",
                     marginBottom: 4,
                   }}>Always confirm with staff before ordering.</span>
                   AllergEats is a decision-support tool, not medical advice.
