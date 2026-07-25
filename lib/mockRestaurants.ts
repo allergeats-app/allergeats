@@ -1240,6 +1240,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "red-lobster",
     name: "Red Lobster",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/b/b1/Redlobster_logocopia.png",
     cuisine: "Casual Dining · Seafood",
     tags: ["seafood", "casual"],
     distance: 1.5,
@@ -1381,6 +1382,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
   {
     id: "buffalo-wild-wings",
     name: "Buffalo Wild Wings",
+    imageUrl: "/api/wiki-thumb?url=https://upload.wikimedia.org/wikipedia/en/2/2c/Buffalo_Wild_Wings_%28logo%2C_vertical%29.svg",
     cuisine: "Casual Dining · Wings & Sports Bar",
     tags: ["wings", "sports-bar", "casual"],
     distance: 1.3,
