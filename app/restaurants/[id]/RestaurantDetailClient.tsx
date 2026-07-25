@@ -439,6 +439,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     : null;
   const isLogo = (() => {
     if (!photoSrc) return false;
+    if (photoSrc.startsWith("/logos/")) return true;
     if (photoSrc.startsWith("/api/wiki-thumb?url=")) {
       return /\.svg\.png/i.test(decodeURIComponent(photoSrc));
     }
@@ -646,7 +647,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           {/* Cover photo / gradient strip */}
           <div style={{
             height: 148,
-            background: isLogo && photoLoaded ? "#fff" : coverGradient(hero.cuisine, hero.restaurantName),
+            background: isLogo && photoLoaded ? (isDark ? "#1a1a1a" : "#f8f8f8") : coverGradient(hero.cuisine, hero.restaurantName),
             position: "relative", overflow: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
             transition: "background 0.3s ease",

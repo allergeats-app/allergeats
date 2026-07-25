@@ -256,13 +256,11 @@ export class GooglePlacesLocationProvider implements LocationProvider {
       googleFailed = true;
     }
 
-    // Full failure — go straight to Overpass
-    if (googleFailed) {
-      return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
-    }
-
-    if (googlePlaces.length === 0) {
-      return this._overpass.searchRestaurants(lat, lng, radiusMiles, accuracy);
+    // Full failure or empty — fall back to Overpass, gracefully degrade to [] if that also fails
+    if (googleFailed || googlePlaces.length === 0) {
+      return this._overpass
+        .searchRestaurants(lat, lng, radiusMiles, accuracy)
+        .catch(() => [] as Restaurant[]);
     }
 
     // Only fetch supplemental sources when Google returns few results (rural areas, small towns).
