@@ -70,7 +70,7 @@ export function LandingPage() {
         <div className={s.container}>
           <div className={s.heroEyebrow}>
             <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-              <circle cx="5" cy="5" r="5" fill="#14b8a6" />
+              <circle cx="5" cy="5" r="5" fill="#1fbdcc" />
             </svg>
             Free · No account needed · Works anywhere
           </div>
@@ -98,7 +98,7 @@ export function LandingPage() {
                 <div className={s.phoneBar}>
                   <div className={s.phoneBarTitle}>Nearby Restaurants</div>
                   <div className={s.phoneBarLoc}>
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2.5" aria-hidden="true">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#1fbdcc" strokeWidth="2.5" aria-hidden="true">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                     </svg>
                     Near you
@@ -221,7 +221,7 @@ export function LandingPage() {
       <section className={`${s.section} ${s.whoSection}`}>
         <div className={s.containerWide} style={{ position: "relative" }}>
           <div className={s.fadeUp} style={{ maxWidth: 600 }}>
-            <div className={s.sectionEyebrow} style={{ color: "#14b8a6" }}>Who It&rsquo;s For</div>
+            <div className={s.sectionEyebrow} style={{ color: "#1fbdcc" }}>Who It&rsquo;s For</div>
             <h2 className={s.sectionH2} style={{ color: "#fff" }}>If eating out makes you anxious, AllergEats is for you.</h2>
           </div>
           <div className={s.whoGrid}>
