@@ -855,22 +855,22 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
 
 
-        {/* ── Chain template disclaimer (safety-critical) ── */}
+        {/* ── Chain template disclaimer ── */}
         {restaurant.menuIsGenericChainTemplate && (
           <div style={{
-            background: isDark ? "rgba(217,119,6,0.12)" : "#FEF3C7",
-            border: `1px solid ${isDark ? "rgba(217,119,6,0.4)" : "#F59E0B"}`,
-            borderLeft: "4px solid #D97706",
-            padding: "12px 16px",
-            marginBottom: "16px",
-            borderRadius: "4px",
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "6px 10px",
+            marginBottom: "12px",
+            borderRadius: 8,
+            background: isDark ? "rgba(217,119,6,0.10)" : "rgba(217,119,6,0.07)",
+            border: `1px solid ${isDark ? "rgba(217,119,6,0.3)" : "rgba(217,119,6,0.25)"}`,
           }}>
-            <strong style={{ fontSize: "13px", color: isDark ? "#fbbf24" : "#92400E" }}>
-              Sample menu — not location-confirmed
-            </strong>
-            <p style={{ fontSize: "13px", color: isDark ? "#d97706" : "#78350F", marginTop: "4px", lineHeight: 1.5, margin: "4px 0 0" }}>
-              This is a national chain menu. Items, ingredients, and allergen info may vary at this specific location. Always confirm with staff before ordering.
-            </p>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#fbbf24" : "#D97706"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
+            </svg>
+            <span style={{ fontSize: 11, color: isDark ? "#fbbf24" : "#b45309", lineHeight: 1.4 }}>
+              <strong>National chain menu</strong> — items and allergens may vary by location. Confirm with staff.
+            </span>
           </div>
         )}
 
