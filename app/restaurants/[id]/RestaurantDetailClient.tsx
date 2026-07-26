@@ -1296,7 +1296,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 </span>
               </div>
               <p style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.55, margin: 0 }}>
-                This kitchen handles {labels.join(", ")} in shared equipment. Items without those allergens listed may still have cross-contact. Items are marked "Ask Staff" where applicable.
+                This kitchen handles {labels.join(", ")} in shared equipment. Even items that don't list these allergens may have cross-contact risk — always confirm with staff.
               </p>
             </div>
           );
