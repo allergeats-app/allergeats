@@ -49,7 +49,7 @@ const SESSION_KEY = "allegeats_live_restaurants";
 const RISK_META: Record<Risk, { label: string; mark: string; color: string; bg: string; border: string; badgeBg: string }> = {
   "avoid":       { label: "Avoid",       mark: "!", color: "var(--c-risk-avoid)", bg: "rgba(220,38,38,0.07)",  border: "rgba(220,38,38,0.18)",  badgeBg: "rgba(220,38,38,0.1)"  },
   "ask":         { label: "Ask Staff",   mark: "?", color: "var(--c-risk-ask)",   bg: "rgba(217,119,6,0.08)",  border: "rgba(217,119,6,0.22)",  badgeBg: "rgba(217,119,6,0.1)"  },
-  "likely-safe": { label: "Likely Safe", mark: "✓", color: "var(--c-risk-safe)",  bg: "rgba(22,163,74,0.07)",  border: "rgba(22,163,74,0.18)",  badgeBg: "rgba(22,163,74,0.1)"  },
+  "likely-safe": { label: "Safe",        mark: "✓", color: "var(--c-risk-safe)",  bg: "rgba(22,163,74,0.07)",  border: "rgba(22,163,74,0.18)",  badgeBg: "rgba(22,163,74,0.1)"  },
   "unknown":     { label: "Unknown",     mark: "–", color: "var(--c-sub)",         bg: "var(--c-muted)",         border: "var(--c-border)",        badgeBg: "var(--c-muted)"        },
 };
 
@@ -96,7 +96,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [menuInputLoading, setMenuInputLoading] = useState(false);
   const [menuInputError, setMenuInputError] = useState("");
   const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
-  const [showDrinks, setShowDrinks]   = useState(false);
+  const [showDrinks, setShowDrinks]         = useState(false);
+  const [showComponents, setShowComponents] = useState(false);
   const [orderedItemIds, setOrderedItemIds] = useState<Set<string>>(new Set());
   const [showOrderSheet, setShowOrderSheet] = useState(false);
   const [orderSaved, setOrderSaved]         = useState(false);
@@ -349,6 +350,17 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   );
 
   const hasCategories = (vm?.sections.length ?? 0) > 1;
+
+  // Category names that belong to the guided builder (Breads, Proteins, etc.)
+  // These are collapsed into a separate "Components" section in browse mode.
+  const builderCategoryNames = useMemo(() => {
+    if (!restaurant?.builderConfig) return new Set<string>();
+    return new Set(
+      restaurant.builderConfig.steps
+        .map((s) => s.category)
+        .filter((c): c is string => !!c)
+    );
+  }, [restaurant?.builderConfig]);
 
   const bySectionFiltered = useMemo(() => {
     if (!vm || !hasCategories) return new Map<string, typeof allItems>();
@@ -1001,9 +1013,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     ))}
                   </div>
                   {/* Category sub-filter */}
-                  {vm.sections.filter((s) => !isDrinkSection(s.sectionName)).length > 1 && (
+                  {vm.sections.filter((s) => !isDrinkSection(s.sectionName) && !builderCategoryNames.has(s.sectionName)).length > 1 && (
                     <div className="chip-row" style={{ display: "flex", gap: 5, paddingBottom: 2, marginTop: 6 }}>
-                      {[{ key: "all", label: "All" }, ...vm.sections.filter((s) => !isDrinkSection(s.sectionName)).map((s) => ({ key: s.sectionName, label: s.sectionName }))].map((c) => (
+                      {[{ key: "all", label: "All" }, ...vm.sections.filter((s) => !isDrinkSection(s.sectionName) && !builderCategoryNames.has(s.sectionName)).map((s) => ({ key: s.sectionName, label: s.sectionName }))].map((c) => (
                         <button key={c.key} onClick={() => setCategoryFilter(c.key)} style={{
                           padding: "6px 12px", borderRadius: 999, minHeight: 36,
                           border: `1px solid ${categoryFilter === c.key ? "var(--c-text)" : "var(--c-border)"}`,
@@ -1029,9 +1041,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 {filteredItems.length === 0 ? (
                   <EmptyState title="No items match" subtitle="Try a different filter." />
                 ) : hasCategories ? (() => {
-              const foodSections = vm.sections.filter((s) => !isDrinkSection(s.sectionName));
-              const drinkSections = vm.sections.filter((s) => isDrinkSection(s.sectionName));
-              const drinkItems = drinkSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
+              const foodSections      = vm.sections.filter((s) => !isDrinkSection(s.sectionName) && !builderCategoryNames.has(s.sectionName));
+              const componentSections = vm.sections.filter((s) => !isDrinkSection(s.sectionName) && builderCategoryNames.has(s.sectionName));
+              const drinkSections     = vm.sections.filter((s) => isDrinkSection(s.sectionName));
+              const componentItems    = componentSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
+              const drinkItems        = drinkSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
               return (
                 <>
                   {/* ── Food sections ── */}
@@ -1059,6 +1073,53 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       );
                     })}
                   </div>
+
+                  {/* ── Build Your Own components collapsible (builder restaurants) ── */}
+                  {componentItems.length > 0 && (
+                    <div style={{ marginTop: 8, marginBottom: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setShowComponents((v) => !v)}
+                        style={{
+                          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "12px 16px", borderRadius: 14,
+                          background: "var(--c-card)", border: "1px solid var(--c-border)",
+                          cursor: "pointer", marginBottom: showComponents ? 12 : 0,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--c-sub)" }}>
+                            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                          </svg>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: "var(--c-text)" }}>Build Your Own — Components</span>
+                          <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{componentItems.length} item{componentItems.length === 1 ? "" : "s"}</span>
+                        </div>
+                        <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>
+                          {showComponents ? "Hide ▲" : "Show ▼"}
+                        </span>
+                      </button>
+                      {showComponents && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                          {componentSections.map((section) => {
+                            const items = bySectionFiltered.get(section.sectionName);
+                            if (!items?.length) return null;
+                            return (
+                              <div key={section.sectionName}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, paddingTop: 4 }}>
+                                  <h2 style={{ fontSize: 11, fontWeight: 900, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0, whiteSpace: "nowrap" }}>{section.sectionName}</h2>
+                                  <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
+                                  <span style={{ fontSize: 11, color: "var(--c-sub)", whiteSpace: "nowrap" }}>{items.length}</span>
+                                </div>
+                                <div style={{ display: "grid", gap: 6 }}>
+                                  {items.map(renderItem)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* ── Drinks collapsible ── */}
                   {drinkItems.length > 0 && (

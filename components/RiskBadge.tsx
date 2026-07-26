@@ -2,7 +2,7 @@ import type { Risk } from "@/lib/types";
 
 const CONFIG: Record<Risk, { label: string; bg: string; text: string; border: string; icon: React.ReactNode }> = {
   "likely-safe": {
-    label: "Likely Safe",
+    label: "Safe",
     bg: "#eefbf3", text: "#166534", border: "#bbf7d0",
     icon: (
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

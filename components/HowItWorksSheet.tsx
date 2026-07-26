@@ -120,7 +120,7 @@ export function HowItWorksSheet({ open, onClose }: { open: boolean; onClose: () 
                   <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>Grilled Salmon</div>
                   <span style={{ fontSize: 11, fontWeight: 800, padding: "4px 9px", borderRadius: 999, background: "#f9fafb", color: "#6b7280", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}>Low Risk</span>
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: "#15803d" }}>Likely Safe</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#15803d" }}>Safe</div>
               </div>
               <div style={{ background: "#fff7db", border: "1px solid #f4dd8d", borderRadius: 16, padding: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
