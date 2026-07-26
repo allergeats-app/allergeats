@@ -25,7 +25,8 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://fonts.gstatic.com",
       // *.supabase.co still needed for server-side routes and image cache; /_supabase proxy is same-origin ('self')
-      "connect-src 'self' https://*.supabase.co https://va.vercel-insights.com https://nominatim.openstreetmap.org https://overpass-api.de https://overpass.kumi.systems https://overpass.openstreetmap.fr https://*.sentry.io",
+      "connect-src 'self' https://*.supabase.co https://va.vercel-insights.com https://nominatim.openstreetmap.org https://overpass-api.de https://overpass.kumi.systems https://overpass.openstreetmap.fr https://*.sentry.io https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com https://fonts.openmaptiles.org https://server.arcgisonline.com",
+      "worker-src blob:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
