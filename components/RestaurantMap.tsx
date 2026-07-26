@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ScoredRestaurant } from "@/lib/types";
 
+type SafetyLevel = "safe" | "caution" | "unsafe" | "nodata";
+
 type Props = {
   restaurants: ScoredRestaurant[];
   userLat?: number;
@@ -29,6 +31,14 @@ function safeColor(r: ScoredRestaurant): string {
 function safePercent(r: ScoredRestaurant): number | null {
   if (r.summary.total === 0) return null;
   return Math.round((r.summary.likelySafe / r.summary.total) * 100);
+}
+
+function safetyLevel(r: ScoredRestaurant): SafetyLevel {
+  if (r.summary.total === 0) return "nodata";
+  const pct = (r.summary.likelySafe / r.summary.total) * 100;
+  if (pct >= 70) return "safe";
+  if (pct >= 40) return "caution";
+  return "unsafe";
 }
 
 function makePillHtml(r: ScoredRestaurant, isDark: boolean): string {
@@ -166,6 +176,13 @@ const MAP_CSS = `
   }
 `;
 
+const SAFETY_LAYERS: { key: SafetyLevel; color: string; label: string; sub: string }[] = [
+  { key: "safe",    color: "#22c55e", label: "Safe",          sub: "≥70% items" },
+  { key: "caution", color: "#f59e0b", label: "Caution",       sub: "40–69%"     },
+  { key: "unsafe",  color: "#ef4444", label: "Unsafe",        sub: "<40%"       },
+  { key: "nodata",  color: "#9ca3af", label: "No menu data",  sub: ""           },
+];
+
 export function RestaurantMap({ restaurants, userLat, userLng, centerLat, centerLng, onSearchArea, isDark = false }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef       = useRef<import("maplibre-gl").Map | null>(null);
@@ -173,8 +190,13 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
   const originRef    = useRef<{ lat: number; lng: number } | null>(null);
   const didFitRef    = useRef(false);
   const [pendingSearch, setPendingSearch] = useState<{ lat: number; lng: number } | null>(null);
-  const [menuOnly, setMenuOnly] = useState(false);
-  const [satView, setSatView]   = useState(false);
+  const [menuOnly, setMenuOnly]     = useState(false);
+  const [satView, setSatView]       = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [tilt3d, setTilt3d]         = useState(true);
+  const [safetyFilter, setSafetyFilter] = useState<Record<SafetyLevel, boolean>>({
+    safe: true, caution: true, unsafe: true, nodata: true,
+  });
 
   // ── Map init (once on mount) ──────────────────────────────────────────────
   useEffect(() => {
@@ -197,8 +219,6 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       const initLng = userLng ?? restaurants[0]?.lng ?? -122.4194;
       originRef.current = { lat: initLat, lng: initLng };
 
-      // Point to the worker file served from public/ — import.meta.url doesn't
-      // resolve correctly inside Next.js's bundled output.
       maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
       const map = new maplibregl.Map({
@@ -206,6 +226,7 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
         style: getStyleUrl(isDark),
         center: [initLng, initLat],
         zoom: 14,
+        pitch: 40, // 3D tilt auto-selected
         attributionControl: false,
       });
       mapRef.current = map;
@@ -253,7 +274,14 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
     map.setStyle(satView ? SATELLITE_STYLE : getStyleUrl(isDark));
   }, [satView, isDark]);
 
-  // ── Rebuild markers when restaurants, filter, or theme changes ───────────
+  // ── 3D tilt toggle ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.easeTo({ pitch: tilt3d ? 40 : 0, duration: 400 });
+  }, [tilt3d]);
+
+  // ── Rebuild markers when restaurants, filters, or theme changes ───────────
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -267,9 +295,10 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
 
-      const visible = menuOnly
-        ? restaurants.filter((r) => r.scoredItems.length > 0)
-        : restaurants;
+      const visible = restaurants.filter((r) => {
+        if (menuOnly && r.scoredItems.length === 0) return false;
+        return safetyFilter[safetyLevel(r)];
+      });
 
       const bounds: [number, number][] = [];
 
@@ -316,11 +345,15 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       cancelled = true;
       map.off("load", rebuildMarkers);
     };
-  }, [restaurants, menuOnly, isDark]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restaurants, menuOnly, isDark, safetyFilter.safe, safetyFilter.caution, safetyFilter.unsafe, safetyFilter.nodata]);
 
   const menuCount = restaurants.filter((r) => r.scoredItems.length > 0).length;
   const chipBg    = isDark ? "rgba(28,28,30,0.92)" : "rgba(255,255,255,0.94)";
   const chipText  = "var(--c-text)";
+  const divider   = isDark ? "#2c2c2e" : "#f0f0f0";
+  const subText   = isDark ? "#6b7280" : "#9ca3af";
+  const inactiveDot = isDark ? "#4b5563" : "#d1d5db";
 
   return (
     <div style={{ position: "relative", overflow: "hidden", isolation: "isolate" }}>
@@ -390,37 +423,210 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
         </button>
       </div>
 
-      {/* Satellite / Street toggle */}
-      <div style={{ position: "absolute", top: 14, right: 14, zIndex: 10 }}>
+      {/* Click-outside overlay */}
+      {layersOpen && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 15 }}
+          onClick={() => setLayersOpen(false)}
+        />
+      )}
+
+      {/* Layers button + panel */}
+      <div style={{ position: "absolute", top: 14, right: 14, zIndex: 20 }}>
         <button
-          onClick={() => setSatView((v) => !v)}
-          aria-label={satView ? "Switch to street map" : "Switch to satellite"}
+          onClick={() => setLayersOpen((v) => !v)}
+          aria-label="Map layers"
+          aria-expanded={layersOpen}
           style={{
             padding: "7px 13px", borderRadius: 999,
-            background: chipBg, color: chipText,
+            background: layersOpen ? "var(--c-text)" : chipBg,
+            color: layersOpen ? (isDark ? "#111827" : "#fff") : chipText,
             border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer",
             WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)",
             boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
             display: "flex", alignItems: "center", gap: 5,
+            WebkitTapHighlightColor: "transparent",
           }}
         >
-          {satView ? (
-            <>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-              Street
-            </>
-          ) : (
-            <>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-              </svg>
-              Satellite
-            </>
-          )}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+          Layers
         </button>
+
+        {layersOpen && (
+          <div style={{
+            position: "absolute", top: "calc(100% + 8px)", right: 0,
+            width: 228,
+            background: isDark ? "rgba(22,22,24,0.97)" : "rgba(255,255,255,0.97)",
+            WebkitBackdropFilter: "blur(20px)",
+            backdropFilter: "blur(20px)",
+            borderRadius: 20,
+            boxShadow: isDark
+              ? "0 8px 40px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
+              : "0 8px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.06)",
+            overflow: "hidden",
+          }}>
+
+            {/* Header */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "14px 16px 12px",
+              borderBottom: `1px solid ${divider}`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={chipText} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                  <polyline points="2 17 12 22 22 17"/>
+                  <polyline points="2 12 12 17 22 12"/>
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.07em", color: chipText }}>MAP LAYERS</span>
+              </div>
+              <button
+                onClick={() => setLayersOpen(false)}
+                aria-label="Close layers panel"
+                style={{
+                  width: 24, height: 24, borderRadius: "50%",
+                  background: isDark ? "#3a3a3c" : "#f3f4f6",
+                  border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: subText, fontSize: 14, fontWeight: 700,
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Map style toggle */}
+            <div style={{ padding: "12px 14px", borderBottom: `1px solid ${divider}` }}>
+              <div style={{ display: "flex", gap: 8 }}>
+                {/* Street */}
+                <button
+                  onClick={() => setSatView(false)}
+                  style={{
+                    flex: 1, padding: "10px 0",
+                    background: !satView ? (isDark ? "#3a3a3c" : "#f0f0f5") : "transparent",
+                    border: "none", borderRadius: 12, cursor: "pointer",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke={!satView ? chipText : subText} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                    <line x1="8" y1="2" x2="8" y2="18"/>
+                    <line x1="16" y1="6" x2="16" y2="22"/>
+                  </svg>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: !satView ? chipText : subText }}>Street</span>
+                </button>
+                {/* Satellite */}
+                <button
+                  onClick={() => setSatView(true)}
+                  style={{
+                    flex: 1, padding: "10px 0",
+                    background: satView ? (isDark ? "#3a3a3c" : "#f0f0f5") : "transparent",
+                    border: "none", borderRadius: 12, cursor: "pointer",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke={satView ? chipText : subText} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: satView ? chipText : subText }}>Satellite</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Safety score filters */}
+            <div style={{ padding: "10px 0 6px" }}>
+              <div style={{ padding: "0 16px 6px", fontSize: 10, fontWeight: 800, letterSpacing: "0.07em", color: subText }}>
+                SAFETY SCORE
+              </div>
+              {SAFETY_LAYERS.map(({ key, color, label, sub }) => {
+                const active = safetyFilter[key];
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSafetyFilter((f) => ({ ...f, [key]: !f[key] }))}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center", gap: 10,
+                      padding: "8px 16px",
+                      background: active ? `${color}14` : "transparent",
+                      border: "none", cursor: "pointer", textAlign: "left",
+                      WebkitTapHighlightColor: "transparent",
+                    }}
+                  >
+                    <span style={{
+                      width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+                      background: active ? color : "transparent",
+                      border: `2px solid ${active ? color : inactiveDot}`,
+                      transition: "background 0.15s, border-color 0.15s",
+                    }} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: active ? chipText : subText, flex: 1 }}>{label}</span>
+                    {sub && <span style={{ fontSize: 11, color: inactiveDot, fontWeight: 500 }}>{sub}</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ height: 1, background: divider, margin: "0 16px" }} />
+
+            {/* Has menu only */}
+            <div style={{ padding: "6px 0" }}>
+              <button
+                onClick={() => setMenuOnly((v) => !v)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 10,
+                  padding: "8px 16px",
+                  background: menuOnly ? "rgba(31,189,204,0.10)" : "transparent",
+                  border: "none", cursor: "pointer", textAlign: "left",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <span style={{
+                  width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+                  background: menuOnly ? "var(--c-brand)" : "transparent",
+                  border: `2px solid ${menuOnly ? "var(--c-brand)" : inactiveDot}`,
+                  transition: "background 0.15s, border-color 0.15s",
+                }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: menuOnly ? chipText : subText, flex: 1 }}>Has menu data</span>
+                <span style={{ fontSize: 11, color: inactiveDot, fontWeight: 500 }}>{menuCount}</span>
+              </button>
+            </div>
+
+            <div style={{ height: 1, background: divider, margin: "0 16px" }} />
+
+            {/* 3D Tilt */}
+            <div style={{ padding: "6px 0 4px" }}>
+              <button
+                onClick={() => setTilt3d((v) => !v)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 10,
+                  padding: "8px 16px",
+                  background: tilt3d ? (isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)") : "transparent",
+                  border: "none", cursor: "pointer", textAlign: "left",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <span style={{
+                  width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+                  background: tilt3d ? (isDark ? "#f2f2f7" : "#111827") : "transparent",
+                  border: `2px solid ${tilt3d ? (isDark ? "#f2f2f7" : "#111827") : inactiveDot}`,
+                  transition: "background 0.15s, border-color 0.15s",
+                }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: tilt3d ? chipText : subText, flex: 1 }}>3D Tilt</span>
+              </button>
+            </div>
+
+          </div>
+        )}
       </div>
 
       {/* Safety legend */}
