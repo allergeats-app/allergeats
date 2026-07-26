@@ -244,25 +244,27 @@ const OVERPASS_ENDPOINTS = [
 ];
 
 async function fetchOverpass(query: string): Promise<{ elements: OverpassElement[] }> {
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: query,
-        signal: AbortSignal.timeout(20000),
-      });
-      if (res.ok) return await res.json();
-    } catch { /* try next mirror */ }
-  }
-  throw new Error("All Overpass endpoints failed");
+  // Race all mirrors — whichever responds first wins. Avoids the sequential worst-case
+  // of 3 × 20s = 60s when one endpoint is slow or down.
+  const attempts = OVERPASS_ENDPOINTS.map(async (endpoint) => {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: query,
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!res.ok) throw new Error(`${endpoint} ${res.status}`);
+    return res.json() as Promise<{ elements: OverpassElement[] }>;
+  });
+  return Promise.any(attempts);
 }
 
 // ─── Spatial result cache ─────────────────────────────────────────────────────
 // Buckets lat/lng to ~1.1km grid so minor movement reuses cached results.
-// TTL: 5 minutes. Stored in sessionStorage so it clears on tab close.
+// TTL: 20 minutes. Stored in localStorage so it survives tab close — returning
+// users see results instantly instead of waiting for Overpass on every session.
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = 20 * 60 * 1000;
 
 /**
  * Cache key for Overpass results.
@@ -278,16 +280,16 @@ function overpassCacheKey(lat: number, lng: number, radiusMiles: number): string
 
 function readOverpassCache(key: string): Restaurant[] | null {
   try {
-    const raw = sessionStorage.getItem(key);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const { ts, results } = JSON.parse(raw) as { ts: number; results: Restaurant[] };
-    if (Date.now() - ts > CACHE_TTL_MS) { sessionStorage.removeItem(key); return null; }
+    if (Date.now() - ts > CACHE_TTL_MS) { localStorage.removeItem(key); return null; }
     return results;
   } catch { return null; }
 }
 
 function writeOverpassCache(key: string, results: Restaurant[]): void {
-  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), results })); }
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), results })); }
   catch { /* ignore quota errors */ }
 }
 
