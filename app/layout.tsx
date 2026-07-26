@@ -8,7 +8,6 @@ import { ThemeProvider } from "@/lib/themeContext";
 import { Analytics } from "@vercel/analytics/next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
-import { OnboardingModal } from "@/components/OnboardingModal";
 import { AppFooter } from "@/components/AppFooter";
 
 const geistSans = Geist({
@@ -96,7 +95,6 @@ export default function RootLayout({
             <FavoritesProvider>
               <ErrorBoundary>
                 <OfflineBanner />
-                <OnboardingModal />
                 {children}
                 <AppFooter />
               </ErrorBoundary>
