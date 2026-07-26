@@ -6,10 +6,12 @@ import { useRef, useState } from "react";
 
 export function BottomNav({
   onMapPress,
+  onHomePress,
   query,
   setQuery,
 }: {
   onMapPress?: () => void;
+  onHomePress?: () => void;
   query?: string;
   setQuery?: (q: string) => void;
 }) {
@@ -186,12 +188,21 @@ export function BottomNav({
               {/* ── DEFAULT: all 5 nav items ── */}
 
               {/* Home */}
-              <Link href="/" aria-label="Home" className="bn-btn" style={circle}>
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"
-                  fill={pathname === "/" ? activeColor : "var(--bn-icon)"} stroke="none">
-                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                </svg>
-              </Link>
+              {onHomePress ? (
+                <button type="button" onClick={onHomePress} aria-label="Home" className="bn-btn" style={circle}>
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"
+                    fill={pathname === "/" ? activeColor : "var(--bn-icon)"} stroke="none">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                  </svg>
+                </button>
+              ) : (
+                <Link href="/" aria-label="Home" className="bn-btn" style={circle}>
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"
+                    fill={pathname === "/" ? activeColor : "var(--bn-icon)"} stroke="none">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                  </svg>
+                </Link>
+              )}
 
               {/* Map */}
               <button type="button" onClick={handleMap} aria-label="Map view" className="bn-btn" style={circle}>

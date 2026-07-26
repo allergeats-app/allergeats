@@ -646,6 +646,7 @@ function HomeContent() {
 
       <BottomNav
         onMapPress={() => setLayout(layout === "map" ? "list" : "map")}
+        onHomePress={layout === "map" ? () => setLayout("list") : undefined}
         query={query}
         setQuery={setQuery}
       />
