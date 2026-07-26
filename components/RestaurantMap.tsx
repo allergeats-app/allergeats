@@ -197,6 +197,10 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
       const initLng = userLng ?? restaurants[0]?.lng ?? -122.4194;
       originRef.current = { lat: initLat, lng: initLng };
 
+      // Point to the worker file served from public/ — import.meta.url doesn't
+      // resolve correctly inside Next.js's bundled output.
+      maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
+
       const map = new maplibregl.Map({
         container: containerRef.current,
         style: getStyleUrl(isDark),
