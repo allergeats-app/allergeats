@@ -428,6 +428,12 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["coffee"],
     distance: 0.6,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your drink",  categories: ["Hot Coffee","Cold Coffee","Frappuccinos","Teas"], required: true,  maxSelect: 1, category: "Hot Coffee" },
+        { label: "Add food",           categories: ["Bakery","Sandwiches","Hot Breakfast","Snacks"],   required: false, maxSelect: 2, category: "Bakery" },
+      ],
+    },
     menuItems: [
       // Espresso & Hot Coffee
       { id: "sbux-black",      name: "Pike Place Roast (Black)",          category: "Hot Coffee", sourceType: "official", allergens: [] },
@@ -475,6 +481,13 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["burgers"],
     distance: 2.1,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your burger or chicken", categories: ["Burgers","Chicken"], required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Add a side",                    category: "Sides",      required: false, maxSelect: 1 },
+        { label: "Add a shake or drink",          categories: ["Shakes","Beverages"], required: false, maxSelect: 1, category: "Shakes" },
+      ],
+    },
     menuItems: [
       // Burgers
       { id: "ss-shackburger",  name: "ShackBurger",                       category: "Burgers",    sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
@@ -739,6 +752,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["mexican"],
     distance: 0.8,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your main",  categories: ["Tacos","Burritos","Specialties","Quesadillas","Nachos","Bowls"], required: true,  maxSelect: 3, category: "Tacos" },
+        { label: "Add a side",        category: "Sides",    required: false, maxSelect: 2 },
+        { label: "Add a drink",       category: "Drink",    required: false, maxSelect: 1 },
+        { label: "Add sauce",         category: "Sauce",    required: false, maxSelect: 99 },
+      ],
+    },
     menuItems: [
       // ── Breakfast — Crunchwraps ───────────────────────────────────────────
       { id: "tb-bfast-crunchwrap-bacon",   name: "Breakfast Crunchwrap Bacon",                  category: "Breakfast",    sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
@@ -1274,6 +1295,12 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["coffee"],
     distance: 0.7,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your coffee or drink",  categories: ["Coffee","Frozen"], required: false, maxSelect: 1, category: "Coffee" },
+        { label: "Add food",                     categories: ["Donuts","Bakery","Breakfast","Sides"], required: false, maxSelect: 3, category: "Donuts" },
+      ],
+    },
     menuItems: [
       // Donuts
       { id: "dunk-glazed",       name: "Glazed Donut",                       category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
@@ -1310,6 +1337,13 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["burgers"],
     distance: 0.6,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your burger",   category: "Burgers", required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Add fries",            category: "Sides",   required: false, maxSelect: 1 },
+        { label: "Add a drink or shake", categories: ["Drinks","Shakes"], required: false, maxSelect: 1, category: "Drinks" },
+      ],
+    },
     menuItems: [
       { id: "ino-hamburger",     name: "Hamburger",                         category: "Burgers",   sourceType: "official", allergens: ["wheat","egg","sesame"] },
       { id: "ino-cheeseburger",  name: "Cheeseburger",                      category: "Burgers",   sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
@@ -1708,6 +1742,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["sandwiches"],
     distance: 1.1,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your pizza",    category: "Pizza",   required: true,  maxSelect: 2 },
+        { label: "Add wings or chicken", categories: ["Wings","Chicken"], required: false, maxSelect: 1, category: "Chicken" },
+        { label: "Add a side or pasta",  categories: ["Sides","Pasta"],   required: false, maxSelect: 1, category: "Sides" },
+        { label: "Add dessert",          category: "Desserts",required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       // Pizzas (Hand Tossed — most common)
       { id: "dom-cheese",         name: "Cheese Pizza (Hand Tossed)",       category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
@@ -1864,6 +1906,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["casual"],
     distance: 1.0,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",  categories: ["Burgers","Chicken","Ribs","Steaks","Fajitas","Tex-Mex","Seafood"], required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Add a starter",       category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add a side",          category: "Sides",      required: false, maxSelect: 2 },
+        { label: "Add dessert",         category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       // Appetizers
       { id: "chils-blossom",       name: "Awesome Blossom Petals",           category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
@@ -1919,6 +1969,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["casual"],
     distance: 1.5,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",  categories: ["Burgers","Sandwiches","Chicken","Steaks","Ribs","Seafood","Pasta","Fajitas"], required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Add a starter",       category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add a side",          category: "Sides",      required: false, maxSelect: 1 },
+        { label: "Add dessert",         category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       // Appetizers
       { id: "appb-mozz-sticks",    name: "Mozzarella Sticks",                category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
@@ -1977,6 +2035,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["steakhouse", "casual"],
     distance: 1.8,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your steak or entrée", categories: ["Steaks","Chicken","Ribs","Seafood","Burgers","Entrees"], required: true,  maxSelect: 1, category: "Steaks" },
+        { label: "Pick your first side",         category: "Sides",      required: true,  maxSelect: 1 },
+        { label: "Pick your second side",        category: "Sides",      required: false, maxSelect: 1 },
+        { label: "Add a starter",                category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add dessert",                  category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "txrh-rolls",          name: "Fresh-Baked Rolls with Cinnamon Butter", category: "Bread",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "txrh-cactus",         name: "Cactus Blossom",                   category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
@@ -2025,6 +2092,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["steakhouse", "casual"],
     distance: 2.0,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your steak or entrée", categories: ["Steaks","Chicken","Ribs","Seafood"], required: true,  maxSelect: 1, category: "Steaks" },
+        { label: "Add a side",                  category: "Sides",       required: false, maxSelect: 2 },
+        { label: "Add a starter",               categories: ["Appetizers","Soups"], required: false, maxSelect: 1, category: "Appetizers" },
+        { label: "Add dessert",                 category: "Desserts",    required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "lhs-wild-west-shrimp", name: "Wild West Shrimp",               category: "Appetizers", sourceType: "official", allergens: ["shellfish","wheat","egg","soy"] },
       { id: "lhs-fire-cracker",    name: "Fire-Cracker Shrimp",             category: "Appetizers", sourceType: "official", allergens: ["shellfish","wheat","egg","soy","dairy"] },
@@ -2067,6 +2142,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["steakhouse"],
     distance: 2.2,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your steak or entrée", categories: ["Steaks","Chicken","Seafood"],        required: true,  maxSelect: 1, category: "Steaks" },
+        { label: "Add a side",                  category: "Sides",                                 required: false, maxSelect: 2 },
+        { label: "Add a starter",               categories: ["Appetizers","Soups","Salads"],        required: false, maxSelect: 1, category: "Appetizers" },
+        { label: "Add dessert",                 category: "Desserts",                              required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "kjs-onion-rings",     name: "Onion Rings",                      category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       { id: "kjs-shrimp-cocktail", name: "Shrimp Cocktail",                  category: "Appetizers", sourceType: "official", allergens: ["shellfish"] },
@@ -2109,6 +2192,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["steakhouse", "fine-dining"],
     distance: 2.5,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your steak or protein", categories: ["Steaks","Chicken","Chops","Seafood"], required: true,  maxSelect: 1, category: "Steaks" },
+        { label: "Add a side",                   category: "Sides",                                  required: false, maxSelect: 2 },
+        { label: "Add a starter",                categories: ["Appetizers","Soups","Salads"],         required: false, maxSelect: 1, category: "Appetizers" },
+        { label: "Add dessert",                  category: "Desserts",                               required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "rc-shrimp-cocktail",  name: "Shrimp Cocktail",                  category: "Appetizers", sourceType: "official", allergens: ["shellfish"] },
       { id: "rc-crab-cakes",       name: "Sizzling Blue Crab Cakes",         category: "Appetizers", sourceType: "official", allergens: ["shellfish","wheat","egg","dairy"] },
@@ -2156,6 +2247,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["casual", "fine-dining"],
     distance: 2.8,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée", categories: ["Chicken","Entrees","Steaks","Pasta","Seafood"], required: true,  maxSelect: 1, category: "Entrees" },
+        { label: "Add a starter",      categories: ["Appetizers","Soups","Salads"],                  required: false, maxSelect: 1, category: "Appetizers" },
+        { label: "Add a side",         category: "Sides",                                            required: false, maxSelect: 2 },
+        { label: "Add dessert",        category: "Desserts",                                         required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "ch-hummus",           name: "Hummus Trio",                      category: "Appetizers", sourceType: "official", allergens: ["sesame","legumes","wheat"] },
       { id: "ch-bruschetta",       name: "Bruschetta",                       category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy"] },
@@ -2205,6 +2304,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["italian", "pasta", "casual"],
     distance: 1.2,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your pasta or entrée", categories: ["Pasta","Entrees","Seafood"], required: true,  maxSelect: 1, category: "Pasta" },
+        { label: "Add a soup or salad",         categories: ["Soups","Salads"],            required: false, maxSelect: 1, category: "Salads" },
+        { label: "Add a starter",               category: "Appetizers",                   required: false, maxSelect: 1 },
+        { label: "Add dessert",                 category: "Desserts",                     required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "og-breadsticks",      name: "Breadsticks",                      category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy"] },
       { id: "og-spinach-dip",      name: "Spinach-Artichoke Dip",            category: "Appetizers", sourceType: "official", allergens: ["dairy","wheat"] },
@@ -2236,6 +2343,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["seafood", "casual"],
     distance: 1.5,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your seafood",  categories: ["Seafood","Pasta"],       required: true,  maxSelect: 1, category: "Seafood" },
+        { label: "Add a starter",        category: "Appetizers",                required: false, maxSelect: 1 },
+        { label: "Add a soup or salad",  categories: ["Soups","Salads"],        required: false, maxSelect: 1, category: "Salads" },
+        { label: "Add dessert",          category: "Desserts",                  required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "rl-biscuits",         name: "Cheddar Bay Biscuits",             category: "Bread",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "rl-shrimp-cocktail",  name: "Jumbo Shrimp Cocktail",            category: "Appetizers", sourceType: "official", allergens: ["shellfish"] },
@@ -2347,6 +2462,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["american", "casual", "cheesecake"],
     distance: 2.0,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",  categories: ["Pasta","Chicken","Steaks","Burgers","Seafood"], required: true,  maxSelect: 1, category: "Pasta" },
+        { label: "Add a starter",       category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add a salad",         category: "Salads",     required: false, maxSelect: 1 },
+        { label: "Add dessert",         category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "ccf-egg-rolls",       name: "Avocado Egg Rolls",                category: "Appetizers", sourceType: "official", allergens: ["wheat","egg","tree-nut","soy"] },
       { id: "ccf-fried-mac",       name: "Fried Macaroni and Cheese",        category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
@@ -2519,6 +2642,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["asian", "chinese", "casual"],
     distance: 1.8,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",  category: "Entrees",    required: true,  maxSelect: 2 },
+        { label: "Add a starter",       category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add soup",            category: "Soups",      required: false, maxSelect: 1 },
+        { label: "Add a side",          category: "Sides",      required: false, maxSelect: 1 },
+        { label: "Add dessert",         category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "pfc-lettuce-wraps",   name: "Chicken Lettuce Wraps",            category: "Appetizers", sourceType: "official", allergens: ["soy","wheat","dairy","egg","sesame","shellfish"] },
       { id: "pfc-hot-sour-soup",   name: "Hot and Sour Soup",                category: "Soups",      sourceType: "official", allergens: ["wheat","soy","egg"] },
@@ -2546,6 +2678,13 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["chicken", "fast-casual"],
     distance: 0.6,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your combo",       category: "Combos",    required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Add extra dipping sauce", category: "Sauces",    required: false, maxSelect: 99 },
+        { label: "Add a drink",             category: "Beverages", required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "canes-fingers",       name: "Chicken Fingers",                  category: "Chicken",    sourceType: "official", allergens: ["wheat","egg","soy","dairy"] },
       { id: "canes-box-combo",     name: "Box Combo",                        category: "Combos",     sourceType: "official", allergens: ["wheat","egg","soy","dairy","fish"] },
@@ -3033,6 +3172,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["pizza", "fast-casual"],
     distance: 1.1,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your pizza",   category: "Pizza",    required: true,  maxSelect: 1 },
+        { label: "Add wings",           category: "Wings",    required: false, maxSelect: 1 },
+        { label: "Add a side or pasta", categories: ["Sides","Pasta"], required: false, maxSelect: 1, category: "Sides" },
+        { label: "Add dessert",         category: "Desserts", required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "ph-orig-pan-cheese",  name: "Original Pan Cheese Pizza",        category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
       { id: "ph-thin-crispy",      name: "Thin N' Crispy Cheese Pizza",      category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
@@ -3077,6 +3224,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["pizza", "fast-casual"],
     distance: 1.3,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your pizza", category: "Pizza",    required: true,  maxSelect: 1 },
+        { label: "Add wings",         category: "Wings",    required: false, maxSelect: 1 },
+        { label: "Add a side",        category: "Sides",    required: false, maxSelect: 1 },
+        { label: "Add dessert",       category: "Desserts", required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "pj-orig-cheese",      name: "Original Cheese Pizza",            category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
       { id: "pj-pepperoni",        name: "Pepperoni Pizza",                  category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
@@ -3433,6 +3588,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["burgers", "custard", "fast-casual"],
     distance: 1.0,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",    categories: ["Burgers","Chicken & Sandwiches","Seafood","Dinners"], required: true,  maxSelect: 1, category: "Burgers", showAsCombo: true },
+        { label: "Add a side",            category: "Sides",            required: false, maxSelect: 1 },
+        { label: "Add frozen custard",    categories: ["Fresh Frozen Custard","Concrete Mixers","Sundaes","Shakes & Malts"], required: false, maxSelect: 1, category: "Fresh Frozen Custard" },
+        { label: "Add a drink",           category: "Drink",            required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       // ── ButterBurgers ─────────────────────────────────────────────────────
       { id: "culv-butterburger",         name: "ButterBurger",                          category: "Burgers",           sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
@@ -3573,6 +3736,12 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["noodles", "pasta", "fast-casual"],
     distance: 0.7,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your noodle dish", category: "Noodles", required: true,  maxSelect: 1 },
+        { label: "Add a soup",              category: "Soups",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "noco-buttered-noodle",name: "Buttered Noodles",                 category: "Noodles",    sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "noco-mac",            name: "Wisconsin Mac & Cheese",           category: "Noodles",    sourceType: "official", allergens: ["wheat","dairy"] },
@@ -3596,6 +3765,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["american", "bar", "craft-beer", "casual"],
     distance: 2.1,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",  categories: ["Burgers","Sandwiches","Seafood","Pasta","Pizza"], required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Add a starter",       category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add a side",          category: "Sides",      required: false, maxSelect: 1 },
+        { label: "Add a salad",         category: "Salads",     required: false, maxSelect: 1 },
+        { label: "Add dessert",         category: "Desserts",   required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "yh-spinach-dip",      name: "Spinach Artichoke Dip",            category: "Appetizers", sourceType: "official", allergens: ["dairy","wheat","soy"] },
       { id: "yh-pretzel-bites",    name: "Soft Pretzel Bites",               category: "Appetizers", sourceType: "official", allergens: ["wheat","dairy","egg"] },
@@ -4080,6 +4258,13 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["asian", "fast-casual"],
     distance: 1.2,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your entrée",  categories: ["Noodles","Wok","Rice"], required: true,  maxSelect: 2, category: "Noodles" },
+        { label: "Add a starter",       category: "Appetizers", required: false, maxSelect: 1 },
+        { label: "Add a side",          category: "Sides",      required: false, maxSelect: 1 },
+      ],
+    },
     menuItems: [
       { id: "pw-pad-thai",         name: "Pad Thai",                         category: "Noodles",    sourceType: "official", allergens: ["peanut","egg","fish","wheat","soy"] },
       { id: "pw-orange-chicken",   name: "Orange Chicken",                   category: "Wok",        sourceType: "official", allergens: ["wheat","soy","egg"] },
@@ -4169,6 +4354,15 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     tags: ["american", "casual", "buffet"],
     distance: 2.0,
     sourceType: "official",
+    builderConfig: {
+      steps: [
+        { label: "Choose your proteins",  category: "Entrees",  required: true,  maxSelect: 3 },
+        { label: "Choose your sides",     category: "Sides",    required: false, maxSelect: 4 },
+        { label: "Add soup",              category: "Soups",    required: false, maxSelect: 1 },
+        { label: "Add bread",             category: "Bread",    required: false, maxSelect: 1 },
+        { label: "Add dessert",           category: "Desserts", required: false, maxSelect: 3 },
+      ],
+    },
     menuItems: [
       // Entrées
       { id: "gc-pot-roast",        name: "Pot Roast",                        category: "Entrees",    sourceType: "official", allergens: ["wheat","soy","dairy"] },
