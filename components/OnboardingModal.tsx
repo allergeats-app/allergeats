@@ -18,24 +18,6 @@ const ONBOARDING_KEY = "allegeats_onboarded_v1";
 // Allergens that warrant a severity question — life-threatening reaction risk
 const HIGH_RISK_IDS = new Set<AllergenId>(["peanut", "tree-nut", "shellfish", "fish", "sesame"]);
 
-// Emoji icons per allergen for visual scannability
-const ALLERGEN_ICON: Record<AllergenId, string> = {
-  peanut:    "🥜",
-  dairy:     "🥛",
-  egg:       "🥚",
-  gluten:    "🌾",
-  "tree-nut":"🌰",
-  wheat:     "🌾",
-  soy:       "🫘",
-  sesame:    "🌱",
-  fish:      "🐟",
-  shellfish: "🦐",
-  mustard:   "🌿",
-  corn:      "🌽",
-  legumes:   "🫘",
-  oats:      "🌾",
-};
-
 const iosTap: React.CSSProperties = {
   WebkitTapHighlightColor: "transparent",
   touchAction: "manipulation",
@@ -362,7 +344,6 @@ export function OnboardingModal() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 20 }}>
               {ALLERGEN_LIST.map(({ id, label }) => {
                 const active = selected.has(id);
-                const icon   = ALLERGEN_ICON[id] ?? "⚠️";
                 return (
                   <button
                     key={id}
@@ -388,7 +369,6 @@ export function OnboardingModal() {
                         : `0 1px 3px rgba(0,0,0,${isDark ? "0.2" : "0.06"})`,
                     }}
                   >
-                    <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }} aria-hidden="true">{icon}</span>
                     <span>{label}</span>
                     {active && (
                       <svg style={{ marginLeft: "auto", flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -484,7 +464,6 @@ export function OnboardingModal() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
               {highRiskSelected.map(({ id, label }) => {
-                const icon = ALLERGEN_ICON[id] ?? "⚠️";
                 const current = severities[id] ?? "anaphylactic";
                 return (
                   <div key={id} style={{
@@ -495,7 +474,6 @@ export function OnboardingModal() {
                   }}>
                     {/* Allergen label */}
                     <div style={{ padding: "12px 16px 10px", display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}` }}>
-                      <span style={{ fontSize: 20 }} aria-hidden="true">{icon}</span>
                       <span style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)" }}>{label}</span>
                     </div>
                     {/* Severity toggles */}
