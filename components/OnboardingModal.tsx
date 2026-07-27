@@ -3,13 +3,39 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ALLERGEN_LIST, saveProfileAllergens, loadProfileAllergens } from "@/lib/allergenProfile";
-import type { AllergenId } from "@/lib/types";
+import {
+  ALLERGEN_LIST,
+  saveProfileAllergens,
+  loadProfileAllergens,
+  saveProfileSeverities,
+  loadProfileSeverities,
+} from "@/lib/allergenProfile";
+import type { AllergenId, AllergenSeverity } from "@/lib/types";
 import { useTheme } from "@/lib/themeContext";
 
 const ONBOARDING_KEY = "allegeats_onboarded_v1";
 
-// iOS tap highlight suppression applied globally to all interactive elements in this modal
+// Allergens that warrant a severity question — life-threatening reaction risk
+const HIGH_RISK_IDS = new Set<AllergenId>(["peanut", "tree-nut", "shellfish", "fish", "sesame"]);
+
+// Emoji icons per allergen for visual scannability
+const ALLERGEN_ICON: Record<AllergenId, string> = {
+  peanut:    "🥜",
+  dairy:     "🥛",
+  egg:       "🥚",
+  gluten:    "🌾",
+  "tree-nut":"🌰",
+  wheat:     "🌾",
+  soy:       "🫘",
+  sesame:    "🌱",
+  fish:      "🐟",
+  shellfish: "🦐",
+  mustard:   "🌿",
+  corn:      "🌽",
+  legumes:   "🫘",
+  oats:      "🌾",
+};
+
 const iosTap: React.CSSProperties = {
   WebkitTapHighlightColor: "transparent",
   touchAction: "manipulation",
@@ -18,24 +44,28 @@ const iosTap: React.CSSProperties = {
 
 const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+type Step = "welcome" | "safety" | "allergens" | "severity" | "done";
+
 export function OnboardingModal() {
   const { isDark } = useTheme();
-  const [visible, setVisible] = useState(false);
-  const [step, setStep] = useState<"welcome" | "safety" | "allergens" | "done">("welcome");
+  const [visible, setVisible]   = useState(false);
+  const [step, setStep]         = useState<Step>("welcome");
   const [selected, setSelected] = useState<Set<AllergenId>>(new Set());
+  const [severities, setSeverities] = useState<Partial<Record<AllergenId, AllergenSeverity>>>({});
+  const [warnEmpty, setWarnEmpty]   = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) {
-      // Pre-populate any allergens already saved (e.g. user dismissed before, then re-opened)
       const existing = loadProfileAllergens();
+      const existingSevs = loadProfileSeverities();
       if (existing.length > 0) setSelected(new Set(existing as AllergenId[]));
+      if (Object.keys(existingSevs).length > 0) setSeverities(existingSevs);
       setVisible(true); // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, []);
 
-  // Focus first interactive element whenever the modal appears or the step changes
   useEffect(() => {
     if (!visible) return;
     requestAnimationFrame(() => {
@@ -58,6 +88,7 @@ export function OnboardingModal() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggle(id: AllergenId) {
+    setWarnEmpty(false);
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -65,13 +96,42 @@ export function OnboardingModal() {
     });
   }
 
-  function handleFinish() {
+  function setSeverity(id: AllergenId, sev: AllergenSeverity) {
+    setSeverities((prev) => ({ ...prev, [id]: sev }));
+  }
+
+  // Which high-risk allergens the user selected (need severity question)
+  const highRiskSelected = ALLERGEN_LIST
+    .filter(({ id }) => selected.has(id) && HIGH_RISK_IDS.has(id));
+
+  function handleAllergenContinue() {
+    if (selected.size === 0) {
+      setWarnEmpty(true);
+      return;
+    }
+    // Pre-fill severity for high-risk allergens that don't have one yet
+    setSeverities((prev) => {
+      const next = { ...prev };
+      for (const { id } of highRiskSelected) {
+        if (!next[id]) next[id] = "anaphylactic"; // default high-risk to anaphylactic
+      }
+      return next;
+    });
+    if (highRiskSelected.length > 0) {
+      setStep("severity");
+    } else {
+      handleFinish(severities);
+    }
+  }
+
+  function handleFinish(finalSeverities: Partial<Record<AllergenId, AllergenSeverity>>) {
     const existing = loadProfileAllergens();
     const merged = [...new Set([...existing, ...selected])];
     saveProfileAllergens(merged);
+    saveProfileSeverities(finalSeverities);
     localStorage.setItem(ONBOARDING_KEY, "1");
     setStep("done");
-    setTimeout(() => setVisible(false), 1200);
+    setTimeout(() => setVisible(false), 1400);
   }
 
   function handleSkip() {
@@ -81,6 +141,7 @@ export function OnboardingModal() {
 
   if (!visible) return null;
 
+  // ── Shared card shell ──────────────────────────────────────────────────────
   return (
     <div
       role="dialog"
@@ -88,7 +149,8 @@ export function OnboardingModal() {
       aria-label="Welcome to AllergEats"
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
-        background: "rgba(0,0,0,0.55)", WebkitBackdropFilter: "blur(6px)", backdropFilter: "blur(6px)",
+        background: "rgba(0,0,0,0.55)",
+        WebkitBackdropFilter: "blur(6px)", backdropFilter: "blur(6px)",
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
       }}
@@ -96,14 +158,14 @@ export function OnboardingModal() {
     >
       <div ref={dialogRef} style={{
         background: isDark
-          ? "linear-gradient(150deg, #111214 0%, #1e2023 20%, #141618 45%, #1a1d20 70%, #111214 100%)"
-          : "linear-gradient(150deg, #f8f9fa 0%, #e8eaed 15%, #ffffff 32%, #d0d4d8 52%, #f4f5f6 68%, #c8ccd0 84%, #eef0f2 100%)",
+          ? "linear-gradient(150deg,#111214 0%,#1e2023 20%,#141618 45%,#1a1d20 70%,#111214 100%)"
+          : "linear-gradient(150deg,#f8f9fa 0%,#e8eaed 15%,#ffffff 32%,#d0d4d8 52%,#f4f5f6 68%,#c8ccd0 84%,#eef0f2 100%)",
         borderRadius: 28,
         width: "100%", maxWidth: 480,
         padding: "32px 24px 28px",
         boxShadow: isDark
-          ? "0 0 0 1px rgba(180,185,195,0.2), 0 16px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.4)"
-          : "0 0 0 1px rgba(140,148,158,0.18), 0 16px 64px rgba(60,70,80,0.22), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(100,110,120,0.12)",
+          ? "0 0 0 1px rgba(180,185,195,0.2),0 16px 64px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.1),inset 0 -1px 0 rgba(0,0,0,0.4)"
+          : "0 0 0 1px rgba(140,148,158,0.18),0 16px 64px rgba(60,70,80,0.22),inset 0 1px 0 rgba(255,255,255,0.95),inset 0 -1px 0 rgba(100,110,120,0.12)",
         border: isDark
           ? "1px solid rgba(160,168,178,0.3)"
           : "1px solid rgba(150,158,168,0.3)",
@@ -117,12 +179,12 @@ export function OnboardingModal() {
           position: "absolute", top: 0, left: 0, right: 0, height: 80,
           borderRadius: "28px 28px 0 0",
           background: isDark
-            ? "linear-gradient(180deg, rgba(220,225,235,0.08) 0%, rgba(220,225,235,0) 100%)"
-            : "linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 100%)",
+            ? "linear-gradient(180deg,rgba(220,225,235,0.08) 0%,rgba(220,225,235,0) 100%)"
+            : "linear-gradient(180deg,rgba(255,255,255,0.85) 0%,rgba(255,255,255,0) 100%)",
           pointerEvents: "none",
         }} />
 
-        {/* ── Welcome ── */}
+        {/* ── Step: Welcome ──────────────────────────────────────────────── */}
         {step === "welcome" && (
           <>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
@@ -130,14 +192,12 @@ export function OnboardingModal() {
                 sizes="200px"
                 style={{ width: "auto", height: 48, maxWidth: "70vw", margin: "0 auto 16px", display: "block" }} />
               <div style={{
-                fontSize: 24,
-                fontWeight: 900,
-                fontFamily: "'Georgia', 'Times New Roman', serif",
-                letterSpacing: "-0.02em",
-                lineHeight: 1.15,
+                fontSize: 24, fontWeight: 900,
+                fontFamily: "'Georgia','Times New Roman',serif",
+                letterSpacing: "-0.02em", lineHeight: 1.15,
                 background: isDark
-                  ? "linear-gradient(135deg, #c8cdd5 0%, #e8ecf0 50%, #9aa0a8 100%)"
-                  : "linear-gradient(135deg, #2c3038 0%, #4a5260 40%, #1e2228 100%)",
+                  ? "linear-gradient(135deg,#c8cdd5 0%,#e8ecf0 50%,#9aa0a8 100%)"
+                  : "linear-gradient(135deg,#2c3038 0%,#4a5260 40%,#1e2228 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -146,108 +206,61 @@ export function OnboardingModal() {
               </div>
             </div>
 
-            {/* Feature pills */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "center", marginBottom: 24 }}>
               {[
-                {
-                  text: "Find Nearby Restaurants",
-                  icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                    </svg>
-                  ),
-                },
-                {
-                  text: "Know What's Safe Instantly",
-                  icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
-                    </svg>
-                  ),
-                },
-                {
-                  text: "Save Your Go-To Meals",
-                  icon: (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                    </svg>
-                  ),
-                },
+                { text: "Find Nearby Restaurants", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> },
+                { text: "Know What's Safe Instantly", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> },
+                { text: "Save Your Go-To Meals",    icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> },
               ].map(({ icon, text }) => (
                 <div key={text} style={{
                   display: "inline-flex", alignItems: "center", gap: 10,
                   borderRadius: 999, padding: "9px 16px 9px 10px",
                   background: isDark
-                    ? "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)"
-                    : "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,248,246,0.8) 100%)",
+                    ? "linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%)"
+                    : "linear-gradient(135deg,rgba(255,255,255,0.95) 0%,rgba(249,248,246,0.8) 100%)",
                   border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
                   boxShadow: isDark
-                    ? "inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 4px rgba(0,0,0,0.25)"
-                    : "inset 0 1px 0 rgba(255,255,255,1), 0 1px 4px rgba(0,0,0,0.06)",
+                    ? "inset 0 1px 0 rgba(255,255,255,0.06),0 1px 4px rgba(0,0,0,0.25)"
+                    : "inset 0 1px 0 rgba(255,255,255,1),0 1px 4px rgba(0,0,0,0.06)",
                 }}>
-                  <div style={{
-                    width: 28, height: 28, borderRadius: 999, flexShrink: 0,
-                    background: isDark ? "rgba(31,189,204,0.12)" : "rgba(31,189,204,0.07)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 999, flexShrink: 0, background: isDark ? "rgba(31,189,204,0.12)" : "rgba(31,189,204,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {icon}
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
-                    {text}
-                  </span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--c-text)", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>{text}</span>
                 </div>
               ))}
             </div>
 
-            {/* Subtitle */}
             <div style={{ textAlign: "center", marginBottom: 16 }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: isDark ? "rgba(180,188,198,0.7)" : "rgba(60,70,82,0.6)" }}>
-                Set Up in 30 Seconds
+                Set Up in 30 Seconds — No Account Required
               </div>
             </div>
 
-            {/* CTA */}
             <button
-              onClick={() => setStep("allergens")}
+              onClick={() => setStep("safety")}
               style={{
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
                 borderRadius: 16, border: "none",
-                background: "linear-gradient(135deg, #149aab 0%, var(--c-brand) 50%, #35d4e4 100%)",
-                boxShadow: "0 2px 0 rgba(0,0,0,0.2), 0 6px 20px rgba(0,150,165,0.35), inset 0 1px 0 rgba(100,230,240,0.3)",
+                background: "linear-gradient(135deg,#149aab 0%,var(--c-brand) 50%,#35d4e4 100%)",
+                boxShadow: "0 2px 0 rgba(0,0,0,0.2),0 6px 20px rgba(0,150,165,0.35),inset 0 1px 0 rgba(100,230,240,0.3)",
                 color: "var(--c-brand-fg)",
                 fontSize: 17, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
               }}
             >
-              Set My Allergens & Find Food
+              Set My Allergens &amp; Find Food
             </button>
 
-            {/* Skip + Sign In — centered */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14 }}>
-              <button
-                onClick={handleSkip}
-                style={{
-                  ...iosTap,
-                  minHeight: 44, padding: "10px 4px",
-                  border: "none", background: "transparent",
-                  color: "var(--c-sub)", fontSize: 14, fontWeight: 600, cursor: "pointer",
-                }}
-              >
+              <button onClick={handleSkip} style={{ ...iosTap, minHeight: 44, padding: "10px 4px", border: "none", background: "transparent", color: "var(--c-sub)", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
                 Skip for now
               </button>
-              <span style={{ color: "var(--c-border)", fontSize: 14, userSelect: "none" }}>·</span>
+              <span style={{ color: "var(--c-border)", fontSize: 14 }}>·</span>
               <span style={{ fontSize: 14, color: "var(--c-sub)" }}>
                 Already a Member?{" "}
-                <Link
-                  href="/auth"
-                  onClick={handleSkip}
-                  style={{
-                    ...iosTap,
-                    color: "var(--c-brand)", fontWeight: 700, textDecoration: "none",
-                    display: "inline", minHeight: 44, padding: "10px 0",
-                  }}
-                >
+                <Link href="/auth" onClick={handleSkip} style={{ ...iosTap, color: "var(--c-brand)", fontWeight: 700, textDecoration: "none" }}>
                   Sign In
                 </Link>
               </span>
@@ -255,30 +268,26 @@ export function OnboardingModal() {
           </>
         )}
 
-        {/* ── Safety acknowledgment ── */}
+        {/* ── Step: Safety acknowledgment ───────────────────────────────── */}
         {step === "safety" && (
           <>
-            {/* Gold card */}
             <div style={{
               borderRadius: 20,
-              background: "linear-gradient(160deg, #1e1a0e 0%, #2a2010 60%, #1a1508 100%)",
+              background: "linear-gradient(160deg,#1e1a0e 0%,#2a2010 60%,#1a1508 100%)",
               border: "1.5px solid #b8892a",
-              boxShadow: "0 0 32px rgba(212,160,40,0.25), inset 0 0 40px rgba(180,130,20,0.06)",
+              boxShadow: "0 0 32px rgba(212,160,40,0.25),inset 0 0 40px rgba(180,130,20,0.06)",
               padding: "28px 22px 24px",
               marginBottom: 20,
               textAlign: "center",
               position: "relative",
               overflow: "hidden",
             }}>
-              {/* Top gold line glow */}
-              <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.8), transparent)" }} />
-              {/* Bottom gold line glow */}
-              <div style={{ position: "absolute", bottom: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.5), transparent)" }} />
+              <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg,transparent,rgba(212,160,40,0.8),transparent)" }} />
+              <div style={{ position: "absolute", bottom: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg,transparent,rgba(212,160,40,0.5),transparent)" }} />
 
-              {/* Icon */}
               <div style={{ marginBottom: 14, display: "flex", justifyContent: "center" }}>
                 <div style={{ position: "relative" }}>
-                  <div style={{ position: "absolute", inset: -8, borderRadius: "50%", background: "radial-gradient(circle, rgba(212,160,40,0.35) 0%, transparent 70%)" }} />
+                  <div style={{ position: "absolute", inset: -8, borderRadius: "50%", background: "radial-gradient(circle,rgba(212,160,40,0.35) 0%,transparent 70%)" }} />
                   <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
                     <polygon points="26,5 49,45 3,45" fill="url(#goldTriangle)" stroke="#c9922a" strokeWidth="1.5" strokeLinejoin="round"/>
                     <defs>
@@ -292,37 +301,26 @@ export function OnboardingModal() {
                 </div>
               </div>
 
-              {/* Title */}
-              <div style={{
-                fontSize: 22, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 4,
-                background: "linear-gradient(135deg, #f5c842 0%, #e8a820 50%, #c9922a 100%)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-              }}>
+              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 4, background: "linear-gradient(135deg,#f5c842 0%,#e8a820 50%,#c9922a 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 Important Information
               </div>
 
-              {/* Divider */}
-              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.4), transparent)", margin: "14px 0" }} />
+              <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(212,160,40,0.4),transparent)", margin: "14px 0" }} />
 
-              {/* Body */}
               <div style={{ textAlign: "left" }}>
                 <div style={{ fontSize: 14, color: "#e8c97a", lineHeight: 1.65, fontWeight: 600, marginBottom: 12 }}>
                   <span style={{ color: "#f5c842" }}>AllergEats</span> is a decision-support tool, not medical advice. It helps you identify potential allergens in menu text, but:
                 </div>
                 <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 14, color: "#c8a84a", lineHeight: 1.85 }}>
                   <li>Menus change — ingredients listed today may differ tomorrow</li>
-                  <li>Cross-contamination is not detectable from text alone</li>
+                  <li>Cross-contamination cannot be detected from text alone</li>
                   <li>Detection is not 100% accurate for all ingredient names</li>
                 </ul>
               </div>
 
-              {/* Divider */}
-              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(212,160,40,0.4), transparent)", margin: "14px 0" }} />
+              <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(212,160,40,0.4),transparent)", margin: "14px 0" }} />
 
-              {/* Red warning line */}
-              <div style={{
-                fontSize: 13, color: "#fca5a5", lineHeight: 1.6, fontWeight: 600,
-              }}>
+              <div style={{ fontSize: 13, color: "#fca5a5", lineHeight: 1.6, fontWeight: 600 }}>
                 <strong style={{ color: "#f87171" }}>Always confirm with restaurant staff before ordering</strong>, especially for severe or life-threatening allergies.
               </div>
             </div>
@@ -333,7 +331,7 @@ export function OnboardingModal() {
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
                 borderRadius: 16, border: "none",
-                background: "linear-gradient(135deg, #149aab 0%, var(--c-brand) 50%, #35d4e4 100%)",
+                background: "linear-gradient(135deg,#149aab 0%,var(--c-brand) 50%,#35d4e4 100%)",
                 color: "var(--c-brand-fg)",
                 fontSize: 16, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
@@ -341,71 +339,88 @@ export function OnboardingModal() {
             >
               I Understand — Set My Allergens
             </button>
-            <button
-              onClick={() => setStep("welcome")}
-              style={{
-                ...iosTap,
-                marginTop: 10, width: "100%", minHeight: 44,
-                border: "none", background: "transparent",
-                color: "var(--c-sub)", fontSize: 13, fontWeight: 600, cursor: "pointer",
-              }}
-            >
+            <button onClick={() => setStep("welcome")} style={{ ...iosTap, marginTop: 10, width: "100%", minHeight: 44, border: "none", background: "transparent", color: "var(--c-sub)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               ← Back
             </button>
           </>
         )}
 
-        {/* ── Allergen picker ── */}
+        {/* ── Step: Allergen picker ─────────────────────────────────────── */}
         {step === "allergens" && (
           <>
-            <button
-              onClick={() => setStep("welcome")}
-              style={{
-                ...iosTap,
-                background: "none", border: "none",
-                color: "var(--c-sub)", fontSize: 13, fontWeight: 700,
-                cursor: "pointer", padding: "0 0 16px", minHeight: 44,
-                display: "flex", alignItems: "center",
-              }}
-            >
+            <button onClick={() => setStep("safety")} style={{ ...iosTap, background: "none", border: "none", color: "var(--c-sub)", fontSize: 13, fontWeight: 700, cursor: "pointer", padding: "0 0 16px", minHeight: 44, display: "flex", alignItems: "center" }}>
               ← Back
             </button>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", marginBottom: 6 }}>
+
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>
               Select your allergens
             </div>
             <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 20, lineHeight: 1.55 }}>
               Tap everything you need to avoid. You can update this anytime in your profile.
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9, marginBottom: 20 }}>
               {ALLERGEN_LIST.map(({ id, label }) => {
                 const active = selected.has(id);
+                const icon   = ALLERGEN_ICON[id] ?? "⚠️";
                 return (
                   <button
                     key={id}
                     onClick={() => toggle(id)}
+                    aria-pressed={active}
                     style={{
                       ...iosTap,
-                      minHeight: 48, padding: "13px 14px",
+                      minHeight: 52, padding: "11px 14px",
                       borderRadius: 14,
-                      border: active ? "2px solid var(--c-brand)" : "1.5px solid var(--c-border)",
-                      background: active ? (isDark ? "rgba(31,189,204,0.15)" : "rgba(31,189,204,0.07)") : "var(--c-card)",
+                      border: active
+                        ? "2px solid var(--c-brand)"
+                        : `1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+                      background: active
+                        ? isDark ? "rgba(31,189,204,0.15)" : "rgba(31,189,204,0.07)"
+                        : isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.8)",
                       color: active ? "var(--c-brand)" : "var(--c-text)",
                       fontSize: 14, fontWeight: active ? 700 : 500,
                       cursor: "pointer", textAlign: "left",
-                      transition: "background 0.1s, border-color 0.1s, color 0.1s",
+                      display: "flex", alignItems: "center", gap: 8,
+                      transition: "background 0.1s,border-color 0.1s,color 0.1s",
+                      boxShadow: active
+                        ? `0 0 0 1px var(--c-brand), 0 2px 8px rgba(31,189,204,${isDark ? "0.2" : "0.12"})`
+                        : `0 1px 3px rgba(0,0,0,${isDark ? "0.2" : "0.06"})`,
                     }}
                   >
-                    {label}
+                    <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }} aria-hidden="true">{icon}</span>
+                    <span>{label}</span>
+                    {active && (
+                      <svg style={{ marginLeft: "auto", flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Compact safety note */}
+            {/* Empty-selection warning */}
+            {warnEmpty && (
+              <div style={{
+                display: "flex", alignItems: "flex-start", gap: 8,
+                padding: "10px 12px", borderRadius: 10, marginBottom: 12,
+                background: isDark ? "rgba(239,68,68,0.1)" : "rgba(254,226,226,0.8)",
+                border: `1px solid ${isDark ? "rgba(239,68,68,0.35)" : "rgba(239,68,68,0.3)"}`,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="3"/>
+                </svg>
+                <span style={{ fontSize: 12, color: isDark ? "#fca5a5" : "#b91c1c", lineHeight: 1.5 }}>
+                  No allergens selected — the app won't flag anything as unsafe. Tap the ones you need to avoid, or skip to browse all restaurants.
+                </span>
+              </div>
+            )}
+
+            {/* Safety note */}
             <div style={{
               display: "flex", alignItems: "flex-start", gap: 8,
-              padding: "10px 12px", borderRadius: 10, marginBottom: 12,
+              padding: "10px 12px", borderRadius: 10, marginBottom: 14,
               background: isDark ? "rgba(217,119,6,0.10)" : "rgba(253,230,138,0.4)",
               border: `1px solid ${isDark ? "rgba(217,119,6,0.3)" : "rgba(251,191,36,0.5)"}`,
             }}>
@@ -414,41 +429,199 @@ export function OnboardingModal() {
                 <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
               <span style={{ fontSize: 12, color: isDark ? "#fbbf24" : "#92400E", lineHeight: 1.5 }}>
-                This app provides guidance only — always confirm allergen info with restaurant staff before ordering.
+                Always confirm allergen info with restaurant staff before ordering.
               </span>
             </div>
 
             <button
-              onClick={handleFinish}
+              onClick={handleAllergenContinue}
               style={{
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
                 borderRadius: 16, border: "none",
-                background: "var(--c-brand)", color: "var(--c-brand-fg)",
+                background: selected.size === 0
+                  ? isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+                  : "linear-gradient(135deg,#149aab 0%,var(--c-brand) 50%,#35d4e4 100%)",
+                boxShadow: selected.size > 0
+                  ? "0 2px 0 rgba(0,0,0,0.15),0 6px 20px rgba(0,150,165,0.3),inset 0 1px 0 rgba(100,230,240,0.3)"
+                  : "none",
+                color: selected.size === 0
+                  ? "var(--c-sub)"
+                  : "var(--c-brand-fg)",
+                fontSize: 17, fontWeight: 800, cursor: "pointer",
+                letterSpacing: "-0.01em",
+                transition: "background 0.2s,color 0.2s,box-shadow 0.2s",
+              }}
+            >
+              {selected.size === 0
+                ? "Continue without selecting"
+                : highRiskSelected.length > 0
+                  ? `Next — Set Severity →`
+                  : `Save ${selected.size} allergen${selected.size !== 1 ? "s" : ""}`}
+            </button>
+
+            {selected.size === 0 && (
+              <button onClick={handleSkip} style={{ ...iosTap, marginTop: 8, width: "100%", minHeight: 44, border: "none", background: "transparent", color: "var(--c-sub)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                Skip setup entirely
+              </button>
+            )}
+          </>
+        )}
+
+        {/* ── Step: Severity ────────────────────────────────────────────── */}
+        {step === "severity" && (
+          <>
+            <button onClick={() => setStep("allergens")} style={{ ...iosTap, background: "none", border: "none", color: "var(--c-sub)", fontSize: 13, fontWeight: 700, cursor: "pointer", padding: "0 0 16px", minHeight: 44, display: "flex", alignItems: "center" }}>
+              ← Back
+            </button>
+
+            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", marginBottom: 4 }}>
+              How serious are these?
+            </div>
+            <div style={{ fontSize: 14, color: "var(--c-sub)", marginBottom: 22, lineHeight: 1.55 }}>
+              This helps us show the right level of warning for each allergen. You can change this later in your profile.
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+              {highRiskSelected.map(({ id, label }) => {
+                const icon = ALLERGEN_ICON[id] ?? "⚠️";
+                const current = severities[id] ?? "anaphylactic";
+                return (
+                  <div key={id} style={{
+                    borderRadius: 16,
+                    border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
+                    background: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.7)",
+                    overflow: "hidden",
+                  }}>
+                    {/* Allergen label */}
+                    <div style={{ padding: "12px 16px 10px", display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}` }}>
+                      <span style={{ fontSize: 20 }} aria-hidden="true">{icon}</span>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)" }}>{label}</span>
+                    </div>
+                    {/* Severity toggles */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
+                      {/* Anaphylactic */}
+                      <button
+                        onClick={() => setSeverity(id, "anaphylactic")}
+                        aria-pressed={current === "anaphylactic"}
+                        style={{
+                          ...iosTap,
+                          minHeight: 72, padding: "12px 14px",
+                          border: "none",
+                          borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
+                          background: current === "anaphylactic"
+                            ? isDark ? "rgba(239,68,68,0.15)" : "rgba(254,226,226,0.7)"
+                            : "transparent",
+                          cursor: "pointer", textAlign: "left",
+                          transition: "background 0.15s",
+                          display: "flex", flexDirection: "column", gap: 4,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${current === "anaphylactic" ? "#ef4444" : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"}`, background: current === "anaphylactic" ? "#ef4444" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s", flexShrink: 0 }}>
+                            {current === "anaphylactic" && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: current === "anaphylactic" ? "#ef4444" : "var(--c-text)" }}>Anaphylactic</span>
+                        </div>
+                        <span style={{ fontSize: 11, color: "var(--c-sub)", lineHeight: 1.4, paddingLeft: 22 }}>Life-threatening — I carry an EpiPen or this is severe</span>
+                      </button>
+
+                      {/* Intolerance */}
+                      <button
+                        onClick={() => setSeverity(id, "intolerance")}
+                        aria-pressed={current === "intolerance"}
+                        style={{
+                          ...iosTap,
+                          minHeight: 72, padding: "12px 14px",
+                          border: "none",
+                          background: current === "intolerance"
+                            ? isDark ? "rgba(245,158,11,0.15)" : "rgba(254,243,199,0.7)"
+                            : "transparent",
+                          cursor: "pointer", textAlign: "left",
+                          transition: "background 0.15s",
+                          display: "flex", flexDirection: "column", gap: 4,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${current === "intolerance" ? "#f59e0b" : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"}`, background: current === "intolerance" ? "#f59e0b" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s", flexShrink: 0 }}>
+                            {current === "intolerance" && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} />}
+                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: current === "intolerance" ? "#f59e0b" : "var(--c-text)" }}>Intolerance</span>
+                        </div>
+                        <span style={{ fontSize: 11, color: "var(--c-sub)", lineHeight: 1.4, paddingLeft: 22 }}>Causes discomfort — not life-threatening</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Anaphylactic warning note */}
+            {highRiskSelected.some(({ id }) => (severities[id] ?? "anaphylactic") === "anaphylactic") && (
+              <div style={{
+                display: "flex", alignItems: "flex-start", gap: 8,
+                padding: "10px 12px", borderRadius: 10, marginBottom: 14,
+                background: isDark ? "rgba(239,68,68,0.1)" : "rgba(254,226,226,0.5)",
+                border: `1px solid ${isDark ? "rgba(239,68,68,0.3)" : "rgba(239,68,68,0.25)"}`,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span style={{ fontSize: 12, color: isDark ? "#fca5a5" : "#b91c1c", lineHeight: 1.5 }}>
+                  For anaphylactic allergens we'll show a stronger warning and flag facility-level cross-contamination risks even on "safe" dishes.
+                </span>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                // Fill any severity not yet set with anaphylactic (the default)
+                const final = { ...severities };
+                for (const { id } of highRiskSelected) {
+                  if (!final[id]) final[id] = "anaphylactic";
+                }
+                setSeverities(final);
+                handleFinish(final);
+              }}
+              style={{
+                ...iosTap,
+                width: "100%", minHeight: 54, padding: "15px 0",
+                borderRadius: 16, border: "none",
+                background: "linear-gradient(135deg,#149aab 0%,var(--c-brand) 50%,#35d4e4 100%)",
+                boxShadow: "0 2px 0 rgba(0,0,0,0.15),0 6px 20px rgba(0,150,165,0.3),inset 0 1px 0 rgba(100,230,240,0.3)",
+                color: "var(--c-brand-fg)",
                 fontSize: 17, fontWeight: 800, cursor: "pointer",
                 letterSpacing: "-0.01em",
               }}
             >
-              {selected.size === 0 ? "Continue with no allergens" : `Save ${selected.size} allergen${selected.size !== 1 ? "s" : ""}`}
+              Save &amp; Find Safe Food
             </button>
           </>
         )}
 
-        {/* ── Done ── */}
+        {/* ── Step: Done ────────────────────────────────────────────────── */}
         {step === "done" && (
-          <div style={{ textAlign: "center", padding: "24px 0" }}>
+          <div style={{ textAlign: "center", padding: "28px 0" }}>
             <div style={{
-              width: 64, height: 64, borderRadius: 999,
-              background: isDark ? "#14532d" : "#dcfce7",
+              width: 68, height: 68, borderRadius: 999,
+              background: isDark ? "rgba(22,163,74,0.15)" : "#dcfce7",
+              border: `1.5px solid ${isDark ? "rgba(34,197,94,0.4)" : "rgba(22,163,74,0.3)"}`,
               display: "flex", alignItems: "center", justifyContent: "center",
               margin: "0 auto 16px",
             }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={isDark ? "#86efac" : "#16a34a"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: "var(--c-text)", marginBottom: 6 }}>You&apos;re all set!</div>
-            <div style={{ fontSize: 14, color: "var(--c-sub)" }}>Start searching for safe places to eat.</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", marginBottom: 6, letterSpacing: "-0.02em" }}>
+              You&apos;re all set!
+            </div>
+            <div style={{ fontSize: 14, color: "var(--c-sub)", lineHeight: 1.55 }}>
+              {selected.size > 0
+                ? `Finding restaurants safe for your ${selected.size} allergen${selected.size !== 1 ? "s" : ""}…`
+                : "Start searching for safe places to eat."}
+            </div>
           </div>
         )}
 
