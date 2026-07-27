@@ -9,11 +9,13 @@ export function BottomNav({
   onHomePress,
   query,
   setQuery,
+  isSignedIn,
 }: {
   onMapPress?: () => void;
   onHomePress?: () => void;
   query?: string;
   setQuery?: (q: string) => void;
+  isSignedIn?: boolean;
 }) {
   const pathname   = usePathname();
   const router     = useRouter();
@@ -253,6 +255,25 @@ export function BottomNav({
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
               </Link>
+
+              {/* Allergy Card — signed-in only */}
+              {isSignedIn && (
+                <Link href="/allergy-card" aria-label="My Allergy Card" className="bn-btn" style={{
+                  ...circle,
+                  background: pathname === "/allergy-card"
+                    ? "var(--c-brand)"
+                    : "var(--bn-circle-bg)",
+                }}>
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke={pathname === "/allergy-card" ? "#fff" : "var(--bn-icon)"}
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="3"/>
+                    <path d="M2 10h20"/>
+                    <path d="M6 15h4"/>
+                    <path d="M14 15h4"/>
+                  </svg>
+                </Link>
+              )}
 
               {/* Profile */}
               <Link href="/profile" aria-label="Profile" className="bn-btn" style={circle}>

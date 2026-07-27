@@ -22,6 +22,7 @@ import { ShowStaffCard } from "@/components/ShowStaffCard";
 import { trackEvent } from "@/lib/analytics";
 import { logRestaurantAnalysis } from "@/lib/learning/analysisLog";
 import { useTheme } from "@/lib/themeContext";
+import { useAuth } from "@/lib/authContext";
 import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { analyzeRestaurant, buildDetailViewModel } from "@/lib/analysis";
 import { BottomNav } from "@/components/BottomNav";
@@ -103,8 +104,10 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [orderSaved, setOrderSaved]         = useState(false);
   const [showStaffCard, setShowStaffCard]   = useState(false);
   const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
+  const [menuSearch, setMenuSearch] = useState("");
 
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { allergens: profileAllergens } = useAllergenProfile();
 
@@ -344,10 +347,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     [allItems, orderedItemIds],
   );
 
-  const filteredItems = useMemo(
-    () => (riskFilter === "all" ? allItems : allItems.filter((i) => i.risk === riskFilter)),
-    [allItems, riskFilter],
-  );
+  const filteredItems = useMemo(() => {
+    let items = riskFilter === "all" ? allItems : allItems.filter((i) => i.risk === riskFilter);
+    if (menuSearch.trim()) {
+      const q = menuSearch.toLowerCase();
+      items = items.filter((i) => i.name.toLowerCase().includes(q));
+    }
+    return items;
+  }, [allItems, riskFilter, menuSearch]);
 
   const hasCategories = (vm?.sections.length ?? 0) > 1;
 
@@ -364,15 +371,17 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
   const bySectionFiltered = useMemo(() => {
     if (!vm || !hasCategories) return new Map<string, typeof allItems>();
+    const q = menuSearch.trim().toLowerCase();
     const map = new Map<string, typeof allItems>();
     for (const section of vm.sections) {
-      const items = section.items.filter((i) => riskFilter === "all" || i.risk === riskFilter);
+      let items = section.items.filter((i) => riskFilter === "all" || i.risk === riskFilter);
+      if (q) items = items.filter((i) => i.name.toLowerCase().includes(q));
       if (items.length > 0) map.set(section.sectionName, [...items].sort(
         (a, b) => RISK_ORDER.indexOf(a.risk) - RISK_ORDER.indexOf(b.risk),
       ));
     }
     return map;
-  }, [vm, hasCategories, riskFilter]);
+  }, [vm, hasCategories, riskFilter, menuSearch]);
 
   // ── Guards ──────────────────────────────────────────────────────────────────
   if (notFound) {
@@ -429,7 +438,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             <div key={i} className="skel" style={{ height: 70, borderRadius: 12 }} />
           ))}
         </div>
-        <BottomNav />
+        <BottomNav isSignedIn={!!user} />
       </main>
     );
   }
@@ -962,6 +971,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     onToggleOrder={toggleOrderItem}
                     onOpenOrder={() => setShowOrderSheet(true)}
                     onBrowse={() => setBuilderBrowseMode(true)}
+                    restaurantName={restaurant.name}
                   />
                 </ErrorBoundary>
               </>
@@ -995,6 +1005,37 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   borderBottom: "1px solid var(--c-border)",
                   marginBottom: 16,
                 }}>
+                  {/* Menu search */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, height: 36,
+                    borderRadius: 999, padding: "0 12px",
+                    background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+                    border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
+                  }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--c-sub)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input
+                      value={menuSearch}
+                      onChange={(e) => setMenuSearch(e.target.value)}
+                      placeholder="Search menu…"
+                      autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
+                      style={{
+                        flex: 1, background: "transparent", border: "none", outline: "none",
+                        fontSize: 13, fontWeight: 500, color: "var(--c-text)",
+                        WebkitAppearance: "none",
+                      }}
+                    />
+                    {menuSearch && (
+                      <button onClick={() => setMenuSearch("")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", flexShrink: 0 }}>
+                        <span style={{ width: 16, height: 16, borderRadius: 999, background: "var(--c-sub)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </span>
+                      </button>
+                    )}
+                  </div>
+
                   <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
                     {RISK_CHIPS.map((c) => (
                       <button key={c.value} onClick={() => { setRiskFilter(c.value); setCategoryFilter("all"); }} style={{
