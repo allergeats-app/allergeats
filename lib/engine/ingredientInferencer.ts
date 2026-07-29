@@ -28,15 +28,21 @@ const SORTED_ONTOLOGY: DishEntry[] = [...DISH_ONTOLOGY].sort((a, b) => {
   return maxB - maxA;
 });
 
+// Pre-compile one RegExp per unique variant string — avoids rebuilding ~800-1000
+// regexes per dish item during a menu scan.
+const VARIANT_RE = new Map<string, RegExp>();
+for (const entry of SORTED_ONTOLOGY) {
+  for (const variant of entry.variants) {
+    if (!VARIANT_RE.has(variant)) {
+      const escaped = variant.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      VARIANT_RE.set(variant, new RegExp(`(?<![a-z])${escaped}(?![a-z])`, "i"));
+    }
+  }
+}
+
 /** True if `variant` appears as a whole word (or phrase) inside `text` */
 function matchesVariant(text: string, variant: string): boolean {
-  // Build a regex with word boundaries.
-  // Escape special regex chars in the variant string.
-  const escaped = variant.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  // \b works for ASCII word boundaries; for phrases with spaces we anchor
-  // on start/end-of-word at the outer edges only.
-  const re = new RegExp(`(?<![a-z])${escaped}(?![a-z])`, "i");
-  return re.test(text);
+  return (VARIANT_RE.get(variant) ?? new RegExp(`(?<![a-z])${variant.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![a-z])`, "i")).test(text);
 }
 
 /** Find all ontology entries whose variants match the normalized text */

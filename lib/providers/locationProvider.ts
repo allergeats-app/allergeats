@@ -33,8 +33,14 @@
  */
 
 import type { Restaurant, RestaurantTag, SourceType } from "@/lib/types";
-import { MOCK_RESTAURANTS } from "@/lib/mockRestaurants";
+import { getMockRestaurants, loadMockRestaurants } from "@/lib/mockRestaurantsLazy";
 import { upsertRestaurant, beginRegistryBatch, endRegistryBatch } from "@/lib/registry";
+
+// Start loading the 576KB mock-restaurant bundle in the background as soon as this
+// module is imported — by the time any async provider method runs (after GPS + network
+// round-trips), the data is almost certainly ready and getMockRestaurants() returns it
+// synchronously with no additional latency.
+loadMockRestaurants();
 
 export type Coordinates = {
   lat: number;
@@ -208,7 +214,7 @@ function formatCuisine(raw: string | undefined): string {
 
 function findMockMatch(liveName: string): Restaurant | undefined {
   const lower = liveName.toLowerCase();
-  return MOCK_RESTAURANTS.find((m) => {
+  return getMockRestaurants().find((m) => {
     const mockLower = m.name.toLowerCase();
     return lower.includes(mockLower) || mockLower.includes(lower);
   });
@@ -373,7 +379,7 @@ function supplementWithChains(osmResults: Restaurant[], lat: number, lng: number
       .filter((r) => r.menuItems.length > 0)
       .map((r) => r.name.toLowerCase()),
   );
-  const unmatched = MOCK_RESTAURANTS
+  const unmatched = getMockRestaurants()
     .filter((m) => !matchedNames.has(m.name.toLowerCase()))
     .map((m) => ({
       ...m,
@@ -435,7 +441,7 @@ export class LiveLocationProvider implements LocationProvider {
 );
 out body center 100;`;
 
-    const data     = await fetchOverpass(query);
+    const [data] = await Promise.all([fetchOverpass(query), loadMockRestaurants()]);
     const elements: OverpassElement[] = data.elements ?? [];
 
     const seen    = new Set<string>();
@@ -525,7 +531,8 @@ export class MockLocationProvider implements LocationProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async searchRestaurants(lat: number, lng: number, radiusMiles: number, _accuracy?: number): Promise<Restaurant[]> {
-    return MOCK_RESTAURANTS.map((r) => ({
+    await loadMockRestaurants();
+    return getMockRestaurants().map((r) => ({
       ...r,
       distance:
         r.lat != null && r.lng != null

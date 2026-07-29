@@ -91,39 +91,59 @@ const ALLERGEN_NEGATION_WORDS: Partial<Record<AllergenId, string[]>> = {
   oats:       ["oat"],
 };
 
+// Pre-compile negation regexes for each allergen/word at module init.
+// getNegatedAllergens() was creating ~60-100 RegExp objects per dish item.
+type NegationPatternSet = { xFree: RegExp; freeOf: RegExp; noX: RegExp };
+const NEGATION_PATTERNS: [AllergenId, NegationPatternSet[]][] = (
+  Object.entries(ALLERGEN_NEGATION_WORDS) as [AllergenId, string[]][]
+).map(([allergen, words]) => [
+  allergen,
+  words.map((word) => {
+    const esc = escapeRe(word);
+    return {
+      xFree:  new RegExp(`\\b${esc}s?[\\s-]free\\b`),
+      freeOf: new RegExp(`\\bfree\\s+of\\s+${esc}s?\\b`),
+      noX:    new RegExp(`\\b(?:no|not|without|hold|remove|omit|skip)\\b(?:\\s+\\w+){0,3}\\s+${esc}s?\\b`),
+    };
+  }),
+]);
+
 /**
  * Returns the set of allergens explicitly excluded in the text.
  * Checks both item text and (optionally) the menu section heading.
- * Patterns matched:
- *   "X free" / "X-free"   — e.g. "dairy free", "gluten-free"
- *   "free of X"            — e.g. "free of nuts"
- *   "no/without/omit X"    — e.g. "no butter", "without dairy"
  */
 function getNegatedAllergens(normalized: string, sectionTag?: string): Set<AllergenId> {
   const combined = sectionTag ? `${normalized} ${sectionTag}` : normalized;
   const negated  = new Set<AllergenId>();
 
-  for (const [allergen, words] of Object.entries(ALLERGEN_NEGATION_WORDS) as [AllergenId, string[]][]) {
-    for (const word of words) {
-      const esc = escapeRe(word);
-      if (new RegExp(`\\b${esc}s?[\\s-]free\\b`).test(combined))                                                         { negated.add(allergen); break; }
-      if (new RegExp(`\\bfree\\s+of\\s+${esc}s?\\b`).test(combined))                                                     { negated.add(allergen); break; }
-      if (new RegExp(`\\b(?:no|not|without|hold|remove|omit|skip)\\b(?:\\s+\\w+){0,3}\\s+${esc}s?\\b`).test(combined)) { negated.add(allergen); break; }
+  for (const [allergen, patterns] of NEGATION_PATTERNS) {
+    for (const { xFree, freeOf, noX } of patterns) {
+      if (xFree.test(combined) || freeOf.test(combined) || noX.test(combined)) {
+        negated.add(allergen);
+        break;
+      }
     }
   }
 
   return negated;
 }
 
+// Cache trigger negation regexes — triggers come from a finite vocabulary so this
+// grows to a small fixed size after the first full menu scan.
+const TRIGGER_NEGATION_RE = new Map<string, RegExp>();
+
 /**
  * Returns true if a specific trigger term is negated in the text.
  * Handles ingredient-level negation: "no anchovies", "without butter".
  */
 function isTriggerNegated(normalized: string, trigger: string): boolean {
-  const esc = escapeRe(trigger);
-  return new RegExp(
-    `\\b(?:no|not|without|hold|remove|omit|skip)\\b(?:\\s+\\w+){0,3}\\s+${esc}(?:s|es)?\\b`
-  ).test(normalized);
+  let re = TRIGGER_NEGATION_RE.get(trigger);
+  if (!re) {
+    const esc = escapeRe(trigger);
+    re = new RegExp(`\\b(?:no|not|without|hold|remove|omit|skip)\\b(?:\\s+\\w+){0,3}\\s+${esc}(?:s|es)?\\b`);
+    TRIGGER_NEGATION_RE.set(trigger, re);
+  }
+  return re.test(normalized);
 }
 
 /** Remove signals for allergens/triggers explicitly excluded in the text */
@@ -153,21 +173,19 @@ type SafeTermOverride = {
   allergens: AllergenId[];
 };
 
-const SAFE_TERM_OVERRIDES: SafeTermOverride[] = [
-  { phrase: "cream soda",  allergens: ["dairy"] },
-  { phrase: "cream ale",   allergens: ["dairy"] },
-  { phrase: "egg cream",   allergens: ["egg"]   },  // NYC drink: seltzer + choc syrup + milk; no egg
-  { phrase: "bass ale",    allergens: ["fish"]  },
-  { phrase: "bass beer",   allergens: ["fish"]  },
-  { phrase: "bass lager",  allergens: ["fish"]  },
-  { phrase: "bass pale",   allergens: ["fish"]  },
+const SAFE_TERM_OVERRIDES: (SafeTermOverride & { re: RegExp })[] = [
+  { phrase: "cream soda",  allergens: ["dairy"], re: /\bcream soda\b/i  },
+  { phrase: "cream ale",   allergens: ["dairy"], re: /\bcream ale\b/i   },
+  { phrase: "egg cream",   allergens: ["egg"],   re: /\begg cream\b/i   },  // NYC drink: no egg
+  { phrase: "bass ale",    allergens: ["fish"],  re: /\bbass ale\b/i    },
+  { phrase: "bass beer",   allergens: ["fish"],  re: /\bbass beer\b/i   },
+  { phrase: "bass lager",  allergens: ["fish"],  re: /\bbass lager\b/i  },
+  { phrase: "bass pale",   allergens: ["fish"],  re: /\bbass pale\b/i   },
 ];
 
 /** Remove signals that are false positives for well-known drink / idiom phrases. */
 function filterSafeTermSignals(signals: RiskSignal[], normalized: string): RiskSignal[] {
-  const active = SAFE_TERM_OVERRIDES.filter(({ phrase }) =>
-    new RegExp(`\\b${escapeRe(phrase)}\\b`).test(normalized)
-  );
+  const active = SAFE_TERM_OVERRIDES.filter(({ re }) => re.test(normalized));
   if (active.length === 0) return signals;
 
   return signals.filter((signal) => {
@@ -445,8 +463,10 @@ function analyzeDish(
   // Layer 1 + 2: direct ingredients + synonyms + dish/sauce inference (via vocab)
   allSignals.push(...userVocabSignals);
 
-  // Layer 3: structured dish/ingredient ontology (ingredient-chain reasoning)
-  allSignals.push(...detectIngredientSignals(dish.normalized, userAllergens));
+  // Layer 3: structured dish/ingredient ontology (ingredient-chain reasoning).
+  // Run once for ALL_ALLERGENS and partition — avoids a second full scan at line ~476.
+  const allOntologySignals = detectIngredientSignals(dish.normalized, ALL_ALLERGENS);
+  allSignals.push(...allOntologySignals.filter((s) => userAllergens.includes(s.allergen)));
 
   // Layer 4: preparation method risks
   allSignals.push(...getPrepSignals(dish.normalized, userAllergens));
@@ -472,8 +492,7 @@ function analyzeDish(
 
   // Collect ALL detected allergens (not just user's profile) for informational display
   // (e.g. "also contains shellfish" even if the user only set peanut allergy).
-  // allVocabSignals already covers ALL_ALLERGENS — reuse it here.
-  const allOntologySignals = detectIngredientSignals(dish.normalized, ALL_ALLERGENS);
+  // allOntologySignals and allVocabSignals already cover ALL_ALLERGENS — reuse them.
   const allDetected = [...new Set([
     ...allVocabSignals.map((s) => s.allergen),
     ...allOntologySignals.map((s) => s.allergen),

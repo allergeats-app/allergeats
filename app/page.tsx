@@ -61,6 +61,21 @@ function matchesType(r: { tags?: import("@/lib/types").RestaurantTag[] }, type: 
   return r.tags?.includes(type) ?? false;
 }
 
+async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      { headers: { "Accept-Language": "en", "User-Agent": "AllergEats/1.0" } }
+    );
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const a = data.address ?? {};
+    return a.neighbourhood ?? a.suburb ?? a.city_district ?? a.city ?? a.town ?? a.village ?? "Nearby";
+  } catch {
+    return "Nearby";
+  }
+}
+
 function HomePageSkeleton() {
   return (
     <main style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
@@ -138,21 +153,6 @@ function HomeContent() {
     onlySaved,
     radiusMiles !== 10,
   ].filter(Boolean).length;
-
-  async function reverseGeocode(lat: number, lng: number): Promise<string> {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        { headers: { "Accept-Language": "en", "User-Agent": "AllergEats/1.0" } }
-      );
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      const a = data.address ?? {};
-      return a.neighbourhood ?? a.suburb ?? a.city_district ?? a.city ?? a.town ?? a.village ?? "Nearby";
-    } catch {
-      return "Nearby";
-    }
-  }
 
   useEffect(() => {
     let cancelled = false;
