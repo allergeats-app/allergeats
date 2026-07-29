@@ -92,7 +92,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
         {/* ── Cover image ── */}
         <div style={{
           height: imgHeight,
-          background: isLogo && photoLoaded ? (isDark ? "#1a1a1a" : "#f8f8f8") : photoLoaded ? "var(--c-card)" : cover.bg,
+          background: isLogo && photoLoaded ? "#ffffff" : photoLoaded ? "var(--c-card)" : cover.bg,
           display: "flex", alignItems: "center", justifyContent: "center",
           position: "relative", overflow: "hidden",
           transition: "background 0.3s ease",

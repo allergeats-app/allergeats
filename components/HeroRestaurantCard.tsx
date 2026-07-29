@@ -91,7 +91,7 @@ export function HeroRestaurantCard({ restaurant: r }: Props) {
         <div style={{
           height: 220,
           position: "relative",
-          background: isLogo && photoLoaded ? (isDark ? "#111" : "#f9f9f9") : cover,
+          background: isLogo && photoLoaded ? "#ffffff" : cover,
           overflow: "hidden",
         }}>
           {photoSrc && (
