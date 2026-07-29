@@ -1138,6 +1138,7 @@ menuItems: [
       { id: "wen-jr-cheese",           name: "Jr. Cheeseburger",                          category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
       { id: "wen-jr-burger",           name: "Jr. Hamburger",                             category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","sesame"] },
       // ── Burgers — Specialty ───────────────────────────────────────────────
+      { id: "wen-curry-bean-burger",   name: "Curry Bean Burger",                          category: "Entrée",         sourceType: "official", allergens: ["dairy","egg","soy","wheat","sesame"] },
       { id: "wen-pretzel-baconator",   name: "Pretzel Baconator",                         category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "wen-pretzel-pub-dbl",     name: "Pretzel Bacon Pub Double",                  category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "wen-pretzel-pub-tri",     name: "Pretzel Bacon Pub Triple",                  category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
@@ -1148,7 +1149,8 @@ menuItems: [
       { id: "wen-asiago-classic",      name: "Asiago Ranch Classic Chicken Club",         category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
       { id: "wen-asiago-spicy",        name: "Asiago Ranch Spicy Chicken Club",           category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
       { id: "wen-crispy-ch-new",       name: "Crispy Chicken Sandwich",                   category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
-      { id: "wen-grilled-ch",          name: "Grilled Chicken Sandwich",                  category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "wen-grilled-ch",          name: "Grilled Chicken Sandwich",                  category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "wen-avocado-club",         name: "Avocado Chicken Club",                      category: "Entrée",         sourceType: "official", allergens: ["dairy","egg","soy","wheat","sesame"] },
       // ── Chicken Wraps ─────────────────────────────────────────────────────
       { id: "wen-crispy-wrap",         name: "Crispy Chicken Wrap",                       category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "wen-grilled-wrap",        name: "Grilled Chicken Wrap",                      category: "Entrée",         sourceType: "official", allergens: ["wheat","dairy","soy"] },
