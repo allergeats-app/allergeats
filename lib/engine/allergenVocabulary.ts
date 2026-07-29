@@ -687,4 +687,23 @@ export const ALLERGEN_VOCABULARY: VocabEntry[] = [
   { term: "chicken pot pie",allergens: ["wheat", "gluten", "dairy", "egg"],  source: "dish" },
   { term: "corndog",        allergens: ["corn", "wheat", "gluten", "egg"],   source: "dish",    note: "Hot dog dipped in cornmeal + wheat batter" },
   { term: "corn dog",       allergens: ["corn", "wheat", "gluten", "egg"],   source: "dish" },
+
+  // ─── DAIRY — Middle Eastern / global menu terms ────────────────────────────
+  { term: "labneh",         allergens: ["dairy"],              source: "direct",  note: "Strained yogurt cheese common in Lebanese and Middle Eastern cooking" },
+  { term: "labne",          allergens: ["dairy"],              source: "direct",  note: "Alternative spelling of labneh" },
+  { term: "clotted cream",  allergens: ["dairy"],              source: "direct",  note: "Thick British-style cream served with scones and desserts" },
+  { term: "milk solids",    allergens: ["dairy"],              source: "synonym", note: "Dried dairy component in processed items" },
+  { term: "milk powder",    allergens: ["dairy"],              source: "synonym" },
+  { term: "dry milk",       allergens: ["dairy"],              source: "synonym" },
+  { term: "butter flavoring",allergens: ["dairy"],             source: "synonym", note: "Typically dairy-derived flavoring agent" },
+  { term: "butter flavored", allergens: ["dairy"],             source: "synonym" },
+
+  // ─── SHELLFISH + FISH — Upscale condiments ─────────────────────────────────
+  { term: "xo sauce",       allergens: ["shellfish", "fish"],  source: "sauce",   note: "Hong Kong luxury condiment made from dried shrimp, scallop, and fish" },
+
+  // ─── SOY + WHEAT — Chinese and Korean fermented pastes ─────────────────────
+  { term: "doubanjiang",    allergens: ["soy", "wheat"],       source: "direct",  note: "Sichuan fermented broad bean and chili paste — contains soy and typically wheat" },
+  { term: "toban djan",     allergens: ["soy", "wheat"],       source: "direct",  note: "Common Romanization of doubanjiang" },
+  { term: "tobanjian",      allergens: ["soy", "wheat"],       source: "direct" },
+  { term: "pixian",         allergens: ["soy", "wheat"],       source: "direct",  note: "Pixian doubanjiang — a specific Sichuan fermented chili bean paste" },
 ];

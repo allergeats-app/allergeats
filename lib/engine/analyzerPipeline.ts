@@ -343,15 +343,52 @@ function detectContainsLabelSignals(normalized: string, userAllergens: AllergenI
 
 const MAY_CONTAIN_RE = new RegExp(
   "\\b(?:" +
+    // Standard packaged-food precautionary labels
     "may\\s+contain(?:\\s+traces?\\s+of)?|" +
     "traces?\\s+of|" +
-    "(?:made|produced|processed|manufactured|packaged)\\s+(?:in|on)\\s+(?:a\\s+)?(?:shared\\s+)?(?:facility|equipment|line|plant)\\s+(?:that\\s+)?(?:also\\s+)?(?:process(?:es)?|handles?|uses?|contains?|with)" +
+    "(?:made|produced|processed|manufactured|packaged)\\s+(?:in|on)\\s+(?:a\\s+)?(?:shared\\s+)?(?:facility|equipment|line|plant)\\s+(?:that\\s+)?(?:also\\s+)?(?:process(?:es)?|handles?|uses?|contains?|with)|" +
+    // Restaurant-specific cross-contact language
+    "(?:cooked?|fried|prepared|grilled|seared)\\s+(?:in|on|with)\\s+(?:the\\s+)?(?:same\\s+)?(?:oil|fryer|grill|pan|wok|griddle|broiler)\\s+(?:as|that\\s+(?:also\\s+)?(?:cook|fry|grill)s?)|" +
+    "shared\\s+(?:fryer|grill|wok|pan|oil)|" +
+    "uses?\\s+shared\\s+(?:fryer|grill|wok|pan|cookware|equipment|oil)|" +
+    "(?:may\\s+)?(?:have\\s+)?(?:come\\s+into|contact\\s+with)\\s+(?:allergens?|)?|" +
+    "prepared\\s+(?:alongside|next\\s+to|near|in\\s+a\\s+kitchen\\s+(?:that\\s+)?(?:also\\s+)?(?:uses?|handles?|contains?))" +
   ")\\s*:?\\s*([^.;\\n]{2,200})",
   "gi"
 );
 
 /**
+ * Resolves allergens from a captured cross-contamination text fragment.
+ * Tries multi-word lookup first, then scans individual words and bigrams
+ * as a fallback for phrases like "items containing peanuts" or "nut products".
+ */
+function resolveAllergensFromText(text: string, userAllergens: AllergenId[]): AllergenId[] {
+  const found = new Set<AllergenId>();
+  const segments = text.split(/[,;&]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+
+  for (const segment of segments) {
+    // Multi-word lookup (up to 3 words)
+    const key = segment.replace(/\s+/g, " ").split(" ").slice(0, 3).join(" ");
+    const direct = LABEL_ALLERGEN_MAP[key] ?? LABEL_ALLERGEN_MAP[segment];
+    if (direct && userAllergens.includes(direct)) { found.add(direct); continue; }
+
+    // Scan individual words and bigrams — catches "items containing peanuts", "nut products"
+    const words = segment.split(/\s+/);
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      const bigram = i + 1 < words.length ? `${w} ${words[i + 1]}` : null;
+      const a = LABEL_ALLERGEN_MAP[w] ?? (bigram ? LABEL_ALLERGEN_MAP[bigram] : undefined);
+      if (a && userAllergens.includes(a)) found.add(a);
+    }
+  }
+
+  return [...found];
+}
+
+/**
  * Detects precautionary allergen disclosures and emits weight-2 signals.
+ * Covers both packaged-food labels ("may contain", "made in a facility with") and
+ * restaurant-specific cross-contact language ("cooked in the same fryer as shellfish").
  * Weight-2 maps to "ask" (not "avoid") — cross-contamination risk, not confirmed ingredient.
  */
 function detectMayContainSignals(normalized: string, userAllergens: AllergenId[]): RiskSignal[] {
@@ -360,17 +397,15 @@ function detectMayContainSignals(normalized: string, userAllergens: AllergenId[]
   let match: RegExpExecArray | null;
 
   while ((match = re.exec(normalized)) !== null) {
-    const items = match[1].split(/[,;&]+/).map((s) => s.trim()).filter(Boolean);
-    for (const item of items) {
-      const key = item.toLowerCase().replace(/\s+/g, " ").split(" ").slice(0, 3).join(" ");
-      const allergen = LABEL_ALLERGEN_MAP[key] ?? LABEL_ALLERGEN_MAP[item.toLowerCase()];
-      if (!allergen || !userAllergens.includes(allergen)) continue;
+    const capturedText = match[1];
+    const allergens = resolveAllergensFromText(capturedText, userAllergens);
+    for (const allergen of allergens) {
       signals.push({
         allergen,
-        source:  "prep",  // reuse prep weight (2) — cross-contamination risk
+        source:  "prep",
         weight:  2,
-        trigger: item,
-        reason:  `May contain (precautionary label) — cross-contamination risk`,
+        trigger: capturedText.trim().slice(0, 60),
+        reason:  `Cross-contamination risk — ${capturedText.trim().slice(0, 80)}`,
       });
     }
   }

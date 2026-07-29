@@ -20,7 +20,7 @@
 import { scoreMenuItem, scoreRestaurant, coverageTier, coverageTierLabel } from "@/lib/scoring";
 import { INGESTION_SOURCE_TO_LEGACY } from "@/lib/menu-ingestion/types";
 import type { NormalizedMenu } from "@/lib/menu-ingestion/types";
-import type { Restaurant, AllergenId, SourceType } from "@/lib/types";
+import type { Restaurant, AllergenId, AllergenSeverity, SourceType } from "@/lib/types";
 import type {
   AnalyzedMenuItem,
   AnalyzedMenuSection,
@@ -116,11 +116,12 @@ function buildSectionSummary(items: AnalyzedMenuItem[]): Pick<AnalyzedMenuSectio
 export function analyzeNormalizedMenu(
   menu: NormalizedMenu,
   userAllergens: AllergenId[],
-  opts: { cuisine?: string; menuVersionId?: string } = {},
+  opts: { cuisine?: string; menuVersionId?: string; severities?: Partial<Record<AllergenId, AllergenSeverity>> } = {},
 ): RestaurantMenuAnalysis {
-  const legacySource  = INGESTION_SOURCE_TO_LEGACY[menu.sourceType];
+  const legacySource   = INGESTION_SOURCE_TO_LEGACY[menu.sourceType];
   const cuisineContext = opts.cuisine ?? menu.restaurantName;
-  const analyzedAt    = new Date().toISOString();
+  const analyzedAt     = new Date().toISOString();
+  const severities     = opts.severities ?? {};
 
   const sections: AnalyzedMenuSection[] = menu.sections.map((section) => {
     const items: AnalyzedMenuItem[] = section.items.map((normItem) => {
@@ -136,6 +137,7 @@ export function analyzeNormalizedMenu(
         legacySource,
         userAllergens,
         cuisineContext,
+        severities,
       );
 
       return {
