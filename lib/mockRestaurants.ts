@@ -36,7 +36,7 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     facilityAllergens: ["wheat", "dairy", "egg", "soy", "sesame"],
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Entrée","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Entrée" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
       ],
@@ -925,7 +925,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Lunch Meal","Breakfast Meal"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Lunch Meal" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Add a shake",        category: "Drink",  required: false, maxSelect: 1  },
       ],
@@ -1089,7 +1089,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Lunch Meal","Breakfast Meal"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Lunch Meal" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Add a Frosty",       category: "Drink",  required: false, maxSelect: 1  },
       ],
@@ -1438,7 +1438,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",     category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",     category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
         { label: "Pick a style of fries", category: "Fries",    required: false, maxSelect: 1 },
         { label: "Add a shake",           category: "Shakes",   required: false, maxSelect: 1 },
       ],
@@ -1536,7 +1536,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Combos","Meal","Sandwiches","Tenders"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
       ],
     },
@@ -1675,7 +1675,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
         { label: "Pick a side",        category: "Side",   required: true,  maxSelect: 2  },
       ],
     },
@@ -2803,7 +2803,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",       category: "Combos",    required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",       category: "Combos",    required: true,  maxSelect: 1, showAsCombo: true },
         { label: "Add extra dipping sauce", category: "Sauces",    required: false, maxSelect: 99 },
         { label: "Add a drink",             category: "Beverages", required: false, maxSelect: 1 },
       ],
@@ -2832,7 +2832,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Combos","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
       ],
@@ -3026,7 +3026,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Combos","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
       ],
     },
@@ -3148,7 +3148,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",  category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
         { label: "Pick a side",        category: "Sides",    required: false, maxSelect: 1 },
         { label: "Add a Blizzard",     category: "Blizzard", required: false, maxSelect: 1 },
       ],
@@ -3624,7 +3624,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Combos","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
       ],
@@ -4098,7 +4098,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Add a milkshake",    category: "Drink",  required: false, maxSelect: 1  },
       ],
@@ -4126,7 +4126,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Sandwiches", required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Sandwiches","Chicken","Tenders","Breakfast"], required: true,  maxSelect: 1, showAsCombo: true, category: "Sandwiches" },
         { label: "Pick a side",        category: "Sides",      required: false, maxSelect: 1 },
         { label: "Add a biscuit",      category: "Biscuits",   required: false, maxSelect: 1 },
       ],
@@ -4173,7 +4173,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Burgers","Chicken","Breakfast"], required: true,  maxSelect: 1, showAsCombo: true, category: "Burgers" },
         { label: "Pick a side",        category: "Sides",    required: false, maxSelect: 1 },
         { label: "Add a shake",        category: "Shakes",   required: false, maxSelect: 1 },
       ],
@@ -4362,7 +4362,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",  category: "Burgers",  required: true,  maxSelect: 1, showAsCombo: true },
         { label: "Pick a side",        category: "Sides",    required: false, maxSelect: 1 },
         { label: "Add a shake",        category: "Shakes",   required: false, maxSelect: 1 },
       ],
@@ -4402,7 +4402,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
+        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 2  },
       ],
     },
@@ -4428,7 +4428,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  category: "Burgers",   required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "What's your meal?",  categories: ["Charburgers","Sandwiches"], required: true,  maxSelect: 1, showAsCombo: true, category: "Charburgers" },
         { label: "Pick a side",        category: "Sides",     required: false, maxSelect: 1 },
         { label: "Add a shake",        category: "Shakes",    required: false, maxSelect: 1 },
       ],
@@ -4670,7 +4670,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your combo",  categories: ["Burritos","Bowls","Tacos","Quesadillas"], required: true,  maxSelect: 1, showAsCombo: true, category: "Burritos" },
+        { label: "What's your meal?",  categories: ["Burritos","Bowls","Tacos","Quesadillas"], required: true,  maxSelect: 1, showAsCombo: true, category: "Burritos" },
         { label: "Pick a side",        category: "Sides",      required: false, maxSelect: 2 },
       ],
     },
