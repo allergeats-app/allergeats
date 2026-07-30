@@ -32,9 +32,10 @@ type Props = {
 
 export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOrder, onOpenOrder, onBrowse, restaurantName }: Props) {
   const { isDark } = useTheme();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [done, setDone]               = useState(false);
-  const [copied, setCopied]           = useState(false);
+  const [currentStep, setCurrentStep]     = useState(0);
+  const [done, setDone]                   = useState(false);
+  const [copied, setCopied]               = useState(false);
+  const [confirmedItemId, setConfirmedItemId] = useState<string | null>(null);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => { if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current); }, []);
@@ -57,6 +58,10 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   const allAvoid     = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
   const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
 
+  const priorPickedItems = steps.slice(0, currentStep).flatMap((s) =>
+    getStepItems(s).filter((i) => orderedItemIds.has(i.id))
+  );
+
   const totalBuilderItems = steps.reduce((n, s) => {
     return n + getStepItems(s).filter((i) => orderedItemIds.has(i.id)).length;
   }, 0);
@@ -68,11 +73,13 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         if (stepItem.id !== item.id && orderedItemIds.has(stepItem.id)) onToggleOrder(stepItem.id);
       }
       if (!orderedItemIds.has(item.id)) onToggleOrder(item.id);
+      setConfirmedItemId(item.id);
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
       advanceTimerRef.current = setTimeout(() => {
+        setConfirmedItemId(null);
         if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
         else setDone(true);
-      }, 280);
+      }, 420);
     } else {
       onToggleOrder(item.id);
     }
@@ -228,26 +235,73 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
 
   // ── Step state ────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-      {/* ── Progress bar ── */}
-      <div style={{ display: "flex", gap: 5 }}>
-        {steps.map((_, i) => {
+      {/* ── Step breadcrumbs ── */}
+      <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
+        {steps.map((s, i) => {
           const isComplete = i < currentStep;
           const isCurrent  = i === currentStep;
           return (
-            <div key={i} style={{
-              flex: 1, height: 4, borderRadius: 999,
-              background: isComplete
-                ? "var(--c-brand)"
-                : isCurrent
-                  ? isDark ? "rgba(31,189,204,0.45)" : "rgba(31,189,204,0.35)"
-                  : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-              transition: "all 0.3s ease",
-            }} />
+            <button
+              key={i}
+              type="button"
+              onClick={() => { if (isComplete) setCurrentStep(i); }}
+              style={{
+                flexShrink: 0,
+                padding: "5px 11px", borderRadius: 999,
+                fontSize: 11, fontWeight: 800, letterSpacing: "0.03em",
+                border: isCurrent
+                  ? "1.5px solid var(--c-brand)"
+                  : isComplete
+                    ? `1px solid ${isDark ? "rgba(31,189,204,0.3)" : "rgba(31,189,204,0.35)"}`
+                    : `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
+                background: isCurrent
+                  ? isDark ? "rgba(31,189,204,0.12)" : "rgba(31,189,204,0.08)"
+                  : "transparent",
+                color: isCurrent
+                  ? "var(--c-brand)"
+                  : isComplete
+                    ? isDark ? "rgba(31,189,204,0.85)" : "rgba(0,150,163,0.9)"
+                    : "var(--c-sub)",
+                cursor: isComplete ? "pointer" : "default",
+                transition: "all 0.2s ease",
+                display: "flex", alignItems: "center", gap: 4,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              {isComplete && (
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+              {stepSummaryLabel(s.label)}
+            </button>
           );
         })}
       </div>
+
+      {/* ── Running order tray ── */}
+      {priorPickedItems.length > 0 && (
+        <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
+          {priorPickedItems.map((item) => {
+            const riskColor = RISK_COLOR[item.risk] ?? "#9ca3af";
+            return (
+              <span key={item.id} style={{
+                flexShrink: 0, fontSize: 12, fontWeight: 600,
+                padding: "4px 10px", borderRadius: 999,
+                background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+                color: "var(--c-text)",
+                display: "inline-flex", alignItems: "center", gap: 5,
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: riskColor, flexShrink: 0 }} />
+                {item.name}
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── Step header ── */}
       <div style={{ ...glass, padding: "18px 20px" }}>
@@ -393,14 +447,28 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                   )}
                 </div>
 
-                {/* Safety badge */}
-                <span style={{
-                  fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999,
-                  background: badge.bg, color: badge.color, flexShrink: 0,
-                  letterSpacing: "0.02em", border: `1px solid ${badge.bg}`,
-                }}>
-                  {badge.label}
-                </span>
+                {/* Safety badge / confirmation flash */}
+                {confirmedItemId === item.id ? (
+                  <span style={{
+                    fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999,
+                    background: "rgba(22,163,74,0.12)", color: "#16a34a", flexShrink: 0,
+                    letterSpacing: "0.02em", border: "1px solid rgba(22,163,74,0.25)",
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                  }}>
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Added
+                  </span>
+                ) : (
+                  <span style={{
+                    fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999,
+                    background: badge.bg, color: badge.color, flexShrink: 0,
+                    letterSpacing: "0.02em", border: `1px solid ${badge.bg}`,
+                  }}>
+                    {badge.label}
+                  </span>
+                )}
 
                 {/* Check/radio indicator */}
                 {!isAvoid && (
