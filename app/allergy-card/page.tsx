@@ -14,7 +14,14 @@ export default function AllergyCardPage() {
   const [hydrated, setHydrated]     = useState(false);
 
   useEffect(() => {
-    setAllergens(loadProfileAllergens() as AllergenId[]);
+    // Shared links encode allergens as ?a=peanut,dairy — use those when present
+    const params = new URLSearchParams(window.location.search);
+    const paramA = params.get("a");
+    if (paramA) {
+      setAllergens(paramA.split(",").filter(Boolean) as AllergenId[]);
+    } else {
+      setAllergens(loadProfileAllergens() as AllergenId[]);
+    }
     setSeverities(loadProfileSeverities());
     setHydrated(true);
   }, []);

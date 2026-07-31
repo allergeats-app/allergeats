@@ -31,16 +31,19 @@ import type {
   RestaurantMenuAnalysis,
   RestaurantDetailViewModel,
   AnalyzedMenuItem,
-  MemoryInsight,
 } from "@/lib/analysis";
 import { applyMemoryToAnalysis } from "@/lib/learning/memoryIntegration";
 import { useRestaurantMemory } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackParams } from "@/lib/learning/useRestaurantMemory";
-import type { FeedbackType } from "@/lib/learning/types";
 import type { Restaurant, Risk, AllergenId, AllergenSeverity } from "@/lib/types";
 import { loadProfileSeverities } from "@/lib/allergenProfile";
 import { coverGradient } from "@/lib/coverGradient";
 import { chainLogoUrl } from "@/lib/chainLogos";
+import { StatBlock } from "@/components/restaurant-detail/StatBlock";
+import { SectionHeader } from "@/components/restaurant-detail/SectionHeader";
+import { MemoryInsightCard } from "@/components/restaurant-detail/MemoryInsightCard";
+import { FeedbackRow } from "@/components/restaurant-detail/FeedbackRow";
+import { MenuFreshnessNotice } from "@/components/restaurant-detail/MenuFreshnessNotice";
 
 type RiskFilter = "all" | Risk;
 
@@ -54,12 +57,6 @@ const RISK_META: Record<Risk, { label: string; mark: string; color: string; bg: 
   "unknown":     { label: "Unknown",     mark: "–", color: "var(--c-sub)",         bg: "var(--c-muted)",         border: "var(--c-border)",        badgeBg: "var(--c-muted)"        },
 };
 
-const QUICK_FEEDBACK: { type: FeedbackType; label: string }[] = [
-  { type: "confirmed-safe",           label: "Was safe for me ✓" },
-  { type: "found-unsafe",             label: "Had my allergen ✗" },
-  { type: "false-positive",           label: "App wrongly flagged" },
-  { type: "needs-staff-confirmation", label: "Ask staff ?" },
-];
 
 
 function findRestaurant(id: string): Restaurant | undefined {
@@ -1024,6 +1021,15 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 )}
                 <SectionHeader label="Menu" count={summary.total} />
 
+                {/* Menu data freshness notice */}
+                {restaurant && (
+                  <MenuFreshnessNotice
+                    restaurantId={restaurant.id}
+                    isChainTemplate={!!restaurant.menuIsGenericChainTemplate}
+                    isDark={isDark}
+                  />
+                )}
+
                 {/* Sticky risk filter chips */}
                 <div style={{
                   position: "sticky",
@@ -1803,41 +1809,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   );
 }
 
-// ── Helper components ─────────────────────────────────────────────────────────
-
-function StatBlock({
-  count, label, color, rgb, isDark, active, onClick,
-}: {
-  count: number; label: string; color: string; rgb: string; isDark: boolean;
-  active?: boolean; onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={`Show ${label.toLowerCase()} items`}
-      style={{
-        textAlign: "center",
-        padding: "12px 8px",
-        borderRadius: 14,
-        background: active
-          ? `rgba(${rgb},${isDark ? "0.22" : "0.14"})`
-          : `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
-        border: active
-          ? `1.5px solid rgba(${rgb},${isDark ? "0.65" : "0.50"})`
-          : `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
-        boxShadow: active
-          ? `0 4px 20px rgba(${rgb},${isDark ? "0.35" : "0.20"})`
-          : count > 0 ? `0 4px 16px rgba(${rgb},${isDark ? "0.25" : "0.12"})` : "none",
-        cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
-      }}
-    >
-      <div style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.04em", lineHeight: 1 }}>{count}</div>
-      <div style={{ fontSize: 11, fontWeight: 800, color, opacity: 0.8, marginTop: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-    </button>
-  );
-}
+// ── Module-level helpers (not components) ─────────────────────────────────────
 
 const DRINK_KEYWORDS = [
   "beverage", "drink", "coffee", "tea", "frappuccino", "shake", "smoothie",
@@ -1848,142 +1820,4 @@ const DRINK_KEYWORDS = [
 function isDrinkSection(name: string): boolean {
   const lower = name.toLowerCase();
   return DRINK_KEYWORDS.some((k) => new RegExp(`\\b${k}s?\\b`).test(lower));
-}
-
-function SectionHeader({ label, count }: { label: string; count?: number }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 12px" }}>
-      <span style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em" }}>{label}</span>
-      {count != null && (
-        <span style={{
-          fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
-          background: "var(--c-muted)", borderRadius: 999,
-          padding: "2px 8px",
-        }}>
-          {count}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** Renders one memory insight card in the Community Knowledge section. */
-function MemoryInsightCard({ insight }: { insight: MemoryInsight }) {
-  return (
-    <div style={{
-      background: "var(--c-card)", border: "1px solid var(--c-border)",
-      borderRadius: 14, padding: "12px 14px",
-      display: "flex", alignItems: "flex-start", gap: 12,
-    }}>
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: "var(--c-text)", lineHeight: 1.3 }}>
-          {insight.title}
-        </div>
-        <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
-          {insight.description}
-        </div>
-      </div>
-      <span style={{
-        flexShrink: 0, padding: "3px 9px", borderRadius: 999,
-        background: `${insight.badgeColor}20`,
-        color: insight.badgeColor,
-        border: `1px solid ${insight.badgeColor}40`,
-        fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
-      }}>
-        {insight.badgeLabel}
-      </span>
-    </div>
-  );
-}
-
-/**
- * Per-item feedback trigger shown below each MenuItemCard.
- * Collapsed by default ("Report" link). Expands to 4 quick-feedback buttons.
- * Collapses to a confirmation message after submission.
- */
-function FeedbackRow({
-  item,
-  userAllergens,
-  onSubmit,
-}: {
-  item: AnalyzedMenuItem;
-  userAllergens: AllergenId[];
-  onSubmit: (params: Omit<FeedbackParams, "dishName" | "menuItemId">) => void;
-}) {
-  const [expanded,  setExpanded]  = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  if (submitted) {
-    return (
-      <div style={{ fontSize: 13, color: "#15803d", padding: "6px 4px 8px", textAlign: "right" }}>
-        Thanks for your report ✓
-      </div>
-    );
-  }
-
-  if (!expanded) {
-    return (
-      <div style={{ textAlign: "right" }}>
-        <button
-          onClick={() => setExpanded(true)}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 13, color: "#6b7280", padding: "8px 4px",
-            minHeight: 44, display: "inline-flex", alignItems: "center",
-            textDecoration: "underline", textUnderlineOffset: "2px",
-          }}
-        >
-          &#9873; Report issue
-        </button>
-      </div>
-    );
-  }
-
-  // Pre-fill allergen: prefer what caused the flag, fallback to first user allergen
-  const defaultAllergen = item.userAllergenHits[0] ?? userAllergens[0];
-
-  return (
-    <div style={{
-      background: "var(--c-muted)", borderRadius: "0 0 12px 12px",
-      padding: "12px 14px 14px", marginTop: -2,
-      border: "1px solid var(--c-border)", borderTop: "none",
-    }}>
-      <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 10, fontWeight: 600 }}>
-        What happened with <strong style={{ color: "var(--c-text)" }}>{item.name}</strong>?
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {QUICK_FEEDBACK.map((opt) => (
-          <button
-            key={opt.type}
-            onClick={() => {
-              onSubmit({
-                type:               opt.type,
-                allergen:           defaultAllergen,
-                originalRisk:       item.risk,
-                originalConfidence: item.confidence,
-              });
-              setSubmitted(true);
-            }}
-            style={{
-              padding: "9px 14px", borderRadius: 10,
-              border: "1px solid var(--c-border)",
-              background: "var(--c-card)", color: "var(--c-text)",
-              fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: 44,
-            }}
-          >
-            {opt.label}
-          </button>
-        ))}
-        <button
-          onClick={() => setExpanded(false)}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 13, color: "var(--c-sub)", padding: "9px 8px", minHeight: 44,
-          }}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
 }
