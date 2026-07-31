@@ -4700,6 +4700,200 @@ menuItems: [
       { id: "epl-chips-salsa",     name: "Chips & Salsa",                    category: "Sides",      sourceType: "official", allergens: ["corn"] },
     ],
   },
+
+  // ─── Del Taco ────────────────────────────────────────────────────────────────
+  // Source: deltaco.com allergen information (hard shell = corn, flour = wheat)
+  {
+    id: "del-taco",
+    name: "Del Taco",
+    imageUrl: "/logos/del-taco.svg",
+    cuisine: "Mexican · Fast Food",
+    tags: ["mexican", "fast-food"],
+    distance: 1.2,
+    sourceType: "official",
+    dataVerifiedDate: "2026-07-31",
+    builderConfig: {
+      steps: [
+        { label: "What's your meal?", categories: ["Tacos","Burritos","Specialties"], required: true, maxSelect: 1, showAsCombo: true, category: "Tacos" },
+        { label: "Pick a side",       category: "Sides",    required: false, maxSelect: 1 },
+        { label: "Pick a drink",      category: "Beverages",required: false, maxSelect: 1 },
+      ],
+    },
+    menuItems: [
+      // ── Tacos ─────────────────────────────────────────────────────────────
+      { id: "dt-del-taco",             name: "Del Taco (Hard Shell)",           category: "Tacos",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "dt-soft-taco",            name: "Soft Taco",                       category: "Tacos",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-double-del-taco",      name: "Double Del Taco (Hard Shell)",    category: "Tacos",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "dt-crispy-shrimp-taco",   name: "Crispy Shrimp Taco",              category: "Tacos",      sourceType: "official", allergens: ["wheat","shellfish","egg","soy"] },
+      { id: "dt-beyond-taco",          name: "Beyond Taco (Hard Shell)",        category: "Tacos",      sourceType: "official", allergens: ["dairy","soy","wheat"] },
+      { id: "dt-beyond-soft-taco",     name: "Beyond Soft Taco",               category: "Tacos",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // ── Burritos ──────────────────────────────────────────────────────────
+      { id: "dt-bean-cheese-burrito",  name: "Bean & Cheese Burrito",           category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-del-beef-burrito",     name: "Del Beef Burrito",                category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-combo-burrito",        name: "Del Combo Burrito",               category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-macho-beef-burrito",   name: "Macho Beef Burrito",              category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-chicken-burrito",      name: "Crispy Chicken Burrito",          category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "dt-beyond-burrito",       name: "Beyond 8 Layer Burrito",          category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-epic-shrimp-burrito",  name: "Epic Shrimp Burrito",             category: "Burritos",   sourceType: "official", allergens: ["wheat","shellfish","egg","dairy","soy"] },
+      // ── Breakfast ─────────────────────────────────────────────────────────
+      { id: "dt-egg-cheese-burrito",   name: "Egg & Cheese Burrito",            category: "Breakfast",  sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dt-bacon-egg-burrito",    name: "Bacon & Egg Burrito",             category: "Breakfast",  sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dt-hash-brown-burrito",   name: "Steak & Egg Hash Brown Burrito",  category: "Breakfast",  sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      // ── Specialties ───────────────────────────────────────────────────────
+      { id: "dt-quesadilla",           name: "Chicken Quesadilla",              category: "Specialties",sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "dt-nachos",               name: "Regular Nachos",                  category: "Specialties",sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "dt-taco-salad",           name: "Taco Salad",                      category: "Specialties",sourceType: "official", allergens: ["dairy","soy","egg"] },
+      // ── Sides ─────────────────────────────────────────────────────────────
+      { id: "dt-crinkle-fries",        name: "Crinkle Cut Fries",               category: "Sides",      sourceType: "official", allergens: ["soy"] },
+      { id: "dt-seasoned-fries",       name: "Del's Famous Seasoned Fries",     category: "Sides",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "dt-rice-cup",             name: "Rice Cup",                        category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "dt-guac",                 name: "Guacamole",                       category: "Sides",      sourceType: "official", allergens: [] },
+      // ── Beverages ─────────────────────────────────────────────────────────
+      { id: "dt-shake",                name: "Shake (all flavors)",              category: "Beverages",  sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "dt-soda",                 name: "Fountain Drink",                  category: "Beverages",  sourceType: "official", allergens: [] },
+    ],
+  },
+
+  // ─── Waffle House ─────────────────────────────────────────────────────────────
+  // Source: wafflehouse.com nutrition info. Open-grill kitchen — shared surface for all items.
+  {
+    id: "waffle-house",
+    name: "Waffle House",
+    imageUrl: "/logos/waffle-house.svg",
+    cuisine: "Diner · Breakfast",
+    tags: ["breakfast", "casual"],
+    distance: 1.0,
+    sourceType: "official",
+    dataVerifiedDate: "2026-07-31",
+    builderConfig: {
+      steps: [
+        { label: "Main dish",   categories: ["Waffles","Eggs & Breakfast","Plates"], required: true,  maxSelect: 1, showAsCombo: true, category: "Waffles" },
+        { label: "Add a side",  category: "Sides",    required: false, maxSelect: 2 },
+        { label: "Pick a drink",category: "Beverages",required: false, maxSelect: 1 },
+      ],
+    },
+    menuItems: [
+      // ── Waffles ───────────────────────────────────────────────────────────
+      { id: "wh-waffle",           name: "Original Waffle",              category: "Waffles",        sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "wh-pecan-waffle",     name: "Pecan Waffle",                 category: "Waffles",        sourceType: "official", allergens: ["wheat","egg","dairy","soy","tree-nut"] },
+      { id: "wh-blueberry-waffle", name: "Blueberry Waffle",             category: "Waffles",        sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "wh-chocolate-waffle", name: "Chocolate Chip Waffle",        category: "Waffles",        sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      // ── Eggs & Breakfast ──────────────────────────────────────────────────
+      { id: "wh-eggs",             name: "Eggs (any style)",             category: "Eggs & Breakfast",sourceType: "official", allergens: ["egg"] },
+      { id: "wh-omelet",           name: "Cheese Omelet",                category: "Eggs & Breakfast",sourceType: "official", allergens: ["egg","dairy"] },
+      { id: "wh-bacon",            name: "Crispy Bacon",                 category: "Eggs & Breakfast",sourceType: "official", allergens: [] },
+      { id: "wh-sausage",          name: "Sausage Patty",                category: "Eggs & Breakfast",sourceType: "official", allergens: ["soy"] },
+      { id: "wh-ham",              name: "Country Ham",                  category: "Eggs & Breakfast",sourceType: "official", allergens: [] },
+      { id: "wh-t-bone",           name: "T-Bone Steak",                 category: "Eggs & Breakfast",sourceType: "official", allergens: [] },
+      { id: "wh-pork-chop",        name: "Pork Chop",                    category: "Eggs & Breakfast",sourceType: "official", allergens: [] },
+      // ── Sides ─────────────────────────────────────────────────────────────
+      { id: "wh-hash-browns",      name: "Hash Browns",                  category: "Sides",          sourceType: "official", allergens: ["soy"] },
+      { id: "wh-hash-browns-scattered", name: "Scattered Hash Browns w/ Cheese", category: "Sides", sourceType: "official", allergens: ["soy","dairy"] },
+      { id: "wh-grits",            name: "Grits",                        category: "Sides",          sourceType: "official", allergens: ["dairy"] },
+      { id: "wh-toast",            name: "White Toast",                  category: "Sides",          sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "wh-wheat-toast",      name: "Wheat Toast",                  category: "Sides",          sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "wh-biscuit",          name: "Biscuit",                      category: "Sides",          sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      // ── Beverages ─────────────────────────────────────────────────────────
+      { id: "wh-coffee",           name: "Coffee",                       category: "Beverages",      sourceType: "official", allergens: [] },
+      { id: "wh-oj",               name: "Orange Juice",                 category: "Beverages",      sourceType: "official", allergens: [] },
+      { id: "wh-soda",             name: "Soft Drink",                   category: "Beverages",      sourceType: "official", allergens: [] },
+      { id: "wh-milk",             name: "Milk",                         category: "Beverages",      sourceType: "official", allergens: ["dairy"] },
+    ],
+  },
+
+  // ─── Moe's Southwest Grill ───────────────────────────────────────────────────
+  // Source: moes.com allergen information
+  {
+    id: "moes-southwest-grill",
+    name: "Moe's Southwest Grill",
+    imageUrl: "/logos/moes.svg",
+    cuisine: "Mexican · Fast Casual",
+    tags: ["mexican"],
+    distance: 1.0,
+    sourceType: "official",
+    dataVerifiedDate: "2026-07-31",
+    builderConfig: {
+      steps: [
+        { label: "What's your order?", categories: ["Burritos","Bowls","Tacos","Quesadillas","Nachos"], required: true, maxSelect: 1, showAsCombo: true, category: "Burritos" },
+        { label: "Pick a side",        category: "Sides",    required: false, maxSelect: 1 },
+        { label: "Pick a drink",       category: "Beverages",required: false, maxSelect: 1 },
+      ],
+    },
+    menuItems: [
+      // ── Burritos ──────────────────────────────────────────────────────────
+      { id: "moes-homewrecker",       name: "Homewrecker Burrito (Chicken)", category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "moes-joey-bag",          name: "Joey Bag of Donuts (Steak)",   category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "moes-close-talker",      name: "Close Talker (Tofu)",          category: "Burritos",   sourceType: "official", allergens: ["wheat","soy","dairy"] },
+      { id: "moes-fat-sam",           name: "Fat Sam (Pork)",               category: "Burritos",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // ── Bowls ─────────────────────────────────────────────────────────────
+      { id: "moes-bowl-chicken",      name: "Burrito Bowl (Chicken)",       category: "Bowls",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "moes-bowl-steak",        name: "Burrito Bowl (Steak)",         category: "Bowls",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "moes-bowl-tofu",         name: "Burrito Bowl (Tofu)",          category: "Bowls",      sourceType: "official", allergens: ["soy","dairy"] },
+      // ── Tacos ─────────────────────────────────────────────────────────────
+      { id: "moes-taco-chicken",      name: "Moe's Taco (Chicken, flour)",  category: "Tacos",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "moes-taco-steak",        name: "Moe's Taco (Steak, flour)",    category: "Tacos",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // ── Quesadillas ───────────────────────────────────────────────────────
+      { id: "moes-quesadilla",        name: "Quesadilla (Chicken)",         category: "Quesadillas",sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // ── Kids ──────────────────────────────────────────────────────────────
+      { id: "moes-mini-burrito",      name: "Mini Burrito",                 category: "Kids",       sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      // ── Nachos ────────────────────────────────────────────────────────────
+      { id: "moes-nachos",            name: "Nachos (Chicken)",             category: "Nachos",     sourceType: "official", allergens: ["dairy","soy"] },
+      // ── Sides & Add-ons ───────────────────────────────────────────────────
+      { id: "moes-guac",              name: "Guacamole",                    category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "moes-queso",             name: "Queso",                        category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "moes-chips-salsa",       name: "Chips & Salsa",                category: "Sides",      sourceType: "official", allergens: [] },
+      { id: "moes-chips-queso",       name: "Chips & Queso",                category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      // ── Beverages ─────────────────────────────────────────────────────────
+      { id: "moes-soda",              name: "Fountain Drink",               category: "Beverages",  sourceType: "official", allergens: [] },
+    ],
+  },
+
+  // ─── Firehouse Subs ──────────────────────────────────────────────────────────
+  // Source: firehousesubs.com allergen info
+  {
+    id: "firehouse-subs",
+    name: "Firehouse Subs",
+    imageUrl: "/logos/firehouse-subs.svg",
+    cuisine: "Sandwiches · Fast Casual",
+    tags: ["sandwiches"],
+    distance: 1.0,
+    sourceType: "official",
+    dataVerifiedDate: "2026-07-31",
+    builderConfig: {
+      steps: [
+        { label: "Pick a sub",   categories: ["Subs","Salads"],      required: true, maxSelect: 1, showAsCombo: true, category: "Subs" },
+        { label: "Pick a side",  category: "Sides",                  required: false, maxSelect: 1 },
+        { label: "Pick a drink", category: "Beverages",              required: false, maxSelect: 1 },
+      ],
+    },
+    menuItems: [
+      // ── Subs ──────────────────────────────────────────────────────────────
+      { id: "fhs-hook-ladder",     name: "Hook & Ladder (Smoked Turkey & Ham)",  category: "Subs", sourceType: "official", allergens: ["wheat","soy","sesame"] },
+      { id: "fhs-engineer",        name: "Engineer (Corned Beef & Pastrami)",     category: "Subs", sourceType: "official", allergens: ["wheat","soy","sesame","dairy"] },
+      { id: "fhs-smokehouse-beef", name: "Smokehouse Beef & Cheddar Brisket",    category: "Subs", sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "fhs-italian",         name: "Firehouse Italian",                     category: "Subs", sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "fhs-new-yorker",      name: "New Yorker (Ham & Salami)",             category: "Subs", sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "fhs-chicken-bacon",   name: "Chicken Bacon Ranch",                  category: "Subs", sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "fhs-spicy-cajun",     name: "Spicy Cajun Chicken",                  category: "Subs", sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "fhs-meatball",        name: "Meatball Sub",                         category: "Subs", sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "fhs-turkey",          name: "Turkey Bacon Ranch",                   category: "Subs", sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
+      { id: "fhs-tuna",            name: "Tuna Salad Sub",                       category: "Subs", sourceType: "official", allergens: ["wheat","fish","egg","soy","sesame","dairy"] },
+      { id: "fhs-veggie",          name: "Veggie Sub",                           category: "Subs", sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      // ── Salads ────────────────────────────────────────────────────────────
+      { id: "fhs-salad-chicken",   name: "Grilled Chicken Salad",               category: "Salads",sourceType: "official", allergens: ["dairy","egg","soy"] },
+      { id: "fhs-salad-tuna",      name: "Tuna Salad",                          category: "Salads",sourceType: "official", allergens: ["fish","egg","soy","dairy"] },
+      // ── Kids ──────────────────────────────────────────────────────────────
+      { id: "fhs-kids-ham",        name: "Kids Ham & Swiss",                    category: "Kids",  sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      { id: "fhs-kids-turkey",     name: "Kids Turkey & American",              category: "Kids",  sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
+      // ── Sides ─────────────────────────────────────────────────────────────
+      { id: "fhs-chips",           name: "Chips",                               category: "Sides", sourceType: "official", allergens: ["soy"] },
+      { id: "fhs-mac-cheese",      name: "Mac & Cheese Cup",                   category: "Sides", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "fhs-pickle",          name: "Pickle",                              category: "Sides", sourceType: "official", allergens: [] },
+      // ── Beverages ─────────────────────────────────────────────────────────
+      { id: "fhs-soda",            name: "Fountain Drink",                      category: "Beverages", sourceType: "official", allergens: [] },
+      { id: "fhs-lemonade",        name: "Fresh Lemonade",                      category: "Beverages", sourceType: "official", allergens: [] },
+    ],
+  },
 ];
 
 // ─── Per-restaurant facility allergen & freshness data ───────────────────────
@@ -4779,6 +4973,10 @@ const FACILITY_DATA: Record<string, FacilityData> = {
   "portillos":           { facilityAllergens: ["wheat","gluten","dairy","egg","soy","fish","sesame","peanut","tree-nut"], dataVerifiedDate: "2026-07-29" },
   "golden-corral":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy","peanut","tree-nut","shellfish","fish"], dataVerifiedDate: "2026-04-10" },
   "el-pollo-loco":       { facilityAllergens: ["wheat","gluten","dairy","egg","soy","corn"],     dataVerifiedDate: "2026-04-10" },
+  "del-taco":            { facilityAllergens: ["wheat","gluten","dairy","egg","soy","sesame"],   dataVerifiedDate: "2026-07-31" },
+  "waffle-house":        { facilityAllergens: ["wheat","gluten","dairy","egg","soy","tree-nut"], dataVerifiedDate: "2026-07-31" },
+  "moes-southwest-grill":{ facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-07-31" },
+  "firehouse-subs":      { facilityAllergens: ["wheat","gluten","dairy","egg","soy","fish","sesame"], dataVerifiedDate: "2026-07-31" },
   // Steakhouses — generally lower cross-contamination but shared grill and sauces
   "kjs-steakhouse":      { facilityAllergens: ["wheat","gluten","dairy","egg","soy"],            dataVerifiedDate: "2026-04-10" },
   "ruths-chris":         { facilityAllergens: ["dairy","wheat","gluten","egg","soy","shellfish"], dataVerifiedDate: "2026-04-10" },

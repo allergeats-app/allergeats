@@ -94,6 +94,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [menuInputUrl, setMenuInputUrl]     = useState("");
   const [menuInputLoading, setMenuInputLoading] = useState(false);
   const [menuInputError, setMenuInputError] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiMenuLoaded, setAiMenuLoaded] = useState(false);
   const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
   const [showDrinks, setShowDrinks]         = useState(false);
   const [showComponents, setShowComponents] = useState(false);
@@ -121,10 +123,24 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
     // Merge user-contributed menu items when no official data exists
     const userEntry = getUserMenu(found.id);
-    const effective = (userEntry && found.menuItems.length === 0 && !found.menuIsGenericChainTemplate)
+    let effective: Restaurant = (userEntry && found.menuItems.length === 0 && !found.menuIsGenericChainTemplate)
       ? { ...found, menuItems: userEntry.items }
       : found;
     if (userEntry && effective !== found) setUserMenuSource(userEntry.source);
+
+    // Load cached AI-generated menu when no other data exists
+    if (effective.menuItems.length === 0 && !effective.menuIsGenericChainTemplate) {
+      try {
+        const aiRaw = localStorage.getItem(`allegeats_ai_menu_${found.id}`);
+        if (aiRaw) {
+          const parsed = JSON.parse(aiRaw) as { items: Restaurant["menuItems"]; savedAt: number };
+          if (Date.now() - parsed.savedAt < 7 * 24 * 60 * 60 * 1000 && parsed.items?.length > 0) {
+            effective = { ...effective, menuItems: parsed.items };
+            setAiMenuLoaded(true);
+          }
+        }
+      } catch { /* ignore */ }
+    }
 
     const analysis = analyzeRestaurant(effective, allergens, sevs);
     setBaseAnalysis(analysis);
@@ -228,6 +244,51 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
     return () => { cancelled = true; };
   }, [restaurant?.id, restaurant?.website]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── AI menu generation fallback ───────────────────────────────────────────
+  // Called manually when website scrape fails/returns nothing.
+  // Caches result for 7 days so repeat visits are instant.
+  const generateWithAI = useCallback(async () => {
+    if (!restaurant) return;
+    setAiGenerating(true);
+    try {
+      const res = await fetch("/api/restaurant-manager/analyze", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          restaurantName: restaurant.name,
+          cuisineType:    restaurant.cuisine,
+          menuUrl:        restaurant.website,
+        }),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json() as {
+        restaurant?: { menuItems?: Array<{ id: string; name: string; category: string; allergens: string[] }> }
+      };
+      const rawItems = (data.restaurant?.menuItems ?? []).map((item) => ({
+        ...item,
+        sourceType: "scraped" as const,
+        allergens:  item.allergens as AllergenId[],
+      }));
+      if (rawItems.length === 0) throw new Error("No items returned");
+
+      try {
+        localStorage.setItem(`allegeats_ai_menu_${restaurant.id}`, JSON.stringify({
+          items:   rawItems,
+          savedAt: Date.now(),
+        }));
+      } catch { /* quota exceeded */ }
+
+      const allergens = loadProfileAllergens();
+      const enriched  = { ...restaurant, menuItems: rawItems };
+      const analysis  = analyzeRestaurant(enriched, allergens, severities);
+      setRestaurant(enriched);
+      setBaseAnalysis(analysis);
+      setAiMenuLoaded(true);
+    } catch { /* button reappears */ }
+    finally { setAiGenerating(false); }
+  }, [restaurant, severities]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── USDA FoodData Central cross-check ──────────────────────────────────────
   // Fires after crawl completes (or immediately if we already have menu data).
@@ -826,6 +887,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         >
                           Fetch from URL →
                         </button>
+                        <button
+                          onClick={generateWithAI}
+                          disabled={aiGenerating}
+                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: "1px solid rgba(99,102,241,0.35)", background: "rgba(99,102,241,0.06)", color: isDark ? "#a5b4fc" : "#4f46e5", fontSize: 14, fontWeight: 700, cursor: aiGenerating ? "wait" : "pointer", textAlign: "left", opacity: aiGenerating ? 0.7 : 1 }}
+                        >
+                          {aiGenerating ? "Generating…" : "✦ Ask AI to estimate allergens →"}
+                        </button>
+                        <div style={{ fontSize: 11, color: "var(--c-sub)", lineHeight: 1.4, paddingLeft: 2 }}>
+                          AI estimates are not verified. Always confirm with staff.
+                        </div>
                       </div>
                     )}
                     {menuInputMode === "text" && (
@@ -1324,6 +1395,40 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </>
             )}
           </section>
+        )}
+
+        {/* ── AI-generated menu banner ── */}
+        {aiMenuLoaded && !userMenuSource && (
+          <div style={{
+            marginBottom: 16, borderRadius: 14, padding: "12px 14px",
+            border: "1.5px solid rgba(99,102,241,0.35)",
+            background: "rgba(99,102,241,0.06)",
+            display: "flex", alignItems: "flex-start", gap: 10,
+          }}>
+            <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>✦</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: isDark ? "#a5b4fc" : "#4f46e5", marginBottom: 3 }}>
+                AI-estimated allergens — not officially verified
+              </div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                Generated from Claude&apos;s knowledge of this chain&apos;s menu. Results may be incomplete or outdated. Always confirm with staff before ordering.
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                try { localStorage.removeItem(`allegeats_ai_menu_${restaurant?.id}`); } catch { /* ignore */ }
+                setAiMenuLoaded(false);
+                if (restaurant) {
+                  const cleared = { ...restaurant, menuItems: [] };
+                  setRestaurant(cleared);
+                  setBaseAnalysis(analyzeRestaurant(cleared, userAllergens, severities));
+                }
+              }}
+              style={{ flexShrink: 0, padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(99,102,241,0.3)", background: "transparent", color: isDark ? "#a5b4fc" : "#4f46e5", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Remove
+            </button>
+          </div>
         )}
 
         {/* ── User-contributed menu banner ── */}
