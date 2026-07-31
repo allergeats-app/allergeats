@@ -1795,6 +1795,7 @@ menuItems: [
   },
 
   // ─── Domino's ────────────────────────────────────────────────────────────────
+  // Source: dominos.com/en/content/allergen-info — static HTML table, scraped 2026-07-31
   {
     id: "dominos",
     imageUrl: "/logos/dominos.svg",
@@ -1803,40 +1804,61 @@ menuItems: [
     tags: ["sandwiches"],
     distance: 1.1,
     sourceType: "official",
+    dataVerifiedDate: "2026-07-31",
     builderConfig: {
       steps: [
-        { label: "Choose your pizza",    category: "Pizza",   required: true,  maxSelect: 2 },
-        { label: "Add wings or chicken", categories: ["Wings","Chicken"], required: false, maxSelect: 1, category: "Chicken" },
-        { label: "Add a side or pasta",  categories: ["Sides","Pasta"],   required: false, maxSelect: 1, category: "Sides" },
-        { label: "Add dessert",          category: "Desserts",required: false, maxSelect: 1 },
+        { label: "Choose your pizza",    category: "Pizza",       required: true,  maxSelect: 2 },
+        { label: "Add wings or chicken", categories: ["Wings","Chicken"], required: false, maxSelect: 1, category: "Wings" },
+        { label: "Add a side or pasta",  categories: ["Sides","Pasta","Sandwiches","Salads"], required: false, maxSelect: 1, category: "Sides" },
+        { label: "Add dessert",          category: "Desserts",    required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
-      // Pizzas (Hand Tossed — most common)
-      { id: "dom-cheese",         name: "Cheese Pizza (Hand Tossed)",       category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-pepperoni",      name: "Pepperoni Pizza (Hand Tossed)",    category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-bbq-chicken",    name: "BBQ Chicken Pizza",                category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
-      { id: "dom-buffalo-chick",  name: "Buffalo Chicken Pizza",            category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
-      { id: "dom-garden",         name: "Garden Fresh Pizza",               category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-meatzza",        name: "MeatZZa Pizza",                    category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-philly-steak",   name: "Philly Cheese Steak Pizza",        category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-thin-cheese",    name: "Cheese Pizza (Thin Crust)",        category: "Pizza",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-gf-cheese",      name: "Cheese Pizza (Gluten Free Crust)", category: "Pizza",     sourceType: "official", allergens: ["dairy","soy"], description: "Gluten-free crust, but made in shared kitchen — not safe for celiac." },
-      // Chicken
-      { id: "dom-wings-plain",    name: "Plain Wings",                      category: "Chicken",   sourceType: "official", allergens: ["soy"] },
-      { id: "dom-wings-buffalo",  name: "Buffalo Wings",                    category: "Chicken",   sourceType: "official", allergens: ["dairy","soy"] },
-      { id: "dom-wings-bbq",      name: "BBQ Wings",                        category: "Chicken",   sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-boneless",       name: "Boneless Chicken (Plain)",         category: "Chicken",   sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
-      { id: "dom-parm-bites",     name: "Parmesan Bread Bites",             category: "Chicken",   sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
-      // Sides & Pasta
-      { id: "dom-breadsticks",    name: "Breadsticks",                      category: "Sides",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-cheesy-bread",   name: "Stuffed Cheesy Bread",             category: "Sides",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-pasta-baked",    name: "Chicken Alfredo (Pasta)",          category: "Pasta",     sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
-      { id: "dom-pasta-penne",    name: "Italian Sausage Marinara (Pasta)", category: "Pasta",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-salad",          name: "Garden Salad",                     category: "Sides",     sourceType: "official", allergens: [] },
-      // Desserts
-      { id: "dom-cinn-bread",     name: "Cinnamon Bread Twists",            category: "Desserts",  sourceType: "official", allergens: ["wheat","dairy","soy"] },
-      { id: "dom-marbled-cookie", name: "Marbled Cookie Brownie",           category: "Desserts",  sourceType: "official", allergens: ["wheat","dairy","soy","egg","tree-nut"] },
+      // ── Pizzas by crust (crust allergens apply to all pizza builds) ──────────
+      { id: "dom-pizza-hand-tossed",    name: "Pizza — Hand Tossed Crust",        category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"], description: "Crust: wheat, milk, egg. Pizza sauce adds soy." },
+      { id: "dom-pizza-pan",            name: "Pizza — Handmade Pan Crust",       category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-pizza-ny",             name: "Pizza — New York Style Crust",     category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-pizza-stuffed",        name: "Pizza — Parmesan Stuffed Crust",   category: "Pizza",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-pizza-thin",           name: "Pizza — Thin Crust",               category: "Pizza",      sourceType: "official", allergens: ["dairy","egg","soy"], description: "Thin crust has no wheat — but sauce adds soy." },
+      { id: "dom-pizza-gf",             name: "Pizza — Gluten Free Crust",        category: "Pizza",      sourceType: "official", allergens: ["dairy","soy"], description: "GF crust has no allergens. Cheese adds dairy, sauce adds soy. Shared kitchen — not safe for celiac." },
+      // ── Wings ─────────────────────────────────────────────────────────────
+      { id: "dom-wings-plain",          name: "Wings — Plain (No Sauce)",         category: "Wings",      sourceType: "official", allergens: [] },
+      { id: "dom-wings-honey-bbq",      name: "Wings — Honey BBQ",                category: "Wings",      sourceType: "official", allergens: [] },
+      { id: "dom-wings-hot-buffalo",    name: "Wings — Hot Buffalo",              category: "Wings",      sourceType: "official", allergens: [] },
+      { id: "dom-wings-mango",          name: "Wings — Sweet Mango Habanero",     category: "Wings",      sourceType: "official", allergens: [] },
+      { id: "dom-wings-mild-buffalo",   name: "Wings — Mild Buffalo",             category: "Wings",      sourceType: "official", allergens: ["wheat"] },
+      { id: "dom-wings-garlic-parm",    name: "Wings — Garlic Parmesan",          category: "Wings",      sourceType: "official", allergens: ["wheat","dairy"] },
+      // ── Loaded Chicken ────────────────────────────────────────────────────
+      { id: "dom-loaded-hot-buffalo",   name: "Loaded Chicken — Hot Buffalo",     category: "Chicken",    sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-loaded-bbq-bacon",     name: "Loaded Chicken — Sweet BBQ Bacon", category: "Chicken",   sourceType: "official", allergens: ["wheat","dairy"] },
+      { id: "dom-loaded-jalapeno",      name: "Loaded Chicken — Spicy Jalapeño",  category: "Chicken",   sourceType: "official", allergens: ["wheat","dairy"] },
+      { id: "dom-boneless",             name: "Boneless Chicken",                 category: "Chicken",    sourceType: "official", allergens: ["wheat"] },
+      // ── Sandwiches & Hoagies ──────────────────────────────────────────────
+      { id: "dom-sub-buffalo-ckn",      name: "Buffalo Chicken Sandwich",         category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-sub-ckn-bacon-ranch",  name: "Chicken Bacon Ranch Sandwich",     category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-sub-philly",           name: "Philly Cheese Steak Sandwich",     category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-sub-italian",          name: "Italian Sandwich",                 category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy"] },
+      { id: "dom-sub-classic-hoagie",   name: "Classic Hoagie",                   category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-sub-buffalo-ranch",    name: "Buffalo Ranch Hoagie",             category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-sub-bacon-cheddar",    name: "Bacon Cheddar Hoagie",             category: "Sandwiches", sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      // ── Pasta ─────────────────────────────────────────────────────────────
+      { id: "dom-pasta-alfredo",        name: "Chicken Alfredo Pasta",            category: "Pasta",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-pasta-mac-cheese",     name: "5-Cheese Mac & Cheese",            category: "Pasta",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-pasta-buffalo-mac",    name: "Spicy Buffalo Mac & Cheese",       category: "Pasta",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      // ── Cheesy Breads ─────────────────────────────────────────────────────
+      { id: "dom-cheesy-bread",         name: "Stuffed Cheesy Bread",             category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-cheesy-bacon-jal",     name: "Cheesy Bread — Bacon & Jalapeño",  category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-cheesy-spinach-feta",  name: "Cheesy Bread — Spinach & Feta",    category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-garlic-bites",         name: "Garlic Bread Bites",               category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "dom-parm-bites",           name: "Parmesan Bread Bites",             category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      // ── Salads ────────────────────────────────────────────────────────────
+      { id: "dom-salad-garden",         name: "Classic Garden Salad",             category: "Salads",     sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "dom-salad-caesar",         name: "Chicken Caesar Salad",             category: "Salads",     sourceType: "official", allergens: ["dairy","fish"] },
+      // ── Desserts ──────────────────────────────────────────────────────────
+      { id: "dom-lava-chocolate",       name: "Chocolate Lava Crunch Cake",       category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-lava-smores",          name: "S'mores Lava Cake",                category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-marbled-cookie",       name: "Marbled Cookie Brownie",           category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "dom-cinn-bites",           name: "Cinnamon Bread Bites",             category: "Desserts",   sourceType: "official", allergens: ["wheat","dairy","egg"] },
     ],
   },
 
