@@ -130,7 +130,6 @@ export const ALLERGEN_VOCABULARY: VocabEntry[] = [
   { term: "soy",             allergens: ["soy"],           source: "direct" },
   { term: "tofu",            allergens: ["soy"],           source: "direct" },
   { term: "miso",            allergens: ["soy"],           source: "direct" },
-  { term: "edamame",         allergens: ["soy"],           source: "direct" },
   { term: "tempeh",          allergens: ["soy"],           source: "direct" },
   { term: "tamari",          allergens: ["soy"],           source: "direct" },
   { term: "natto",           allergens: ["soy"],           source: "direct" },
@@ -141,7 +140,6 @@ export const ALLERGEN_VOCABULARY: VocabEntry[] = [
   { term: "yakitori",        allergens: ["soy", "wheat", "gluten"], source: "dish", note: "Teriyaki-glazed chicken" },
   { term: "gyoza",           allergens: ["wheat", "gluten", "soy"], source: "dish" },
   { term: "dumpling",        allergens: ["wheat", "gluten", "soy"], source: "dish" },
-  { term: "edamame",         allergens: ["soy"],           source: "direct" },
 
   // ─── WHEAT / GLUTEN ────────────────────────────────────────────────────────
   { term: "bulgogi",         allergens: ["soy", "wheat", "gluten", "sesame"], source: "dish", note: "Korean marinated beef — soy + sesame marinade" },
@@ -376,7 +374,6 @@ export const ALLERGEN_VOCABULARY: VocabEntry[] = [
   { term: "cashew cream",    allergens: ["tree-nut"],       source: "direct", note: "Common vegan dairy substitute" },
   { term: "walnut oil",      allergens: ["tree-nut"],       source: "direct" },
   { term: "amaretto",        allergens: ["tree-nut"],       source: "direct", note: "Almond-flavored liqueur" },
-  { term: "marzipan",        allergens: ["tree-nut"],       source: "direct", note: "Almond paste" },
 
   // ─── SESAME ────────────────────────────────────────────────────────────────
   { term: "sesame",          allergens: ["sesame"],         source: "direct" },

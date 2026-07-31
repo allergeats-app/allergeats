@@ -30,8 +30,8 @@ export default function ResetPasswordPage() {
     const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
       if (event === "PASSWORD_RECOVERY" && sess) {
         setReady(true);
-      } else if (!sess && event !== "INITIAL_SESSION") {
-        // No session and not just initialising — link may be expired
+      } else if (event === "SIGNED_OUT") {
+        // Explicit sign-out means the reset link was used or expired
         setError("This reset link has expired. Please request a new one.");
       }
     });

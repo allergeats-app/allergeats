@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ALLERGEN_LIST,
+  PROFILE_KEY,
   saveProfileAllergens,
   loadProfileAllergens,
   saveProfileSeverities,
@@ -56,7 +57,6 @@ export function OnboardingModal() {
   }, [visible, step]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") { handleSkip(); return; }
     if (e.key !== "Tab") return;
     const nodes = dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE);
     if (!nodes || nodes.length === 0) return;
@@ -110,6 +110,8 @@ export function OnboardingModal() {
     const existing = loadProfileAllergens();
     const merged = [...new Set([...existing, ...selected])];
     saveProfileAllergens(merged);
+    // Notify same-tab listeners (e.g. useAllergenProfile) that the profile changed
+    window.dispatchEvent(new StorageEvent("storage", { key: PROFILE_KEY }));
     saveProfileSeverities(finalSeverities);
     localStorage.setItem(ONBOARDING_KEY, "1");
     setStep("done");
@@ -414,7 +416,9 @@ export function OnboardingModal() {
             </div>
 
             <button
-              onClick={handleAllergenContinue}
+              onClick={selected.size === 0 ? undefined : handleAllergenContinue}
+              disabled={selected.size === 0}
+              aria-disabled={selected.size === 0}
               style={{
                 ...iosTap,
                 width: "100%", minHeight: 54, padding: "15px 0",
@@ -428,13 +432,15 @@ export function OnboardingModal() {
                 color: selected.size === 0
                   ? "var(--c-sub)"
                   : "var(--c-brand-fg)",
-                fontSize: 17, fontWeight: 800, cursor: "pointer",
+                fontSize: 17, fontWeight: 800,
+                cursor: selected.size === 0 ? "not-allowed" : "pointer",
+                opacity: selected.size === 0 ? 0.5 : 1,
                 letterSpacing: "-0.01em",
-                transition: "background 0.2s,color 0.2s,box-shadow 0.2s",
+                transition: "background 0.2s,color 0.2s,box-shadow 0.2s,opacity 0.2s",
               }}
             >
               {selected.size === 0
-                ? "Continue without selecting"
+                ? "Select allergens to continue"
                 : highRiskSelected.length > 0
                   ? `Next — Set Severity →`
                   : `Save ${selected.size} allergen${selected.size !== 1 ? "s" : ""}`}
@@ -442,7 +448,7 @@ export function OnboardingModal() {
 
             {selected.size === 0 && (
               <button onClick={handleSkip} style={{ ...iosTap, marginTop: 8, width: "100%", minHeight: 44, border: "none", background: "transparent", color: "var(--c-sub)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                Skip setup entirely
+                I have no food allergies — skip setup
               </button>
             )}
           </>

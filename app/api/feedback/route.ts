@@ -39,12 +39,11 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   };
 
-  // Persist to Supabase (requires a `feedback` table — fails silently if absent)
+  // Persist to Supabase (requires a `feedback` table)
   const { error: dbError } = await supabase.from("feedback").insert(entry);
   if (dbError) {
-    // Fall back to Vercel Function Logs so submissions are never fully lost
-    console.log("[feedback]", JSON.stringify(entry));
     console.error("[feedback] supabase insert error:", dbError.message);
+    return NextResponse.json({ error: "Failed to save feedback" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

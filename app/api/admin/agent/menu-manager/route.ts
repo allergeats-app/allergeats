@@ -41,11 +41,14 @@ export async function POST(req: NextRequest) {
   if (!verifyAdminRequest(req)) return new Response("Unauthorized", { status: 401 });
   if (!process.env.ANTHROPIC_API_KEY) return new Response("API key not configured", { status: 503 });
 
-  const body = await req.json() as {
+  let body: {
     registry?: unknown[];
     crawlQueue?: Record<string, unknown>;
     mockRestaurants?: { id: string; name: string; itemCount: number }[];
   };
+  try { body = await req.json(); } catch {
+    return new Response("Invalid JSON", { status: 400 });
+  }
 
   const userMessage = JSON.stringify({
     registry: body.registry ?? [],

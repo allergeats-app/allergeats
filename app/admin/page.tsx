@@ -34,6 +34,8 @@ export default function AdminPage() {
         const { token } = await res.json() as { token: string };
         sessionStorage.setItem(SESSION_KEY, "1");
         sessionStorage.setItem("allegeats_admin_token", token);
+        // Session cookie lets middleware block sub-routes without JS
+        document.cookie = "allegeats_admin_session=1; path=/admin; SameSite=Strict";
         setAuthed(true);
         setError(false);
       } else {

@@ -83,13 +83,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [restaurant, setRestaurant]       = useState<Restaurant | null>(null);
   const [userAllergens, setUserAllergens] = useState<AllergenId[]>([]);
   const [notFound, setNotFound]           = useState(false);
-  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("likely-safe");
+  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [photoFailed, setPhotoFailed]     = useState(false);
   const [photoLoaded, setPhotoLoaded]     = useState(false);
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
+  const [loadError, setLoadError]     = useState(false);
   const [userMenuSource, setUserMenuSource] = useState<"text" | "url" | null>(null);
   const [menuInputMode, setMenuInputMode]   = useState<"none" | "text" | "url">("none");
   const [menuInputText, setMenuInputText]   = useState("");
@@ -336,6 +337,13 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     [enhancedAnalysis, restaurant, warnings, insights, isFavorite],
   );
 
+  // Skeleton timeout — show an error message instead of loading forever
+  useEffect(() => {
+    if (vm && restaurant) return;
+    const timer = setTimeout(() => setLoadError(true), 10_000);
+    return () => clearTimeout(timer);
+  }, [vm, restaurant]);
+
   // ── Derived display state ───────────────────────────────────────────────────
   const allItems = useMemo(
     () => (vm ? vm.sections.flatMap((s) => s.items) : []),
@@ -397,6 +405,23 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   if (!vm || !restaurant) {
+    if (loadError) {
+      return (
+        <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ textAlign: "center", padding: "0 24px" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--c-text)", marginBottom: 12 }}>
+              Couldn&apos;t load this restaurant. Please try again.
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              style={{ padding: "10px 20px", borderRadius: 12, background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer" }}
+            >
+              Reload
+            </button>
+          </div>
+        </main>
+      );
+    }
     return (
       <main style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
         <style>{`
@@ -775,6 +800,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     Checking restaurant website for menu data…
                   </div>
                 ) : (
+                  <>
+                  {crawlStatus === "failed" && (
+                    <div style={{ padding: "10px 14px", borderRadius: 10, background: "var(--c-muted)", border: "1px solid var(--c-border)", fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                      Couldn&apos;t load menu from the restaurant&apos;s website. You can add items manually below.
+                    </div>
+                  )}
                   <div style={{ borderRadius: 16, border: "1px solid var(--c-border)", background: "var(--c-card)", overflow: "hidden" }}>
                     {/* Header */}
                     <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid var(--c-border)" }}>
@@ -857,6 +888,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       </div>
                     )}
                   </div>
+                  </>
                 )}
               </div>
             ) : (

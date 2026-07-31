@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabaseClient } from "./supabaseClient";
 import type { AllergenId, AllergenSeverity } from "./types";
-import { loadProfileSeverities, saveProfileSeverities } from "./allergenProfile";
+import { loadProfileAllergens, loadProfileSeverities, saveProfileSeverities, ALLERGEN_LIST } from "./allergenProfile";
 
 const PROFILE_KEY = "allegeats_profile_allergens";
 const SESSION_ONLY_KEY = "allegeats_session_only";
@@ -30,6 +30,8 @@ type AuthContextValue = {
   saveAllergens: (allergens: AllergenId[]) => Promise<void>;
   saveSeverities: (severities: Partial<Record<AllergenId, AllergenSeverity>>) => void;
   saveName: (firstName: string, lastName: string) => Promise<void>;
+  profileConflict: { local: AllergenId[], cloud: AllergenId[] } | null;
+  resolveProfileConflict: (choice: "local" | "cloud" | "merge") => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -41,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
   const [firstName, setFirstName]     = useState<string>("");
   const [lastName,  setLastName]      = useState<string>("");
+  const [profileConflict, setProfileConflict] = useState<{ local: AllergenId[], cloud: AllergenId[] } | null>(null);
 
   function hydrate(sess: Session | null) {
     const meta = sess?.user?.user_metadata ?? {};
@@ -49,14 +52,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLastName((meta.last_name  as string | undefined) ?? "");
 
     const cloud = meta.allergens as AllergenId[] | undefined;
+    // IMP-08: use validated loadProfileAllergens() instead of raw JSON.parse
+    const local = loadProfileAllergens();
     if (cloud?.length) {
-      setAllergens(cloud);
-      try { localStorage.setItem(PROFILE_KEY, JSON.stringify(cloud)); } catch { /* ignore */ }
+      // S-05: if both profiles are non-empty and differ, ask the user instead of silently overwriting
+      if (local.length > 0 && JSON.stringify([...cloud].sort()) !== JSON.stringify([...local].sort())) {
+        setProfileConflict({ local, cloud });
+      } else {
+        setAllergens(cloud);
+        try { localStorage.setItem(PROFILE_KEY, JSON.stringify(cloud)); } catch { /* ignore */ }
+      }
     } else {
-      try {
-        const raw = localStorage.getItem(PROFILE_KEY);
-        if (raw) setAllergens(JSON.parse(raw) as AllergenId[]);
-      } catch { /* ignore */ }
+      if (local.length > 0) setAllergens(local);
     }
   }
 
@@ -175,6 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setFirstName("");
     setLastName("");
     try {
+      localStorage.removeItem(PROFILE_KEY);
       sessionStorage.removeItem(SESSION_ONLY_KEY);
       localStorage.removeItem(WAS_SESSION_ONLY_KEY);
     } catch { /* ignore */ }
@@ -183,6 +191,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   function saveSeverities(map: Partial<Record<AllergenId, AllergenSeverity>>): void {
     setSeverities(map);
     saveProfileSeverities(map);
+  }
+
+  function resolveProfileConflict(choice: "local" | "cloud" | "merge"): void {
+    if (!profileConflict) return;
+    const resolved: AllergenId[] = choice === "local"
+      ? profileConflict.local
+      : choice === "cloud"
+        ? profileConflict.cloud
+        : [...new Set([...profileConflict.local, ...profileConflict.cloud])];
+    setAllergens(resolved);
+    try { localStorage.setItem(PROFILE_KEY, JSON.stringify(resolved)); } catch { /* ignore */ }
+    // Push the chosen profile back to Supabase unless the user chose "cloud" (already in sync)
+    if (session && choice !== "cloud") {
+      const sb = getSupabaseClient();
+      if (sb) sb.auth.updateUser({ data: { allergens: resolved } }).catch(() => { /* ignore */ });
+    }
+    setProfileConflict(null);
   }
 
   async function saveAllergens(list: AllergenId[]): Promise<void> {
@@ -196,8 +221,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, severities, signIn, signUp, signInWithOAuth, linkIdentity, signOut, saveAllergens, saveSeverities, saveName }}
+      value={{ session, user: session?.user ?? null, firstName, lastName, displayName: [firstName, lastName].filter(Boolean).join(" ") || session?.user?.email?.split("@")[0] || "", loading, allergens, severities, signIn, signUp, signInWithOAuth, linkIdentity, signOut, saveAllergens, saveSeverities, saveName, profileConflict, resolveProfileConflict }}
     >
+      {profileConflict && (
+        <div role="dialog" aria-modal="true" aria-label="Allergen profile conflict" style={{ position: "fixed", inset: 0, zIndex: 99999, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "#1a1d20", borderRadius: 20, padding: "28px 24px", width: "100%", maxWidth: 420, boxShadow: "0 16px 64px rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 8 }}>Profile Conflict</div>
+            <div style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", marginBottom: 20, lineHeight: 1.6 }}>
+              Your device and account have different allergen profiles. Which would you like to use?
+            </div>
+            <div style={{ display: "grid", gap: 10 }}>
+              <button onClick={() => resolveProfileConflict("local")} style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", textAlign: "left" }}>
+                <div style={{ fontWeight: 800, marginBottom: 3 }}>Keep device profile</div>
+                <div style={{ fontWeight: 400, opacity: 0.7, fontSize: 12 }}>{profileConflict.local.map(id => ALLERGEN_LIST.find(a => a.id === id)?.label ?? id).join(", ")}</div>
+              </button>
+              <button onClick={() => resolveProfileConflict("cloud")} style={{ padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", textAlign: "left" }}>
+                <div style={{ fontWeight: 800, marginBottom: 3 }}>Use saved profile</div>
+                <div style={{ fontWeight: 400, opacity: 0.7, fontSize: 12 }}>{profileConflict.cloud.map(id => ALLERGEN_LIST.find(a => a.id === id)?.label ?? id).join(", ")}</div>
+              </button>
+              <button onClick={() => resolveProfileConflict("merge")} style={{ padding: "12px 16px", borderRadius: 12, border: "none", background: "#1fbccc", color: "#fff", fontSize: 14, fontWeight: 800, cursor: "pointer", textAlign: "left" }}>
+                Merge both
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {children}
     </AuthContext.Provider>
   );

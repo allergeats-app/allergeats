@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useTheme, type ThemeMode } from "@/lib/themeContext";
+import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
+import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import { BottomNav } from "@/components/BottomNav";
 import { SupportChat } from "@/components/SupportChat";
 
 export default function ProfilePage() {
   const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
   const { isDark, mode: themeMode, setMode: setThemeMode } = useTheme();
+  const { allergens } = useAllergenProfile();
   const router = useRouter();
 
   const [signingOut, setSigningOut]       = useState(false);
@@ -213,6 +216,52 @@ export default function ProfilePage() {
                themeMode === "light" ? "Always light" : "Always dark"}
             </div>
           </div>
+        </div>
+
+        {/* Allergen Profile card */}
+        <div
+          style={{
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
+            borderRadius: 20, padding: 20,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              Allergen Profile
+            </div>
+            <Link href="/" style={{ fontSize: 12, fontWeight: 700, color: "var(--c-brand)", textDecoration: "none" }}>
+              Edit on home screen →
+            </Link>
+          </div>
+          {allergens.length === 0 ? (
+            <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+              No allergens set.{" "}
+              <Link href="/" style={{ color: "var(--c-brand)", fontWeight: 700, textDecoration: "none" }}>
+                Add them from the home screen
+              </Link>{" "}
+              to see safety scores on restaurant menus.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {allergens.map((id) => {
+                const meta = ALLERGEN_LIST.find((a) => a.id === id);
+                return (
+                  <span
+                    key={id}
+                    style={{
+                      padding: "6px 14px", borderRadius: 999,
+                      background: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.08)",
+                      border: "1px solid rgba(239,68,68,0.3)",
+                      fontSize: 13, fontWeight: 700, color: isDark ? "#fca5a5" : "#b91c1c",
+                    }}
+                  >
+                    {meta?.label ?? id}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Support */}

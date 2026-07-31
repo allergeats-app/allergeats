@@ -1,4 +1,8 @@
 // lib/allergenDB.ts
+// NOTE: This file is NOT used by the active detection engine.
+// The live engine reads lib/engine/allergenVocabulary.ts instead.
+// Adding terms here has no effect. This file exists as a legacy type
+// definition source for AllergenId and TermRule.
 
 export type Allergen =
   | "dairy"

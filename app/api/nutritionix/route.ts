@@ -108,11 +108,20 @@ export async function POST(req: Request) {
       const data = await res.json();
       const foods: NutritionixFood[] = data.foods ?? [];
 
+      // Nutritionix doesn't guarantee response order matches request order.
+      // Match each returned food to the batch item by name; fall back to
+      // positional index only if no name match is found.
       foods.forEach((food, j) => {
+        const normalizedFoodName = food.food_name?.toLowerCase().trim();
+        const matched = batch.find(
+          (b) => b.name.toLowerCase().trim() === normalizedFoodName,
+        );
+        // Fallback to positional entry if name lookup fails
+        const batchItem = matched ?? batch[j];
         allFoods.push({
           ...food,
-          _id: batch[j]?.id ?? `nix-${i + j}`,
-          _category: batch[j]?.category,
+          _id: batchItem?.id ?? `nix-${i + j}`,
+          _category: batchItem?.category,
         });
       });
     } catch {

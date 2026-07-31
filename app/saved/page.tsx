@@ -5,9 +5,7 @@ import Link from "next/link";
 import { SettingsButton } from "@/components/SettingsButton";
 import { useFavorites, type FavoriteMeta } from "@/lib/favoritesContext";
 import { getRecentlyViewed, type RecentView } from "@/lib/recentlyViewed";
-import { getScanHistory, type ScanEntry } from "@/lib/scanHistory";
 import { loadSavedOrders, deleteSavedOrder, type SavedOrder } from "@/lib/savedOrders";
-import { CameraScanButton } from "@/components/CameraScanButton";
 import { BottomNav } from "@/components/BottomNav";
 
 function timeAgo(ts: number): string {
@@ -20,17 +18,6 @@ function timeAgo(ts: number): string {
   if (hours < 24) return `${hours}h ago`;
   if (days < 7)   return `${days}d ago`;
   return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function ScanSummaryBar({ safe, ask, avoid, total }: { safe: number; ask: number; avoid: number; total: number }) {
-  if (total === 0) return null;
-  return (
-    <div style={{ height: 4, borderRadius: 999, background: "var(--c-muted)", overflow: "hidden", display: "flex", marginTop: 6 }}>
-      <div style={{ width: `${(safe  / total) * 100}%`, background: "#22c55e" }} />
-      <div style={{ width: `${(ask   / total) * 100}%`, background: "#f59e0b" }} />
-      <div style={{ width: `${(avoid / total) * 100}%`, background: "#ef4444" }} />
-    </div>
-  );
 }
 
 function SectionHeader({ label, count }: { label: string; count?: number }) {
@@ -61,33 +48,6 @@ function RecentViewCard({ view }: { view: RecentView }) {
         </div>
       </div>
     </Link>
-  );
-}
-
-function ScanCard({ entry }: { entry: ScanEntry }) {
-  const safeLabel  = entry.safeCount  > 0 ? `${entry.safeCount} safe`  : null;
-  const avoidLabel = entry.avoidCount > 0 ? `${entry.avoidCount} avoid` : null;
-  const sourceLabel = entry.source === "preloaded" ? "Menu library" : entry.source === "url" ? "URL scan" : "Manual";
-
-  return (
-    <div style={{
-      background: "var(--c-card)", border: "1px solid var(--c-border)",
-      borderRadius: 16, padding: "12px 14px",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <div style={{ fontWeight: 800, fontSize: 14, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
-          {entry.restaurantName}
-        </div>
-        <span style={{ fontSize: 11, color: "var(--c-sub)", flexShrink: 0, paddingLeft: 10 }}>{timeAgo(entry.scannedAt)}</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 11, color: "var(--c-sub)" }}>{sourceLabel} · {entry.totalItems} items</span>
-        {safeLabel  && <span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a" }}>{safeLabel}</span>}
-        {avoidLabel && <span style={{ fontSize: 11, fontWeight: 700, color: "#dc2626" }}>{avoidLabel}</span>}
-      </div>
-      <ScanSummaryBar safe={entry.safeCount} ask={entry.askCount} avoid={entry.avoidCount} total={entry.totalItems} />
-    </div>
   );
 }
 
@@ -164,7 +124,6 @@ function SavedOrderCard({ order, onDelete }: { order: SavedOrder; onDelete: () =
 function SavedContent() {
   const { favorites, favoritesMeta } = useFavorites();
   const [recentViews]   = useState<RecentView[]>(() => getRecentlyViewed());
-  const [scanHistory]   = useState<ScanEntry[]>(() => getScanHistory());
   const [savedOrders, setSavedOrders] = useState<SavedOrder[]>(() => loadSavedOrders());
 
   function removeOrder(id: string) {
@@ -183,7 +142,7 @@ function SavedContent() {
   const viewedIds = new Set(recentViews.map((v) => v.id));
   const savedNotViewed = [...favorites].filter((id) => !viewedIds.has(id));
 
-  const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || scanHistory.length > 0 || savedOrders.length > 0;
+  const hasAnything = usualSpots.length > 0 || recentViews.length > 0 || savedOrders.length > 0;
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--c-bg)", paddingBottom: "max(120px, calc(90px + env(safe-area-inset-bottom)))" }}>
@@ -213,7 +172,7 @@ function SavedContent() {
             <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", marginBottom: 8 }}>Nothing saved yet</div>
             <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 28, lineHeight: 1.6 }}>
               Save restaurants with the heart button.<br />
-              Your visit history and scans will appear here.
+              Your visit history will appear here.
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 260, margin: "0 auto" }}>
               <Link href="/" style={{
@@ -224,15 +183,6 @@ function SavedContent() {
               }}>
                 Browse Restaurants
               </Link>
-              <CameraScanButton style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                padding: "13px 0", borderRadius: 14,
-                background: "var(--c-card)", border: "1.5px solid var(--c-border)",
-                color: "var(--c-text)", fontSize: 14, fontWeight: 800,
-                cursor: "pointer", textDecoration: "none",
-              }}>
-                Scan a Menu
-              </CameraScanButton>
             </div>
           </div>
         ) : (
@@ -306,15 +256,6 @@ function SavedContent() {
               </>
             )}
 
-            {/* ── Recent Scans ── */}
-            {scanHistory.length > 0 && (
-              <>
-                <SectionHeader label="Recent Scans" count={scanHistory.length} />
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {scanHistory.slice(0, 10).map((entry) => <ScanCard key={entry.id} entry={entry} />)}
-                </div>
-              </>
-            )}
           </>
         )}
       </div>

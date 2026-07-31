@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
-// Note: withSentryConfig (source map upload) is wired separately via Sentry CLI.
-// The Sentry SDK in sentry.client/server/edge.config.ts still captures runtime errors.
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   // Prevent the page from being embedded in an iframe (clickjacking)
@@ -61,4 +60,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org:     "allergeats",
+  project: "javascript-nextjs",
+  // Upload source maps on CI/Vercel builds; skip locally to avoid token errors
+  silent:                  !process.env.CI,
+  widenClientFileUpload:   true,
+  // Tunnel Sentry requests through our domain to bypass ad blockers
+  tunnelRoute:             "/monitoring",
+  // disableLogger / automaticVercelMonitors not supported with Turbopack — omitted
+});

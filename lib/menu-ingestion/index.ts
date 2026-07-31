@@ -46,7 +46,6 @@ export { NutritionixAdapter } from "./adapters/nutritionixAdapter";
 export type { NutritionixFood } from "./adapters/nutritionixAdapter";
 // PdfAdapter is server-only (uses pdf-parse/Node.js fs) — import directly from
 // "./adapters/pdfAdapter" in API routes only, never from this client-safe index.
-export { ImageAdapter }       from "./adapters/imageAdapter";
 export { ToastAdapter }       from "./adapters/toastAdapter";
 export type { ToastAdapterConfig, ToastMenusResponse } from "./adapters/toastAdapter";
 export { SquareAdapter }      from "./adapters/squareAdapter";

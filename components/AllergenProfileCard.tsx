@@ -35,7 +35,7 @@ export function AllergenProfileCard({ allergens, saveState, isSignedIn, onChange
           )}
           {!isSignedIn && (
             <Link href="/auth" style={{ fontSize: 11, fontWeight: 700, color: "var(--c-brand)", textDecoration: "none" }}>
-              Sign in to save
+              Sign in to sync across devices
             </Link>
           )}
         </div>

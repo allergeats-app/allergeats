@@ -11,11 +11,7 @@ import { normalizeText } from "./ocrNormalizer";
  * and are often ALL CAPS or title case with no description words.
  */
 function isSectionHeader(line: string): boolean {
-  // Very short lines that look like category labels
   if (line.length > 60) return false;
-  const upper = line.toUpperCase();
-  if (upper === line && line.length <= 40) return true;
-  // Common category names
   const categoryKeywords = [
     "appetizer", "starter", "entree", "entrée", "main", "side", "dessert",
     "drink", "beverage", "breakfast", "lunch", "dinner", "salad", "soup",
@@ -23,6 +19,25 @@ function isSectionHeader(line: string): boolean {
     "vegan", "kids", "specials", "combo", "value", "add on",
     "cocktail", "mocktail", "smoothie", "juice", "beer", "wine", "spirit", "liquor",
   ];
+  const upper = line.toUpperCase();
+  if (upper === line) {
+    const words = line.split(/\s+/);
+    // Single-word ALL-CAPS lines are almost always section labels (SIDES, DESSERTS, MAINS)
+    if (words.length === 1) return true;
+    // Multi-word ALL-CAPS: only a section header if every word is a known category term
+    // or a common section modifier. "CAESAR SALAD", "EGG SALAD", "FILET-O-FISH" must
+    // pass through as menu items — they are false-negatives if dropped here.
+    const modifiers = new Set([
+      "hot", "cold", "fresh", "daily", "our", "chef", "house", "new",
+      "featured", "seasonal", "classic", "signature",
+    ]);
+    const allAreCategory = words.every((w) => {
+      const wl = w.toLowerCase();
+      return categoryKeywords.some((k) => wl === k || wl === k + "s") || modifiers.has(wl);
+    });
+    if (allAreCategory) return true;
+  }
+  // Exact match to a known category label (any case)
   const lower = line.toLowerCase();
   return categoryKeywords.some((k) => lower === k || lower === k + "s");
 }

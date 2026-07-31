@@ -54,6 +54,8 @@ export function profileToDetectorAllergens(profileAllergens: AllergenId[]): stri
 }
 
 const STORAGE_KEY = "allegeats_profile_allergens";
+/** Exported for storage-event listeners that need to filter by key */
+export const PROFILE_KEY = STORAGE_KEY;
 
 const VALID_ALLERGEN_IDS = new Set<string>(ALLERGEN_LIST.map((a) => a.id));
 

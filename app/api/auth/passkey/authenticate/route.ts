@@ -51,11 +51,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Authentication session expired — please try again" }, { status: 400 });
   }
 
-  await supabase
-    .from("webauthn_challenges")
-    .delete()
-    .eq("user_id", storedCred.user_id)
-    .eq("type", "authentication");
+  // Challenge is NOT deleted yet — only consume it after successful verification
+  // to allow retries on transient errors and avoid a TOCTOU race.
 
   let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
   try {
@@ -79,6 +76,13 @@ export async function POST(req: Request) {
   if (!verification.verified) {
     return NextResponse.json({ error: "Passkey verification failed" }, { status: 400 });
   }
+
+  // Consume the challenge now that verification succeeded
+  await supabase
+    .from("webauthn_challenges")
+    .delete()
+    .eq("user_id", storedCred.user_id)
+    .eq("type", "authentication");
 
   // Update the replay-attack counter
   await supabase

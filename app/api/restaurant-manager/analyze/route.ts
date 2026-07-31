@@ -52,11 +52,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Rate limit reached" }, { status: 429 });
   }
 
-  const { restaurantName, menuUrl, cuisineType } = await req.json() as {
-    restaurantName?: string;
-    menuUrl?: string;
-    cuisineType?: string;
-  };
+  let parsedbody: { restaurantName?: string; menuUrl?: string; cuisineType?: string };
+  try { parsedbody = await req.json(); } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const { restaurantName, menuUrl, cuisineType } = parsedbody;
 
   if (!restaurantName?.trim()) {
     return NextResponse.json({ error: "Restaurant name is required" }, { status: 400 });

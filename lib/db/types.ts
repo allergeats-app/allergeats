@@ -124,6 +124,7 @@ export type ActiveMenuResult = {
 
 /** Result from persistMenu() */
 export type PersistResult =
-  | { status: "skipped";  reason: "duplicate_source" | "duplicate_version"; versionId: string }
+  | { status: "skipped";  reason: "duplicate_source";  versionId: null }
+  | { status: "skipped";  reason: "duplicate_version"; versionId: string }
   | { status: "created";  versionId: string; itemCount: number; versionNumber: number }
   | { status: "error";    error: string };

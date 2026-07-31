@@ -88,12 +88,15 @@ export async function persistMenu(
       const existing = await detectExistingImportByHash(restaurant.id, snapshotHash);
       if (existing) {
         await touchMenuSource(existing.id);
-        // Find the version linked to this source (if any) to return its id
-        const activeVersionId = existing.id; // placeholder — see note below
+        // `existing` is a menu_sources row — its .id is the source ID, not a version ID.
+        // There is no repository helper to look up the linked menu_versions row by source ID,
+        // so we return null here rather than silently return the wrong ID. Callers that need
+        // the version ID should use the duplicate_version path (level 2 dedup) which does
+        // return the correct existingVersion.id.
         return {
           status:    "skipped",
           reason:    "duplicate_source",
-          versionId: activeVersionId,
+          versionId: null,
         };
       }
     }
