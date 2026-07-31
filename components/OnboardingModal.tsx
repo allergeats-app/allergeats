@@ -27,7 +27,7 @@ const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), [tabi
 
 type Step = "welcome" | "safety" | "allergens" | "done";
 
-export function OnboardingModal() {
+export function OnboardingModal({ onComplete }: { onComplete?: () => void } = {}) {
   const { isDark } = useTheme();
   const [visible, setVisible]   = useState(false);
   const [step, setStep]         = useState<Step>("welcome");
@@ -93,12 +93,13 @@ export function OnboardingModal() {
     saveProfileSeverities(finalSeverities);
     localStorage.setItem(ONBOARDING_KEY, "1");
     setStep("done");
-    setTimeout(() => setVisible(false), 1400);
+    setTimeout(() => { setVisible(false); onComplete?.(); }, 1400);
   }
 
   function handleSkip() {
     localStorage.setItem(ONBOARDING_KEY, "1");
     setVisible(false);
+    onComplete?.();
   }
 
   if (!visible) return null;

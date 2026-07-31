@@ -308,7 +308,7 @@ function HomeContent() {
         isSignedIn={!!user}
       />
 
-      <OnboardingModal />
+      <OnboardingModal onComplete={handleUseCurrentLocation} />
     </main>
   );
 }
