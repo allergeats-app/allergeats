@@ -3702,12 +3702,12 @@ menuItems: [
       { id: "jitb-mini-pancakes",        name: "Mini Pancakes",                      category: "Breakfast",        sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       // ── Sides ─────────────────────────────────────────────────────────────
       { id: "jitb-curly-fries",          name: "Seasoned Curly Fries",               category: "Side",             sourceType: "official", allergens: ["wheat","soy"] },
-      { id: "jitb-french-fries",         name: "French Fries",                       category: "Side",             sourceType: "official", allergens: ["soy"] },
+      { id: "jitb-french-fries",         name: "French Fries",                       category: "Side",             sourceType: "official", allergens: [] },
       { id: "jitb-onion-rings",          name: "Onion Rings",                        category: "Side",             sourceType: "official", allergens: ["wheat","soy","egg"] },
       { id: "jitb-stuffed-jalap-3",      name: "Stuffed Jalapeños (3 PC)",           category: "Side",             sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "jitb-stuffed-jalap-7",      name: "Stuffed Jalapeños (7 PC)",           category: "Side",             sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "jitb-egg-rolls",            name: "Jumbo Egg Rolls (3 PC)",             category: "Side",             sourceType: "official", allergens: ["wheat","soy","egg"] },
-      { id: "jitb-egg-rolls-1",          name: "Jumbo Egg Rolls (1 PC)",             category: "Side",             sourceType: "official", allergens: ["wheat","soy","egg"] },
+      { id: "jitb-egg-rolls",            name: "Jumbo Egg Rolls (3 PC)",             category: "Side",             sourceType: "official", allergens: ["wheat","soy","egg","fish"], description: "Contains anchovies." },
+      { id: "jitb-egg-rolls-1",          name: "Jumbo Egg Rolls (1 PC)",             category: "Side",             sourceType: "official", allergens: ["wheat","soy","egg","fish"], description: "Contains anchovies." },
       { id: "jitb-mozz-sticks",          name: "Mozzarella Sticks",                  category: "Side",             sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       // ── Salads ────────────────────────────────────────────────────────────
       { id: "jitb-grilled-ckn-salad",    name: "Grilled Chicken Salad",              category: "Salads",           sourceType: "official", allergens: ["wheat","dairy","egg"] },
