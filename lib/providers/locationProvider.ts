@@ -127,10 +127,11 @@ export function isAccurate(accuracy?: number): boolean {
 const LAST_LOCATION_KEY = "allegeats_last_location";
 const LAST_LOCATION_TTL_MS = 20 * 60 * 1000;
 
-/** Only persist positions with accuracy better than 20 km — IP-geolocated positions
- *  (accuracy 50–100 km) are too coarse to be useful as a fallback and can place the
- *  user in the wrong city/state entirely. */
-const MAX_SAVE_ACCURACY_M = 20_000;
+/** Only persist positions with accuracy better than 5 km — IP-geolocated results
+ *  typically report 5–15 km accuracy and can resolve to a completely wrong city
+ *  (e.g. an ISP hub in San Francisco for a user in another state). Real Wi-Fi
+ *  positioning is usually < 500 m indoors; GPS < 50 m outdoors. */
+const MAX_SAVE_ACCURACY_M = 5_000;
 
 function saveLastLocation(c: Coordinates): void {
   if (typeof localStorage === "undefined") return;
@@ -147,6 +148,11 @@ export function loadLastLocation(): Coordinates | null {
     if (!raw) return null;
     const { savedAt, ...coords } = JSON.parse(raw) as Coordinates & { savedAt: number };
     if (Date.now() - savedAt > LAST_LOCATION_TTL_MS) {
+      localStorage.removeItem(LAST_LOCATION_KEY);
+      return null;
+    }
+    // Evict coarse entries saved before the threshold was tightened (old limit: 20 km).
+    if (coords.accuracy != null && coords.accuracy > MAX_SAVE_ACCURACY_M) {
       localStorage.removeItem(LAST_LOCATION_KEY);
       return null;
     }

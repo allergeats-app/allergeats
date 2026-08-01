@@ -110,8 +110,12 @@ export function useHomeData(radiusMiles: number) {
           }
 
           // Fast-path: show cached location + results immediately while GPS resolves.
+          // Skip if accuracy is too coarse (> 5 km) — IP-geolocation can resolve to
+          // a completely wrong city and we'd rather wait for real GPS than show garbage.
           const cachedPos = loadLastLocation();
-          if (cachedPos && !cancelled) {
+          const cachedIsUsable = cachedPos != null &&
+            (cachedPos.accuracy == null || cachedPos.accuracy <= 5_000);
+          if (cachedIsUsable && !cancelled) {
             setUserLocation({ ...cachedPos, source: "cached" });
             setLocationMode("cached");
             reverseGeocode(cachedPos.lat, cachedPos.lng)
@@ -131,7 +135,7 @@ export function useHomeData(radiusMiles: number) {
           const position = await locationProvider.getUserLocation();
 
           if (!position) {
-            if (!cancelled && !cachedPos) {
+            if (!cancelled && !cachedIsUsable) {
               setLocationMode("unavailable");
               setLocationLabel("Location unavailable");
               setLoading(false);
