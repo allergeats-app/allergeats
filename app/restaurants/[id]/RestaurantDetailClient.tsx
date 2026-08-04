@@ -1098,6 +1098,8 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     restaurantId={restaurant.id}
                     isChainTemplate={!!restaurant.menuIsGenericChainTemplate}
                     isDark={isDark}
+                    dataVerifiedDate={restaurant.dataVerifiedDate}
+                    coverageLine={hero.coverageLine}
                   />
                 )}
 
