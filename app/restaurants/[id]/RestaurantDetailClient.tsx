@@ -962,66 +962,11 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             ) : (
               <>
                 {/* ── 2. Interactive stat blocks ── */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
                   <StatBlock count={summary.likelySafe} label="Safe"      color="#22c55e" rgb="34,197,94"  isDark={isDark} active={riskFilter === "likely-safe"} onClick={() => { setRiskFilter("likely-safe"); document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                   <StatBlock count={summary.ask}        label="Ask Staff" color="#f59e0b" rgb="245,158,11" isDark={isDark} active={riskFilter === "ask"}         onClick={() => { setRiskFilter("ask");          document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                   <StatBlock count={summary.avoid}      label="Avoid"     color="#ef4444" rgb="239,68,68"  isDark={isDark} active={riskFilter === "avoid"}       onClick={() => { setRiskFilter("avoid");        document.getElementById("full-menu")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
                 </div>
-
-                {/* ── 2b. Fit explanation ── */}
-                {hero.fitExplanation && (
-                  <p style={{ fontSize: 13, color: "var(--c-sub)", margin: "0 0 18px", lineHeight: 1.5 }}>
-                    {hero.fitExplanation}
-                  </p>
-                )}
-
-                {/* ── 3. Best options for you ── */}
-                {vm.bestOptions.length > 0 && (
-                  <section style={{ marginBottom: 20 }}>
-                    <SectionHeader label="Best Options for You" />
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {vm.bestOptions.slice(0, 3).map((rec, i) => (
-                        <div key={i} style={{
-                          padding: "12px 14px", borderRadius: 12,
-                          border: "1px solid var(--c-border)",
-                          background: "var(--c-card)",
-                        }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
-                            <span style={{ fontWeight: 700, fontSize: 14, color: "var(--c-text)", lineHeight: 1.3 }}>{rec.item.name}</span>
-                            <span style={{
-                              flexShrink: 0, fontSize: 10, fontWeight: 700,
-                              padding: "3px 7px", borderRadius: 999,
-                              background: isDark ? "rgba(34,197,94,0.15)" : "#dcfce7",
-                              color: isDark ? "#4ade80" : "#15803d",
-                              letterSpacing: "0.03em",
-                            }}>{rec.reasonLabel}</span>
-                          </div>
-                          <p style={{ fontSize: 12, color: "var(--c-sub)", margin: 0, lineHeight: 1.5 }}>{rec.explanation}</p>
-                          {rec.askNotes.length > 0 && (
-                            <p style={{ fontSize: 11, color: isDark ? "#fbbf24" : "#92400e", margin: "6px 0 0", lineHeight: 1.4 }}>{rec.askNotes[0]}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* ── 3b. Why this restaurant works for you ── */}
-                {vm.whyThisWorks.length > 0 && (
-                  <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
-                      Why this restaurant works for you
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                      {vm.whyThisWorks.map((bullet, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#22c55e", marginTop: 6, flexShrink: 0 }} />
-                          <span style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>{bullet}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
               </>
             )}
@@ -1156,27 +1101,6 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     dataVerifiedDate={restaurant.dataVerifiedDate}
                     coverageLine={hero.coverageLine}
                   />
-                )}
-
-                {/* Ask staff — aggregated from all "ask risk" items */}
-                {vm.aggregatedStaffQuestions.length > 0 && (
-                  <div style={{
-                    marginBottom: 14, padding: "10px 12px", borderRadius: 10,
-                    background: isDark ? "rgba(245,158,11,0.07)" : "rgba(253,230,138,0.2)",
-                    border: `1px solid ${isDark ? "rgba(245,158,11,0.18)" : "rgba(251,191,36,0.3)"}`,
-                  }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: isDark ? "#fbbf24" : "#92400e", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>
-                      Ask staff before ordering:
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                      {vm.aggregatedStaffQuestions.slice(0, 5).map((q, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 12, color: isDark ? "#d4b896" : "#78350f", lineHeight: 1.5 }}>
-                          <span style={{ color: isDark ? "#fbbf24" : "#92400e", fontWeight: 700, flexShrink: 0 }}>·</span>
-                          {q}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 )}
 
                 {/* Sticky risk filter chips */}
