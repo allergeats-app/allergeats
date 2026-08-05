@@ -6,14 +6,17 @@ import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import { useTheme, type ThemeMode } from "@/lib/themeContext";
 import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import { BottomNav } from "@/components/BottomNav";
 import { SupportChat } from "@/components/SupportChat";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 
 export default function ProfilePage() {
   const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
   const { isDark, mode: themeMode, setMode: setThemeMode } = useTheme();
   const { allergens } = useAllergenProfile();
+  const subscription = useSubscription();
   const router = useRouter();
 
   const [signingOut, setSigningOut]       = useState(false);
@@ -22,6 +25,29 @@ export default function ProfilePage() {
   const [lastEdit,   setLastEdit]   = useState("");
   const [nameSaving, setNameSaving] = useState(false);
   const [nameSaved,  setNameSaved]  = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  // Show success banner when returning from Stripe checkout
+  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgraded") === "1") {
+      setShowUpgradeSuccess(true);
+      window.history.replaceState({}, "", "/profile");
+    }
+  }, []);
+
+  async function handleManageBilling() {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!loading && !user) router.replace("/auth");
@@ -91,6 +117,24 @@ export default function ProfilePage() {
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px 16px", display: "grid", gap: 16 }}>
 
+        {/* Upgrade success banner */}
+        {showUpgradeSuccess && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "12px 16px", borderRadius: 12,
+            background: isDark ? "rgba(34,197,94,.12)" : "rgba(34,197,94,.08)",
+            border: "1px solid rgba(34,197,94,.3)",
+          }}>
+            <span style={{ fontSize: 18 }}>🎉</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: isDark ? "#86efac" : "#15803d" }}>Welcome to Pro!</div>
+              <div style={{ fontSize: 12, color: isDark ? "#4ade80" : "#16a34a" }}>All Pro features are now active on your account.</div>
+            </div>
+            <button onClick={() => setShowUpgradeSuccess(false)}
+              style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "var(--c-sub)", fontSize: 18 }}>×</button>
+          </div>
+        )}
+
         {/* Account card */}
         <div
           style={{
@@ -122,6 +166,47 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Subscription card */}
+        {!subscription.loading && (
+          subscription.isPro ? (
+            <div style={{
+              background: "var(--c-card)", border: "1px solid var(--c-border)",
+              borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase",
+                    color: "#8b5cf6", background: isDark ? "rgba(124,58,237,.15)" : "rgba(124,58,237,.08)",
+                    padding: "3px 8px", borderRadius: 4 }}>Pro</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Active</span>
+                </div>
+                {subscription.cancelAtPeriodEnd && (
+                  <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 600 }}>Cancels at period end</span>
+                )}
+              </div>
+              {subscription.currentPeriodEnd && (
+                <p style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 14 }}>
+                  {subscription.cancelAtPeriodEnd ? "Access until" : "Renews"}{" "}
+                  {subscription.currentPeriodEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                </p>
+              )}
+              <button
+                onClick={handleManageBilling}
+                disabled={portalLoading}
+                style={{
+                  padding: "9px 16px", borderRadius: 8, border: "1px solid var(--c-border)",
+                  background: "var(--c-bg)", color: "var(--c-text)", fontSize: 13, fontWeight: 600,
+                  cursor: portalLoading ? "not-allowed" : "pointer", opacity: portalLoading ? 0.6 : 1,
+                }}
+              >
+                {portalLoading ? "Loading…" : "Manage billing"}
+              </button>
+            </div>
+          ) : (
+            <UpgradePrompt isDark={isDark} />
+          )
+        )}
 
         {/* Settings card */}
         <div
