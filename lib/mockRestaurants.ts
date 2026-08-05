@@ -3640,6 +3640,7 @@ menuItems: [
     tags: ["southern", "breakfast", "comfort-food", "casual"],
     distance: 2.2,
     sourceType: "official",
+    dataVerifiedDate: "2026-02-11",
     builderConfig: {
       steps: [
         { label: "Choose your main",    categories: ["Breakfast", "Dinner"],   required: true,  maxSelect: 1, category: "Dinner" },
@@ -3651,12 +3652,14 @@ menuItems: [
     menuItems: [
       { id: "cb-old-timers",       name: "Old Timer's Breakfast",            category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "cb-pancakes",         name: "Buttermilk Pancakes",              category: "Breakfast",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "cb-biscuits",         name: "Buttermilk Biscuits",              category: "Bread",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "cb-hashbrown-cass",   name: "Hashbrown Casserole",              category: "Sides",      sourceType: "official", allergens: ["dairy","wheat","egg","soy"] },
-      { id: "cb-chicken-dumplin",  name: "Chicken n' Dumplins",              category: "Dinner",     sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "cb-meatloaf",         name: "Country Meatloaf",                 category: "Dinner",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "cb-biscuits",         name: "Buttermilk Biscuits",              category: "Bread",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "cb-hashbrown-cass",   name: "Hashbrown Casserole",              category: "Sides",      sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "cb-chicken-dumplin",  name: "Chicken n' Dumplins",              category: "Dinner",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "cb-meatloaf",         name: "Country Meatloaf",                 category: "Dinner",     sourceType: "official", allergens: ["wheat","egg","soy"] },
       { id: "cb-cfs",              name: "Country Fried Chicken",            category: "Dinner",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
-      { id: "cb-mac",              name: "Macaroni n' Cheese",               category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "cb-mac",              name: "Macaroni n' Cheese",               category: "Sides",      sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "cb-mashed",           name: "Mashed Potatoes",                  category: "Sides",      sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "cb-green-beans",      name: "Country Green Beans",              category: "Sides",      sourceType: "official", allergens: [] },
       { id: "cb-cornbread",        name: "Corn Muffins",                     category: "Bread",      sourceType: "official", allergens: ["corn","wheat","dairy","egg"] },
       { id: "cb-choc-cake",        name: "Double Chocolate Fudge Coca-Cola Cake", category: "Desserts", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
     ],
@@ -5062,6 +5065,8 @@ menuItems: [
       { id: "wc-chicken-rings",       name: "Chicken Rings",                      category: "Sliders",  sourceType: "official", allergens: ["wheat","dairy"] },
       { id: "wc-fish",                name: "Panko Fish Slider",                  category: "Sliders",  sourceType: "official", allergens: ["wheat","fish"] },
       { id: "wc-veggie",              name: "Veggie Slider",                      category: "Sliders",  sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "wc-ckn-waffles",         name: "Chicken & Waffles Slider",           category: "Sliders",  sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "wc-impossible",          name: "Impossible Slider",                  category: "Sliders",  sourceType: "official", allergens: ["wheat","soy"] },
       // ── Breakfast ─────────────────────────────────────────────────────────────
       { id: "wc-bfast-egg-cheese",    name: "Breakfast Slider (Egg & Cheese)",    category: "Breakfast",sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "wc-bfast-sausage",       name: "Breakfast Slider (Sausage, Egg & Cheese)", category: "Breakfast", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
@@ -5070,6 +5075,10 @@ menuItems: [
       { id: "wc-fries",               name: "French Fries",                       category: "Sides",    sourceType: "official", allergens: [], description: "Shared fryer cross-contact: Egg, Milk, Wheat, Soy, Fish, Shellfish" },
       { id: "wc-onion-rings",         name: "Onion Rings",                        category: "Sides",    sourceType: "official", allergens: ["wheat","egg","dairy"] },
       { id: "wc-mozzarella-sticks",   name: "Mozzarella Sticks",                  category: "Sides",    sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "wc-cheese-fries",        name: "Cheese Fries",                       category: "Sides",    sourceType: "official", allergens: ["dairy","soy"] },
+      { id: "wc-three-cheese-tots",   name: "Three Cheese Tots",                  category: "Sides",    sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
+      { id: "wc-fish-nibblers",       name: "Fish Nibblers",                       category: "Sides",    sourceType: "official", allergens: ["wheat","dairy","egg","soy","fish","shellfish"] },
+      { id: "wc-clam-strips",         name: "Clam Strips",                         category: "Sides",    sourceType: "official", allergens: ["wheat","dairy","egg","shellfish"] },
       // ── Shakes & Drinks ───────────────────────────────────────────────────────
       { id: "wc-shake-choc",          name: "Chocolate Shake",                    category: "Shakes",   sourceType: "official", allergens: ["dairy"] },
       { id: "wc-shake-van",           name: "Vanilla Shake",                      category: "Shakes",   sourceType: "official", allergens: ["dairy"] },
