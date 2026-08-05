@@ -1367,6 +1367,7 @@ menuItems: [
     tags: ["coffee"],
     distance: 0.7,
     sourceType: "official",
+    dataVerifiedDate: "2026-07-08",
     builderConfig: {
       steps: [
         { label: "Choose your coffee or drink",  categories: ["Coffee","Frozen"], required: false, maxSelect: 1, category: "Coffee" },
@@ -1381,8 +1382,8 @@ menuItems: [
       { id: "dunk-glazed-munchkin", name: "Glazed Munchkin Donut Holes",     category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       { id: "dunk-old-fashioned",name: "Old Fashioned Donut",                category: "Donuts",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       // Bagels & Muffins
-      { id: "dunk-bagel-plain",  name: "Plain Bagel",                        category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
-      { id: "dunk-bagel-cream",  name: "Bagel with Cream Cheese",            category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
+      { id: "dunk-bagel-plain",  name: "Plain Bagel",                        category: "Bakery",     sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "dunk-bagel-cream",  name: "Bagel with Cream Cheese",            category: "Bakery",     sourceType: "official", allergens: ["wheat","dairy","soy"] },
       { id: "dunk-muffin-blue",  name: "Blueberry Muffin",                   category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       { id: "dunk-croissant",    name: "Croissant",                          category: "Bakery",     sourceType: "official", allergens: ["wheat","egg","dairy","soy"] },
       // Breakfast Sandwiches
@@ -3041,6 +3042,7 @@ menuItems: [
     tags: ["fast-food", "sandwiches", "roast-beef"],
     distance: 1.4,
     sourceType: "official",
+    dataVerifiedDate: "2026-08-01",
     builderConfig: {
       steps: [
         { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
@@ -3051,10 +3053,10 @@ menuItems: [
     menuItems: [
       { id: "arbs-classic-roast",  name: "Classic Roast Beef",               category: "Entrée", sourceType: "official", allergens: ["wheat","soy","sesame"] },
       { id: "arbs-double-roast",   name: "Double Roast Beef",                category: "Entrée", sourceType: "official", allergens: ["wheat","soy","sesame"] },
-      { id: "arbs-beef-cheddar",   name: "Beef 'n Cheddar",                  category: "Entrée", sourceType: "official", allergens: ["wheat","dairy","soy"] },
+      { id: "arbs-beef-cheddar",   name: "Beef 'n Cheddar",                  category: "Entrée", sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
       { id: "arbs-french-dip",     name: "French Dip",                       category: "Entrée", sourceType: "official", allergens: ["wheat","soy","dairy"] },
       { id: "arbs-crispy-ckn",     name: "Classic Crispy Chicken Sandwich",  category: "Entrée",    sourceType: "official", allergens: ["wheat","egg","soy","dairy","sesame"] },
-      { id: "arbs-gyro",           name: "Traditional Greek Gyro",           category: "Entrée", sourceType: "official", allergens: ["wheat","dairy","egg"] },
+      { id: "arbs-gyro",           name: "Traditional Greek Gyro",           category: "Entrée", sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "arbs-curly-fries",    name: "Curly Fries",                      category: "Side",      sourceType: "official", allergens: ["wheat","soy"] },
       { id: "arbs-loaded-fries",   name: "Loaded Curly Fries",               category: "Side",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
       { id: "arbs-mozz-sticks",    name: "Mozzarella Sticks",                category: "Side",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
