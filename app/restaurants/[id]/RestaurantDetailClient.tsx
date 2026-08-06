@@ -839,7 +839,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </div>
               <button
                 onClick={() => {
-                  if (!favorited && !isPro && favorites.size >= 4) {
+                  if (!favorited && !isPro && favorites.size >= 3) {
                     setShowSaveWall(true);
                     return;
                   }
