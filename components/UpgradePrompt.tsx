@@ -63,7 +63,7 @@ export function UpgradePrompt({
             opacity: loading ? 0.7 : 1,
           }}
         >
-          {loading ? "…" : "Upgrade $4/mo"}
+          {loading ? "…" : "Upgrade $5/mo"}
         </button>
       </div>
     );
@@ -98,7 +98,7 @@ export function UpgradePrompt({
         Eat safely, everywhere
       </h3>
       <p style={{ fontSize: 13, color: muted, marginBottom: 16, lineHeight: 1.5 }}>
-        Upgrade for $4/month and get everything you need to manage allergies for your whole family.
+        Upgrade for $5/month and get everything you need to manage allergies for your whole family.
       </p>
 
       <ul style={{ listStyle: "none", margin: "0 0 20px", padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -126,7 +126,7 @@ export function UpgradePrompt({
           boxShadow: "0 2px 12px rgba(124,58,237,.35)",
         }}
       >
-        {loading ? "Redirecting to checkout…" : "Upgrade to Pro — $4/mo"}
+        {loading ? "Redirecting to checkout…" : "Upgrade to Pro — $5/mo"}
       </button>
 
       <p style={{ fontSize: 11, color: muted, textAlign: "center", marginTop: 10 }}>
