@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/authContext";
 
 const FEATURES = [
   { icon: "♾️",  text: "Unlimited saved restaurants" },
@@ -16,6 +17,7 @@ export function SaveWallModal({
   isDark: boolean;
   onClose: () => void;
 }) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +28,10 @@ export function SaveWallModal({
   }, [onClose]);
 
   async function handleUpgrade() {
+    if (!user) {
+      window.location.href = "/auth?next=/profile";
+      return;
+    }
     setLoading(true);
     setError(null);
     try {

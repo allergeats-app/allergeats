@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/lib/authContext";
 
 const PRO_FEATURES = [
   { icon: "🔄", label: "Profile sync across all your devices" },
@@ -18,10 +19,15 @@ export function UpgradePrompt({
   compact?: boolean;
   onDismiss?: () => void;
 }) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleUpgrade() {
+    if (!user) {
+      window.location.href = "/auth?next=/profile";
+      return;
+    }
     setLoading(true);
     setError(null);
     try {

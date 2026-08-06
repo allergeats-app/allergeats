@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/authContext";
 
 const DISMISS_KEY = "allegeats_alerts_banner_dismissed";
 
@@ -11,6 +12,7 @@ export function ProAlertsBanner({
   restaurantName: string;
   isDark: boolean;
 }) {
+  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
 
@@ -28,6 +30,10 @@ export function ProAlertsBanner({
   }
 
   async function handleUpgrade() {
+    if (!user) {
+      window.location.href = "/auth?next=/profile";
+      return;
+    }
     setUpgrading(true);
     try {
       const res = await fetch("/api/stripe/checkout", { method: "POST" });
