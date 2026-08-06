@@ -56,28 +56,6 @@ export function useSubscription(): Subscription {
     }
 
     load();
-
-    // Live updates when webhook writes to Supabase
-    const channel = client
-      .channel(`sub:${user.id}:${Date.now()}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const row = payload.new as Record<string, unknown>;
-          const status = (row.status ?? "free") as SubscriptionStatus;
-          setSub({
-            status,
-            isPro: status === "active" || status === "trialing",
-            cancelAtPeriodEnd: Boolean(row.cancel_at_period_end),
-            currentPeriodEnd: row.current_period_end ? new Date(row.current_period_end as string) : null,
-            loading: false,
-          });
-        }
-      )
-      .subscribe();
-
-    return () => { client.removeChannel(channel); };
   }, [user]);
 
   return sub;
