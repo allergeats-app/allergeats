@@ -59,7 +59,7 @@ export function useSubscription(): Subscription {
 
     // Live updates when webhook writes to Supabase
     const channel = client
-      .channel(`sub:${user.id}`)
+      .channel(`sub:${user.id}:${Date.now()}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` },
