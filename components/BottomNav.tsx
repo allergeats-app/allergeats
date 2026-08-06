@@ -256,24 +256,22 @@ export function BottomNav({
                 </svg>
               </Link>
 
-              {/* Allergy Card — signed-in only */}
-              {isSignedIn && (
-                <Link href="/allergy-card" aria-label="My Allergy Card" className="bn-btn" style={{
-                  ...circle,
-                  background: pathname === "/allergy-card"
-                    ? "var(--c-brand)"
-                    : "var(--bn-circle-bg)",
-                }}>
-                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke={pathname === "/allergy-card" ? "#fff" : "var(--bn-icon)"}
-                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="5" width="20" height="14" rx="3"/>
-                    <path d="M2 10h20"/>
-                    <path d="M6 15h4"/>
-                    <path d="M14 15h4"/>
-                  </svg>
-                </Link>
-              )}
+              {/* Allergy Card */}
+              <Link href="/allergy-card" aria-label="My Allergy Card" className="bn-btn" style={{
+                ...circle,
+                background: pathname === "/allergy-card"
+                  ? "var(--c-brand)"
+                  : "var(--bn-circle-bg)",
+              }}>
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke={pathname === "/allergy-card" ? "#fff" : "var(--bn-icon)"}
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="3"/>
+                  <path d="M2 10h20"/>
+                  <path d="M6 15h4"/>
+                  <path d="M14 15h4"/>
+                </svg>
+              </Link>
 
               {/* Profile */}
               <Link href="/profile" aria-label="Profile" className="bn-btn" style={circle}>

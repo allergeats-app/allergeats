@@ -19,6 +19,28 @@ import { isRateLimited, getClientIp } from "@/lib/rateLimit";
 const PHOTO_WINDOW_MS = 60_000;
 const PHOTO_MAX_REQ   = 30;
 const FETCH_TIMEOUT_MS = 10_000;
+const MAX_IMG_BYTES = 5 * 1024 * 1024; // 5 MB
+
+async function readBodyCapped(res: Response): Promise<ArrayBuffer | null> {
+  const reader = res.body?.getReader();
+  if (!reader) return null;
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.length;
+    if (totalBytes > MAX_IMG_BYTES) {
+      reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  const combined = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) { combined.set(chunk, offset); offset += chunk.length; }
+  return combined.buffer;
+}
 
 const PLACES_V1 = "https://places.googleapis.com/v1";
 
@@ -124,7 +146,9 @@ export async function GET(req: Request) {
       if (!imgRes.ok) return new Response(null, { status: 404, ...NO_CACHE });
       const VALID = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       const imgType = VALID.find((t) => (imgRes.headers.get("Content-Type") ?? "").includes(t)) ?? "image/jpeg";
-      return new Response(await imgRes.arrayBuffer(), {
+      const imgBuf = await readBodyCapped(imgRes);
+      if (!imgBuf) return new Response(null, { status: 413, ...NO_CACHE });
+      return new Response(imgBuf, {
         headers: {
           "Content-Type": imgType,
           "X-Content-Type-Options": "nosniff",
@@ -136,7 +160,9 @@ export async function GET(req: Request) {
     // Legacy path — direct image bytes
     const VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     const imgContentType = VALID_IMAGE_TYPES.find((t) => contentType.includes(t)) ?? "image/jpeg";
-    return new Response(await photoRes.arrayBuffer(), {
+    const photoBuf = await readBodyCapped(photoRes);
+    if (!photoBuf) return new Response(null, { status: 413, ...NO_CACHE });
+    return new Response(photoBuf, {
       headers: {
         "Content-Type": imgContentType,
         "X-Content-Type-Options": "nosniff",

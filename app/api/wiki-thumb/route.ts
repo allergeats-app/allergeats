@@ -99,6 +99,29 @@ const WIKI_TITLES: Record<string, string> = {
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX       = 120;
 
+const MAX_IMG_BYTES = 5 * 1024 * 1024; // 5 MB
+
+async function readBodyCapped(res: Response): Promise<ArrayBuffer | null> {
+  const reader = res.body?.getReader();
+  if (!reader) return null;
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.length;
+    if (totalBytes > MAX_IMG_BYTES) {
+      reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  const combined = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) { combined.set(chunk, offset); offset += chunk.length; }
+  return combined.buffer;
+}
+
 export async function GET(req: Request) {
   if (await isRateLimited(getClientIp(req), RATE_WINDOW_MS, RATE_MAX)) {
     return new Response(null, { status: 429 });
@@ -141,7 +164,8 @@ export async function GET(req: Request) {
       if (!imgRes.ok) return new Response(null, { status: 404 });
 
       const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
-      const buffer = await imgRes.arrayBuffer();
+      const buffer = await readBodyCapped(imgRes);
+      if (!buffer) return new Response(null, { status: 413 });
       const isLogoUrl = /\.svg(\.png)?$/i.test(directUrl) || /[Ll]ogo/.test(directUrl);
       return new Response(buffer, {
         headers: {
@@ -195,7 +219,8 @@ export async function GET(req: Request) {
     if (!imgRes) return new Response(null, { status: 404 });
 
     const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
-    const buffer = await imgRes.arrayBuffer();
+    const buffer = await readBodyCapped(imgRes);
+    if (!buffer) return new Response(null, { status: 413 });
 
     return new Response(buffer, {
       headers: {

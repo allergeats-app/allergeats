@@ -95,7 +95,10 @@ export async function POST(req: NextRequest) {
         cache_control: { type: "ephemeral" },
       },
     ],
-    messages: messages.slice(-30),
+    messages: messages.slice(-30).map((msg) => ({
+      ...msg,
+      content: typeof msg.content === "string" ? msg.content.slice(0, 4000) : msg.content,
+    })),
   });
 
   const readable = new ReadableStream({

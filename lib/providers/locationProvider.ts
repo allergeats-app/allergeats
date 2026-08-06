@@ -127,10 +127,11 @@ export function isAccurate(accuracy?: number): boolean {
 const LAST_LOCATION_KEY = "allegeats_last_location";
 const LAST_LOCATION_TTL_MS = 20 * 60 * 1000;
 
-/** Only persist positions with accuracy better than 20 km — IP-geolocated positions
- *  (accuracy 50–100 km) are too coarse to be useful as a fallback and can place the
- *  user in the wrong city/state entirely. */
-const MAX_SAVE_ACCURACY_M = 20_000;
+/** Only persist positions with accuracy better than 5 km — IP-geolocated results
+ *  typically report 5–15 km accuracy and can resolve to a completely wrong city
+ *  (e.g. an ISP hub in San Francisco for a user in another state). Real Wi-Fi
+ *  positioning is usually < 500 m indoors; GPS < 50 m outdoors. */
+const MAX_SAVE_ACCURACY_M = 5_000;
 
 function saveLastLocation(c: Coordinates): void {
   if (typeof localStorage === "undefined") return;
@@ -147,6 +148,11 @@ export function loadLastLocation(): Coordinates | null {
     if (!raw) return null;
     const { savedAt, ...coords } = JSON.parse(raw) as Coordinates & { savedAt: number };
     if (Date.now() - savedAt > LAST_LOCATION_TTL_MS) {
+      localStorage.removeItem(LAST_LOCATION_KEY);
+      return null;
+    }
+    // Evict coarse entries saved before the threshold was tightened (old limit: 20 km).
+    if (coords.accuracy != null && coords.accuracy > MAX_SAVE_ACCURACY_M) {
       localStorage.removeItem(LAST_LOCATION_KEY);
       return null;
     }
@@ -321,37 +327,65 @@ function getRealLocation(): Promise<Coordinates | null> {
   }
 
   return new Promise((resolve) => {
-    let settled = false;
+    let best: Coordinates | null = null;
     let failures = 0;
+    let committed = false;
+    let upgradeTimer: ReturnType<typeof setTimeout> | null = null;
 
-    function succeed(c: Coordinates) {
-      if (settled) return;
-      settled = true;
+    function commit(c: Coordinates) {
+      if (committed) return;
+      committed = true;
+      if (upgradeTimer) { clearTimeout(upgradeTimer); upgradeTimer = null; }
       saveLastLocation(c);
       resolve(c);
     }
 
+    // Called when any source produces a position. Keeps the most accurate result
+    // seen so far and commits after a short window so a slow-but-accurate GPS
+    // result can override a fast-but-coarse IP-geolocation result.
+    function candidate(c: Coordinates) {
+      if (committed) {
+        // Already resolved — update the cache if this new result is more accurate.
+        if (c.accuracy != null && (best == null || best.accuracy == null || c.accuracy < best.accuracy)) {
+          saveLastLocation(c);
+        }
+        return;
+      }
+      if (!best || (c.accuracy != null && (best.accuracy == null || c.accuracy < best.accuracy))) {
+        best = c;
+      }
+      if (!upgradeTimer) {
+        // First result in — wait 2.5 s for a more accurate result before committing.
+        // IP-geolocation typically resolves < 500 ms; GPS/Wi-Fi takes 1–3 s.
+        upgradeTimer = setTimeout(() => commit(best!), 2500);
+      }
+      // GPS-quality accuracy (≤ 100 m) — no need to wait, commit immediately.
+      if (c.accuracy != null && c.accuracy <= 100) commit(c);
+    }
+
     function fail() {
-      if (settled) return;
+      if (committed) return;
       failures++;
       if (failures >= 2) {
-        // Both GPS and network failed — fall back to cached position
-        settled = true;
-        const cached = loadLastLocation();
-        resolve(cached ? { ...cached, source: "cached" as const } : null);
+        if (best) {
+          commit(best); // one source worked, timer would have fired eventually
+        } else {
+          const cached = loadLastLocation();
+          resolve(cached ? { ...cached, source: "cached" as const } : null);
+        }
       }
     }
 
-    // Fire GPS and network simultaneously — take whichever resolves first.
-    // GPS typically resolves in 1–3 s outdoors; network < 1 s indoors.
-    // Old sequential approach (10 s + 10 s) could take 20 s in the worst case.
+    // Fire both simultaneously. Network resolves fast (IP-based) but coarsely;
+    // GPS/Wi-Fi resolves slower but accurately. The 2.5 s commit window lets the
+    // better result win rather than always taking the faster one.
     navigator.geolocation.getCurrentPosition(
-      (pos) => succeed(fromPosition(pos, "gps")),
+      (pos) => candidate(fromPosition(pos, "gps")),
       fail,
       { timeout: 6000, enableHighAccuracy: true },
     );
     navigator.geolocation.getCurrentPosition(
-      (pos) => succeed(fromPosition(pos, "network")),
+      (pos) => candidate(fromPosition(pos, "network")),
       fail,
       { timeout: 8000, enableHighAccuracy: false },
     );

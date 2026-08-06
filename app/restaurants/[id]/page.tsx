@@ -26,20 +26,42 @@ async function getRestaurantMeta(id: string): Promise<CachedRestaurant | null> {
   return null;
 }
 
+const BASE_URL = "https://www.allergeats.com";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const restaurant = await getRestaurantMeta(id);
 
   const name    = restaurant?.name    ?? "Restaurant";
   const cuisine = restaurant?.cuisine ?? "Restaurant";
+  const pageUrl = `${BASE_URL}/restaurants/${id}`;
+  const title   = `${name} Allergy Menu | AllergEats`;
+  const desc    = `View the ${name} menu filtered for your food allergies. See which ${cuisine} items are safe, need staff confirmation, or should be avoided.`;
 
   return {
-    title:       `${name} Allergy Menu | AllergEats`,
-    description: `View the ${name} menu filtered for your food allergies. See which items are safe, need staff confirmation, or should be avoided — powered by AllergEats.`,
+    title,
+    description: desc,
+    alternates: { canonical: pageUrl },
     openGraph: {
       title:       `${name} — Allergy-Safe Menu | AllergEats`,
-      description: `Explore ${cuisine} dishes at ${name} with your allergy profile applied. Safe, ask, and avoid ratings for every menu item.`,
+      description: desc,
+      url:         pageUrl,
+      siteName:    "AllergEats",
       type:        "website",
+      images: [
+        {
+          url:    `${BASE_URL}/og-image.png`,
+          width:  1200,
+          height: 630,
+          alt:    `AllergEats — Allergy-safe menu for ${name}`,
+        },
+      ],
+    },
+    twitter: {
+      card:        "summary_large_image",
+      title:       `${name} — Allergy-Safe Menu`,
+      description: desc,
+      images:      [`${BASE_URL}/og-image.png`],
     },
   };
 }

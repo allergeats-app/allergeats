@@ -11,7 +11,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { tsCode } = await req.json() as { tsCode?: string };
+  let body: { tsCode?: string };
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const { tsCode } = body;
   if (!tsCode?.trim()) {
     return NextResponse.json({ error: "No code provided" }, { status: 400 });
   }

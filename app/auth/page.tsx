@@ -24,6 +24,7 @@ export default function AuthPage() {
   const [staySignedIn, setStay] = useState(true);
   const [error, setError]       = useState<string | null>(null);
   const [info, setInfo]         = useState<string | null>(null);
+  const [pendingResendEmail, setPendingResendEmail] = useState<string | null>(null);
   const [loading, setLoading]   = useState(false);
   const [oauthLoading, setOauthLoading]           = useState<"google" | null>(null);
   const [passkeySupported, setPasskeySupported]   = useState(false);
@@ -51,7 +52,7 @@ export default function AuthPage() {
     }
   }, []);
 
-  function switchMode(m: Mode) { setMode(m); setError(null); setInfo(null); }
+  function switchMode(m: Mode) { setMode(m); setError(null); setInfo(null); setPendingResendEmail(null); }
 
   async function handleOAuth(provider: "google") {
     setError(null);
@@ -99,8 +100,10 @@ export default function AuthPage() {
       if (passkeySupported) { setShowPasskeyPrompt(true); return; }
       router.push("/");
     } else {
+      // Switch tab without calling switchMode() — that would clear the info message
+      setMode("signin");
+      setPendingResendEmail(email);
       setInfo("Check your email to confirm your account, then sign in.");
-      switchMode("signin");
     }
   }
 
@@ -111,6 +114,15 @@ export default function AuthPage() {
     if (token) await registerPasskey(token);
     setPasskeyEnrolling(false);
     router.push("/");
+  }
+
+  async function handleResendConfirmation() {
+    if (!pendingResendEmail) return;
+    const sb = getSupabaseClient();
+    if (!sb) return;
+    const { error: err } = await sb.auth.resend({ type: "signup", email: pendingResendEmail });
+    if (err) { setError(err.message); return; }
+    setInfo("Confirmation email resent — check your inbox.");
   }
 
   const inputStyle: React.CSSProperties = {
@@ -272,9 +284,9 @@ export default function AuthPage() {
                     </button>
                   )}
                 </div>
-                <input id="auth-password" type="password" required minLength={6}
+                <input id="auth-password" type="password" required minLength={8}
                   value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === "signup" ? "At least 6 characters" : "••••••••"}
+                  placeholder={mode === "signup" ? "At least 8 characters" : "••••••••"}
                   autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   style={inputStyle} />
               </div>
@@ -290,6 +302,12 @@ export default function AuthPage() {
 
               {error && <div style={{ padding: "10px 14px", borderRadius: 10, background: "#fff1f0", border: "1px solid #f3c5c0", fontSize: 13, color: "#b91c1c" }}>{error}</div>}
               {info  && <div style={{ padding: "10px 14px", borderRadius: 10, background: "#f0fdf4", border: "1px solid #bbf7d0", fontSize: 13, color: "#15803d" }}>{info}</div>}
+              {pendingResendEmail && (
+                <button type="button" onClick={handleResendConfirmation}
+                  style={{ background: "none", border: "none", color: "var(--c-brand)", fontSize: 13, fontWeight: 600, cursor: "pointer", padding: 0, textAlign: "left" }}>
+                  Resend confirmation email →
+                </button>
+              )}
 
               <button type="submit" disabled={loading} style={{
                 marginTop: 2, padding: "14px 0", borderRadius: 14, border: "none",

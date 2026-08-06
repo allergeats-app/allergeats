@@ -6,8 +6,11 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import type { NextRequest } from "next/server";
 
-const getSecret = () =>
-  process.env.ADMIN_JWT_SECRET ?? process.env.ADMIN_PASSWORD ?? "dev-only-change-in-prod";
+const getSecret = (): string => {
+  const s = process.env.ADMIN_JWT_SECRET ?? process.env.ADMIN_PASSWORD;
+  if (!s) throw new Error("ADMIN_JWT_SECRET env var is not set");
+  return s;
+};
 
 const TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
@@ -18,17 +21,22 @@ export function mintAdminToken(): string {
 }
 
 export function verifyAdminToken(token: string): boolean {
-  const sep = token.indexOf(":");
-  if (sep < 1) return false;
-  const expStr = token.slice(0, sep);
-  const mac    = token.slice(sep + 1);
-  const exp    = Number(expStr);
-  if (!exp || Date.now() > exp) return false;
-  const expected = createHmac("sha256", getSecret()).update(expStr).digest("hex");
-  const a = Buffer.from(mac,      "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  try {
+    const sep = token.indexOf(":");
+    if (sep < 1) return false;
+    const expStr = token.slice(0, sep);
+    const mac    = token.slice(sep + 1);
+    const exp    = Number(expStr);
+    if (!exp || Date.now() > exp) return false;
+    const expected = createHmac("sha256", getSecret()).update(expStr).digest("hex");
+    const a = Buffer.from(mac,      "hex");
+    const b = Buffer.from(expected, "hex");
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  } catch {
+    // getSecret() throws when ADMIN_JWT_SECRET is not set — fail closed
+    return false;
+  }
 }
 
 export function verifyAdminRequest(req: NextRequest): boolean {

@@ -20,7 +20,8 @@ export default function AuthCallbackPage() {
 
     if (error) {
       const isEmailConflict = /already.registered|email.*exist|conflict|different.*provider/i.test(errorDesc);
-      router.replace(`/auth?error=${isEmailConflict ? "email_conflict" : "oauth_cancelled"}`);
+      const isCancelled = error === "access_denied";
+      router.replace(`/auth?error=${isEmailConflict ? "email_conflict" : isCancelled ? "oauth_cancelled" : "oauth_failed"}`);
       return;
     }
 

@@ -13,6 +13,9 @@ import { bumpInteraction, registerForCrawl, markCrawled } from "@/lib/menu-crawl
 import { toRawMenuItems } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
 import { useFavorites } from "@/lib/favoritesContext";
+import { useSubscription } from "@/lib/hooks/useSubscription";
+import { ProAlertsBanner } from "@/components/ProAlertsBanner";
+import { SaveWallModal } from "@/components/SaveWallModal";
 import { saveOrder } from "@/lib/savedOrders";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { GuidedOrderBuilder } from "@/components/GuidedOrderBuilder";
@@ -31,16 +34,19 @@ import type {
   RestaurantMenuAnalysis,
   RestaurantDetailViewModel,
   AnalyzedMenuItem,
-  MemoryInsight,
 } from "@/lib/analysis";
 import { applyMemoryToAnalysis } from "@/lib/learning/memoryIntegration";
 import { useRestaurantMemory } from "@/lib/learning/useRestaurantMemory";
 import type { FeedbackParams } from "@/lib/learning/useRestaurantMemory";
-import type { FeedbackType } from "@/lib/learning/types";
 import type { Restaurant, Risk, AllergenId, AllergenSeverity } from "@/lib/types";
 import { loadProfileSeverities } from "@/lib/allergenProfile";
 import { coverGradient } from "@/lib/coverGradient";
 import { chainLogoUrl } from "@/lib/chainLogos";
+import { StatBlock } from "@/components/restaurant-detail/StatBlock";
+import { SectionHeader } from "@/components/restaurant-detail/SectionHeader";
+import { MemoryInsightCard } from "@/components/restaurant-detail/MemoryInsightCard";
+import { FeedbackRow } from "@/components/restaurant-detail/FeedbackRow";
+import { MenuFreshnessNotice } from "@/components/restaurant-detail/MenuFreshnessNotice";
 
 type RiskFilter = "all" | Risk;
 
@@ -54,12 +60,6 @@ const RISK_META: Record<Risk, { label: string; mark: string; color: string; bg: 
   "unknown":     { label: "Unknown",     mark: "–", color: "var(--c-sub)",         bg: "var(--c-muted)",         border: "var(--c-border)",        badgeBg: "var(--c-muted)"        },
 };
 
-const QUICK_FEEDBACK: { type: FeedbackType; label: string }[] = [
-  { type: "confirmed-safe",           label: "Was safe for me ✓" },
-  { type: "found-unsafe",             label: "Had my allergen ✗" },
-  { type: "false-positive",           label: "App wrongly flagged" },
-  { type: "needs-staff-confirmation", label: "Ask staff ?" },
-];
 
 
 function findRestaurant(id: string): Restaurant | undefined {
@@ -83,19 +83,22 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [restaurant, setRestaurant]       = useState<Restaurant | null>(null);
   const [userAllergens, setUserAllergens] = useState<AllergenId[]>([]);
   const [notFound, setNotFound]           = useState(false);
-  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("likely-safe");
+  const [riskFilter, setRiskFilter]       = useState<RiskFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [photoFailed, setPhotoFailed]     = useState(false);
   const [photoLoaded, setPhotoLoaded]     = useState(false);
   // Incremented after each feedback submission — forces memory re-application
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [crawlStatus, setCrawlStatus] = useState<"idle" | "fetching" | "done" | "empty" | "failed">("idle");
+  const [loadError, setLoadError]     = useState(false);
   const [userMenuSource, setUserMenuSource] = useState<"text" | "url" | null>(null);
   const [menuInputMode, setMenuInputMode]   = useState<"none" | "text" | "url">("none");
   const [menuInputText, setMenuInputText]   = useState("");
   const [menuInputUrl, setMenuInputUrl]     = useState("");
   const [menuInputLoading, setMenuInputLoading] = useState(false);
   const [menuInputError, setMenuInputError] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiMenuLoaded, setAiMenuLoaded] = useState(false);
   const [severities, setSeverities]   = useState<Partial<Record<AllergenId, AllergenSeverity>>>(() => loadProfileSeverities());
   const [showDrinks, setShowDrinks]         = useState(false);
   const [showComponents, setShowComponents] = useState(false);
@@ -106,9 +109,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
 
+  const [showSaveWall, setShowSaveWall] = useState(false);
+
   const { isDark } = useTheme();
   const { user } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, favorites } = useFavorites();
+  const { isPro } = useSubscription();
   const { allergens: profileAllergens } = useAllergenProfile();
 
   // ── Load restaurant + base analysis ────────────────────────────────────────
@@ -123,10 +129,24 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
     // Merge user-contributed menu items when no official data exists
     const userEntry = getUserMenu(found.id);
-    const effective = (userEntry && found.menuItems.length === 0 && !found.menuIsGenericChainTemplate)
+    let effective: Restaurant = (userEntry && found.menuItems.length === 0 && !found.menuIsGenericChainTemplate)
       ? { ...found, menuItems: userEntry.items }
       : found;
     if (userEntry && effective !== found) setUserMenuSource(userEntry.source);
+
+    // Load cached AI-generated menu when no other data exists
+    if (effective.menuItems.length === 0 && !effective.menuIsGenericChainTemplate) {
+      try {
+        const aiRaw = localStorage.getItem(`allegeats_ai_menu_${found.id}`);
+        if (aiRaw) {
+          const parsed = JSON.parse(aiRaw) as { items: Restaurant["menuItems"]; savedAt: number };
+          if (Date.now() - parsed.savedAt < 7 * 24 * 60 * 60 * 1000 && parsed.items?.length > 0) {
+            effective = { ...effective, menuItems: parsed.items };
+            setAiMenuLoaded(true);
+          }
+        }
+      } catch { /* ignore */ }
+    }
 
     const analysis = analyzeRestaurant(effective, allergens, sevs);
     setBaseAnalysis(analysis);
@@ -230,6 +250,51 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
 
     return () => { cancelled = true; };
   }, [restaurant?.id, restaurant?.website]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── AI menu generation fallback ───────────────────────────────────────────
+  // Called manually when website scrape fails/returns nothing.
+  // Caches result for 7 days so repeat visits are instant.
+  const generateWithAI = useCallback(async () => {
+    if (!restaurant) return;
+    setAiGenerating(true);
+    try {
+      const res = await fetch("/api/restaurant-manager/analyze", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          restaurantName: restaurant.name,
+          cuisineType:    restaurant.cuisine,
+          menuUrl:        restaurant.website,
+        }),
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json() as {
+        restaurant?: { menuItems?: Array<{ id: string; name: string; category: string; allergens: string[] }> }
+      };
+      const rawItems = (data.restaurant?.menuItems ?? []).map((item) => ({
+        ...item,
+        sourceType: "scraped" as const,
+        allergens:  item.allergens as AllergenId[],
+      }));
+      if (rawItems.length === 0) throw new Error("No items returned");
+
+      try {
+        localStorage.setItem(`allegeats_ai_menu_${restaurant.id}`, JSON.stringify({
+          items:   rawItems,
+          savedAt: Date.now(),
+        }));
+      } catch { /* quota exceeded */ }
+
+      const allergens = loadProfileAllergens();
+      const enriched  = { ...restaurant, menuItems: rawItems };
+      const analysis  = analyzeRestaurant(enriched, allergens, severities);
+      setRestaurant(enriched);
+      setBaseAnalysis(analysis);
+      setAiMenuLoaded(true);
+    } catch { /* button reappears */ }
+    finally { setAiGenerating(false); }
+  }, [restaurant, severities]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── USDA FoodData Central cross-check ──────────────────────────────────────
   // Fires after crawl completes (or immediately if we already have menu data).
@@ -336,6 +401,13 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
     [enhancedAnalysis, restaurant, warnings, insights, isFavorite],
   );
 
+  // Skeleton timeout — show an error message instead of loading forever
+  useEffect(() => {
+    if (vm && restaurant) return;
+    const timer = setTimeout(() => setLoadError(true), 10_000);
+    return () => clearTimeout(timer);
+  }, [vm, restaurant]);
+
   // ── Derived display state ───────────────────────────────────────────────────
   const allItems = useMemo(
     () => (vm ? vm.sections.flatMap((s) => s.items) : []),
@@ -397,6 +469,23 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   if (!vm || !restaurant) {
+    if (loadError) {
+      return (
+        <main style={{ minHeight: "100dvh", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ textAlign: "center", padding: "0 24px" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--c-text)", marginBottom: 12 }}>
+              Couldn&apos;t load this restaurant. Please try again.
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              style={{ padding: "10px 20px", borderRadius: 12, background: "var(--c-brand)", color: "var(--c-brand-fg)", fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer" }}
+            >
+              Reload
+            </button>
+          </div>
+        </main>
+      );
+    }
     return (
       <main style={{ minHeight: "100dvh", background: "var(--c-bg)" }}>
         <style>{`
@@ -749,7 +838,19 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 })()}
               </div>
               <button
-                onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier }); toggleFavorite(restaurant.id); }}
+                onClick={() => {
+                  if (!favorited && !isPro) {
+                    const SESSION_SAVE_KEY = "allegeats_session_save_count";
+                    const sessionSaves = parseInt(sessionStorage.getItem(SESSION_SAVE_KEY) || "0");
+                    if (favorites.size >= 3 || sessionSaves >= 3) {
+                      setShowSaveWall(true);
+                      return;
+                    }
+                    sessionStorage.setItem(SESSION_SAVE_KEY, String(sessionSaves + 1));
+                  }
+                  trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier });
+                  toggleFavorite(restaurant.id);
+                }}
                 aria-label={favorited ? `Remove ${hero.restaurantName} from saved` : `Save ${hero.restaurantName}`}
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
@@ -775,6 +876,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                     Checking restaurant website for menu data…
                   </div>
                 ) : (
+                  <>
+                  {crawlStatus === "failed" && (
+                    <div style={{ padding: "10px 14px", borderRadius: 10, background: "var(--c-muted)", border: "1px solid var(--c-border)", fontSize: 13, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                      Couldn&apos;t load menu from the restaurant&apos;s website. You can add items manually below.
+                    </div>
+                  )}
                   <div style={{ borderRadius: 16, border: "1px solid var(--c-border)", background: "var(--c-card)", overflow: "hidden" }}>
                     {/* Header */}
                     <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid var(--c-border)" }}>
@@ -798,6 +905,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         >
                           Fetch from URL →
                         </button>
+                        <button
+                          onClick={generateWithAI}
+                          disabled={aiGenerating}
+                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, border: "1px solid rgba(99,102,241,0.35)", background: "rgba(99,102,241,0.06)", color: isDark ? "#a5b4fc" : "#4f46e5", fontSize: 14, fontWeight: 700, cursor: aiGenerating ? "wait" : "pointer", textAlign: "left", opacity: aiGenerating ? 0.7 : 1 }}
+                        >
+                          {aiGenerating ? "Generating…" : "✦ Ask AI to estimate allergens →"}
+                        </button>
+                        <div style={{ fontSize: 11, color: "var(--c-sub)", lineHeight: 1.4, paddingLeft: 2 }}>
+                          AI estimates are not verified. Always confirm with staff.
+                        </div>
                       </div>
                     )}
                     {menuInputMode === "text" && (
@@ -857,6 +974,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                       </div>
                     )}
                   </div>
+                  </>
                 )}
               </div>
             ) : (
@@ -991,6 +1109,17 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                   </button>
                 )}
                 <SectionHeader label="Menu" count={summary.total} />
+
+                {/* Menu data freshness notice */}
+                {restaurant && (
+                  <MenuFreshnessNotice
+                    restaurantId={restaurant.id}
+                    isChainTemplate={!!restaurant.menuIsGenericChainTemplate}
+                    isDark={isDark}
+                    dataVerifiedDate={restaurant.dataVerifiedDate}
+                    coverageLine={hero.coverageLine}
+                  />
+                )}
 
                 {/* Sticky risk filter chips */}
                 <div style={{
@@ -1286,6 +1415,40 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </>
             )}
           </section>
+        )}
+
+        {/* ── AI-generated menu banner ── */}
+        {aiMenuLoaded && !userMenuSource && (
+          <div style={{
+            marginBottom: 16, borderRadius: 14, padding: "12px 14px",
+            border: "1.5px solid rgba(99,102,241,0.35)",
+            background: "rgba(99,102,241,0.06)",
+            display: "flex", alignItems: "flex-start", gap: 10,
+          }}>
+            <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>✦</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: isDark ? "#a5b4fc" : "#4f46e5", marginBottom: 3 }}>
+                AI-estimated allergens — not officially verified
+              </div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", lineHeight: 1.5 }}>
+                Generated from Claude&apos;s knowledge of this chain&apos;s menu. Results may be incomplete or outdated. Always confirm with staff before ordering.
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                try { localStorage.removeItem(`allegeats_ai_menu_${restaurant?.id}`); } catch { /* ignore */ }
+                setAiMenuLoaded(false);
+                if (restaurant) {
+                  const cleared = { ...restaurant, menuItems: [] };
+                  setRestaurant(cleared);
+                  setBaseAnalysis(analyzeRestaurant(cleared, userAllergens, severities));
+                }
+              }}
+              style={{ flexShrink: 0, padding: "5px 10px", borderRadius: 8, border: "1px solid rgba(99,102,241,0.3)", background: "transparent", color: isDark ? "#a5b4fc" : "#4f46e5", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              Remove
+            </button>
+          </div>
         )}
 
         {/* ── User-contributed menu banner ── */}
@@ -1766,46 +1929,20 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
+      {!isPro && restaurant && (
+        <ProAlertsBanner restaurantName={restaurant.name} isDark={isDark} />
+      )}
+
+      {showSaveWall && (
+        <SaveWallModal isDark={isDark} onClose={() => setShowSaveWall(false)} />
+      )}
+
       <BottomNav />
     </main>
   );
 }
 
-// ── Helper components ─────────────────────────────────────────────────────────
-
-function StatBlock({
-  count, label, color, rgb, isDark, active, onClick,
-}: {
-  count: number; label: string; color: string; rgb: string; isDark: boolean;
-  active?: boolean; onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={`Show ${label.toLowerCase()} items`}
-      style={{
-        textAlign: "center",
-        padding: "12px 8px",
-        borderRadius: 14,
-        background: active
-          ? `rgba(${rgb},${isDark ? "0.22" : "0.14"})`
-          : `rgba(${rgb},${isDark ? "0.14" : "0.08"})`,
-        border: active
-          ? `1.5px solid rgba(${rgb},${isDark ? "0.65" : "0.50"})`
-          : `1.5px solid rgba(${rgb},${isDark ? "0.35" : "0.22"})`,
-        boxShadow: active
-          ? `0 4px 20px rgba(${rgb},${isDark ? "0.35" : "0.20"})`
-          : count > 0 ? `0 4px 16px rgba(${rgb},${isDark ? "0.25" : "0.12"})` : "none",
-        cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
-      }}
-    >
-      <div style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.04em", lineHeight: 1 }}>{count}</div>
-      <div style={{ fontSize: 11, fontWeight: 800, color, opacity: 0.8, marginTop: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-    </button>
-  );
-}
+// ── Module-level helpers (not components) ─────────────────────────────────────
 
 const DRINK_KEYWORDS = [
   "beverage", "drink", "coffee", "tea", "frappuccino", "shake", "smoothie",
@@ -1816,142 +1953,4 @@ const DRINK_KEYWORDS = [
 function isDrinkSection(name: string): boolean {
   const lower = name.toLowerCase();
   return DRINK_KEYWORDS.some((k) => new RegExp(`\\b${k}s?\\b`).test(lower));
-}
-
-function SectionHeader({ label, count }: { label: string; count?: number }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 12px" }}>
-      <span style={{ fontSize: 18, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em" }}>{label}</span>
-      {count != null && (
-        <span style={{
-          fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
-          background: "var(--c-muted)", borderRadius: 999,
-          padding: "2px 8px",
-        }}>
-          {count}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** Renders one memory insight card in the Community Knowledge section. */
-function MemoryInsightCard({ insight }: { insight: MemoryInsight }) {
-  return (
-    <div style={{
-      background: "var(--c-card)", border: "1px solid var(--c-border)",
-      borderRadius: 14, padding: "12px 14px",
-      display: "flex", alignItems: "flex-start", gap: 12,
-    }}>
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: "var(--c-text)", lineHeight: 1.3 }}>
-          {insight.title}
-        </div>
-        <div style={{ fontSize: 14, color: "var(--c-sub)", marginTop: 4, lineHeight: 1.5 }}>
-          {insight.description}
-        </div>
-      </div>
-      <span style={{
-        flexShrink: 0, padding: "3px 9px", borderRadius: 999,
-        background: `${insight.badgeColor}20`,
-        color: insight.badgeColor,
-        border: `1px solid ${insight.badgeColor}40`,
-        fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
-      }}>
-        {insight.badgeLabel}
-      </span>
-    </div>
-  );
-}
-
-/**
- * Per-item feedback trigger shown below each MenuItemCard.
- * Collapsed by default ("Report" link). Expands to 4 quick-feedback buttons.
- * Collapses to a confirmation message after submission.
- */
-function FeedbackRow({
-  item,
-  userAllergens,
-  onSubmit,
-}: {
-  item: AnalyzedMenuItem;
-  userAllergens: AllergenId[];
-  onSubmit: (params: Omit<FeedbackParams, "dishName" | "menuItemId">) => void;
-}) {
-  const [expanded,  setExpanded]  = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  if (submitted) {
-    return (
-      <div style={{ fontSize: 13, color: "#15803d", padding: "6px 4px 8px", textAlign: "right" }}>
-        Thanks for your report ✓
-      </div>
-    );
-  }
-
-  if (!expanded) {
-    return (
-      <div style={{ textAlign: "right" }}>
-        <button
-          onClick={() => setExpanded(true)}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 13, color: "#6b7280", padding: "8px 4px",
-            minHeight: 44, display: "inline-flex", alignItems: "center",
-            textDecoration: "underline", textUnderlineOffset: "2px",
-          }}
-        >
-          &#9873; Report issue
-        </button>
-      </div>
-    );
-  }
-
-  // Pre-fill allergen: prefer what caused the flag, fallback to first user allergen
-  const defaultAllergen = item.userAllergenHits[0] ?? userAllergens[0];
-
-  return (
-    <div style={{
-      background: "var(--c-muted)", borderRadius: "0 0 12px 12px",
-      padding: "12px 14px 14px", marginTop: -2,
-      border: "1px solid var(--c-border)", borderTop: "none",
-    }}>
-      <div style={{ fontSize: 13, color: "var(--c-sub)", marginBottom: 10, fontWeight: 600 }}>
-        What happened with <strong style={{ color: "var(--c-text)" }}>{item.name}</strong>?
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {QUICK_FEEDBACK.map((opt) => (
-          <button
-            key={opt.type}
-            onClick={() => {
-              onSubmit({
-                type:               opt.type,
-                allergen:           defaultAllergen,
-                originalRisk:       item.risk,
-                originalConfidence: item.confidence,
-              });
-              setSubmitted(true);
-            }}
-            style={{
-              padding: "9px 14px", borderRadius: 10,
-              border: "1px solid var(--c-border)",
-              background: "var(--c-card)", color: "var(--c-text)",
-              fontSize: 13, fontWeight: 600, cursor: "pointer", minHeight: 44,
-            }}
-          >
-            {opt.label}
-          </button>
-        ))}
-        <button
-          onClick={() => setExpanded(false)}
-          style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 13, color: "var(--c-sub)", padding: "9px 8px", minHeight: 44,
-          }}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
 }

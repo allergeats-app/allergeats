@@ -20,14 +20,14 @@ const ABBREVIATIONS: [RegExp, string][] = [
   [/\blb\b/gi,    "pound "],
 ];
 
-/** OCR common misreads — character substitutions */
+/** Character normalization for copy-paste / scraped text artifacts */
 const OCR_FIXES: [RegExp, string][] = [
   [/0(?=[a-z])/gi, "o"],   // 0 → o when followed by letter (e.g. "0live" → "olive")
   [/1(?=[a-z])/gi, "l"],   // 1 → l when followed by letter (e.g. "1emon" → "lemon")
-  [/\|/g,          "l"],   // pipe → l
-  [/\bI(?=[a-z])/g,"l"],   // capital I → l mid-word (OCR common)
-  [/rn/g,          "m"],   // "rn" → "m" (common OCR substitution e.g. "alrnond" → "almond")
-  [/\bII\b/g,      "ll"],  // double I → ll
+  [/\|/g,          "l"],   // pipe → l (table-separator artifact in scraped HTML)
+  [/\bI(?=[a-z])/g,"l"],   // capital I → l mid-word (copy-paste artifact)
+  // NOTE: "rn→m" and "II→ll" were removed — those are camera-OCR artifacts only
+  // and caused false negatives for "corn" (→ "com") in web-scraped/pasted text.
 ];
 
 /** Patterns to strip from raw menu text */

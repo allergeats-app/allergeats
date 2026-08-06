@@ -4,6 +4,8 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
+import { useSubscription } from "@/lib/hooks/useSubscription";
+import { SaveWallModal } from "@/components/SaveWallModal";
 import { coverageTier } from "@/lib/scoring";
 import { fitLevel, fitBadge } from "@/lib/fitLevel";
 import type { ScoredRestaurant } from "@/lib/types";
@@ -29,8 +31,10 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const [photoLoaded, setPhotoLoaded] = useState(false);
   const [fallbackSrc, setFallbackSrc] = useState<string | null>(null);
   const fallbackFiredRef = useRef(false);
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, favorites } = useFavorites();
+  const { isPro } = useSubscription();
   const favorited = isFavorite(r.id);
+  const [showSaveWall, setShowSaveWall] = useState(false);
 
   const wikiUrl  = chainLogoUrl(r.name);
   const primarySrc = !photoFailed
@@ -74,6 +78,7 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
   const imgHeight = isRail ? 108 : isCompact ? 108 : 148;
 
   return (
+    <>
     <Link
       href={`/restaurants/${r.id}`}
       onClick={() => trackEvent("restaurant_clicked", { id: r.id, name: r.name, fit: level, coverage: tier })}
@@ -181,6 +186,15 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
           <button
             onClick={(e) => {
               e.preventDefault(); e.stopPropagation();
+              if (!favorited && !isPro) {
+                const SESSION_SAVE_KEY = "allegeats_session_save_count";
+                const sessionSaves = parseInt(sessionStorage.getItem(SESSION_SAVE_KEY) || "0");
+                if (favorites.size >= 3 || sessionSaves >= 3) {
+                  setShowSaveWall(true);
+                  return;
+                }
+                sessionStorage.setItem(SESSION_SAVE_KEY, String(sessionSaves + 1));
+              }
               trackEvent(favorited ? "place_unsaved" : "place_saved", { id: r.id, name: r.name, fit: level, coverage: tier });
               toggleFavorite(r.id, { name: r.name, cuisine: r.cuisine });
             }}
@@ -255,6 +269,11 @@ export function RestaurantCard({ restaurant: r, variant = "default" }: Props) {
         </div>
       </div>
     </Link>
+
+    {showSaveWall && (
+      <SaveWallModal isDark={isDark} onClose={() => setShowSaveWall(false)} />
+    )}
+  </>
   );
 }
 

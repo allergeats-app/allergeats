@@ -18,7 +18,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/authContext";
-import { loadProfileAllergens, saveProfileAllergens } from "@/lib/allergenProfile";
+import { loadProfileAllergens, saveProfileAllergens, PROFILE_KEY } from "@/lib/allergenProfile";
 import type { AllergenId } from "@/lib/types";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
@@ -41,11 +41,23 @@ export function useAllergenProfile() {
     setAllergensState(loadProfileAllergens()); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
-  // Auth allergens override localStorage on first load for signed-in users.
-  // Only runs once (initializedRef guards it) so subsequent local edits
-  // are not clobbered when authAllergens reference changes.
+  // UX-01: re-read when another tab writes OR when OnboardingModal dispatches a same-tab storage event
   useEffect(() => {
-    if (!authLoading && authAllergens.length > 0 && !authOverriddenRef.current) {
+    function onStorage(e: StorageEvent) {
+      if (e.key === PROFILE_KEY) {
+        setAllergensState(loadProfileAllergens() as AllergenId[]); // eslint-disable-line react-hooks/set-state-in-effect
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  // Auth allergens override localStorage on first load for signed-in users.
+  // Only runs once, and only if the user hasn't already made local edits
+  // (initializedRef.current would be true). Prevents clobbering in-progress
+  // edits when auth resolves while the user is already on the profile screen.
+  useEffect(() => {
+    if (!authLoading && authAllergens.length > 0 && !authOverriddenRef.current && !initializedRef.current) {
       authOverriddenRef.current = true;
       setAllergensState(authAllergens); // eslint-disable-line react-hooks/set-state-in-effect
       // Do NOT set initializedRef here — that would trigger a spurious remote save

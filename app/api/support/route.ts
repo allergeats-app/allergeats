@@ -88,8 +88,11 @@ export async function POST(req: NextRequest) {
     return new Response("Invalid request", { status: 400 });
   }
 
-  // Cap history at last 20 turns to avoid runaway context
-  const trimmed = messages.slice(-20);
+  // Cap history at last 20 turns to avoid runaway context; truncate each message to 4000 chars
+  const trimmed = messages.slice(-20).map((msg) => ({
+    ...msg,
+    content: typeof msg.content === "string" ? msg.content.slice(0, 4000) : msg.content,
+  }));
 
   const stream = client.messages.stream({
     model: "claude-haiku-4-5-20251001",
