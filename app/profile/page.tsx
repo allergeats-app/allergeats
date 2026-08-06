@@ -302,16 +302,31 @@ export default function ProfilePage() {
           )
         )}
 
-        {/* Family profiles card (Pro only) */}
-        {subscription.isPro && (
+        {/* My Family card — always visible, CTA for free users */}
+        {!subscription.loading && (
           <div style={{
             background: "var(--c-card)", border: "1px solid var(--c-border)",
             borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
           }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
-              Family
+              My Family
             </div>
-            <FamilyProfileManager isDark={isDark} />
+            {subscription.isPro ? (
+              <FamilyProfileManager isDark={isDark} />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "8px 0 4px", textAlign: "center" }}>
+                <div style={{ fontSize: 44, lineHeight: 1 }}>👨‍👩‍👧</div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "var(--c-text)", marginBottom: 6 }}>
+                    Family Allergen Profiles
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.6, maxWidth: 280, margin: "0 auto" }}>
+                    Add a profile for each family member with their own allergen list. Switch instantly on the home screen to get safety scores tailored to whoever you&apos;re ordering for.
+                  </div>
+                </div>
+                <UpgradePrompt isDark={isDark} compact />
+              </div>
+            )}
           </div>
         )}
 
