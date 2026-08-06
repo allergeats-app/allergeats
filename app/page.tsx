@@ -76,7 +76,7 @@ function HomeContent() {
 
   const { isDark } = useTheme();
   const { user, firstName, severities } = useAuth();
-  const { isFavorite } = useFavorites();
+  const { isFavorite, favorites } = useFavorites();
   const { isPro } = useSubscription();
   const { allergens: localAllergens, saveState, setAllergens: setLocalAllergens } = useAllergenProfile();
   const { allergens: effectiveAllergens } = useEffectiveAllergens();
@@ -292,6 +292,26 @@ function HomeContent() {
                     style={{ flexShrink: 0, padding: "6px 12px", borderRadius: 8, border: "none", background: isDark ? "rgba(245,158,11,0.25)" : "rgba(245,158,11,0.2)", color: isDark ? "#fbbf24" : "#92400e", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
                   >
                     Set up profile →
+                  </button>
+                </div>
+              )}
+
+              {!isPro && favorites.size >= 1 && favorites.size < 3 && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                  padding: "8px 12px", marginBottom: 12, borderRadius: 10,
+                  background: isDark ? "rgba(124,58,237,0.07)" : "rgba(124,58,237,0.05)",
+                  border: `1px solid ${isDark ? "rgba(124,58,237,0.15)" : "rgba(124,58,237,0.12)"}`,
+                }}>
+                  <span style={{ fontSize: 12, color: "var(--c-sub)", fontWeight: 600 }}>
+                    {favorites.size}/3 restaurants saved
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { window.location.href = "/profile"; }}
+                    style={{ flexShrink: 0, background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 12, fontWeight: 700, color: "var(--c-brand)" }}
+                  >
+                    Upgrade for unlimited →
                   </button>
                 </div>
               )}

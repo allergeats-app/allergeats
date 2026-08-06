@@ -28,6 +28,10 @@ export default function ProfilePage() {
   const [nameSaved,  setNameSaved]  = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
 
+  const isLifetime =
+    !!subscription.currentPeriodEnd &&
+    subscription.currentPeriodEnd.getFullYear() >= 2090;
+
   // Show success banner when returning from Stripe checkout
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   useEffect(() => {
@@ -148,18 +152,37 @@ export default function ProfilePage() {
             Account
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div
-              style={{
-                width: 48, height: 48, borderRadius: "50%",
-                background: "var(--c-brand)", color: "var(--c-brand-fg)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 18, fontWeight: 900, flexShrink: 0,
-              }}
-            >
-              {(firstName?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <div
+                style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: subscription.isPro
+                    ? "linear-gradient(135deg, #6d28d9, #7c3aed)"
+                    : "var(--c-brand)",
+                  color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, fontWeight: 900,
+                  boxShadow: subscription.isPro
+                    ? "0 0 0 2.5px #7c3aed, 0 0 14px rgba(124,58,237,0.35)"
+                    : undefined,
+                }}
+              >
+                {(firstName?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
+              </div>
             </div>
             <div>
-              {displayName && <div style={{ fontWeight: 900, fontSize: 16, color: "var(--c-text)" }}>{displayName}</div>}
+              <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
+                {displayName && <span style={{ fontWeight: 900, fontSize: 16, color: "var(--c-text)" }}>{displayName}</span>}
+                {subscription.isPro && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 800, letterSpacing: ".07em", textTransform: "uppercase",
+                    color: "#8b5cf6",
+                    background: isDark ? "rgba(124,58,237,.18)" : "rgba(124,58,237,.1)",
+                    padding: "2px 7px", borderRadius: 4,
+                    border: "1px solid rgba(124,58,237,.2)",
+                  }}>✦ Pro</span>
+                )}
+              </div>
               <div style={{ fontWeight: displayName ? 500 : 800, fontSize: displayName ? 13 : 15, color: displayName ? "var(--c-sub)" : "var(--c-text)" }}>{user.email}</div>
               <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>
                 Member since {new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
@@ -172,37 +195,107 @@ export default function ProfilePage() {
         {!subscription.loading && (
           subscription.isPro ? (
             <div style={{
+              borderRadius: 20,
+              background: "linear-gradient(140deg, #1a0533 0%, #3b0764 50%, #1e2d6b 100%)",
+              padding: "24px 22px",
+              position: "relative",
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(109,40,217,0.3), 0 2px 8px rgba(0,0,0,0.2)",
+            }}>
+              {/* Ambient glows */}
+              <div style={{
+                position: "absolute", top: -60, right: -40,
+                width: 240, height: 180,
+                background: "radial-gradient(ellipse, rgba(139,92,246,0.22) 0%, transparent 65%)",
+                pointerEvents: "none",
+              }} />
+              <div style={{
+                position: "absolute", bottom: -50, left: -30,
+                width: 180, height: 140,
+                background: "radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 65%)",
+                pointerEvents: "none",
+              }} />
+
+              {/* Eyebrow */}
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                marginBottom: 20,
+              }}>
+                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase", color: "rgba(167,139,250,0.85)" }}>
+                  ✦ AllergEats Pro
+                </span>
+                <span style={{ fontSize: 16, color: "rgba(255,255,255,0.15)", letterSpacing: 3 }}>◈◈</span>
+              </div>
+
+              {/* Identity */}
+              <div style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: "-.03em", lineHeight: 1.1, marginBottom: 3 }}>
+                {displayName || firstName || (user.email ?? "").split("@")[0]}
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginBottom: 28 }}>
+                {user.email}
+              </div>
+
+              {/* Status + renewal row */}
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 5 }}>
+                    Status
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{
+                      width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
+                      background: subscription.cancelAtPeriodEnd ? "#fbbf24" : "#4ade80",
+                      boxShadow: subscription.cancelAtPeriodEnd ? "0 0 6px #fbbf24" : "0 0 6px #4ade80",
+                    }} />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
+                      {isLifetime ? "Lifetime" : subscription.cancelAtPeriodEnd ? "Canceling" : "Active"}
+                    </span>
+                  </div>
+                </div>
+                {!isLifetime && subscription.currentPeriodEnd && (
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 5 }}>
+                      {subscription.cancelAtPeriodEnd ? "Access until" : "Renews"}
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.85)" }}>
+                      {subscription.currentPeriodEnd.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {!isLifetime && (
+                <button
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                  style={{
+                    marginTop: 18, padding: "7px 14px", borderRadius: 7,
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.07)",
+                    color: "rgba(255,255,255,0.6)",
+                    fontSize: 11, fontWeight: 600,
+                    cursor: portalLoading ? "not-allowed" : "pointer",
+                    opacity: portalLoading ? 0.5 : 1,
+                  }}
+                >
+                  {portalLoading ? "Loading…" : "Manage billing"}
+                </button>
+              )}
+            </div>
+          ) : showUpgradeSuccess ? (
+            <div style={{
               background: "var(--c-card)", border: "1px solid var(--c-border)",
               borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase",
-                    color: "#8b5cf6", background: isDark ? "rgba(124,58,237,.15)" : "rgba(124,58,237,.08)",
-                    padding: "3px 8px", borderRadius: 4 }}>Pro</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Active</span>
-                </div>
-                {subscription.cancelAtPeriodEnd && (
-                  <span style={{ fontSize: 11, color: "#f59e0b", fontWeight: 600 }}>Cancels at period end</span>
-                )}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase",
+                  color: "#8b5cf6", background: isDark ? "rgba(124,58,237,.15)" : "rgba(124,58,237,.08)",
+                  padding: "3px 8px", borderRadius: 4 }}>Pro</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>Activating…</span>
               </div>
-              {subscription.currentPeriodEnd && (
-                <p style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 14 }}>
-                  {subscription.cancelAtPeriodEnd ? "Access until" : "Renews"}{" "}
-                  {subscription.currentPeriodEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                </p>
-              )}
-              <button
-                onClick={handleManageBilling}
-                disabled={portalLoading}
-                style={{
-                  padding: "9px 16px", borderRadius: 8, border: "1px solid var(--c-border)",
-                  background: "var(--c-bg)", color: "var(--c-text)", fontSize: 13, fontWeight: 600,
-                  cursor: portalLoading ? "not-allowed" : "pointer", opacity: portalLoading ? 0.6 : 1,
-                }}
-              >
-                {portalLoading ? "Loading…" : "Manage billing"}
-              </button>
+              <p style={{ fontSize: 12, color: "var(--c-sub)", margin: 0 }}>
+                Your subscription is being activated — this usually takes a few seconds.
+              </p>
             </div>
           ) : (
             <UpgradePrompt isDark={isDark} />
