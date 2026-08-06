@@ -60,17 +60,12 @@ export function RestaurantFeed({
         </>
       )}
 
-      {/* Chain menus — only when no live nearby results */}
-      {chainTemplates.length > 0 && nearbyFiltered.length === 0 && (
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-            <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
-              Browse Popular Menus
-            </h2>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--c-sub)", marginBottom: 10 }}>
-            No Nearby Results — Menus Only
-          </div>
+      {/* Chain menus — always shown */}
+      {chainTemplates.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 10px" }}>
+            Popular Chain Menus
+          </h2>
           <div className="restaurant-rail" style={{
             display: "flex", overflowX: "auto", scrollSnapType: "x mandatory",
             gap: 10, margin: "0 -16px", padding: "2px 16px 10px",
