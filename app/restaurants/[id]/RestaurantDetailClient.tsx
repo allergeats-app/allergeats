@@ -839,9 +839,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               </div>
               <button
                 onClick={() => {
-                  if (!favorited && !isPro && favorites.size >= 3) {
-                    setShowSaveWall(true);
-                    return;
+                  if (!favorited && !isPro) {
+                    const SESSION_SAVE_KEY = "allegeats_session_save_count";
+                    const sessionSaves = parseInt(sessionStorage.getItem(SESSION_SAVE_KEY) || "0");
+                    if (favorites.size >= 3 || sessionSaves >= 3) {
+                      setShowSaveWall(true);
+                      return;
+                    }
+                    sessionStorage.setItem(SESSION_SAVE_KEY, String(sessionSaves + 1));
                   }
                   trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier });
                   toggleFavorite(restaurant.id);
