@@ -13,6 +13,9 @@ import { bumpInteraction, registerForCrawl, markCrawled } from "@/lib/menu-crawl
 import { toRawMenuItems } from "@/lib/menu-ingestion";
 import type { NormalizedMenu } from "@/lib/menu-ingestion";
 import { useFavorites } from "@/lib/favoritesContext";
+import { useSubscription } from "@/lib/hooks/useSubscription";
+import { ProAlertsBanner } from "@/components/ProAlertsBanner";
+import { SaveWallModal } from "@/components/SaveWallModal";
 import { saveOrder } from "@/lib/savedOrders";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { GuidedOrderBuilder } from "@/components/GuidedOrderBuilder";
@@ -106,9 +109,12 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const [builderBrowseMode, setBuilderBrowseMode] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
 
+  const [showSaveWall, setShowSaveWall] = useState(false);
+
   const { isDark } = useTheme();
   const { user } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, favorites } = useFavorites();
+  const { isPro } = useSubscription();
   const { allergens: profileAllergens } = useAllergenProfile();
 
   // ── Load restaurant + base analysis ────────────────────────────────────────
@@ -832,7 +838,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 })()}
               </div>
               <button
-                onClick={() => { trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier }); toggleFavorite(restaurant.id); }}
+                onClick={() => {
+                  if (!favorited && !isPro && favorites.size >= 4) {
+                    setShowSaveWall(true);
+                    return;
+                  }
+                  trackEvent(favorited ? "place_unsaved" : "place_saved", { id: restaurant.id, name: hero.restaurantName, fit: hero.fitLevel, coverage: coverage.tier });
+                  toggleFavorite(restaurant.id);
+                }}
                 aria-label={favorited ? `Remove ${hero.restaurantName} from saved` : `Save ${hero.restaurantName}`}
                 title={favorited ? "Remove from saved" : "Save restaurant"}
                 style={{
@@ -1910,6 +1923,14 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
           )}
         </div>
       </div>
+
+      {!isPro && restaurant && (
+        <ProAlertsBanner restaurantName={restaurant.name} isDark={isDark} />
+      )}
+
+      {showSaveWall && (
+        <SaveWallModal isDark={isDark} onClose={() => setShowSaveWall(false)} />
+      )}
 
       <BottomNav />
     </main>
