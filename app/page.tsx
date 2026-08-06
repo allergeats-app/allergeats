@@ -7,6 +7,8 @@ import type { RecentView } from "@/lib/recentlyViewed";
 import { useTheme } from "@/lib/themeContext";
 import { useFavorites } from "@/lib/favoritesContext";
 import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
+import { useEffectiveAllergens } from "@/lib/hooks/useEffectiveAllergens";
+import { useSubscription } from "@/lib/hooks/useSubscription";
 import { useHomeData } from "@/lib/hooks/useHomeData";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
 import { RestaurantsHeader } from "@/components/RestaurantsHeader";
@@ -22,6 +24,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SmartEmptyState } from "@/components/SmartEmptyState";
 import { SkeletonCard } from "@/components/SkeletonCard";
 import { AllergenProfileCard } from "@/components/AllergenProfileCard";
+import { FamilyProfileSwitcher } from "@/components/FamilyProfileSwitcher";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import type { AllergenId } from "@/lib/types";
@@ -74,7 +77,9 @@ function HomeContent() {
   const { isDark } = useTheme();
   const { user, firstName, severities } = useAuth();
   const { isFavorite } = useFavorites();
+  const { isPro } = useSubscription();
   const { allergens: localAllergens, saveState, setAllergens: setLocalAllergens } = useAllergenProfile();
+  const { allergens: effectiveAllergens } = useEffectiveAllergens();
 
   const {
     rawRestaurants, loading,
@@ -94,8 +99,8 @@ function HomeContent() {
   ].filter(Boolean).length;
 
   const restaurants = useMemo(() =>
-    rawRestaurants.map((r) => scoreRestaurant(r, localAllergens, severities)),
-    [rawRestaurants, localAllergens, severities]
+    rawRestaurants.map((r) => scoreRestaurant(r, effectiveAllergens, severities)),
+    [rawRestaurants, effectiveAllergens, severities]
   );
 
   const handleAllergenChange = useCallback((next: AllergenId[]) => {
@@ -172,6 +177,7 @@ function HomeContent() {
           isSignedIn={!!user}
           onChange={handleAllergenChange}
         />
+        {isPro && <FamilyProfileSwitcher isDark={isDark} />}
         <CuisineChipRow typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
       </div>}
 

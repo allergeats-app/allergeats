@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useAuth } from "@/lib/authContext";
 
 const PRO_FEATURES = [
-  { icon: "🔄", label: "Profile sync across all your devices" },
-  { icon: "👨‍👩‍👧", label: "Up to 5 family allergen profiles" },
-  { icon: "🔔", label: "Alerts when a restaurant's allergen data changes" },
   { icon: "♾️",  label: "Unlimited saved restaurants" },
+  { icon: "👨‍👩‍👧", label: "Up to 5 family allergen profiles" },
+  { icon: "🔄", label: "Profile sync across all your devices" },
+  { icon: "🔔", label: "Menu change alerts (coming soon)" },
 ];
 
 export function UpgradePrompt({

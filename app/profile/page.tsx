@@ -11,6 +11,7 @@ import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import { BottomNav } from "@/components/BottomNav";
 import { SupportChat } from "@/components/SupportChat";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
+import { FamilyProfileManager } from "@/components/FamilyProfileManager";
 
 export default function ProfilePage() {
   const { user, loading, firstName, lastName, displayName, saveName, signOut } = useAuth();
@@ -206,6 +207,19 @@ export default function ProfilePage() {
           ) : (
             <UpgradePrompt isDark={isDark} />
           )
+        )}
+
+        {/* Family profiles card (Pro only) */}
+        {subscription.isPro && (
+          <div style={{
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
+            borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
+              Family
+            </div>
+            <FamilyProfileManager isDark={isDark} />
+          </div>
         )}
 
         {/* Settings card */}

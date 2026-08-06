@@ -6,8 +6,8 @@ import { useAuth } from "@/lib/authContext";
 const FEATURES = [
   { icon: "♾️",  text: "Unlimited saved restaurants" },
   { icon: "👨‍👩‍👧", text: "Up to 5 family allergen profiles" },
-  { icon: "🔔", text: "Alerts when allergen data changes" },
   { icon: "🔄", text: "Sync your profile across all devices" },
+  { icon: "🔔", text: "Menu change alerts (coming soon)" },
 ];
 
 export function SaveWallModal({
