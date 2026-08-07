@@ -50,7 +50,7 @@ export function HowItWorksSheet({ open, onClose }: { open: boolean; onClose: () 
           display: "flex", flexDirection: "column",
         }}
       >
-        <div style={{ overflowY: "auto", flex: 1, padding: "0 20px max(36px, env(safe-area-inset-bottom))" }}>
+        <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" as never, flex: 1, padding: "0 20px max(36px, env(safe-area-inset-bottom))" }}>
 
           {/* Handle */}
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 14, marginBottom: 4 }}>

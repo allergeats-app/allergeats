@@ -150,7 +150,7 @@ export function SupportChat({ open: controlledOpen, onClose }: { open?: boolean;
 
             {/* Messages */}
             <div style={{
-              flex: 1, overflowY: "auto", padding: "16px 16px 8px",
+              flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" as never, padding: "16px 16px 8px",
               display: "flex", flexDirection: "column", gap: 12,
             }}>
               {/* Welcome state */}

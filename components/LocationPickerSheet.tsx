@@ -220,7 +220,7 @@ export function LocationPickerSheet({ open, onClose, onSelectLocation, onUseCurr
         </div>
 
         {/* Scrollable body */}
-        <div style={{ overflowY: "auto", flex: 1, padding: "16px 20px 24px" }}>
+        <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" as never, flex: 1, padding: "16px 20px 24px" }}>
 
           {/* Use current location */}
           <button
