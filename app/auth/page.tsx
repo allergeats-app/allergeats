@@ -31,7 +31,11 @@ export default function AuthPage() {
   const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(false);
   const [passkeyEnrolling, setPasskeyEnrolling]   = useState(false);
 
-  useEffect(() => { if (user) router.replace("/"); }, [user, router]);
+  const nextPath = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("next") ?? "/"
+    : "/";
+
+  useEffect(() => { if (user) router.replace(nextPath); }, [user, router, nextPath]);
   useEffect(() => { isPasskeySupported().then(setPasskeySupported); }, []);
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY);
@@ -57,6 +61,7 @@ export default function AuthPage() {
   async function handleOAuth(provider: "google") {
     setError(null);
     setOauthLoading(provider);
+    if (nextPath !== "/") sessionStorage.setItem("auth_next", nextPath);
     const err = await signInWithOAuth(provider);
     if (err) { setError(err); setOauthLoading(null); }
   }
@@ -98,7 +103,7 @@ export default function AuthPage() {
         if (!linkErr) return; // redirect in progress
       }
       if (passkeySupported) { setShowPasskeyPrompt(true); return; }
-      router.push("/");
+      router.push(nextPath);
     } else {
       // Switch tab without calling switchMode() — that would clear the info message
       setMode("signin");
@@ -113,7 +118,7 @@ export default function AuthPage() {
     const token = (await sb?.auth.getSession())?.data.session?.access_token;
     if (token) await registerPasskey(token);
     setPasskeyEnrolling(false);
-    router.push("/");
+    router.push(nextPath);
   }
 
   async function handleResendConfirmation() {
@@ -171,7 +176,7 @@ export default function AuthPage() {
             }}>
               {passkeyEnrolling ? "Setting up…" : "Enable Face ID"}
             </button>
-            <button onClick={() => router.push("/")} style={{
+            <button onClick={() => router.push(nextPath)} style={{
               padding: "14px 0", borderRadius: 14,
               border: "1.5px solid var(--c-border)", background: "transparent",
               color: "var(--c-sub)", fontSize: 15, fontWeight: 700, cursor: "pointer",

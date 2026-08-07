@@ -25,6 +25,9 @@ export default function AuthCallbackPage() {
       return;
     }
 
+    const storedNext = sessionStorage.getItem("auth_next") ?? "/";
+    if (storedNext !== "/") sessionStorage.removeItem("auth_next");
+
     let done = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     function finish(path: string) {
@@ -40,7 +43,7 @@ export default function AuthCallbackPage() {
     // getSession().then() registers its listener, leaving the page stuck in loading.
     const { data: { subscription } } = sb.auth.onAuthStateChange((event, sess) => {
       if (sess) {
-        finish("/");
+        finish(storedNext);
       } else if (event === "SIGNED_OUT") {
         // Only treat explicit sign-out as a failure — TOKEN_REFRESHED with no session
         // is a normal background event and should not trigger an error redirect.
@@ -58,7 +61,7 @@ export default function AuthCallbackPage() {
 
     // Also check if session is already present (exchange may have completed synchronously)
     sb.auth.getSession().then(({ data: { session } }) => {
-      if (session) finish("/");
+      if (session) finish(storedNext);
     }).catch(() => { /* ignore */ });
 
     return () => {

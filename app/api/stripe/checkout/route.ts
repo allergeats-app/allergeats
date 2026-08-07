@@ -52,16 +52,23 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = req.headers.get("origin") ?? "http://localhost:3000";
-  const session = await getStripe().checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${origin}/profile?upgraded=1`,
-    cancel_url: `${origin}/profile`,
-    subscription_data: {
-      metadata: { supabase_user_id: user.id },
-    },
-  });
+  let session;
+  try {
+    session = await getStripe().checkout.sessions.create({
+      customer: customerId,
+      mode: "subscription",
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${origin}/profile?upgraded=1`,
+      cancel_url: `${origin}/profile`,
+      subscription_data: {
+        metadata: { supabase_user_id: user.id },
+      },
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Stripe session creation failed";
+    console.error("[stripe/checkout]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ url: session.url });
 }
