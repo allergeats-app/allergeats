@@ -117,7 +117,7 @@ export function FamilyProfileModal({
             : "0 -20px 60px rgba(10,0,30,0.12)",
           padding: "24px 20px 20px",
           animation: "fpSlideUp .25s cubic-bezier(0.22,1,0.36,1)",
-          maxHeight: "85dvh", overflowY: "auto",
+          maxHeight: "85dvh", overflowY: "auto", WebkitOverflowScrolling: "touch" as never,
         }}
       >
         {/* Header */}

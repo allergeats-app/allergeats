@@ -53,6 +53,7 @@ export function ShowStaffCard({ allergens, severities = {}, onClose }: Props) {
         background: "#fff",
         display: "flex", flexDirection: "column",
         overflowY: "auto",
+        WebkitOverflowScrolling: "touch" as never,
         fontFamily: "Inter, -apple-system, Arial, sans-serif",
       }}
     >

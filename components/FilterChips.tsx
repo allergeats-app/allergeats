@@ -13,7 +13,7 @@ type Props<T extends string> = {
 
 export function FilterChips<T extends string>({ chips, active, onChange }: Props<T>) {
   return (
-    <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+    <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2, WebkitOverflowScrolling: "touch" as never }}>
       {chips.map((chip) => {
         const isActive = chip.value === active;
         return (
