@@ -30,31 +30,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Stripe price not configured" }, { status: 500 });
   }
 
-  // Retrieve or create Stripe customer
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("stripe_customer_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  let customerId = sub?.stripe_customer_id;
-  if (!customerId) {
-    const customer = await getStripe().customers.create({
-      email: user.email,
-      metadata: { supabase_user_id: user.id },
-    });
-    customerId = customer.id;
-    await supabase.from("subscriptions").upsert({
-      user_id: user.id,
-      stripe_customer_id: customerId,
-      status: "free",
-    });
-  }
-
-  const origin = req.headers.get("origin") ?? "http://localhost:3000";
-  let session;
   try {
-    session = await getStripe().checkout.sessions.create({
+    // Retrieve or create Stripe customer
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    let customerId = sub?.stripe_customer_id;
+    if (!customerId) {
+      const customer = await getStripe().customers.create({
+        email: user.email,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = customer.id;
+      await supabase.from("subscriptions").upsert({
+        user_id: user.id,
+        stripe_customer_id: customerId,
+        status: "free",
+      });
+    }
+
+    const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
@@ -64,11 +63,11 @@ export async function POST(req: NextRequest) {
         metadata: { supabase_user_id: user.id },
       },
     });
+
+    return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Stripe session creation failed";
+    const msg = err instanceof Error ? err.message : "Checkout failed";
     console.error("[stripe/checkout]", msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
-
-  return NextResponse.json({ url: session.url });
 }
