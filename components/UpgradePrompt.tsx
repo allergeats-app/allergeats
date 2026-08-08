@@ -19,19 +19,22 @@ export function UpgradePrompt({
   compact?: boolean;
   onDismiss?: () => void;
 }) {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleUpgrade() {
-    if (!user) {
+    if (!user || !session) {
       window.location.href = "/auth?next=/profile";
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong");
       window.location.href = data.url;

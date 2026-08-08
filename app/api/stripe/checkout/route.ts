@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
 import { getClientIp, isRateLimited } from "@/lib/rateLimit";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 
 const WINDOW_MS = 60 * 1000;
 const MAX_PER_WINDOW = 5;
@@ -14,14 +12,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const cookieStore = await cookies();
-  const authClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
-  );
-  const { data: { user } } = await authClient.auth.getUser();
-  if (!user) {
+  // Client passes the Supabase access token in the Authorization header.
+  // The session lives in localStorage (not cookies), so we can't use createServerClient.
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
+  if (authErr || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
