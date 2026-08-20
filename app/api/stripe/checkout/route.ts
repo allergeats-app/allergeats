@@ -39,6 +39,15 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     let customerId = sub?.stripe_customer_id;
+    if (customerId) {
+      // Verify the customer still exists in this Stripe mode (handles test→live switches)
+      try {
+        const existing = await getStripe().customers.retrieve(customerId);
+        if ((existing as { deleted?: boolean }).deleted) customerId = null;
+      } catch {
+        customerId = null;
+      }
+    }
     if (!customerId) {
       const customer = await getStripe().customers.create({
         email: user.email,
