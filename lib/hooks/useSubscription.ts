@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authContext";
 
@@ -22,41 +22,32 @@ const DEFAULT: Subscription = {
   loading: true,
 };
 
-export function useSubscription(): Subscription {
+export function useSubscription(): Subscription & { refresh: () => Promise<void> } {
   const { user } = useAuth();
   const [sub, setSub] = useState<Subscription>(DEFAULT);
 
-  useEffect(() => {
-    if (!user) {
-      setSub({ ...DEFAULT, loading: false });
-      return;
-    }
-
+  const refresh = useCallback(async () => {
+    if (!user) { setSub({ ...DEFAULT, loading: false }); return; }
     const client = getSupabaseClient();
-    if (!client) {
-      setSub({ ...DEFAULT, loading: false });
-      return;
-    }
+    if (!client) { setSub({ ...DEFAULT, loading: false }); return; }
 
-    async function load() {
-      const { data } = await client!
-        .from("subscriptions")
-        .select("status, cancel_at_period_end, current_period_end")
-        .eq("user_id", user!.id)
-        .maybeSingle();
+    const { data } = await client
+      .from("subscriptions")
+      .select("status, cancel_at_period_end, current_period_end")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-      const status = (data?.status ?? "free") as SubscriptionStatus;
-      setSub({
-        status,
-        isPro: status === "active" || status === "trialing",
-        cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
-        currentPeriodEnd: data?.current_period_end ? new Date(data.current_period_end) : null,
-        loading: false,
-      });
-    }
-
-    load();
+    const status = (data?.status ?? "free") as SubscriptionStatus;
+    setSub({
+      status,
+      isPro: status === "active" || status === "trialing",
+      cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
+      currentPeriodEnd: data?.current_period_end ? new Date(data.current_period_end) : null,
+      loading: false,
+    });
   }, [user]);
 
-  return sub;
+  useEffect(() => { refresh(); }, [refresh]);
+
+  return { ...sub, refresh };
 }

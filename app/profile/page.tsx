@@ -32,16 +32,23 @@ export default function ProfilePage() {
     !!subscription.currentPeriodEnd &&
     subscription.currentPeriodEnd.getFullYear() >= 2090;
 
-  // Show success banner when returning from Stripe checkout
+  // Show success banner when returning from Stripe checkout; poll until webhook fires
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("upgraded") === "1") {
-      setShowUpgradeSuccess(true);
-      window.history.replaceState({}, "", "/profile");
-    }
-  }, []);
+    if (params.get("upgraded") !== "1") return;
+    setShowUpgradeSuccess(true);
+    window.history.replaceState({}, "", "/profile");
+
+    // Poll every 3s for up to 30s so the Pro card appears as soon as the webhook writes
+    let attempts = 0;
+    const id = setInterval(async () => {
+      await subscription.refresh();
+      if (++attempts >= 10) clearInterval(id);
+    }, 3000);
+    return () => clearInterval(id);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleManageBilling() {
     setPortalLoading(true);
