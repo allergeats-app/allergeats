@@ -1031,51 +1031,23 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
             {/* ── Guided builder mode ── */}
             {restaurant?.builderConfig && !builderBrowseMode ? (
               <>
-                <div style={{ marginBottom: 24 }}>
-                  {/* Browse Full Menu — top */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "var(--c-text)", letterSpacing: "-0.01em" }}>Build Your Order</div>
+                    <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>Step-by-step · only safe options shown</div>
+                  </div>
                   <button
                     onClick={() => setBuilderBrowseMode(true)}
                     style={{
-                      width: "100%", padding: "13px 0", marginBottom: 16,
-                      borderRadius: 14,
-                      border: isDark ? "1px solid rgba(200,210,220,0.3)" : "1px solid rgba(160,175,190,0.45)",
-                      background: isDark
-                        ? "linear-gradient(135deg, #2a2f35 0%, #3a4048 40%, #2e333a 60%, #252a30 100%)"
-                        : "linear-gradient(135deg, #e8ecf0 0%, #f4f6f8 30%, #ffffff 50%, #dde3e8 70%, #e8ecf0 100%)",
-                      color: isDark ? "#c8d4de" : "#4a5568",
-                      fontSize: 14, fontWeight: 900, cursor: "pointer",
-                      letterSpacing: "0.06em", textTransform: "uppercase",
-                      boxShadow: isDark
-                        ? "0 1px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07)"
-                        : "0 1px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9)",
+                      padding: "8px 14px", borderRadius: 10, flexShrink: 0,
+                      border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)"}`,
+                      background: "transparent",
+                      color: "var(--c-sub)", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                      WebkitTapHighlightColor: "transparent",
                     }}
                   >
-                    Browse Full Menu
+                    Full menu
                   </button>
-
-                  {/* OR divider */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                    <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
-                    <span style={{ fontSize: 12, fontWeight: 800, color: "var(--c-sub)", letterSpacing: "0.1em" }}>OR</span>
-                    <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
-                  </div>
-
-                  {/* Build Your Order title */}
-                  <div style={{ textAlign: "center", marginBottom: 14 }}>
-                    <div style={{
-                      fontSize: 34,
-                      fontWeight: 900,
-                      fontFamily: "'Georgia', 'Times New Roman', serif",
-                      letterSpacing: "-0.02em",
-                      color: isDark ? "#c8d4de" : "#4a5a6a",
-                      lineHeight: 1.1,
-                    }}>
-                      Build Your Order
-                    </div>
-                    <div style={{ fontSize: 13, color: "var(--c-sub)", marginTop: 5, fontWeight: 500 }}>
-                      Step-by-step — only safe options shown
-                    </div>
-                  </div>
                 </div>
                 <ErrorBoundary fallback={
                   <div style={{ padding: "24px 0", textAlign: "center", color: "var(--c-sub)", fontSize: 14 }}>

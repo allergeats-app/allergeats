@@ -6,13 +6,6 @@ import type { AnalyzedMenuSection, AnalyzedMenuItem } from "@/lib/analysis";
 import { useTheme } from "@/lib/themeContext";
 import { RISK_COLOR } from "@/lib/riskColors";
 
-const RISK_BADGE: Record<string, { bg: string; color: string; label: string }> = {
-  "likely-safe": { bg: "rgba(22,163,74,0.12)",  color: "#16a34a", label: "Safe"      },
-  "ask":         { bg: "rgba(217,119,6,0.12)",  color: "#d97706", label: "Ask staff" },
-  "avoid":       { bg: "rgba(220,38,38,0.1)",   color: "#dc2626", label: "Avoid"     },
-  "unknown":     { bg: "rgba(156,163,175,0.12)", color: "#9ca3af", label: "Unknown"   },
-};
-
 function stepSummaryLabel(label: string): string {
   return label
     .replace(/^Choose your /i, "")
@@ -32,9 +25,9 @@ type Props = {
 
 export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOrder, onOpenOrder, onBrowse, restaurantName }: Props) {
   const { isDark } = useTheme();
-  const [currentStep, setCurrentStep]     = useState(0);
-  const [done, setDone]                   = useState(false);
-  const [copied, setCopied]               = useState(false);
+  const [currentStep, setCurrentStep]         = useState(0);
+  const [done, setDone]                       = useState(false);
+  const [copied, setCopied]                   = useState(false);
   const [confirmedItemId, setConfirmedItemId] = useState<string | null>(null);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,7 +43,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   }
 
   const stepItems = step ? getStepItems(step) : [];
-
   const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
   const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
 
@@ -79,7 +71,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
         setConfirmedItemId(null);
         if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
         else setDone(true);
-      }, 420);
+      }, 300);
     } else {
       onToggleOrder(item.id);
     }
@@ -118,7 +110,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
     }).catch(() => {});
   }
 
-  // Shared glass card style
   const glass = {
     background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.82)",
     WebkitBackdropFilter: "blur(20px)", backdropFilter: "blur(20px)",
@@ -133,7 +124,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
   if (done) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {/* Success header */}
         <div style={{ ...glass, padding: "24px 20px", textAlign: "center" }}>
           <div style={{
             width: 52, height: 52, borderRadius: 999, margin: "0 auto 14px",
@@ -166,27 +156,24 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
                   {stepSummaryLabel(s.label)}
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {pickedItems.map((item) => {
-                    const badge = RISK_BADGE[item.risk] ?? RISK_BADGE["unknown"];
-                    return (
-                      <span key={item.id} style={{
-                        fontSize: 13, fontWeight: 700, color: "var(--c-text)",
-                        background: badge.bg, borderRadius: 999,
-                        padding: "5px 11px", display: "inline-flex", alignItems: "center", gap: 6,
-                        border: `1px solid ${badge.bg}`,
-                      }}>
-                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: RISK_COLOR[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
-                        {item.name}
-                      </span>
-                    );
-                  })}
+                  {pickedItems.map((item) => (
+                    <span key={item.id} style={{
+                      fontSize: 13, fontWeight: 700, color: "var(--c-text)",
+                      background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+                      borderRadius: 999, padding: "5px 11px",
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+                    }}>
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: RISK_COLOR[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
+                      {item.name}
+                    </span>
+                  ))}
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* CTAs */}
         <button onClick={onOpenOrder} style={{
           width: "100%", padding: "15px 0", borderRadius: 16, border: "none",
           background: "var(--c-brand)", color: "var(--c-brand-fg)",
@@ -235,11 +222,11 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
 
   // ── Step state ────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-      {/* ── Step breadcrumbs ── */}
-      <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
-        {steps.map((s, i) => {
+      {/* ── Dot progress bar ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "center", paddingTop: 2 }}>
+        {steps.map((_, i) => {
           const isComplete = i < currentStep;
           const isCurrent  = i === currentStep;
           return (
@@ -247,69 +234,29 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               key={i}
               type="button"
               onClick={() => { if (isComplete) setCurrentStep(i); }}
+              aria-label={isComplete ? `Go back to step ${i + 1}` : undefined}
               style={{
-                flexShrink: 0,
-                padding: "5px 11px", borderRadius: 999,
-                fontSize: 11, fontWeight: 800, letterSpacing: "0.03em",
-                border: isCurrent
-                  ? "1.5px solid var(--c-brand)"
-                  : isComplete
-                    ? `1px solid ${isDark ? "rgba(31,189,204,0.3)" : "rgba(31,189,204,0.35)"}`
-                    : `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
+                width: isCurrent ? 22 : 8,
+                height: 8, borderRadius: 999, border: "none", padding: 0,
                 background: isCurrent
-                  ? isDark ? "rgba(31,189,204,0.12)" : "rgba(31,189,204,0.08)"
-                  : "transparent",
-                color: isCurrent
                   ? "var(--c-brand)"
                   : isComplete
-                    ? isDark ? "rgba(31,189,204,0.85)" : "rgba(0,150,163,0.9)"
-                    : "var(--c-sub)",
+                    ? isDark ? "rgba(31,189,204,0.5)" : "rgba(0,150,163,0.45)"
+                    : isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)",
                 cursor: isComplete ? "pointer" : "default",
-                transition: "all 0.2s ease",
-                display: "flex", alignItems: "center", gap: 4,
+                transition: "width 0.2s ease, background 0.2s ease",
+                flexShrink: 0,
                 WebkitTapHighlightColor: "transparent",
               }}
-            >
-              {isComplete && (
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              )}
-              {stepSummaryLabel(s.label)}
-            </button>
+            />
           );
         })}
       </div>
 
-      {/* ── Running order tray ── */}
-      {priorPickedItems.length > 0 && (
-        <div className="chip-row" style={{ display: "flex", gap: 6, paddingBottom: 2 }}>
-          {priorPickedItems.map((item) => {
-            const riskColor = RISK_COLOR[item.risk] ?? "#9ca3af";
-            return (
-              <span key={item.id} style={{
-                flexShrink: 0, fontSize: 12, fontWeight: 600,
-                padding: "4px 10px", borderRadius: 999,
-                background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
-                color: "var(--c-text)",
-                display: "inline-flex", alignItems: "center", gap: 5,
-                border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: riskColor, flexShrink: 0 }} />
-                {item.name}
-              </span>
-            );
-          })}
-        </div>
-      )}
-
       {/* ── Step header ── */}
       <div style={{ ...glass, padding: "18px 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <span style={{
-            fontSize: 11, fontWeight: 900, letterSpacing: "0.08em",
-            color: "var(--c-brand)", textTransform: "uppercase",
-          }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", color: "var(--c-brand)", textTransform: "uppercase" }}>
             Step {currentStep + 1} of {steps.length}
           </span>
           {!step?.required && (
@@ -322,9 +269,29 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             </span>
           )}
         </div>
-        <div style={{ fontSize: 26, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: 6 }}>
+        <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: 8 }}>
           {step?.label}
         </div>
+
+        {/* In your order — inline under step label */}
+        {priorPickedItems.length > 0 ? (
+          <div className="chip-row" style={{ display: "flex", gap: 5, marginBottom: 10 }}>
+            {priorPickedItems.map((item) => (
+              <span key={item.id} style={{
+                flexShrink: 0, fontSize: 11, fontWeight: 600,
+                padding: "3px 9px", borderRadius: 999,
+                background: isDark ? "rgba(31,189,204,0.1)" : "rgba(0,150,163,0.07)",
+                color: isDark ? "rgba(31,189,204,0.9)" : "rgba(0,120,130,0.9)",
+                display: "inline-flex", alignItems: "center", gap: 4,
+                border: `1px solid ${isDark ? "rgba(31,189,204,0.2)" : "rgba(0,150,163,0.15)"}`,
+              }}>
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: RISK_COLOR[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
+                {item.name}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 5,
           fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
@@ -346,7 +313,6 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
           padding: "14px 18px", borderRadius: 16,
           background: isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)",
           border: `1.5px solid rgba(220,38,38,${isDark ? "0.3" : "0.2"})`,
-          backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         }}>
           <div style={{
             width: 32, height: 32, borderRadius: 10, flexShrink: 0,
@@ -359,9 +325,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             </svg>
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#dc2626", lineHeight: 1.3 }}>
-              No safe options here
-            </div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#dc2626", lineHeight: 1.3 }}>No safe options here</div>
             <div style={{ fontSize: 12, color: isDark ? "rgba(220,38,38,0.7)" : "rgba(185,28,28,0.65)", marginTop: 2 }}>
               All items contain your allergens — skip this step.
             </div>
@@ -376,12 +340,11 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             No items available
           </div>
         ) : sortedItems.map((item, idx) => {
-          const isSelected = orderedItemIds.has(item.id);
-          const isAvoid    = item.risk === "avoid";
-          const badge      = RISK_BADGE[item.risk] ?? RISK_BADGE["unknown"];
-          const riskColor  = RISK_COLOR[item.risk] ?? "#9ca3af";
-          const isLast     = idx === sortedItems.length - 1;
-          const comboNum   = step?.showAsCombo ? idx + 1 : null;
+          const isSelected  = orderedItemIds.has(item.id);
+          const isConfirmed = confirmedItemId === item.id;
+          const isAvoid     = item.risk === "avoid";
+          const riskColor   = RISK_COLOR[item.risk] ?? "#9ca3af";
+          const isLast      = idx === sortedItems.length - 1;
 
           return (
             <button
@@ -390,97 +353,64 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               onClick={() => selectItem(item)}
               disabled={isAvoid}
               style={{
-                display: "flex", alignItems: "center",
-                width: "100%", textAlign: "left",
-                padding: 0,
-                background: isSelected
-                  ? isDark ? "rgba(31,189,204,0.1)" : "rgba(31,189,204,0.06)"
-                  : "transparent",
+                display: "flex", alignItems: "stretch",
+                width: "100%", textAlign: "left", padding: 0,
+                background: isConfirmed
+                  ? isDark ? "rgba(22,163,74,0.1)" : "rgba(22,163,74,0.06)"
+                  : isSelected
+                    ? isDark ? "rgba(31,189,204,0.08)" : "rgba(31,189,204,0.05)"
+                    : "transparent",
                 border: "none",
                 borderBottom: isLast ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
                 cursor: isAvoid ? "not-allowed" : "pointer",
-                opacity: isAvoid ? 0.4 : 1,
+                opacity: isAvoid ? 0.35 : 1,
                 transition: "background 0.15s",
-                minHeight: 62,
+                minHeight: 58,
+                WebkitTapHighlightColor: "transparent",
               }}
             >
               {/* Risk color strip */}
-              <div style={{
-                width: 3, alignSelf: "stretch",
-                background: riskColor,
-                flexShrink: 0,
-                borderRadius: "0",
-              }} />
+              <div style={{ width: 3, alignSelf: "stretch", background: riskColor, flexShrink: 0 }} />
 
               {/* Content */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, padding: "14px 16px" }}>
-                {/* Combo badge OR risk dot */}
-                {comboNum ? (
-                  <div style={{
-                    width: 34, height: 34, borderRadius: 12, flexShrink: 0,
-                    background: isSelected ? "var(--c-brand)" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "background 0.15s",
-                    border: `1px solid ${isSelected ? "transparent" : isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
-                  }}>
-                    <span style={{ fontSize: 12, fontWeight: 900, color: isSelected ? "#fff" : "var(--c-sub)" }}>
-                      #{comboNum}
-                    </span>
-                  </div>
-                ) : (
-                  <div style={{
-                    width: 10, height: 10, borderRadius: "50%",
-                    background: riskColor, flexShrink: 0,
-                    boxShadow: `0 0 6px ${riskColor}66`,
-                  }} />
-                )}
-
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, padding: "13px 16px" }}>
                 {/* Name + allergen hits */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: isAvoid ? "var(--c-sub)" : "var(--c-text)", lineHeight: 1.3, letterSpacing: "-0.01em" }}>
+                  <div style={{
+                    fontSize: 15, fontWeight: 700,
+                    color: isAvoid ? "var(--c-sub)" : "var(--c-text)",
+                    lineHeight: 1.3, letterSpacing: "-0.01em",
+                    textDecoration: isAvoid ? "line-through" : "none",
+                  }}>
                     {item.name}
                   </div>
                   {item.userAllergenHits.length > 0 && (
-                    <div style={{ fontSize: 11, color: "#dc2626", fontWeight: 600, marginTop: 3, letterSpacing: "0.01em" }}>
-                      Contains: {item.userAllergenHits.map((a) => a.replace(/-/g, " ")).join(", ")}
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      fontSize: 11, color: "#dc2626", fontWeight: 700, marginTop: 4,
+                      background: "rgba(220,38,38,0.08)", borderRadius: 6, padding: "2px 7px",
+                    }}>
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      </svg>
+                      {item.userAllergenHits.map((a) => a.replace(/-/g, " ")).join(", ")}
                     </div>
                   )}
                 </div>
-
-                {/* Safety badge / confirmation flash */}
-                {confirmedItemId === item.id ? (
-                  <span style={{
-                    fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999,
-                    background: "rgba(22,163,74,0.12)", color: "#16a34a", flexShrink: 0,
-                    letterSpacing: "0.02em", border: "1px solid rgba(22,163,74,0.25)",
-                    display: "inline-flex", alignItems: "center", gap: 4,
-                  }}>
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Added
-                  </span>
-                ) : (
-                  <span style={{
-                    fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999,
-                    background: badge.bg, color: badge.color, flexShrink: 0,
-                    letterSpacing: "0.02em", border: `1px solid ${badge.bg}`,
-                  }}>
-                    {badge.label}
-                  </span>
-                )}
 
                 {/* Check/radio indicator */}
                 {!isAvoid && (
                   <div style={{
                     width: 22, height: 22, borderRadius: isSingle ? 999 : 7, flexShrink: 0,
-                    border: isSelected ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)"}`,
-                    background: isSelected ? "var(--c-brand)" : "transparent",
+                    border: isSelected || isConfirmed ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)"}`,
+                    background: isConfirmed ? "#16a34a" : isSelected ? "var(--c-brand)" : "transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     transition: "all 0.15s",
-                    boxShadow: isSelected ? "0 2px 8px rgba(31,189,204,0.4)" : "none",
+                    boxShadow: isConfirmed
+                      ? "0 2px 8px rgba(22,163,74,0.4)"
+                      : isSelected ? "0 2px 8px rgba(31,189,204,0.4)" : "none",
                   }}>
-                    {isSelected && (
+                    {(isSelected || isConfirmed) && (
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
@@ -502,6 +432,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
             background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
             fontSize: 14, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer", minHeight: 48,
             backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+            WebkitTapHighlightColor: "transparent",
           }}>
             ← Back
           </button>
@@ -520,7 +451,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               fontSize: 14, fontWeight: 700,
               color: allAvoid ? "#dc2626" : "var(--c-sub)",
               cursor: "pointer",
-              backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+              WebkitTapHighlightColor: "transparent",
             }}>
               {allAvoid ? "Skip this step →" : "Skip →"}
             </button>
@@ -545,6 +476,7 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
               transition: "all 0.15s",
               boxShadow: picksForStep.length > 0 && !allAvoid ? "0 4px 16px rgba(31,189,204,0.35)" : "none",
               letterSpacing: "-0.01em",
+              WebkitTapHighlightColor: "transparent",
             }}
           >
             {allAvoid
