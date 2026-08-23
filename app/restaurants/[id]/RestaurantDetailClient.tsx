@@ -45,7 +45,6 @@ import { chainLogoUrl } from "@/lib/chainLogos";
 import { StatBlock } from "@/components/restaurant-detail/StatBlock";
 import { SectionHeader } from "@/components/restaurant-detail/SectionHeader";
 import { MemoryInsightCard } from "@/components/restaurant-detail/MemoryInsightCard";
-import { FeedbackRow } from "@/components/restaurant-detail/FeedbackRow";
 import { MenuFreshnessNotice } from "@/components/restaurant-detail/MenuFreshnessNotice";
 
 type RiskFilter = "all" | Risk;
@@ -664,23 +663,32 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   }
 
   // Shared item renderer — wraps MenuItemCard with the feedback row
-  function renderItem(item: AnalyzedMenuItem) {
+  const itemListCard: React.CSSProperties = {
+    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.88)",
+    backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+    border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
+    borderRadius: 16, overflow: "hidden",
+    boxShadow: isDark
+      ? "0 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)"
+      : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)",
+  };
+
+  function renderItemGroup(items: AnalyzedMenuItem[]) {
+    const divider = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
     return (
-      <div key={item.id}>
-        <MenuItemCard
-          item={item}
-          restaurantId={restaurant!.id}
-          restaurantName={restaurant!.name}
-          inOrder={orderedItemIds.has(item.id)}
-          onToggleOrder={() => toggleOrderItem(item.id)}
-        />
-        <FeedbackRow
-          item={item}
-          userAllergens={userAllergens}
-          onSubmit={(params) =>
-            handleFeedback({ ...params, dishName: item.name, menuItemId: item.itemId })
-          }
-        />
+      <div style={itemListCard}>
+        {items.map((item, idx) => (
+          <div key={item.id} style={{ borderBottom: idx < items.length - 1 ? `1px solid ${divider}` : "none" }}>
+            <MenuItemCard
+              item={item}
+              restaurantId={restaurant!.id}
+              restaurantName={restaurant!.name}
+              inOrder={orderedItemIds.has(item.id)}
+              onToggleOrder={() => toggleOrderItem(item.id)}
+              seamless
+            />
+          </div>
+        ))}
       </div>
     );
   }
@@ -1191,26 +1199,20 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               return (
                 <>
                   {/* ── Food sections ── */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingBottom: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 18, paddingBottom: 8 }}>
                     {foodSections.map((section) => {
                       const items = bySectionFiltered.get(section.sectionName);
                       if (!items?.length) return null;
                       if (categoryFilter !== "all" && section.sectionName !== categoryFilter) return null;
                       return (
                         <div key={section.sectionName}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, paddingTop: 4 }}>
-                            <h2 style={{ fontSize: 11, fontWeight: 900, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0, whiteSpace: "nowrap" }}>{section.sectionName}</h2>
-                            <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
-                            <span style={{ fontSize: 11, color: "var(--c-sub)", whiteSpace: "nowrap" }}>{items.length}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
+                            <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.07em", margin: 0 }}>{section.sectionName}</h2>
                             {section.safeCount > 0 && riskFilter === "all" && (
-                              <span style={{ fontSize: 11, fontWeight: 700, color: isDark ? "#4ade80" : "#15803d", whiteSpace: "nowrap" }}>
-                                · {section.safeCount} safe
-                              </span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: isDark ? "#4ade80" : "#15803d" }}>· {section.safeCount} safe</span>
                             )}
                           </div>
-                          <div style={{ display: "grid", gap: 6 }}>
-                            {items.map(renderItem)}
-                          </div>
+                          {renderItemGroup(items)}
                         </div>
                       );
                     })}
@@ -1241,20 +1243,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         </span>
                       </button>
                       {showComponents && (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                           {componentSections.map((section) => {
                             const items = bySectionFiltered.get(section.sectionName);
                             if (!items?.length) return null;
                             return (
                               <div key={section.sectionName}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, paddingTop: 4 }}>
-                                  <h2 style={{ fontSize: 11, fontWeight: 900, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0, whiteSpace: "nowrap" }}>{section.sectionName}</h2>
-                                  <div style={{ flex: 1, height: 1, background: "var(--c-border)" }} />
-                                  <span style={{ fontSize: 11, color: "var(--c-sub)", whiteSpace: "nowrap" }}>{items.length}</span>
+                                <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
+                                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.07em", margin: 0 }}>{section.sectionName}</h2>
                                 </div>
-                                <div style={{ display: "grid", gap: 6 }}>
-                                  {items.map(renderItem)}
-                                </div>
+                                {renderItemGroup(items)}
                               </div>
                             );
                           })}
@@ -1288,19 +1286,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                         </span>
                       </button>
                       {showDrinks && (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                           {drinkSections.map((section) => {
                             const items = bySectionFiltered.get(section.sectionName);
                             if (!items?.length) return null;
                             return (
                               <div key={section.sectionName}>
-                                <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 12 }}>
-                                  <h2 style={{ fontSize: 14, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>{section.sectionName}</h2>
-                                  <span style={{ fontSize: 13, color: "var(--c-sub)" }}>{items.length}</span>
+                                <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
+                                  <h2 style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.07em", margin: 0 }}>{section.sectionName}</h2>
                                 </div>
-                                <div style={{ display: "grid", gap: 8 }}>
-                                  {items.map(renderItem)}
-                                </div>
+                                {renderItemGroup(items)}
                               </div>
                             );
                           })}
@@ -1342,9 +1337,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                               <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
                             </div>
                           </div>
-                          <div style={{ display: "grid", gap: 6 }}>
-                            {items.map(renderItem)}
-                          </div>
+                          {renderItemGroup(items)}
                         </div>
                       );
                     })}
@@ -1373,11 +1366,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                           {showDrinks ? "Hide ▲" : "Show ▼"}
                         </span>
                       </button>
-                      {showDrinks && (
-                        <div style={{ display: "grid", gap: 8 }}>
-                          {drinkItems.map(renderItem)}
-                        </div>
-                      )}
+                      {showDrinks && renderItemGroup(drinkItems)}
                     </div>
                   )}
                 </>

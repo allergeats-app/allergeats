@@ -56,9 +56,10 @@ type Props = {
   restaurantName?: string;
   inOrder?: boolean;
   onToggleOrder?: () => void;
+  seamless?: boolean;
 };
 
-export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onToggleOrder }: Props) {
+export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onToggleOrder, seamless }: Props) {
   const { isDark } = useTheme();
   const canOrder = item.risk === "likely-safe" || item.risk === "ask";
   const [open, setOpen]                   = useState(false);
@@ -125,13 +126,15 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
   return (
     <div ref={cardRef} style={{
       display: "flex", alignItems: "stretch",
-      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.88)",
-      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-      border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
-      borderRadius: 16, overflow: "hidden",
-      boxShadow: isDark
-        ? "0 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)"
-        : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)",
+      ...(seamless ? {} : {
+        background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.88)",
+        backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
+        borderRadius: 16, overflow: "hidden",
+        boxShadow: isDark
+          ? "0 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)"
+          : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)",
+      }),
     }}>
       {/* Left risk strip */}
       <div style={{ width: 3, background: stripColor, flexShrink: 0 }} />
