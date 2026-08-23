@@ -434,9 +434,9 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
   const builderCategoryNames = useMemo(() => {
     if (!restaurant?.builderConfig) return new Set<string>();
     return new Set(
-      restaurant.builderConfig.steps
-        .map((s) => s.category)
-        .filter((c): c is string => !!c)
+      restaurant.builderConfig.steps.flatMap((s) =>
+        s.categories ? s.categories : s.category ? [s.category] : []
+      )
     );
   }, [restaurant?.builderConfig]);
 

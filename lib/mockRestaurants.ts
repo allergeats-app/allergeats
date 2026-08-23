@@ -19,7 +19,7 @@ import type { Restaurant } from "./types";
  * each chain's published allergen guide. Update this whenever you
  * audit and confirm the data is still accurate.
  */
-export const MENU_DATA_VERIFIED_DATE = "2026-08-20";
+export const MENU_DATA_VERIFIED_DATE = "2026-08-23";
 
 export const MOCK_RESTAURANTS: Restaurant[] = [
 
@@ -36,12 +36,32 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     facilityAllergens: ["wheat", "dairy", "egg", "soy", "sesame"],
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Entrée","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Entrée" },
+        { label: "What's your meal?",  categories: ["Combo Meal","Breakfast Combo"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combo Meal" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
         { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
       ],
     },
 menuItems: [
+      // ── Combo Meals (Extra Value Meals — what's on the drive-thru board) ──
+      { id: "mcd-meal-big-mac",             name: "Big Mac Meal",                              category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat","sesame"] },
+      { id: "mcd-meal-qtr-pounder",         name: "Quarter Pounder with Cheese Meal",          category: "Combo Meal",     sourceType: "official", allergens: ["dairy","soy","wheat","sesame"] },
+      { id: "mcd-meal-dbl-qtr-pounder",     name: "Double Quarter Pounder with Cheese Meal",   category: "Combo Meal",     sourceType: "official", allergens: ["dairy","soy","wheat","sesame"] },
+      { id: "mcd-meal-mccrispy",            name: "McCrispy Meal",                             category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-spicy-mccrispy",      name: "Spicy McCrispy Meal",                       category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-deluxe-mccrispy",     name: "Deluxe McCrispy Meal",                      category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-mcchicken",           name: "McChicken Meal",                            category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat","sesame"] },
+      { id: "mcd-meal-filet-o-fish",        name: "Filet-O-Fish Meal",                         category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","fish","soy","wheat","sesame"] },
+      { id: "mcd-meal-nuggets-10",          name: "10 PC Chicken McNuggets Meal",              category: "Combo Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-mcdouble",            name: "McDouble Meal",                             category: "Combo Meal",     sourceType: "official", allergens: ["dairy","soy","wheat","sesame"] },
+      { id: "mcd-meal-cheeseburger",        name: "Cheeseburger Meal",                         category: "Combo Meal",     sourceType: "official", allergens: ["dairy","soy","wheat","sesame"] },
+      // ── Breakfast Combo Meals ──────────────────────────────────────────────
+      { id: "mcd-meal-egg-mcmuffin",        name: "Egg McMuffin Meal",                         category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-sau-mcmuffin-egg",    name: "Sausage McMuffin with Egg Meal",            category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-bac-egg-che-biscuit", name: "Bacon, Egg & Cheese Biscuit Meal",          category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-sau-egg-che-mcgrid",  name: "Sausage, Egg & Cheese McGriddles Meal",     category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-bac-egg-che-mcgrid",  name: "Bacon, Egg & Cheese McGriddles Meal",       category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-sau-burrito",         name: "Sausage Burrito Meal",                      category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-meal-big-breakfast",       name: "Big Breakfast",                             category: "Breakfast Combo", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
       // ── Entrée ──────────────────────────────────────────────
       { id: "mcd-10-piece-chicken-mcnuggets", name: "10 Piece Chicken McNuggets", category: "Entrée", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
       { id: "mcd-20-piece-chicken-mcnuggets", name: "20 Piece Chicken McNuggets", category: "Entrée", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
@@ -343,6 +363,10 @@ menuItems: [
       { id: "cfa-spicy",             name: "Spicy Chicken Sandwich",                category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
       { id: "cfa-deluxe",            name: "Chick-fil-A Deluxe Sandwich",           category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
       { id: "cfa-spicy-deluxe",      name: "Spicy Deluxe Sandwich",                 category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
+      { id: "cfa-jal-ranch-club",    name: "Jalapeño Ranch Club Sandwich",          category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
+      { id: "cfa-spicy-jal-ranch",   name: "Spicy Jalapeño Ranch Club Sandwich",    category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
+      { id: "cfa-chk-waffles",       name: "Chicken & Waffles Sandwich",            category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "cfa-spicy-chk-waffles", name: "Spicy Chicken & Waffles Sandwich",      category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
       { id: "cfa-grilled",           name: "Grilled Chicken Sandwich",              category: "Entrees",        sourceType: "official", allergens: ["egg","wheat"] },
       { id: "cfa-grilled-dlx",       name: "Grilled Chicken Club Sandwich",         category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","wheat"] },
       { id: "cfa-honey-pepper",      name: "Honey Pepper Pimento Sandwich",         category: "Entrees",        sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
@@ -439,6 +463,8 @@ menuItems: [
       { id: "cfa-meal-cobbsal",      name: "Cobb Salad Meal",                       category: "Lunch Meal",     sourceType: "official", allergens: ["dairy","egg","wheat"] },
       { id: "cfa-meal-marketsal",    name: "Market Salad Meal",                     category: "Lunch Meal",     sourceType: "official", allergens: ["dairy","tree-nut"] },
       { id: "cfa-meal-spicyswsal",   name: "Spicy Southwest Salad Meal",            category: "Lunch Meal",     sourceType: "official", allergens: ["dairy","egg","soy"] },
+      { id: "cfa-meal-jalranch",     name: "Jalapeño Ranch Club Sandwich Meal",     category: "Lunch Meal",     sourceType: "official", allergens: ["dairy","egg","sesame","soy","wheat"] },
+      { id: "cfa-meal-chkwaffles",   name: "Chicken & Waffles Sandwich Meal",       category: "Lunch Meal",     sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
     ],
   },
 
@@ -852,6 +878,8 @@ menuItems: [
       { id: "tb-chips-cheese",             name: "Chips & Nacho Cheese Sauce",                  category: "Nachos",       sourceType: "official", allergens: ["corn","dairy"] },
       { id: "tb-large-nacho-fries",        name: "Large Nacho Fries",                           category: "Nachos",       sourceType: "official", allergens: ["wheat","corn","dairy","soy"] },
       { id: "tb-nacho-fries",              name: "Nacho Fries",                                 category: "Nachos",       sourceType: "official", allergens: ["wheat","corn","dairy","soy"] },
+      { id: "tb-diablo-nuggets",           name: "Diablo Dusted Crispy Chicken Nuggets",         category: "Specialties",  sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "tb-cr-nuggets",               name: "Cool Ranch Dusted Crispy Chicken Nuggets",     category: "Specialties",  sourceType: "official", allergens: ["wheat","soy","dairy"] },
       // ── Bowls ─────────────────────────────────────────────────────────────
       { id: "tb-cantina-bowl",             name: "Cantina Chicken Bowl",                        category: "Bowls",        sourceType: "official", allergens: ["dairy","soy","wheat"] },
       { id: "tb-power-bowl",               name: "Power Menu Bowl Chicken",                     category: "Bowls",        sourceType: "official", allergens: ["dairy","soy","egg"] },
@@ -977,6 +1005,7 @@ menuItems: [
       { id: "bk-dbl-bacon-king",       name: "Double Bacon King",                          category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
       { id: "bk-bbq-bacon-whopper",    name: "BBQ Bacon Whopper",                          category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
       { id: "bk-loaded-jal-whopper",   name: "Loaded Jalapeño Whopper",                    category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
+      { id: "bk-bacon-swiss-bbq-whopper", name: "Bacon Swiss BBQ Whopper",                category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
       // ── Value Burgers ─────────────────────────────────────────────────────
       { id: "bk-cheeseburger",         name: "Cheeseburger",                               category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
       { id: "bk-dbl-cheeseburger",     name: "Double Cheeseburger",                        category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame"] },
@@ -1011,6 +1040,7 @@ menuItems: [
       { id: "bk-fries",                name: "French Fries",                               category: "Side",           sourceType: "official", allergens: ["wheat","soy"] },
       { id: "bk-onion-rings",          name: "Onion Rings",                                category: "Side",           sourceType: "official", allergens: ["wheat","dairy","soy"] },
       { id: "bk-mozz-fries",           name: "Mozzarella Fries",                           category: "Side",           sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
+      { id: "bk-cheddar-ranch-tots",   name: "Cheddar Ranch Tots",                         category: "Side",           sourceType: "official", allergens: ["wheat","dairy","soy"] },
       { id: "bk-apple-slices",         name: "Apple Slices",                               category: "Side",           sourceType: "official", allergens: [] },
       { id: "bk-garden-salad",         name: "Garden Side Salad",                          category: "Side",           sourceType: "official", allergens: [] },
       // ── Kids Meals ────────────────────────────────────────────────────────
@@ -1077,6 +1107,7 @@ menuItems: [
       { id: "bk-meal-bacon-king",      name: "Bacon King Meal",                            category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
       { id: "bk-meal-bbq-bacon",       name: "BBQ Bacon Whopper Meal",                     category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
       { id: "bk-meal-loaded-jal",      name: "Loaded Jalapeño Whopper Meal",               category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
+      { id: "bk-meal-bacon-swiss-bbq", name: "Bacon Swiss BBQ Whopper Meal",               category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
       { id: "bk-meal-royal-crispy",    name: "Royal Crispy Chicken Meal",                  category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","egg","sesame","dairy"] },
       { id: "bk-meal-spicy-royal",     name: "Spicy Royal Crispy Chicken Meal",            category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","egg","sesame","dairy"] },
       { id: "bk-meal-bacon-swiss-royal",name: "Bacon Swiss Royal Crispy Chicken Meal",     category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
@@ -1256,7 +1287,6 @@ menuItems: [
       { id: "wen-meal-baconator",      name: "Baconator Combo",                           category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
       { id: "wen-meal-sonbaconator",   name: "Son of Baconator Combo",                    category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
       { id: "wen-meal-bigbacon",       name: "Big Bacon Classic Combo",                   category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
-      { id: "wen-meal-pretzelbaconator",name: "Pretzel Baconator Combo",                  category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       // ── Chicken Combos ────────────────────────────────────────────────────
       { id: "wen-meal-classicch",      name: "Classic Chicken Sandwich Combo",            category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
       { id: "wen-meal-spicych",        name: "Spicy Chicken Sandwich Combo",              category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
@@ -1265,6 +1295,8 @@ menuItems: [
       { id: "wen-meal-crispych",       name: "Crispy Chicken Sandwich Combo",             category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","dairy","egg","soy","sesame"] },
       { id: "wen-meal-nuggets10",      name: "10 PC Nuggets Combo",                       category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
       { id: "wen-meal-spicynug10",     name: "10 PC Spicy Nuggets Combo",                 category: "Lunch Meal",     sourceType: "official", allergens: ["wheat","soy","egg","dairy"] },
+      { id: "wen-meal-3pctenders",     name: "3 PC Tenders Combo",                        category: "Lunch Meal",     sourceType: "official", allergens: ["wheat"] },
+      { id: "wen-meal-4pctenders",     name: "4 PC Tenders Combo",                        category: "Lunch Meal",     sourceType: "official", allergens: ["wheat"] },
       // ── Biggie Deals ──────────────────────────────────────────────────────
       { id: "wen-biggie-jrbacon",      name: "Jr. Bacon Cheeseburger Biggie Bag",         category: "Biggie Deal",    sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },
       { id: "wen-biggie-dblstack",     name: "Double Stack Biggie Bag",                   category: "Biggie Deal",    sourceType: "official", allergens: ["wheat","dairy","soy","sesame"] },

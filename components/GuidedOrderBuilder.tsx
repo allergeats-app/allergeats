@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, Fragment } from "react";
 import type { BuilderStep } from "@/lib/types";
 import type { AnalyzedMenuSection, AnalyzedMenuItem } from "@/lib/analysis";
 import { useTheme } from "@/lib/themeContext";
 import { RISK_COLOR } from "@/lib/riskColors";
-
-function stepSummaryLabel(label: string): string {
-  return label
-    .replace(/^Choose your /i, "")
-    .replace(/^Add /i, "")
-    .replace(/^Pick /i, "");
-}
 
 type Props = {
   steps: BuilderStep[];
@@ -23,84 +16,60 @@ type Props = {
   restaurantName?: string;
 };
 
-export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOrder, onOpenOrder, onBrowse, restaurantName }: Props) {
+export function GuidedOrderBuilder({
+  steps, sections, orderedItemIds, onToggleOrder, onOpenOrder, onBrowse, restaurantName,
+}: Props) {
   const { isDark } = useTheme();
-  const [currentStep, setCurrentStep]         = useState(0);
-  const [done, setDone]                       = useState(false);
-  const [copied, setCopied]                   = useState(false);
-  const [confirmedItemId, setConfirmedItemId] = useState<string | null>(null);
-  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => () => { if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current); }, []);
-
-  const step = steps[currentStep];
-
-  function getStepItems(s: BuilderStep): AnalyzedMenuItem[] {
+  function getStepSections(s: BuilderStep): { name: string; items: AnalyzedMenuItem[] }[] {
     if (s.categories) {
-      return sections.filter((sec) => s.categories!.includes(sec.sectionName)).flatMap((sec) => sec.items);
+      return sections
+        .filter((sec) => s.categories!.includes(sec.sectionName))
+        .map((sec) => ({ name: sec.sectionName, items: sec.items }))
+        .filter((g) => g.items.length > 0);
     }
-    return sections.find((sec) => sec.sectionName === s.category)?.items ?? [];
+    const sec = sections.find((sec) => sec.sectionName === s.category);
+    return sec ? [{ name: sec.sectionName, items: sec.items }] : [];
   }
 
-  const stepItems = step ? getStepItems(step) : [];
-  const RISK_RANK: Record<string, number> = { "likely-safe": 0, ask: 1, unknown: 2, avoid: 3 };
-  const sortedItems = [...stepItems].sort((a, b) => (RISK_RANK[a.risk] ?? 2) - (RISK_RANK[b.risk] ?? 2));
+  // Build menu board structure with global sequential numbers
+  // Items stay in their original data order (which matches the real drive-thru board).
+  // Risk is communicated via number color, not position.
+  let globalNum = 1;
+  const menuBoard = steps.map((step) => {
+    const subs = getStepSections(step);
+    return {
+      step,
+      subsections: subs.map(({ name, items }) => ({
+        name,
+        numbered: items.map((item) => ({ item, num: globalNum++ })),
+      })),
+    };
+  });
 
-  const isSingle     = step?.maxSelect === 1;
-  const allAvoid     = sortedItems.length > 0 && sortedItems.every((i) => i.risk === "avoid");
-  const picksForStep = stepItems.filter((i) => orderedItemIds.has(i.id));
+  const totalOrdered = orderedItemIds.size;
 
-  const priorPickedItems = steps.slice(0, currentStep).flatMap((s) =>
-    getStepItems(s).filter((i) => orderedItemIds.has(i.id))
-  );
-
-  const totalBuilderItems = steps.reduce((n, s) => {
-    return n + getStepItems(s).filter((i) => orderedItemIds.has(i.id)).length;
-  }, 0);
-
-  function selectItem(item: AnalyzedMenuItem) {
+  function selectItem(step: BuilderStep, allStepItems: AnalyzedMenuItem[], item: AnalyzedMenuItem) {
     if (item.risk === "avoid") return;
-    if (isSingle) {
-      for (const stepItem of stepItems) {
-        if (stepItem.id !== item.id && orderedItemIds.has(stepItem.id)) onToggleOrder(stepItem.id);
+    if (step.maxSelect === 1) {
+      for (const si of allStepItems) {
+        if (si.id !== item.id && orderedItemIds.has(si.id)) onToggleOrder(si.id);
       }
       if (!orderedItemIds.has(item.id)) onToggleOrder(item.id);
-      setConfirmedItemId(item.id);
-      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-      advanceTimerRef.current = setTimeout(() => {
-        setConfirmedItemId(null);
-        if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
-        else setDone(true);
-      }, 300);
     } else {
       onToggleOrder(item.id);
     }
-  }
-
-  function advance() {
-    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
-    else setDone(true);
-  }
-
-  function goBack() {
-    if (done) { setDone(false); return; }
-    if (currentStep > 0) setCurrentStep((s) => s - 1);
-  }
-
-  function startOver() {
-    for (const id of Array.from(orderedItemIds)) onToggleOrder(id);
-    setCurrentStep(0);
-    setDone(false);
   }
 
   function copyOrder() {
     const lines: string[] = [];
     if (restaurantName) lines.push(`My order at ${restaurantName}`);
     lines.push("─".repeat(28));
-    for (const s of steps) {
-      const picked = getStepItems(s).filter((i) => orderedItemIds.has(i.id));
+    for (const { step, subsections } of menuBoard) {
+      const picked = subsections.flatMap((s) => s.numbered.map((n) => n.item)).filter((i) => orderedItemIds.has(i.id));
       if (!picked.length) continue;
-      lines.push(`${stepSummaryLabel(s.label)}: ${picked.map((i) => i.name).join(", ")}`);
+      lines.push(`${step.label}: ${picked.map((i) => i.name).join(", ")}`);
     }
     lines.push("─".repeat(28));
     lines.push("Generated by AllergEats");
@@ -110,384 +79,227 @@ export function GuidedOrderBuilder({ steps, sections, orderedItemIds, onToggleOr
     }).catch(() => {});
   }
 
-  const glass = {
+  const card: React.CSSProperties = {
     background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.82)",
     WebkitBackdropFilter: "blur(20px)", backdropFilter: "blur(20px)",
     border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
-    borderRadius: 20,
+    borderRadius: 16,
+    overflow: "hidden",
     boxShadow: isDark
       ? "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
       : "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
-  } as React.CSSProperties;
+  };
 
-  // ── Done / review state ───────────────────────────────────────────────────
-  if (done) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ ...glass, padding: "24px 20px", textAlign: "center" }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 999, margin: "0 auto 14px",
-            background: "rgba(22,163,74,0.12)",
-            border: "1.5px solid rgba(22,163,74,0.3)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", marginBottom: 4, letterSpacing: "-0.02em" }}>Order built!</div>
-          <div style={{ fontSize: 13, color: "var(--c-sub)" }}>
-            {totalBuilderItems} item{totalBuilderItems !== 1 ? "s" : ""} selected
-          </div>
-        </div>
+  const divider = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
 
-        {/* Summary */}
-        <div style={{ ...glass, overflow: "hidden" }}>
-          {steps.map((s, i) => {
-            const pickedItems = getStepItems(s).filter((item) => orderedItemIds.has(item.id));
-            if (!pickedItems.length) return null;
-            const isLast = i === steps.length - 1;
-            return (
-              <div key={i} style={{
-                padding: "14px 18px",
-                borderBottom: isLast ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+      {menuBoard.map(({ step, subsections }) => {
+        const isSingle = step.maxSelect === 1;
+        const allStepItems = subsections.flatMap((s) => s.numbered.map((n) => n.item));
+        const picked = allStepItems.filter((i) => orderedItemIds.has(i.id));
+        const allAvoid = allStepItems.length > 0 && allStepItems.every((i) => i.risk === "avoid");
+
+        return (
+          <div key={step.label}>
+
+            {/* ── Section header ── */}
+            <div style={{
+              display: "flex", alignItems: "baseline", justifyContent: "space-between",
+              padding: "0 2px 8px",
+            }}>
+              <div style={{
+                fontSize: 13, fontWeight: 900, textTransform: "uppercase",
+                letterSpacing: "0.09em", color: "var(--c-brand)",
+                display: "flex", alignItems: "center", gap: 7,
               }}>
-                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
-                  {stepSummaryLabel(s.label)}
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {pickedItems.map((item) => (
-                    <span key={item.id} style={{
-                      fontSize: 13, fontWeight: 700, color: "var(--c-text)",
-                      background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
-                      borderRadius: 999, padding: "5px 11px",
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
-                    }}>
-                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: RISK_COLOR[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
-                      {item.name}
-                    </span>
-                  ))}
-                </div>
+                {step.label}
+                {picked.length > 0 && (
+                  <span style={{
+                    width: 7, height: 7, borderRadius: "50%",
+                    background: "#16a34a", display: "inline-block", flexShrink: 0,
+                  }} />
+                )}
               </div>
-            );
-          })}
-        </div>
+              <span style={{
+                fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+                letterSpacing: "0.06em", color: "var(--c-sub)",
+              }}>
+                {isSingle
+                  ? "Choose 1"
+                  : step.maxSelect < 99
+                    ? `Choose up to ${step.maxSelect}`
+                    : "Choose any"}
+                {!step.required && " · Optional"}
+              </span>
+            </div>
 
-        <button onClick={onOpenOrder} style={{
-          width: "100%", padding: "15px 0", borderRadius: 16, border: "none",
-          background: "var(--c-brand)", color: "var(--c-brand-fg)",
-          fontSize: 16, fontWeight: 800, cursor: "pointer", minHeight: 54,
-          letterSpacing: "-0.01em",
-        }}>
-          View order →
-        </button>
+            {/* ── Items card ── */}
+            {allAvoid ? (
+              <div style={{
+                ...card,
+                padding: "14px 18px",
+                display: "flex", alignItems: "center", gap: 10,
+                background: isDark ? "rgba(220,38,38,0.07)" : "rgba(220,38,38,0.04)",
+                border: `1px solid rgba(220,38,38,${isDark ? "0.25" : "0.15"})`,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#dc2626" }}>All items contain your allergens</span>
+              </div>
+            ) : (
+              <div style={card}>
+                {subsections.map(({ name: subName, numbered }, subIdx) => {
+                  const isLastSub = subIdx === subsections.length - 1;
+                  return (
+                    <Fragment key={subIdx}>
+                      {/* Sub-header when step spans multiple sections */}
+                      {subsections.length > 1 && (
+                        <div style={{
+                          padding: "8px 18px 7px",
+                          fontSize: 10, fontWeight: 800, textTransform: "uppercase",
+                          letterSpacing: "0.08em", color: "var(--c-sub)",
+                          background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.025)",
+                          borderBottom: `1px solid ${divider}`,
+                        }}>
+                          {subName}
+                        </div>
+                      )}
 
-        <button onClick={copyOrder} style={{
-          width: "100%", padding: "13px 0", borderRadius: 14, minHeight: 48,
-          border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)"}`,
-          background: copied
-            ? isDark ? "rgba(22,163,74,0.12)" : "rgba(22,163,74,0.07)"
-            : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-          color: copied ? "#16a34a" : "var(--c-sub)",
-          fontSize: 14, fontWeight: 700, cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-          transition: "background 0.2s, color 0.2s",
-          WebkitTapHighlightColor: "transparent",
-        }}>
-          {copied ? (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Copied!
-            </>
-          ) : (
-            <>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Copy order
-            </>
-          )}
-        </button>
+                      {numbered.map(({ item, num }, idx) => {
+                        const isSelected = orderedItemIds.has(item.id);
+                        const isAvoid = item.risk === "avoid";
+                        const riskColor = RISK_COLOR[item.risk] ?? "#9ca3af";
+                        const isLast = isLastSub && idx === numbered.length - 1;
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={startOver} style={{ background: "none", border: "none", fontSize: 13, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0", fontWeight: 600 }}>
-            ← Start over
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => selectItem(step, allStepItems, item)}
+                            disabled={isAvoid}
+                            style={{
+                              display: "flex", alignItems: "stretch",
+                              width: "100%", textAlign: "left", padding: 0,
+                              background: isSelected
+                                ? isDark ? "rgba(31,189,204,0.09)" : "rgba(0,150,165,0.06)"
+                                : "transparent",
+                              border: "none",
+                              borderBottom: isLast ? "none" : `1px solid ${divider}`,
+                              cursor: isAvoid ? "not-allowed" : "pointer",
+                              opacity: isAvoid ? 0.35 : 1,
+                              transition: "background 0.15s",
+                              minHeight: 62,
+                              WebkitTapHighlightColor: "transparent",
+                            }}
+                          >
+                            {/* Number column */}
+                            <div style={{
+                              width: 54, flexShrink: 0,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              borderRight: `1px solid ${divider}`,
+                              background: isDark ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.03)",
+                            }}>
+                              <span style={{
+                                fontSize: 22, fontWeight: 900, lineHeight: 1,
+                                fontVariantNumeric: "tabular-nums",
+                                letterSpacing: "-0.03em",
+                                color: isAvoid ? "#9ca3af" : riskColor,
+                                textShadow: (!isAvoid && isDark) ? `0 0 14px ${riskColor}66` : "none",
+                              }}>
+                                {num}
+                              </span>
+                            </div>
+
+                            {/* Name + allergen warning */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, padding: "14px 14px 14px 16px" }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{
+                                  fontSize: 16, fontWeight: 800,
+                                  color: isAvoid ? "var(--c-sub)" : "var(--c-text)",
+                                  lineHeight: 1.25, letterSpacing: "-0.02em",
+                                  textDecoration: isAvoid ? "line-through" : "none",
+                                }}>
+                                  {item.name}
+                                </div>
+                                {item.userAllergenHits.length > 0 && (
+                                  <div style={{
+                                    display: "inline-flex", alignItems: "center", gap: 4,
+                                    fontSize: 11, color: "#dc2626", fontWeight: 700, marginTop: 5,
+                                    background: "rgba(220,38,38,0.08)", borderRadius: 6, padding: "2px 7px",
+                                  }}>
+                                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                    </svg>
+                                    {item.userAllergenHits.map((a) => a.replace(/-/g, " ")).join(", ")}
+                                  </div>
+                                )}
+                              </div>
+
+                              {!isAvoid && (
+                                <div style={{
+                                  width: 24, height: 24,
+                                  borderRadius: isSingle ? 999 : 7,
+                                  flexShrink: 0,
+                                  border: isSelected ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.16)"}`,
+                                  background: isSelected ? "var(--c-brand)" : "transparent",
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  transition: "all 0.15s",
+                                  boxShadow: isSelected ? "0 2px 8px rgba(31,189,204,0.4)" : "none",
+                                }}>
+                                  {isSelected && (
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                      <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </Fragment>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* ── Order actions ── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 4 }}>
+        {totalOrdered > 0 && (
+          <button onClick={onOpenOrder} style={{
+            width: "100%", padding: "15px 0", borderRadius: 16, border: "none",
+            background: "var(--c-brand)", color: "var(--c-brand-fg)",
+            fontSize: 16, fontWeight: 800, cursor: "pointer", minHeight: 54,
+            letterSpacing: "-0.01em",
+          }}>
+            View order ({totalOrdered}) →
           </button>
-          <button onClick={onBrowse} style={{ background: "none", border: "none", fontSize: 13, color: "var(--c-sub)", cursor: "pointer", padding: "8px 0", fontWeight: 600 }}>
+        )}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {totalOrdered > 0 ? (
+            <button onClick={copyOrder} style={{
+              background: "none", border: "none", fontSize: 13,
+              color: copied ? "#16a34a" : "var(--c-sub)",
+              cursor: "pointer", padding: "8px 0", fontWeight: 600,
+            }}>
+              {copied ? "✓ Copied!" : "Copy order"}
+            </button>
+          ) : <div />}
+          <button onClick={onBrowse} style={{
+            background: "none", border: "none", fontSize: 13, color: "var(--c-sub)",
+            cursor: "pointer", padding: "8px 0", fontWeight: 600,
+          }}>
             Browse full menu →
           </button>
         </div>
       </div>
-    );
-  }
-
-  // ── Step state ────────────────────────────────────────────────────────────
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-
-      {/* ── Dot progress bar ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "center", paddingTop: 2 }}>
-        {steps.map((_, i) => {
-          const isComplete = i < currentStep;
-          const isCurrent  = i === currentStep;
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => { if (isComplete) setCurrentStep(i); }}
-              aria-label={isComplete ? `Go back to step ${i + 1}` : undefined}
-              style={{
-                width: isCurrent ? 22 : 8,
-                height: 8, borderRadius: 999, border: "none", padding: 0,
-                background: isCurrent
-                  ? "var(--c-brand)"
-                  : isComplete
-                    ? isDark ? "rgba(31,189,204,0.5)" : "rgba(0,150,163,0.45)"
-                    : isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)",
-                cursor: isComplete ? "pointer" : "default",
-                transition: "width 0.2s ease, background 0.2s ease",
-                flexShrink: 0,
-                WebkitTapHighlightColor: "transparent",
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* ── Step header ── */}
-      <div style={{ ...glass, padding: "18px 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", color: "var(--c-brand)", textTransform: "uppercase" }}>
-            Step {currentStep + 1} of {steps.length}
-          </span>
-          {!step?.required && (
-            <span style={{
-              fontSize: 10, fontWeight: 700, color: "var(--c-sub)",
-              background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-              borderRadius: 999, padding: "2px 8px", letterSpacing: "0.04em", textTransform: "uppercase",
-            }}>
-              Optional
-            </span>
-          )}
-        </div>
-        <div style={{ fontSize: 22, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em", lineHeight: 1.15, marginBottom: 8 }}>
-          {step?.label}
-        </div>
-
-        {/* In your order — inline under step label */}
-        {priorPickedItems.length > 0 ? (
-          <div className="chip-row" style={{ display: "flex", gap: 5, marginBottom: 10 }}>
-            {priorPickedItems.map((item) => (
-              <span key={item.id} style={{
-                flexShrink: 0, fontSize: 11, fontWeight: 600,
-                padding: "3px 9px", borderRadius: 999,
-                background: isDark ? "rgba(31,189,204,0.1)" : "rgba(0,150,163,0.07)",
-                color: isDark ? "rgba(31,189,204,0.9)" : "rgba(0,120,130,0.9)",
-                display: "inline-flex", alignItems: "center", gap: 4,
-                border: `1px solid ${isDark ? "rgba(31,189,204,0.2)" : "rgba(0,150,163,0.15)"}`,
-              }}>
-                <span style={{ width: 5, height: 5, borderRadius: "50%", background: RISK_COLOR[item.risk] ?? "#9ca3af", flexShrink: 0 }} />
-                {item.name}
-              </span>
-            ))}
-          </div>
-        ) : null}
-
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 5,
-          fontSize: 12, fontWeight: 700, color: "var(--c-sub)",
-          background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
-          borderRadius: 999, padding: "4px 10px",
-        }}>
-          {isSingle
-            ? "Pick one"
-            : step?.maxSelect && step.maxSelect < 99
-              ? `Pick up to ${step.maxSelect}`
-              : "Pick as many as you like"}
-        </div>
-      </div>
-
-      {/* ── All-avoid banner ── */}
-      {allAvoid && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "14px 18px", borderRadius: 16,
-          background: isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)",
-          border: `1.5px solid rgba(220,38,38,${isDark ? "0.3" : "0.2"})`,
-        }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-            background: "rgba(220,38,38,0.12)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#dc2626", lineHeight: 1.3 }}>No safe options here</div>
-            <div style={{ fontSize: 12, color: isDark ? "rgba(220,38,38,0.7)" : "rgba(185,28,28,0.65)", marginTop: 2 }}>
-              All items contain your allergens — skip this step.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Item list ── */}
-      <div style={{ ...glass, overflow: "hidden" }}>
-        {sortedItems.length === 0 ? (
-          <div style={{ padding: "24px 18px", color: "var(--c-sub)", fontSize: 14, textAlign: "center" }}>
-            No items available
-          </div>
-        ) : sortedItems.map((item, idx) => {
-          const isSelected  = orderedItemIds.has(item.id);
-          const isConfirmed = confirmedItemId === item.id;
-          const isAvoid     = item.risk === "avoid";
-          const riskColor   = RISK_COLOR[item.risk] ?? "#9ca3af";
-          const isLast      = idx === sortedItems.length - 1;
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => selectItem(item)}
-              disabled={isAvoid}
-              style={{
-                display: "flex", alignItems: "stretch",
-                width: "100%", textAlign: "left", padding: 0,
-                background: isConfirmed
-                  ? isDark ? "rgba(22,163,74,0.1)" : "rgba(22,163,74,0.06)"
-                  : isSelected
-                    ? isDark ? "rgba(31,189,204,0.08)" : "rgba(31,189,204,0.05)"
-                    : "transparent",
-                border: "none",
-                borderBottom: isLast ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
-                cursor: isAvoid ? "not-allowed" : "pointer",
-                opacity: isAvoid ? 0.35 : 1,
-                transition: "background 0.15s",
-                minHeight: 58,
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              {/* Risk color strip */}
-              <div style={{ width: 3, alignSelf: "stretch", background: riskColor, flexShrink: 0 }} />
-
-              {/* Content */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, padding: "13px 16px" }}>
-                {/* Name + allergen hits */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontSize: 15, fontWeight: 700,
-                    color: isAvoid ? "var(--c-sub)" : "var(--c-text)",
-                    lineHeight: 1.3, letterSpacing: "-0.01em",
-                    textDecoration: isAvoid ? "line-through" : "none",
-                  }}>
-                    {item.name}
-                  </div>
-                  {item.userAllergenHits.length > 0 && (
-                    <div style={{
-                      display: "inline-flex", alignItems: "center", gap: 4,
-                      fontSize: 11, color: "#dc2626", fontWeight: 700, marginTop: 4,
-                      background: "rgba(220,38,38,0.08)", borderRadius: 6, padding: "2px 7px",
-                    }}>
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                      </svg>
-                      {item.userAllergenHits.map((a) => a.replace(/-/g, " ")).join(", ")}
-                    </div>
-                  )}
-                </div>
-
-                {/* Check/radio indicator */}
-                {!isAvoid && (
-                  <div style={{
-                    width: 22, height: 22, borderRadius: isSingle ? 999 : 7, flexShrink: 0,
-                    border: isSelected || isConfirmed ? "none" : `2px solid ${isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.15)"}`,
-                    background: isConfirmed ? "#16a34a" : isSelected ? "var(--c-brand)" : "transparent",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "all 0.15s",
-                    boxShadow: isConfirmed
-                      ? "0 2px 8px rgba(22,163,74,0.4)"
-                      : isSelected ? "0 2px 8px rgba(31,189,204,0.4)" : "none",
-                  }}>
-                    {(isSelected || isConfirmed) && (
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    )}
-                  </div>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Navigation ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {currentStep > 0 ? (
-          <button onClick={goBack} style={{
-            padding: "13px 18px", borderRadius: 14,
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
-            background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-            fontSize: 14, fontWeight: 700, color: "var(--c-sub)", cursor: "pointer", minHeight: 48,
-            backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-            WebkitTapHighlightColor: "transparent",
-          }}>
-            ← Back
-          </button>
-        ) : <div />}
-
-        {isSingle ? (
-          (allAvoid || !step?.required) && (
-            <button onClick={advance} style={{
-              flex: 1, padding: "13px 0", borderRadius: 14, minHeight: 48,
-              border: allAvoid
-                ? "1.5px solid rgba(220,38,38,0.25)"
-                : `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
-              background: allAvoid
-                ? isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)"
-                : isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-              fontSize: 14, fontWeight: 700,
-              color: allAvoid ? "#dc2626" : "var(--c-sub)",
-              cursor: "pointer",
-              WebkitTapHighlightColor: "transparent",
-            }}>
-              {allAvoid ? "Skip this step →" : "Skip →"}
-            </button>
-          )
-        ) : (
-          <button
-            onClick={advance}
-            disabled={step?.required && !allAvoid && picksForStep.length === 0}
-            style={{
-              flex: 1, padding: "13px 0", borderRadius: 14, minHeight: 48,
-              border: allAvoid ? "1.5px solid rgba(220,38,38,0.25)" : "none",
-              background: allAvoid
-                ? isDark ? "rgba(220,38,38,0.1)" : "rgba(220,38,38,0.06)"
-                : picksForStep.length > 0
-                  ? "var(--c-brand)"
-                  : isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
-              color: allAvoid
-                ? "#dc2626"
-                : picksForStep.length > 0 ? "var(--c-brand-fg)" : "var(--c-sub)",
-              fontSize: 15, fontWeight: 800,
-              cursor: allAvoid || picksForStep.length > 0 ? "pointer" : "default",
-              transition: "all 0.15s",
-              boxShadow: picksForStep.length > 0 && !allAvoid ? "0 4px 16px rgba(31,189,204,0.35)" : "none",
-              letterSpacing: "-0.01em",
-              WebkitTapHighlightColor: "transparent",
-            }}
-          >
-            {allAvoid
-              ? "Skip this step →"
-              : picksForStep.length > 0
-                ? `Continue with ${picksForStep.length} item${picksForStep.length !== 1 ? "s" : ""} →`
-                : step?.required ? "Select at least one" : "Skip this step →"}
-          </button>
-        )}
-      </div>
-
     </div>
   );
 }
