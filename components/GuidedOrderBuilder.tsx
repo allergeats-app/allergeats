@@ -21,6 +21,12 @@ export function GuidedOrderBuilder({
 }: Props) {
   const { isDark } = useTheme();
   const [copied, setCopied] = useState(false);
+  const [mealTime, setMealTime] = useState<"lunch" | "breakfast">("lunch");
+
+  const hasMealTimeSteps = steps.some((s) => s.mealTime);
+  const activeSteps = hasMealTimeSteps
+    ? steps.filter((s) => !s.mealTime || s.mealTime === mealTime)
+    : steps;
 
   function getStepSections(s: BuilderStep): { name: string; items: AnalyzedMenuItem[] }[] {
     if (s.categories) {
@@ -33,11 +39,11 @@ export function GuidedOrderBuilder({
     return sec ? [{ name: sec.sectionName, items: sec.items }] : [];
   }
 
-  // Build menu board structure with global sequential numbers
-  // Items stay in their original data order (which matches the real drive-thru board).
+  // Build menu board structure with global sequential numbers.
+  // Items stay in their original data order (matching the real drive-thru board).
   // Risk is communicated via number color, not position.
   let globalNum = 1;
-  const menuBoard = steps.map((step) => {
+  const menuBoard = activeSteps.map((step) => {
     const subs = getStepSections(step);
     return {
       step,
@@ -94,6 +100,38 @@ export function GuidedOrderBuilder({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+      {/* ── Meal time toggle ── */}
+      {hasMealTimeSteps && (
+        <div style={{
+          display: "flex", gap: 6, padding: "3px",
+          background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+          borderRadius: 14,
+          alignSelf: "flex-start",
+        }}>
+          {(["lunch", "breakfast"] as const).map((t) => {
+            const active = mealTime === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setMealTime(t)}
+                style={{
+                  padding: "7px 18px", borderRadius: 11, border: "none", cursor: "pointer",
+                  fontSize: 13, fontWeight: 700,
+                  background: active ? "var(--c-brand)" : "transparent",
+                  color: active ? "var(--c-brand-fg)" : "var(--c-sub)",
+                  transition: "background 0.15s, color 0.15s",
+                  letterSpacing: "-0.01em",
+                  boxShadow: active ? "0 1px 6px rgba(0,0,0,0.18)" : "none",
+                }}
+              >
+                {t === "lunch" ? "Lunch & Dinner" : "Breakfast"}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {menuBoard.map(({ step, subsections }) => {
         const isSingle = step.maxSelect === 1;

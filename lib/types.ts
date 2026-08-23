@@ -162,6 +162,12 @@ export type BuilderStep = {
    * Used for fast food entrée steps where items map to meal numbers.
    */
   showAsCombo?: boolean;
+  /**
+   * When set, this step only appears in the specified meal-time mode.
+   * GuidedOrderBuilder shows a Breakfast / Lunch & Dinner toggle when any step
+   * has this field set. Steps without mealTime always show.
+   */
+  mealTime?: "breakfast" | "lunch";
 };
 
 export type BuilderConfig = {

@@ -36,9 +36,11 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     facilityAllergens: ["wheat", "dairy", "egg", "soy", "sesame"],
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Combo Meal","Breakfast Combo"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combo Meal" },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
-        { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
+        { label: "Combo Meal",      category: "Combo Meal",     mealTime: "lunch",     required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Breakfast Combo", category: "Breakfast Combo", mealTime: "breakfast", required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Happy Meal",      category: "Happy Meal",                            required: false, maxSelect: 1 },
+        { label: "Side",            category: "Side",                                  required: false, maxSelect: 1 },
+        { label: "Drink",           category: "Drink",                                 required: false, maxSelect: 1 },
       ],
     },
 menuItems: [
@@ -123,17 +125,16 @@ menuItems: [
       { id: "mcd-spicy-deluxe-mccrispy", name: "Spicy Deluxe McCrispy", category: "Entrée", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
       { id: "mcd-spicy-mccrispy", name: "Spicy McCrispy", category: "Entrée", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
       { id: "mcd-spicy-snack-wrap", name: "Spicy Snack Wrap", category: "Entrée", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
-      // ── Side / Happy Meal ───────────────────────────────────
-      { id: "mcd-4-piece-chicken-mcnuggets-happy-meal", name: "4 Piece Chicken McNuggets Happy Meal", category: "Side", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
-      { id: "mcd-6-piece-chicken-mcnuggets-happy-meal", name: "6 Piece Chicken McNuggets Happy Meal", category: "Side", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat"] },
-      { id: "mcd-apple-slices", name: "Apple Slices", category: "Side", sourceType: "official", allergens: [] },
-      { id: "mcd-bacon-ranch-salad", name: "Bacon Ranch Salad", category: "Side", sourceType: "official", allergens: ["dairy"] },
-      { id: "mcd-fruit-n-yogurt-parfait", name: "Fruit 'n Yogurt Parfait", category: "Side", sourceType: "official", allergens: ["dairy"] },
-      { id: "mcd-hamburger-happy-meal", name: "Hamburger Happy Meal", category: "Side", sourceType: "official", allergens: ["dairy", "soy", "wheat", "sesame"] },
-      { id: "mcd-kids-fries", name: "Kids Fries", category: "Side", sourceType: "official", allergens: ["dairy", "wheat"] },
-      { id: "mcd-side-salad", name: "Side Salad", category: "Side", sourceType: "official", allergens: [] },
-      { id: "mcd-southwest-salad", name: "Southwest Salad", category: "Side", sourceType: "official", allergens: ["dairy"] },
+      // ── Happy Meal ──────────────────────────────────────────
+      { id: "mcd-hamburger-happy-meal",             name: "Hamburger Happy Meal",              category: "Happy Meal", sourceType: "official", allergens: ["dairy","soy","wheat","sesame"] },
+      { id: "mcd-4-piece-chicken-mcnuggets-happy-meal", name: "4 PC McNuggets Happy Meal",    category: "Happy Meal", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      { id: "mcd-6-piece-chicken-mcnuggets-happy-meal", name: "6 PC McNuggets Happy Meal",    category: "Happy Meal", sourceType: "official", allergens: ["dairy","egg","soy","wheat"] },
+      // ── Side ────────────────────────────────────────────────
       { id: "mcd-world-famous-fries", name: "World Famous Fries", category: "Side", sourceType: "official", allergens: ["dairy", "wheat"] },
+      { id: "mcd-apple-slices",       name: "Apple Slices",       category: "Side", sourceType: "official", allergens: [] },
+      { id: "mcd-side-salad",         name: "Side Salad",         category: "Side", sourceType: "official", allergens: [] },
+      { id: "mcd-bacon-ranch-salad",  name: "Bacon Ranch Salad",  category: "Side", sourceType: "official", allergens: ["dairy"] },
+      { id: "mcd-fruit-n-yogurt-parfait", name: "Fruit 'n Yogurt Parfait", category: "Side", sourceType: "official", allergens: ["dairy"] },
       // ── Breakfast ───────────────────────────────────────────
       { id: "mcd-bacon-egg-cheese-bagel", name: "Bacon, Egg & Cheese Bagel", category: "Breakfast", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat", "sesame"] },
       { id: "mcd-bacon-egg-cheese-bagel-egg-whites", name: "Bacon, Egg & Cheese Bagel (Egg Whites)", category: "Breakfast", sourceType: "official", allergens: ["dairy", "egg", "soy", "wheat", "sesame"] },
