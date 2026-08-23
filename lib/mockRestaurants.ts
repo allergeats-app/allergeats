@@ -335,11 +335,12 @@ menuItems: [
     facilityAllergens: ["dairy","egg","soy","wheat","sesame","tree-nut","peanut"],
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Lunch Meal","Breakfast Meal"], required: true,  maxSelect: 1, showAsCombo: true, category: "Lunch Meal" },
-        { label: "Pick a side",        category: "Sides",    required: false, maxSelect: 1 },
-        { label: "What to drink?",     category: "Beverages", required: false, maxSelect: 1 },
-        { label: "Add a sauce",        category: "Sauce",    required: false, maxSelect: 2 },
-        { label: "Add a treat",        category: "Desserts", required: false, maxSelect: 1 },
+        { label: "Lunch & Dinner",   category: "Lunch Meal",     mealTime: "lunch",     required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Breakfast",        category: "Breakfast Meal", mealTime: "breakfast", required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Pick a side",      category: "Sides",          required: false, maxSelect: 1 },
+        { label: "What to drink?",   category: "Beverages",      required: false, maxSelect: 1 },
+        { label: "Add a sauce",      category: "Sauce",          required: false, maxSelect: 2 },
+        { label: "Add a treat",      category: "Desserts",       required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
@@ -815,7 +816,8 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "Choose your main",  categories: ["Tacos","Burritos","Specialties","Quesadillas","Nachos","Bowls"], required: true,  maxSelect: 3, category: "Tacos" },
+        { label: "Breakfast",         category: "Breakfast",                                                           mealTime: "breakfast", required: true, maxSelect: 2 },
+        { label: "Choose your main",  categories: ["Tacos","Burritos","Specialties","Quesadillas","Nachos","Bowls"], mealTime: "lunch",     required: true, maxSelect: 3, category: "Tacos" },
         { label: "Add a side",        category: "Sides",    required: false, maxSelect: 2 },
         { label: "Add a drink",       category: "Drink",    required: false, maxSelect: 1 },
         { label: "Add sauce",         category: "Sauce",    required: false, maxSelect: 99 },
@@ -965,9 +967,11 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Lunch Meal","Breakfast Meal"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Lunch Meal" },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
-        { label: "Add a shake",        category: "Drink",  required: false, maxSelect: 1  },
+        { label: "Entrée",      category: "Entrée",    mealTime: "lunch",     required: true,  maxSelect: 1 },
+        { label: "Breakfast",   category: "Breakfast", mealTime: "breakfast", required: true,  maxSelect: 1 },
+        { label: "Kids Meal",   category: "Kids Meal",                        required: false, maxSelect: 1 },
+        { label: "Pick a side", category: "Side",                             required: false, maxSelect: 1 },
+        { label: "Add a drink", category: "Drink",                            required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
@@ -989,9 +993,9 @@ menuItems: [
       { id: "bk-egg-normous-burrito",  name: "Egg-Normous Burrito",                        category: "Breakfast",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "bk-breakfast-burrito-jr", name: "Breakfast Burrito Jr.",                      category: "Breakfast",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       // ── Breakfast — Sides ─────────────────────────────────────────────────
-      { id: "bk-french-toast-3",       name: "French Toast Sticks (3 PC)",                 category: "Breakfast",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "bk-french-toast-5",       name: "French Toast Sticks (5 PC)",                 category: "Breakfast",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
-      { id: "bk-hash-browns",          name: "Hash Browns",                                category: "Breakfast",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "bk-french-toast-3",       name: "French Toast Sticks (3 PC)",                 category: "Breakfast",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "bk-french-toast-5",       name: "French Toast Sticks (5 PC)",                 category: "Breakfast",      sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "bk-hash-browns",          name: "Hash Browns",                                category: "Breakfast",      sourceType: "official", allergens: ["wheat"] },
       // ── Whopper Family ────────────────────────────────────────────────────
       { id: "bk-whopper",              name: "Whopper",                                    category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","sesame","egg"] },
       { id: "bk-whopper-cheese",       name: "Whopper with Cheese",                        category: "Entrée",         sourceType: "official", allergens: ["wheat","soy","dairy","sesame","egg"] },
@@ -1132,15 +1136,16 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Lunch Meal","Breakfast Meal"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Lunch Meal" },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
-        { label: "Add a Frosty",       category: "Drink",  required: false, maxSelect: 1  },
+        { label: "Entrée",      category: "Entrée",    mealTime: "lunch",     required: true,  maxSelect: 1 },
+        { label: "Breakfast",   category: "Breakfast", mealTime: "breakfast", required: true,  maxSelect: 1 },
+        { label: "Pick a side", category: "Side",                             required: false, maxSelect: 1 },
+        { label: "Add a Frosty",category: "Drink",                            required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
       // ── Breakfast — Croissants ────────────────────────────────────────────
-      { id: "wen-bfast-baconator",     name: "Breakfast Baconator",                       category: "Breakfast",      sourceType: "official", allergens: ["dairy","egg","wheat","soy","sesame"] },
-      { id: "wen-maplebaconcroiss",    name: "Maple Bacon Chicken Croissant",             category: "Breakfast",      sourceType: "official", allergens: ["dairy","wheat"] },
+      { id: "wen-bfast-baconator",     name: "Breakfast Baconator",                       category: "Breakfast",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "wen-maplebaconcroiss",    name: "Maple Bacon Chicken Croissant",             category: "Breakfast",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
       { id: "wen-bacwisscroiss",       name: "Bacon, Egg & Swiss Croissant",              category: "Breakfast",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
       { id: "wen-sauswisscroiss",      name: "Sausage, Egg & Swiss Croissant",            category: "Breakfast",      sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
       // ── Breakfast — Biscuits ──────────────────────────────────────────────
@@ -1581,7 +1586,7 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Combos","Meal","Sandwiches","Tenders"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
+        { label: "What's your meal?",  categories: ["Sandwiches","Tenders"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Sandwiches" },
         { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
       ],
     },
@@ -2993,9 +2998,10 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Combos","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
-        { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
+        { label: "What's your meal?", categories: ["Burgers","Chicken","Hot Dogs"], mealTime: "lunch",     required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Breakfast",         category: "Breakfast",                        mealTime: "breakfast", required: true,  maxSelect: 1 },
+        { label: "Pick a side",       category: "Side",   required: false, maxSelect: 1  },
+        { label: "Pick a drink",      category: "Drink",  required: false, maxSelect: 1  },
       ],
     },
     menuItems: [
@@ -3157,9 +3163,10 @@ menuItems: [
     dataVerifiedDate: "2026-08-01",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  category: "Entrée", required: true,  maxSelect: 1,  showAsCombo: true },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
-        { label: "Add a shake",        category: "Drink",  required: false, maxSelect: 1  },
+        { label: "What's your meal?",  category: "Entrée",    mealTime: "lunch",     required: true,  maxSelect: 1, showAsCombo: true },
+        { label: "Breakfast",          category: "Breakfast", mealTime: "breakfast", required: true,  maxSelect: 1 },
+        { label: "Pick a side",        category: "Side",                             required: false, maxSelect: 1 },
+        { label: "Add a shake",        category: "Drink",                            required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
@@ -3173,6 +3180,19 @@ menuItems: [
       { id: "arbs-loaded-fries",   name: "Loaded Curly Fries",               category: "Side",      sourceType: "official", allergens: ["wheat","dairy","soy","egg"] },
       { id: "arbs-mozz-sticks",    name: "Mozzarella Sticks",                category: "Side",      sourceType: "official", allergens: ["wheat","dairy","egg","soy"] },
       { id: "arbs-jamocha-shake",  name: "Jamocha Shake",                    category: "Drink",   sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      // ── Breakfast ─────────────────────────────────────────────────────────
+      { id: "arbs-bfast-bac-biscuit",  name: "Bacon, Egg & Cheese Biscuit",      category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-sau-biscuit",  name: "Sausage, Egg & Cheese Biscuit",    category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-ham-biscuit",  name: "Ham, Egg & Cheese Biscuit",        category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-sau-gravy",    name: "Sausage Gravy Biscuit",            category: "Breakfast", sourceType: "official", allergens: ["dairy","wheat","soy"] },
+      { id: "arbs-bfast-bac-croiss",   name: "Bacon, Egg & Cheese Croissant",    category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-sau-croiss",   name: "Sausage, Egg & Cheese Croissant",  category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-ham-croiss",   name: "Ham, Egg & Cheese Croissant",      category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-bac-sourdough",name: "Bacon, Egg & Cheese Sourdough",    category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-sau-sourdough",name: "Sausage, Egg & Cheese Sourdough",  category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-ham-sourdough",name: "Ham, Egg & Cheese Sourdough",      category: "Breakfast", sourceType: "official", allergens: ["dairy","egg","wheat","soy"] },
+      { id: "arbs-bfast-french-toast", name: "French Toast Sticks (5 PC)",       category: "Breakfast", sourceType: "official", allergens: ["wheat","soy"] },
+      { id: "arbs-bfast-potato-cakes", name: "Potato Cakes",                     category: "Breakfast", sourceType: "official", allergens: [] },
     ],
   },
 
@@ -3188,8 +3208,9 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Combos","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
+        { label: "What's your meal?",  categories: ["Burgers","Chicken"], mealTime: "lunch",     required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Breakfast",          category: "Breakfast",             mealTime: "breakfast", required: true,  maxSelect: 1 },
+        { label: "Pick a side",        category: "Side",                                         required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
@@ -3798,9 +3819,10 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Combos","Breakfast"], required: true,  maxSelect: 1,  showAsCombo: true, category: "Combos" },
-        { label: "Pick a side",        category: "Side",   required: false, maxSelect: 1  },
-        { label: "Pick a drink",       category: "Drink",  required: false, maxSelect: 1  },
+        { label: "What's your meal?",  categories: ["Burgers","Chicken","Tacos"], mealTime: "lunch",     required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Breakfast",          category: "Breakfast",                     mealTime: "breakfast", required: true,  maxSelect: 1 },
+        { label: "Pick a side",        category: "Side",                                                 required: false, maxSelect: 1 },
+        { label: "Pick a drink",       category: "Drink",                                                required: false, maxSelect: 1 },
       ],
     },
     menuItems: [
@@ -4345,7 +4367,8 @@ menuItems: [
     dataVerifiedDate: "2025-02-01",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Sandwiches","Chicken","Tenders","Breakfast"], required: true,  maxSelect: 1, showAsCombo: true, category: "Sandwiches" },
+        { label: "Sandwiches & Chicken", categories: ["Sandwiches","Chicken","Tenders"], mealTime: "lunch",     required: true,  maxSelect: 1, category: "Sandwiches" },
+        { label: "Breakfast",          category: "Breakfast",                          mealTime: "breakfast", required: true,  maxSelect: 1 },
         { label: "Pick a side",        category: "Sides",      required: false, maxSelect: 1 },
         { label: "Add a biscuit",      category: "Biscuits",   required: false, maxSelect: 1 },
       ],
@@ -4394,7 +4417,8 @@ menuItems: [
     sourceType: "official",
     builderConfig: {
       steps: [
-        { label: "What's your meal?",  categories: ["Burgers","Chicken","Breakfast"], required: true,  maxSelect: 1, showAsCombo: true, category: "Burgers" },
+        { label: "What's your meal?",  categories: ["Burgers","Chicken"], mealTime: "lunch",     required: true,  maxSelect: 1, category: "Burgers" },
+        { label: "Breakfast",          category: "Breakfast",             mealTime: "breakfast", required: true,  maxSelect: 1 },
         { label: "Pick a side",        category: "Sides",    required: false, maxSelect: 1 },
         { label: "Add a shake",        category: "Shakes",   required: false, maxSelect: 1 },
       ],
