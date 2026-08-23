@@ -1327,6 +1327,16 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                 if (isDrinkSection(cat)) drinkItems.push(item);
                 else foodByRisk[item.risk].push(item);
               }
+              // Global numbers for risk-grouped view
+              let _riskNum = 1;
+              const riskGroupStartNums = new Map<string, number>();
+              for (const risk of RISK_ORDER) {
+                if (foodByRisk[risk].length) {
+                  riskGroupStartNums.set(risk, _riskNum);
+                  _riskNum += foodByRisk[risk].length;
+                }
+              }
+
               return (
                 <>
                   <div style={{ display: "flex", flexDirection: "column", gap: 14, paddingBottom: 8 }}>
@@ -1350,7 +1360,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                               <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{items.length} item{items.length === 1 ? "" : "s"}</div>
                             </div>
                           </div>
-                          {renderItemGroup(items)}
+                          {renderItemGroup(items, riskGroupStartNums.get(risk))}
                         </div>
                       );
                     })}

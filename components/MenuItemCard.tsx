@@ -149,11 +149,14 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
           {/* Drive-thru board number */}
           {itemNumber !== undefined && (
             <div style={{
-              width: 28, flexShrink: 0, textAlign: "right",
-              fontSize: 14, fontWeight: 900,
+              width: 30, flexShrink: 0, textAlign: "center",
+              fontSize: 13, fontWeight: 900,
               fontVariantNumeric: "tabular-nums",
-              color: isDark ? "rgba(31,189,204,0.65)" : "rgba(0,118,132,0.6)",
+              color: isDark ? "#1fbdcc" : "#0096a5",
               letterSpacing: "-0.02em",
+              background: isDark ? "rgba(31,189,204,0.1)" : "rgba(0,150,165,0.08)",
+              borderRadius: 6,
+              padding: "3px 0",
             }}>
               {itemNumber}
             </div>
