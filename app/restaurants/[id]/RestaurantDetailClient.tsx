@@ -673,7 +673,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
       : "0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)",
   };
 
-  function renderItemGroup(items: AnalyzedMenuItem[]) {
+  function renderItemGroup(items: AnalyzedMenuItem[], startNum?: number) {
     const divider = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
     return (
       <div style={itemListCard}>
@@ -686,6 +686,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               inOrder={orderedItemIds.has(item.id)}
               onToggleOrder={() => toggleOrderItem(item.id)}
               seamless
+              itemNumber={startNum !== undefined ? startNum + idx : undefined}
             />
           </div>
         ))}
@@ -1196,6 +1197,18 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
               const drinkSections     = vm.sections.filter((s) => isDrinkSection(s.sectionName));
               const componentItems    = componentSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
               const drinkItems        = drinkSections.flatMap((s) => bySectionFiltered.get(s.sectionName) ?? []);
+
+              // Global item numbers across all visible food sections (drive-thru board style)
+              const foodSectionStartNums = new Map<string, number>();
+              let _num = 1;
+              for (const s of foodSections) {
+                const _items = bySectionFiltered.get(s.sectionName);
+                if (_items?.length && (categoryFilter === "all" || s.sectionName === categoryFilter)) {
+                  foodSectionStartNums.set(s.sectionName, _num);
+                  _num += _items.length;
+                }
+              }
+
               return (
                 <>
                   {/* ── Food sections ── */}
@@ -1212,7 +1225,7 @@ export function RestaurantDetailClient({ params }: { params: Promise<{ id: strin
                               <span style={{ fontSize: 11, fontWeight: 700, color: isDark ? "#4ade80" : "#15803d" }}>· {section.safeCount} safe</span>
                             )}
                           </div>
-                          {renderItemGroup(items)}
+                          {renderItemGroup(items, foodSectionStartNums.get(section.sectionName))}
                         </div>
                       );
                     })}

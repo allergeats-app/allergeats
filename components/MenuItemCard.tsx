@@ -57,9 +57,10 @@ type Props = {
   inOrder?: boolean;
   onToggleOrder?: () => void;
   seamless?: boolean;
+  itemNumber?: number;
 };
 
-export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onToggleOrder, seamless }: Props) {
+export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onToggleOrder, seamless, itemNumber }: Props) {
   const { isDark } = useTheme();
   const canOrder = item.risk === "likely-safe" || item.risk === "ask";
   const [open, setOpen]                   = useState(false);
@@ -144,6 +145,19 @@ export function MenuItemCard({ item, restaurantId, restaurantName, inOrder, onTo
 
         {/* ── Main row ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "13px 12px 13px 12px" }}>
+
+          {/* Drive-thru board number */}
+          {itemNumber !== undefined && (
+            <div style={{
+              width: 28, flexShrink: 0, textAlign: "right",
+              fontSize: 14, fontWeight: 900,
+              fontVariantNumeric: "tabular-nums",
+              color: isDark ? "rgba(31,189,204,0.65)" : "rgba(0,118,132,0.6)",
+              letterSpacing: "-0.02em",
+            }}>
+              {itemNumber}
+            </div>
+          )}
 
           {/* Name + allergen chips — tappable expand area */}
           <button
