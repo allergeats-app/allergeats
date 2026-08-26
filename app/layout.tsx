@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { AppFooter } from "@/components/AppFooter";
+import { DisclaimerGate } from "@/components/DisclaimerGate";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -247,6 +248,7 @@ export default function RootLayout({
             <FavoritesProvider>
               <ErrorBoundary>
                 <OfflineBanner />
+                <DisclaimerGate />
                 {children}
                 <AppFooter />
               </ErrorBoundary>

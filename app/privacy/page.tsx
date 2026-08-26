@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "How AllergEats collects, uses, and protects your personal information.",
 };
 
-const EFFECTIVE_DATE = "May 12, 2026";
+const EFFECTIVE_DATE = "August 26, 2026";
 
 export default function PrivacyPage() {
   return (

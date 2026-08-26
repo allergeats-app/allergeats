@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Terms and conditions for using the AllergEats service.",
 };
 
-const EFFECTIVE_DATE = "April 7, 2026";
+const EFFECTIVE_DATE = "August 26, 2026";
 
 export default function TermsPage() {
   return (
@@ -50,8 +50,9 @@ export default function TermsPage() {
           <strong>AllergEats is not a medical service.</strong> The Service does not provide medical advice, diagnosis, or treatment recommendations. The allergen information displayed:
           <ul style={{ paddingLeft: 20, lineHeight: 2, marginTop: 8 }}>
             <li>May be incomplete, inaccurate, or out of date</li>
-            <li>Does not account for cross-contamination risks</li>
-            <li>Does not account for ingredient substitutions or regional variations</li>
+            <li>May reflect a national chain&apos;s standard menu rather than a specific location&apos;s current offerings</li>
+            <li>Does not account for cross-contamination risks specific to each kitchen</li>
+            <li>Does not account for ingredient substitutions, seasonal changes, or regional variations</li>
             <li>Should not be used as the sole basis for any dining decision</li>
           </ul>
           Always consult your physician or allergist for medical guidance. Always verify allergen information directly with restaurant staff before ordering.
