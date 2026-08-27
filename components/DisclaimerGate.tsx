@@ -1,35 +1,93 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { useAuth } from "@/lib/authContext";
+import { getSupabaseClient } from "@/lib/supabaseClient";
+import { TERMS_VERSION, SAFETY_NOTICE_VERSION, SAFETY_LS_KEY } from "@/lib/legalVersions";
 
-const STORAGE_KEY = "allegeats_safety_v1";
+type GateState = "loading" | "hidden" | "visible";
 
 export function DisclaimerGate() {
-  const [visible, setVisible] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const [state, setState] = useState<GateState>("loading");
+  const supabaseChecked = useRef(false);
 
+  // Phase 1 — check localStorage (synchronous, no flash)
   useEffect(() => {
     try {
-      if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
-    } catch {
-      // storage blocked (private browsing, etc.) — don't show blocker
-    }
+      if (localStorage.getItem(SAFETY_LS_KEY)) {
+        setState("hidden");
+        return;
+      }
+    } catch { /* storage blocked */ }
+
+    // localStorage doesn't have it — wait for auth to resolve before deciding
+    if (!authLoading) resolveFromAuth(!!user);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function accept() {
-    try {
-      localStorage.setItem(STORAGE_KEY, String(Date.now()));
-    } catch { /* ignore */ }
-    setVisible(false);
+  // Phase 2 — once auth settles, check Supabase for logged-in users
+  useEffect(() => {
+    if (authLoading || state === "hidden" || supabaseChecked.current) return;
+    supabaseChecked.current = true;
+    resolveFromAuth(!!user);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
+
+  async function resolveFromAuth(loggedIn: boolean) {
+    if (!loggedIn) {
+      setState("visible");
+      return;
+    }
+    // Logged-in: check Supabase for an existing acceptance record
+    const sb = getSupabaseClient();
+    if (!sb) { setState("visible"); return; }
+    const { data } = await sb
+      .from("safety_acceptances")
+      .select("id")
+      .eq("terms_version", TERMS_VERSION)
+      .eq("safety_notice_version", SAFETY_NOTICE_VERSION)
+      .maybeSingle();
+
+    if (data) {
+      // Already accepted on another device — sync localStorage
+      try { localStorage.setItem(SAFETY_LS_KEY, String(Date.now())); } catch { /* ignore */ }
+      setState("hidden");
+    } else {
+      setState("visible");
+    }
   }
 
-  if (!visible) return null;
+  async function accept() {
+    // Write localStorage first so the modal disappears immediately
+    try { localStorage.setItem(SAFETY_LS_KEY, String(Date.now())); } catch { /* ignore */ }
+    setState("hidden");
+
+    // Persist to Supabase for logged-in users
+    if (user) {
+      const sb = getSupabaseClient();
+      if (sb) {
+        await sb.from("safety_acceptances").upsert(
+          {
+            user_id:               user.id,
+            terms_version:         TERMS_VERSION,
+            safety_notice_version: SAFETY_NOTICE_VERSION,
+            user_agent:            typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 512) : null,
+          },
+          { onConflict: "user_id,terms_version,safety_notice_version", ignoreDuplicates: true }
+        );
+      }
+    }
+  }
+
+  if (state !== "visible") return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Safety disclaimer"
+      aria-label="Safety acknowledgement"
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         display: "flex", alignItems: "flex-end", justifyContent: "center",
@@ -78,11 +136,11 @@ export function DisclaimerGate() {
             It is <strong style={{ color: "var(--c-text, #111)" }}>not a medical service</strong>.
           </p>
           <ul style={{ paddingLeft: 18, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
-            <li>Allergen data may be <strong style={{ color: "var(--c-text, #111)" }}>incomplete or outdated</strong></li>
-            <li>Menus change — ingredients vary by location and date</li>
-            <li>Cross-contamination risks cannot be fully predicted</li>
+            <li>Allergen information may be <strong style={{ color: "var(--c-text, #111)" }}>incomplete, inaccurate, or outdated</strong></li>
+            <li>Menus and ingredients can change — they vary by location and date</li>
+            <li>Cross-contact and cross-contamination <strong style={{ color: "var(--c-text, #111)" }}>cannot be reliably predicted</strong></li>
             <li><strong style={{ color: "var(--c-text, #111)" }}>Always confirm with restaurant staff</strong> before ordering</li>
-            <li>Never rely solely on this app for life-threatening allergies</li>
+            <li>Never rely solely on AllergEats to determine whether a food is safe to consume</li>
           </ul>
         </div>
 
@@ -100,18 +158,18 @@ export function DisclaimerGate() {
             marginBottom: 14,
           }}
         >
-          I understand — let&apos;s go
+          I Understand &amp; Agree
         </button>
 
-        {/* Legal links */}
+        {/* Legal copy */}
         <p style={{
           fontSize: 12, color: "var(--c-sub, #9ca3af)",
           textAlign: "center", lineHeight: 1.6, margin: 0,
         }}>
-          By continuing, you agree to our{" "}
+          By selecting &quot;I Understand &amp; Agree,&quot; you acknowledge the safety information above and agree to our{" "}
           <Link href="/terms" onClick={accept} style={{ color: "var(--c-brand, #1fbdcc)", fontWeight: 700 }}>Terms of Service</Link>
           {" "}and{" "}
-          <Link href="/privacy" onClick={accept} style={{ color: "var(--c-brand, #1fbdcc)", fontWeight: 700 }}>Privacy Policy</Link>
+          <Link href="/privacy" onClick={accept} style={{ color: "var(--c-brand, #1fbdcc)", fontWeight: 700 }}>Privacy Policy</Link>.
         </p>
       </div>
     </div>
