@@ -13,7 +13,6 @@ import { useHomeData } from "@/lib/hooks/useHomeData";
 import { scoreRestaurant, bestMatchScore } from "@/lib/scoring";
 import { RestaurantsHeader } from "@/components/RestaurantsHeader";
 import { RestaurantsFilterDrawer } from "@/components/RestaurantsFilterDrawer";
-import { LocationPickerSheet } from "@/components/LocationPickerSheet";
 import { CuisineChipRow } from "@/components/CuisineChipRow";
 import { LocationBlockedBanner } from "@/components/LocationBlockedBanner";
 import { RecentlyViewedRail } from "@/components/RecentlyViewedRail";
@@ -70,7 +69,6 @@ function HomeContent() {
   const [onlySaved, setOnlySaved]     = useState(false);
   const [radiusMiles, setRadiusMiles] = useState(10);
   const [showFilterDrawer, setShowFilterDrawer]     = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [layout, setLayout]           = useState<LayoutOption>("list");
   const [recentViewed, setRecentViewed] = useState<RecentView[]>([]);
 
@@ -162,7 +160,8 @@ function HomeContent() {
         locationLabel={locationLabel}
         locationMode={locationMode}
         resultsSource={resultsSource}
-        onLocationPress={() => setShowLocationPicker(true)}
+        onSelectLocation={handleSelectLocation}
+        onUseCurrentLocation={handleUseCurrentLocation}
       />
 
       {layout !== "map" && <div style={{ maxWidth: 600, margin: "0 auto", padding: "12px 16px 0" }}>
@@ -199,12 +198,6 @@ function HomeContent() {
         onReset={resetFilters}
       />
 
-      <LocationPickerSheet
-        open={showLocationPicker}
-        onClose={() => setShowLocationPicker(false)}
-        onSelectLocation={handleSelectLocation}
-        onUseCurrentLocation={handleUseCurrentLocation}
-      />
 
       <div className={`rp-results rp-results--${layout}`}>
         {loading ? (
