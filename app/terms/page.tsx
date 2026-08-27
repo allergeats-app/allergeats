@@ -55,7 +55,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="2. Acceptance of Terms">
-          By accessing or using the Service, you agree to be bound by these Terms of Service (&quot;Terms&quot;) and our <Link href="/privacy" style={{ color: "var(--c-brand)" }}>Privacy Policy</Link>, which is incorporated by reference. If you do not agree, do not use the Service.
+          By accessing or using the Service, you agree to be bound by these Terms of Service (&quot;Terms&quot;) and our <Link href="/privacy" style={{ color: "var(--c-brand)" }}>Privacy Policy</Link> (including its state-specific and international privacy rights sections), which is incorporated by reference. If you do not agree, do not use the Service.
           <br /><br />
           We may update these Terms from time to time. When we make a material change, we will update the effective date and may require you to affirmatively acknowledge the updated Terms before continuing to use the Service. Your continued use after changes take effect constitutes acceptance of the updated Terms.
         </Section>
@@ -213,6 +213,8 @@ export default function TermsPage() {
           Any legal action or proceeding arising out of or relating to these Terms or the Service shall be brought exclusively in the state or federal courts of competent jurisdiction located in the <strong>State of Florida</strong>. You and AllergEats each consent to the personal jurisdiction of those courts and waive any objection to venue in those courts.
           <br /><br />
           <em>Note: If your jurisdiction does not permit the above choice of law or forum, the mandatory laws of your jurisdiction will apply to the extent required.</em>
+          <br /><br />
+          <strong>Multi-state savings clause.</strong> If a court of competent jurisdiction determines that the law of a state other than Florida applies to a dispute, all substantive protections in these Terms — including the disclaimer of warranties, the limitation of liability, the assumption of risk, and the indemnification provisions — are intended to be enforced to the fullest extent permitted by whichever law the court applies. The intent is that every protective provision in these Terms operate at the maximum level permitted by applicable law in any jurisdiction, not merely Florida.
         </Section>
 
         <Section title="21. Additional Legal Provisions">

@@ -38,16 +38,22 @@ export default function PrivacyPage() {
           When you create an account, we collect your email address and, optionally, your first and last name. If you sign in with Google, we receive your name and email from Google.
 
           <SubHead>Allergen profile</SubHead>
-          The allergens you select are stored locally on your device and, if you are signed in, synced to our secure database so your profile is available across devices.
+          The allergens you select are stored locally on your device and, if you are signed in, synced to our secure database so your profile is available across devices. We treat allergen profile data as sensitive health-related information and do not use it for advertising, sell it, or share it with third parties except as necessary to operate the Service (e.g., syncing across your devices via Supabase).
+
+          <SubHead>Terms and safety acceptance records</SubHead>
+          When a signed-in user acknowledges our Terms of Service and safety notice, we store a record containing your user ID, the date and time of acceptance, the version of the Terms and safety notice you accepted, and your browser user-agent string. This record is used solely for legal compliance and is never shared with third parties.
 
           <SubHead>Saved scans and orders</SubHead>
           Menu scans you save and orders you save are stored locally on your device and, if you are signed in, associated with your account.
 
           <SubHead>Feedback and reports</SubHead>
-          When you submit feedback or report incorrect allergen data through the app, we store your message along with your IP address. Your IP address is used solely for abuse prevention and is not shared with third parties or used for tracking.
+          When you submit feedback or report incorrect allergen data, we store your message and your IP address. Your IP address is used solely for abuse prevention and is not shared with third parties or used for tracking.
 
           <SubHead>Menu scans</SubHead>
           When you use the AI-powered menu scan feature, menu text or photos are sent to Anthropic (Claude) for analysis. We do not attach your account identity or personal information to these requests.
+
+          <SubHead>Payments</SubHead>
+          If you subscribe to a paid tier, payment information (card number, billing details) is collected and processed directly by Stripe, Inc. AllergEats does not receive or store your full payment card number. We receive only a Stripe customer token and subscription status.
 
           <SubHead>Usage data</SubHead>
           We use Vercel Analytics to collect anonymized, aggregated data about page views and navigation. No personal identifiers are included.
@@ -60,21 +66,25 @@ export default function PrivacyPage() {
           <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
             <li>To provide and personalize the AllergEats service</li>
             <li>To sync your allergen profile and saved data across devices</li>
-            <li>To send transactional emails (account confirmation, password reset)</li>
+            <li>To maintain legally required records of your acceptance of our Terms and safety notice</li>
+            <li>To process subscription payments through Stripe</li>
+            <li>To send transactional emails (account confirmation, password reset, subscription receipts)</li>
             <li>To improve the service through aggregated, anonymized analytics</li>
+            <li>To prevent fraud and abuse</li>
           </ul>
-          We do not sell your personal information to third parties. We do not use your allergen data for advertising.
+          We do <strong>not</strong> sell your personal information. We do not use your allergen data for advertising, profiling, or sale.
         </Section>
 
         <Section title="4. Data Storage and Security">
-          User accounts and synced data are stored using Supabase, which is hosted on AWS infrastructure with encryption at rest and in transit. We use industry-standard security practices, but no system is completely secure — please use a strong, unique password.
+          User accounts and synced data are stored using Supabase, which is hosted on AWS infrastructure with encryption at rest and in transit. Payment processing is handled by Stripe. We use industry-standard security practices, but no system is completely secure — please use a strong, unique password.
         </Section>
 
         <Section title="5. Third-Party Services">
           <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
             <li><strong>Supabase</strong> — authentication and database</li>
             <li><strong>Google OAuth</strong> — optional sign-in</li>
-            <li><strong>Anthropic (Claude)</strong> — AI-powered menu scanning and support chat. Menu text/photos and support messages are processed by Claude. No personal account data is included in these requests.</li>
+            <li><strong>Stripe, Inc.</strong> — payment processing for paid subscriptions. Stripe receives payment card data directly; we receive only a token and subscription status. See <a href="https://stripe.com/privacy" style={{ color: "var(--c-brand)" }} target="_blank" rel="noopener noreferrer">Stripe&apos;s Privacy Policy</a>.</li>
+            <li><strong>Anthropic (Claude)</strong> — AI-powered menu scanning. Menu text/photos are processed by Claude. No personal account data is included in these requests.</li>
             <li><strong>Vercel Analytics</strong> — anonymized usage analytics</li>
             <li><strong>OpenStreetMap / Overpass API</strong> — restaurant location data</li>
             <li><strong>Google Places API</strong> — nearby restaurant discovery</li>
@@ -83,26 +93,63 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="6. Data Retention">
-          We retain your account data for as long as your account is active. You may delete your account at any time by contacting us (see Section 9). Upon deletion, your personal data is removed within 30 days, except where retention is required by law.
+          We retain your account data for as long as your account is active. You may delete your account at any time by contacting us (see Section 10). Upon deletion, your personal data is removed within 30 days, except where retention is required by law (e.g., financial records required by law to be retained longer). Acceptance records for our Terms and safety notice are retained as long as required for legal compliance purposes.
         </Section>
 
         <Section title="7. Children's Privacy">
           AllergEats is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided us personal information, please contact us and we will delete it promptly.
         </Section>
 
-        <Section title="8. Your Rights">
-          Depending on your location, you may have the right to access, correct, or delete your personal data, or to object to or restrict certain processing. To exercise these rights, contact us at the address below. We will respond within 30 days.
+        <Section title="8. Your Privacy Rights — General">
+          Depending on your location, you may have rights regarding your personal data, including the right to access, correct, delete, or port your data, and the right to object to or restrict certain processing. To exercise any of these rights, contact us at <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>. We will respond within the timeframe required by applicable law (generally 30–45 days). See Sections 9, 10, and 11 for state- and region-specific rights.
         </Section>
 
-        <Section title="9. Contact Us">
+        <Section title="9. California Residents — CCPA / CPRA Rights">
+          If you are a California resident, the California Consumer Privacy Act (CCPA) as amended by the California Privacy Rights Act (CPRA) gives you specific rights regarding your personal information.
+          <br /><br />
+          <SubHead>Categories of personal information we collect</SubHead>
+          We collect the following categories of personal information, as defined by the CCPA: identifiers (name, email address, IP address); internet or other network activity (anonymized analytics, browser user-agent); geolocation data (approximate location, when you grant permission; not stored server-side); sensitive personal information (allergen/dietary profile, which relates to health); and inferences drawn from the above (your allergen risk profile).
+          <br /><br />
+          <SubHead>We do not sell or share your personal information</SubHead>
+          AllergEats does not sell your personal information or share it for cross-context behavioral advertising as defined by the CCPA/CPRA.
+          <br /><br />
+          <SubHead>Your rights</SubHead>
+          <ul style={{ paddingLeft: 20, lineHeight: 2, marginTop: 8 }}>
+            <li><strong>Right to know.</strong> You may request that we disclose what personal information we have collected about you, the categories of sources, our business or commercial purpose for collecting it, the categories of third parties with whom we share it, and the specific pieces of personal information we hold.</li>
+            <li><strong>Right to delete.</strong> You may request that we delete personal information we have collected from you, subject to certain exceptions (e.g., information necessary to complete a transaction or comply with a legal obligation).</li>
+            <li><strong>Right to correct.</strong> You may request that we correct inaccurate personal information we maintain about you.</li>
+            <li><strong>Right to limit use of sensitive personal information.</strong> You may direct us to limit our use of your sensitive personal information (your allergen profile) to what is necessary to provide the Service. We do not use it for any other purpose.</li>
+            <li><strong>Right to non-discrimination.</strong> We will not discriminate against you for exercising any CCPA/CPRA rights.</li>
+          </ul>
+          <br />
+          <SubHead>How to submit a request</SubHead>
+          Email <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a> with the subject line &quot;California Privacy Request.&quot; We will verify your identity before processing the request and respond within 45 days (extendable by an additional 45 days when reasonably necessary, with notice).
+          <br /><br />
+          <SubHead>Authorized agents</SubHead>
+          You may designate an authorized agent to submit a request on your behalf. We will require written proof of authorization and may verify your identity directly.
+        </Section>
+
+        <Section title="10. Other U.S. State Privacy Rights">
+          Residents of Virginia (CDPA), Colorado (CPA), Connecticut (CTDPA), Texas (TDPSA), and other states with applicable privacy laws may have rights similar to those described in Section 9, including rights to access, correct, delete, and port their personal data, and to opt out of the sale of personal data (we do not sell data) and targeted advertising (we do not engage in targeted advertising).
+          <br /><br />
+          To exercise these rights, email <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>. If you believe we have not responded appropriately to your request, you may have the right to appeal — contact us at the same address and we will review your request within the timeframe required by your state&apos;s law.
+        </Section>
+
+        <Section title="11. International Users">
+          AllergEats is operated from the United States and is intended for users in the United States. If you access the Service from outside the United States — including from the European Economic Area (EEA), United Kingdom, or Switzerland — please be aware that your information may be transferred to, processed in, and stored in the United States, which may not provide the same level of data protection as your home country.
+          <br /><br />
+          If you are located in the EEA or UK, you may have rights under the General Data Protection Regulation (GDPR) or UK GDPR, including the right to access, rectify, erase, restrict, or object to processing of your personal data, and the right to data portability. Our legal bases for processing include contract performance (to provide the Service), legal obligation, and legitimate interests (security, abuse prevention, service improvement). To exercise your GDPR rights or lodge a complaint, contact us at <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>. You also have the right to lodge a complaint with your local data protection authority.
+        </Section>
+
+        <Section title="12. Contact Us">
           If you have questions about this Privacy Policy or your data:
           <br /><br />
           <strong>AllergEats</strong><br />
           Email: <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>
         </Section>
 
-        <Section title="10. Changes to This Policy">
-          We may update this policy from time to time. When we do, we will update the effective date at the top of this page. Continued use of AllergEats after changes constitutes acceptance of the updated policy.
+        <Section title="13. Changes to This Policy">
+          We may update this policy from time to time. When we do, we will update the effective date at the top of this page. For material changes, we may notify you through the Service or by email. Continued use of AllergEats after changes constitutes acceptance of the updated policy.
         </Section>
 
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--c-border)", display: "flex", gap: 20, flexWrap: "wrap" }}>
