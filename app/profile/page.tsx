@@ -27,6 +27,10 @@ export default function ProfilePage() {
   const [nameSaving, setNameSaving] = useState(false);
   const [nameSaved,  setNameSaved]  = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirm,   setDeleteConfirm]   = useState("");
+  const [deleting,        setDeleting]        = useState(false);
+  const [deleteError,     setDeleteError]     = useState("");
 
   const isLifetime =
     !!subscription.currentPeriodEnd &&
@@ -82,6 +86,31 @@ export default function ProfilePage() {
     setSigningOut(true);
     await signOut();
     router.push("/");
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const res = await fetch("/api/auth/delete-account", { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setDeleteError(body.error ?? "Something went wrong. Please try again.");
+        setDeleting(false);
+        return;
+      }
+      // Clear local data then redirect
+      try {
+        ["allegeats_profile_allergens","alegeats_theme","allegeats_saved_scans",
+         "allegeats_learned_rules","allegeats_registry","allegeats_crawl_queue",
+         "allegeats_last_location"].forEach((k) => localStorage.removeItem(k));
+      } catch { /* ignore */ }
+      await signOut();
+      router.push("/");
+    } catch {
+      setDeleteError("Network error. Please try again.");
+      setDeleting(false);
+    }
   }
 
   if (loading || !user) {
@@ -478,6 +507,37 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Danger Zone */}
+        <div style={{
+          background: "var(--c-card)", border: "1px solid rgba(220,38,38,0.25)",
+          borderRadius: 20, padding: 20,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: "#b91c1c", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 14 }}>
+            Danger Zone
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)" }}>Delete account</div>
+              <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2, maxWidth: 260 }}>
+                Permanently removes your account and all your data. This cannot be undone.
+              </div>
+            </div>
+            <button
+              onClick={() => { setShowDeleteModal(true); setDeleteConfirm(""); setDeleteError(""); }}
+              style={{
+                padding: "9px 16px", borderRadius: 10,
+                border: "1px solid rgba(220,38,38,0.4)",
+                background: "rgba(220,38,38,0.06)",
+                color: "#dc2626", fontSize: 13, fontWeight: 700,
+                cursor: "pointer", flexShrink: 0,
+              }}
+            >
+              Delete account
+            </button>
+          </div>
+        </div>
+
         {/* Support */}
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", marginBottom: 10 }}>Help</div>
@@ -515,6 +575,115 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      {/* Delete account confirmation modal */}
+      {showDeleteModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delete account confirmation"
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+            background: "rgba(0,0,0,0.72)",
+            WebkitBackdropFilter: "blur(4px)", backdropFilter: "blur(4px)",
+            padding: "0 0 max(20px, env(safe-area-inset-bottom)) 0",
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget && !deleting) setShowDeleteModal(false); }}
+        >
+          <div style={{
+            background: "var(--c-card)",
+            borderRadius: "24px 24px 16px 16px",
+            width: "100%", maxWidth: 480,
+            margin: "0 12px",
+            padding: "28px 24px 24px",
+            boxShadow: "0 -4px 40px rgba(0,0,0,0.3)",
+            border: "1px solid var(--c-border)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                background: "rgba(220,38,38,0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
+                  <path d="M9 6V4h6v2"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: "var(--c-text)", letterSpacing: "-0.02em" }}>Delete your account?</div>
+                <div style={{ fontSize: 12, color: "var(--c-sub)", marginTop: 2 }}>This action is permanent and cannot be undone</div>
+              </div>
+            </div>
+
+            <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.65, marginBottom: 20 }}>
+              <p style={{ marginBottom: 8 }}>Deleting your account will permanently remove:</p>
+              <ul style={{ paddingLeft: 18, margin: "0 0 10px", display: "flex", flexDirection: "column", gap: 4 }}>
+                <li>Your allergen profile and all saved data</li>
+                <li>Your scan history and saved orders</li>
+                <li>Your family profiles (Pro only)</li>
+                {subscription.isPro && !isLifetime && (
+                  <li style={{ color: "#dc2626", fontWeight: 600 }}>Your active Pro subscription (will be cancelled)</li>
+                )}
+              </ul>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text)", display: "block", marginBottom: 8 }}>
+                Type your email address to confirm:
+              </label>
+              <input
+                type="email"
+                autoComplete="off"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder={user.email ?? ""}
+                disabled={deleting}
+                style={{
+                  width: "100%", padding: "10px 12px",
+                  border: "1px solid var(--c-border)", borderRadius: 10,
+                  fontSize: 14, color: "var(--c-text)",
+                  background: "var(--c-input)", outline: "none",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            {deleteError && (
+              <div style={{ fontSize: 12, color: "#dc2626", marginBottom: 12, fontWeight: 600 }}>{deleteError}</div>
+            )}
+
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirm !== user.email || deleting}
+              style={{
+                width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
+                background: deleteConfirm === user.email && !deleting ? "#dc2626" : "var(--c-border)",
+                color: deleteConfirm === user.email && !deleting ? "#fff" : "var(--c-sub)",
+                fontSize: 15, fontWeight: 800,
+                cursor: deleteConfirm === user.email && !deleting ? "pointer" : "not-allowed",
+                marginBottom: 10,
+                transition: "background 0.15s",
+              }}
+            >
+              {deleting ? "Deleting…" : "Permanently delete my account"}
+            </button>
+
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              disabled={deleting}
+              style={{
+                width: "100%", padding: "12px 0", borderRadius: 12, border: "none",
+                background: "none", color: "var(--c-sub)",
+                fontSize: 14, fontWeight: 600, cursor: deleting ? "not-allowed" : "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <SupportChat open={showSupport} onClose={() => setShowSupport(false)} />
       <BottomNav />
