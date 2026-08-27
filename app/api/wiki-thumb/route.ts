@@ -148,7 +148,7 @@ export async function GET(req: Request) {
 
     const tryFetch = async (url: string) =>
       fetch(url, {
-        headers: { "User-Agent": "AllergEats/1.0 (food-allergy-app; contact@allergeats.com)" },
+        headers: { "User-Agent": "AllergEats/1.0 (food-allergy-app; hello-allergeats@gmail.com)" },
         next: { revalidate: 86400 },
       });
 

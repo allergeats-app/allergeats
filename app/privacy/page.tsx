@@ -101,7 +101,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="8. Your Privacy Rights — General">
-          Depending on your location, you may have rights regarding your personal data, including the right to access, correct, delete, or port your data, and the right to object to or restrict certain processing. To exercise any of these rights, contact us at <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>. We will respond within the timeframe required by applicable law (generally 30–45 days). See Sections 9, 10, and 11 for state- and region-specific rights.
+          Depending on your location, you may have rights regarding your personal data, including the right to access, correct, delete, or port your data, and the right to object to or restrict certain processing. To exercise any of these rights, contact us at <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a>. We will respond within the timeframe required by applicable law (generally 30–45 days). See Sections 9, 10, and 11 for state- and region-specific rights.
         </Section>
 
         <Section title="9. California Residents — CCPA / CPRA Rights">
@@ -123,7 +123,7 @@ export default function PrivacyPage() {
           </ul>
           <br />
           <SubHead>How to submit a request</SubHead>
-          Email <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a> with the subject line &quot;California Privacy Request.&quot; We will verify your identity before processing the request and respond within 45 days (extendable by an additional 45 days when reasonably necessary, with notice).
+          Email <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a> with the subject line &quot;California Privacy Request.&quot; We will verify your identity before processing the request and respond within 45 days (extendable by an additional 45 days when reasonably necessary, with notice).
           <br /><br />
           <SubHead>Authorized agents</SubHead>
           You may designate an authorized agent to submit a request on your behalf. We will require written proof of authorization and may verify your identity directly.
@@ -132,20 +132,20 @@ export default function PrivacyPage() {
         <Section title="10. Other U.S. State Privacy Rights">
           Residents of Virginia (CDPA), Colorado (CPA), Connecticut (CTDPA), Texas (TDPSA), and other states with applicable privacy laws may have rights similar to those described in Section 9, including rights to access, correct, delete, and port their personal data, and to opt out of the sale of personal data (we do not sell data) and targeted advertising (we do not engage in targeted advertising).
           <br /><br />
-          To exercise these rights, email <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>. If you believe we have not responded appropriately to your request, you may have the right to appeal — contact us at the same address and we will review your request within the timeframe required by your state&apos;s law.
+          To exercise these rights, email <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a>. If you believe we have not responded appropriately to your request, you may have the right to appeal — contact us at the same address and we will review your request within the timeframe required by your state&apos;s law.
         </Section>
 
         <Section title="11. International Users">
           AllergEats is operated from the United States and is intended for users in the United States. If you access the Service from outside the United States — including from the European Economic Area (EEA), United Kingdom, or Switzerland — please be aware that your information may be transferred to, processed in, and stored in the United States, which may not provide the same level of data protection as your home country.
           <br /><br />
-          If you are located in the EEA or UK, you may have rights under the General Data Protection Regulation (GDPR) or UK GDPR, including the right to access, rectify, erase, restrict, or object to processing of your personal data, and the right to data portability. Our legal bases for processing include contract performance (to provide the Service), legal obligation, and legitimate interests (security, abuse prevention, service improvement). To exercise your GDPR rights or lodge a complaint, contact us at <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>. You also have the right to lodge a complaint with your local data protection authority.
+          If you are located in the EEA or UK, you may have rights under the General Data Protection Regulation (GDPR) or UK GDPR, including the right to access, rectify, erase, restrict, or object to processing of your personal data, and the right to data portability. Our legal bases for processing include contract performance (to provide the Service), legal obligation, and legitimate interests (security, abuse prevention, service improvement). To exercise your GDPR rights or lodge a complaint, contact us at <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a>. You also have the right to lodge a complaint with your local data protection authority.
         </Section>
 
         <Section title="12. Contact Us">
           If you have questions about this Privacy Policy or your data:
           <br /><br />
           <strong>AllergEats</strong><br />
-          Email: <a href="mailto:privacy@allergeats.com" style={{ color: "var(--c-brand)" }}>privacy@allergeats.com</a>
+          Email: <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a>
         </Section>
 
         <Section title="13. Changes to This Policy">
