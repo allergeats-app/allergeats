@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -9,6 +9,7 @@ import { useAllergenProfile } from "@/lib/hooks/useAllergenProfile";
 import { useSubscription } from "@/lib/hooks/useSubscription";
 import { ALLERGEN_LIST } from "@/lib/allergenProfile";
 import { BottomNav } from "@/components/BottomNav";
+import { isPasskeySupported, registerPasskey, removePasskey } from "@/lib/passkey";
 import { SupportChat } from "@/components/SupportChat";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { FamilyProfileManager } from "@/components/FamilyProfileManager";
@@ -27,6 +28,12 @@ export default function ProfilePage() {
   const [nameSaving, setNameSaving] = useState(false);
   const [nameSaved,  setNameSaved]  = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [passkeySupported,  setPasskeySupported]  = useState(false);
+  const [passkeys,          setPasskeys]          = useState<{ credential_id: string; device_type: string; backed_up: boolean; created_at: string }[]>([]);
+  const [passkeyAdding,     setPasskeyAdding]     = useState(false);
+  const [passkeyRemoving,   setPasskeyRemoving]   = useState<string | null>(null);
+  const [passkeyError,      setPasskeyError]      = useState("");
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirm,   setDeleteConfirm]   = useState("");
   const [deleting,        setDeleting]        = useState(false);
@@ -86,6 +93,49 @@ export default function ProfilePage() {
     setSigningOut(true);
     await signOut();
     router.push("/");
+  }
+
+  const fetchPasskeys = useCallback(async () => {
+    const sb = (await import("@/lib/supabaseClient")).getSupabaseClient();
+    const token = (await sb?.auth.getSession())?.data.session?.access_token;
+    if (!token) return;
+    const res = await fetch("/api/auth/passkey/list", { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) {
+      const { passkeys: list } = await res.json();
+      setPasskeys(list ?? []);
+    }
+  }, []);
+
+  useEffect(() => {
+    isPasskeySupported().then(setPasskeySupported);
+  }, []);
+
+  useEffect(() => {
+    if (user && passkeySupported) fetchPasskeys();
+  }, [user, passkeySupported, fetchPasskeys]);
+
+  async function handleAddPasskey() {
+    setPasskeyAdding(true);
+    setPasskeyError("");
+    const sb = (await import("@/lib/supabaseClient")).getSupabaseClient();
+    const token = (await sb?.auth.getSession())?.data.session?.access_token;
+    if (!token) { setPasskeyError("Not signed in"); setPasskeyAdding(false); return; }
+    const err = await registerPasskey(token);
+    if (err) setPasskeyError(err);
+    else await fetchPasskeys();
+    setPasskeyAdding(false);
+  }
+
+  async function handleRemovePasskey(credentialId: string) {
+    setPasskeyRemoving(credentialId);
+    setPasskeyError("");
+    const sb = (await import("@/lib/supabaseClient")).getSupabaseClient();
+    const token = (await sb?.auth.getSession())?.data.session?.access_token;
+    if (!token) { setPasskeyRemoving(null); return; }
+    const err = await removePasskey(credentialId, token);
+    if (err) setPasskeyError(err);
+    else await fetchPasskeys();
+    setPasskeyRemoving(null);
   }
 
   async function handleDeleteAccount() {
@@ -506,6 +556,81 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Passkeys — only shown on devices that support them */}
+        {passkeySupported && (
+          <div style={{
+            background: "var(--c-card)", border: "1px solid var(--c-border)",
+            borderRadius: 20, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "var(--c-sub)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Face ID / Passkeys
+              </div>
+              <button
+                onClick={handleAddPasskey}
+                disabled={passkeyAdding}
+                style={{
+                  fontSize: 12, fontWeight: 700, color: "var(--c-brand)",
+                  background: "none", border: "none", cursor: passkeyAdding ? "not-allowed" : "pointer",
+                  opacity: passkeyAdding ? 0.6 : 1, padding: 0,
+                }}
+              >
+                {passkeyAdding ? "Setting up…" : "+ Add passkey"}
+              </button>
+            </div>
+
+            {passkeys.length === 0 ? (
+              <div style={{ fontSize: 13, color: "var(--c-sub)", lineHeight: 1.6 }}>
+                No passkeys set up yet. Add one to sign in instantly with Face ID or fingerprint — no password needed.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {passkeys.map((pk) => (
+                  <div key={pk.credential_id} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "10px 14px", borderRadius: 12,
+                    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                    border: "1px solid var(--c-border)",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)" }}>
+                          {pk.device_type === "multiDevice" ? "Synced passkey" : "This device"}
+                          {pk.backed_up && <span style={{ fontSize: 11, color: "var(--c-sub)", marginLeft: 6 }}>· backed up</span>}
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--c-sub)" }}>
+                          Added {new Date(pk.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemovePasskey(pk.credential_id)}
+                      disabled={passkeyRemoving === pk.credential_id}
+                      style={{
+                        fontSize: 12, fontWeight: 700, color: "#b91c1c",
+                        background: "none", border: "none",
+                        cursor: passkeyRemoving === pk.credential_id ? "not-allowed" : "pointer",
+                        opacity: passkeyRemoving === pk.credential_id ? 0.5 : 1,
+                        padding: 0,
+                      }}
+                    >
+                      {passkeyRemoving === pk.credential_id ? "Removing…" : "Remove"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {passkeyError && (
+              <div style={{ fontSize: 12, color: "#dc2626", marginTop: 10, fontWeight: 600 }}>{passkeyError}</div>
+            )}
+          </div>
+        )}
 
         {/* Danger Zone */}
         <div style={{

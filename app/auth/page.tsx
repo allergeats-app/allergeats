@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useAuth } from "@/lib/authContext";
 import { useTheme } from "@/lib/themeContext";
 import { getSupabaseClient } from "@/lib/supabaseClient";
-import { isPasskeySupported, registerPasskey } from "@/lib/passkey";
+import { isPasskeySupported, registerPasskey, authenticateWithPasskey } from "@/lib/passkey";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -30,6 +30,7 @@ export default function AuthPage() {
   const [passkeySupported, setPasskeySupported]   = useState(false);
   const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(false);
   const [passkeyEnrolling, setPasskeyEnrolling]   = useState(false);
+  const [passkeySigningIn, setPasskeySigningIn]   = useState(false);
 
   const nextPath = typeof window !== "undefined"
     ? new URLSearchParams(window.location.search).get("next") ?? "/"
@@ -110,6 +111,26 @@ export default function AuthPage() {
       setPendingResendEmail(email);
       setInfo("Check your email to confirm your account, then sign in.");
     }
+  }
+
+  async function handlePasskeySignIn() {
+    if (!email) { setError("Enter your email first, then tap Sign in with Face ID."); return; }
+    setError(null);
+    setPasskeySigningIn(true);
+    const result = await authenticateWithPasskey(email);
+    if ("error" in result) {
+      setError(result.error);
+      setPasskeySigningIn(false);
+      return;
+    }
+    const sb = getSupabaseClient();
+    if (!sb) { setError("Auth not configured"); setPasskeySigningIn(false); return; }
+    const { error: otpErr } = await sb.auth.verifyOtp({
+      token_hash: result.tokenHash,
+      type: "magiclink",
+    });
+    if (otpErr) { setError(otpErr.message); setPasskeySigningIn(false); return; }
+    router.push(nextPath);
   }
 
   async function handleEnrollPasskey() {
@@ -243,6 +264,30 @@ export default function AuthPage() {
                 </>
               )}
             </button>
+
+            {/* Face ID / passkey sign-in — only shown when device supports it and signing in */}
+            {passkeySupported && mode === "signin" && (
+              <button type="button" onClick={handlePasskeySignIn} disabled={passkeySigningIn || oauthLoading !== null}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                  padding: "13px 16px", borderRadius: 14, marginBottom: 12,
+                  border: "1.5px solid var(--c-border)", background: "var(--c-card)",
+                  color: "var(--c-text)", fontSize: 15, fontWeight: 700,
+                  cursor: passkeySigningIn ? "not-allowed" : "pointer",
+                  opacity: passkeySigningIn || oauthLoading !== null ? 0.7 : 1,
+                  transition: "opacity 0.15s",
+                }}>
+                {passkeySigningIn ? "Verifying…" : (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    Sign in with Face ID
+                  </>
+                )}
+              </button>
+            )}
 
             {/* Divider */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
