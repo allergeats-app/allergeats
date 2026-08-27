@@ -169,7 +169,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="13. User Accounts">
-          You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account. You agree to provide accurate, current, and complete information when creating your account and to keep it updated. Notify us immediately at <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a> if you suspect unauthorized use of your account. We are not liable for losses resulting from unauthorized use of your account.
+          You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account. You agree to provide accurate, current, and complete information when creating your account and to keep it updated. Notify us immediately at <a href="mailto:hello.allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello.allergeats@gmail.com</a> if you suspect unauthorized use of your account. We are not liable for losses resulting from unauthorized use of your account.
         </Section>
 
         <Section title="14. Acceptable Use">
@@ -231,7 +231,7 @@ export default function TermsPage() {
 
         <Section title="22. Contact">
           Questions about these Terms or the Service? Contact us at:{" "}
-          <a href="mailto:hello-allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello-allergeats@gmail.com</a>
+          <a href="mailto:hello.allergeats@gmail.com" style={{ color: "var(--c-brand)" }}>hello.allergeats@gmail.com</a>
         </Section>
 
         <div style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid var(--c-border)", display: "flex", gap: 20, flexWrap: "wrap" }}>
