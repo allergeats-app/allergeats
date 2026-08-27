@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/shellfish-allergy-restaurants`,lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
     { url: `${base}/soy-free-restaurants`,         lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
     { url: `${base}/sesame-allergy-restaurants`,   lastModified: now, changeFrequency: "weekly",  priority: 0.75 },
+    { url: `${base}/fish-allergy-restaurants`,    lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
 
     // SEO landing pages — audience-specific
     { url: `${base}/food-allergy-app`,             lastModified: now, changeFrequency: "weekly",  priority: 0.9 },
