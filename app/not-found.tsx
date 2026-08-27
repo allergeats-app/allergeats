@@ -68,7 +68,7 @@ export default function NotFound() {
           Browse Restaurants
         </Link>
         <Link
-          href="/scan"
+          href="/allergy-card"
           style={{
             display: "block", textAlign: "center",
             padding: "13px 0", borderRadius: 14,
@@ -78,7 +78,7 @@ export default function NotFound() {
             textDecoration: "none",
           }}
         >
-          Scan a Menu
+          My Allergy Card
         </Link>
       </div>
     </main>

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 import { isRateLimited, getClientIp } from "@/lib/rateLimit";
+import { verifyAdminRequest } from "@/lib/adminAuth";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -43,6 +44,10 @@ RULES:
 - Return ONLY valid JSON, no markdown, no explanation`;
 
 export async function POST(req: NextRequest) {
+  if (!verifyAdminRequest(req)) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 503 });
   }

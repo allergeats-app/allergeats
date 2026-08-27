@@ -111,11 +111,6 @@ const websiteJsonLd = {
   "name": "AllergEats",
   "url": "https://www.allergeats.com",
   "description": "AllergEats is a free food allergy restaurant finder and menu scanner. Find restaurants safe for peanut, gluten, dairy, egg, shellfish, soy, tree nut, fish, and sesame allergies.",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": { "@type": "EntryPoint", "urlTemplate": "https://www.allergeats.com/?q={search_term_string}" },
-    "query-input": "required name=search_term_string",
-  },
 };
 
 const appJsonLd = {
@@ -124,7 +119,7 @@ const appJsonLd = {
   "name": "AllergEats",
   "url": "https://www.allergeats.com",
   "applicationCategory": "HealthApplication",
-  "operatingSystem": "Web, iOS, Android",
+  "operatingSystem": "Web",
   "description": "Free food allergy restaurant finder and menu scanner. Set your allergen profile — peanut, gluten, dairy, egg, shellfish, soy, tree nuts, fish, sesame — and instantly see which nearby restaurants and menu items are safe for you.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "screenshot": "https://www.allergeats.com/og-image.png",

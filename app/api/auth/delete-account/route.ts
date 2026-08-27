@@ -35,7 +35,8 @@ export async function DELETE() {
   // Delete the user; ON DELETE CASCADE removes all their data
   const { error } = await supabase.auth.admin.deleteUser(user.id);
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[delete-account]", error.message);
+    return NextResponse.json({ error: "Account deletion failed. Please try again." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

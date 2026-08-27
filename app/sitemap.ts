@@ -5,13 +5,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now  = new Date();
 
   return [
-    // Core app
+    // Core app (public, crawlable)
     { url: base,                                   lastModified: now, changeFrequency: "daily",   priority: 1.0 },
     { url: `${base}/allergies`,                    lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/saved`,                        lastModified: now, changeFrequency: "weekly",  priority: 0.6 },
-    { url: `${base}/profile`,                      lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${base}/auth`,                         lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/allergy-card`,                 lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/try`,                          lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    // /profile, /saved, /auth are excluded — gated/personalized, noindex
 
     // SEO landing pages — allergen-specific
     { url: `${base}/gluten-free-restaurants`,      lastModified: now, changeFrequency: "weekly",  priority: 0.9 },

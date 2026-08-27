@@ -40,7 +40,6 @@ export async function POST(req: Request) {
     restaurantName?: string;
     allergen: string;
     outcome: "safe" | "reaction" | "uncertain";
-    userId?: string;
   };
 
   try {
@@ -49,7 +48,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { dishName, restaurantName, allergen, outcome, userId } = body;
+  const { dishName, restaurantName, allergen, outcome } = body;
   if (!dishName || !allergen || !outcome) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
@@ -83,7 +82,7 @@ export async function POST(req: Request) {
       rest_normalized,
       allergen,
       outcome,
-      user_id:         userId ?? null,
+      user_id:         null,
     }),
     new Promise<{ error: { message: string } }>((_, reject) =>
       setTimeout(() => reject(new Error("DB timeout")), 5000)
