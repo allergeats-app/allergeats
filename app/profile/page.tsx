@@ -768,7 +768,7 @@ export default function ProfilePage() {
                 style={{
                   width: "100%", padding: "10px 12px",
                   border: "1px solid var(--c-border)", borderRadius: 10,
-                  fontSize: 14, color: "var(--c-text)",
+                  fontSize: 16, color: "var(--c-text)",
                   background: "var(--c-input)", outline: "none",
                   boxSizing: "border-box",
                 }}

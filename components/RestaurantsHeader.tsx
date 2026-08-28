@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { SettingsButton } from "@/components/SettingsButton";
@@ -20,6 +21,8 @@ export function RestaurantsHeader({
   onUseCurrentLocation: () => void;
   onRetry?: () => void;
 }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
   return (
     <header
       role="banner"
@@ -36,29 +39,35 @@ export function RestaurantsHeader({
       <div style={{ maxWidth: 600, margin: "0 auto" }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)",
+          // When search is open, collapse to single column so the input has full width
+          gridTemplateColumns: searchOpen ? "1fr" : "minmax(0,1fr) auto minmax(0,1fr)",
           alignItems: "center",
           height: 44,
         }}>
 
-          {/* Left: inline location search */}
+          {/* Left: inline location search — full-width when open */}
           <InlineLocationSearch
             locationLabel={locationLabel}
             locationMode={locationMode}
             resultsSource={resultsSource}
             onSelectLocation={onSelectLocation}
             onUseCurrentLocation={onUseCurrentLocation}
+            onOpenChange={setSearchOpen}
           />
 
-          {/* Center: logo */}
-          <Link href="/" aria-label="AllergEats home" style={{ display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
-            <Image src="/logo 3d.png" alt="AllergEats" width={120} height={29} sizes="120px" style={{ width: "auto", height: 28 }} priority />
-          </Link>
+          {/* Center: logo — hidden when search open */}
+          {!searchOpen && (
+            <Link href="/" aria-label="AllergEats home" style={{ display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
+              <Image src="/logo 3d.png" alt="AllergEats" width={120} height={29} sizes="120px" style={{ width: "auto", height: 28 }} priority />
+            </Link>
+          )}
 
-          {/* Right: settings */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-            <SettingsButton />
-          </div>
+          {/* Right: settings — hidden when search open */}
+          {!searchOpen && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+              <SettingsButton />
+            </div>
+          )}
 
         </div>
       </div>

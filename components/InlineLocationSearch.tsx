@@ -26,11 +26,12 @@ type Props = {
   resultsSource: "live" | "mock";
   onSelectLocation: (lat: number, lng: number, label: string) => void;
   onUseCurrentLocation: () => void;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function InlineLocationSearch({
   locationLabel, locationMode, resultsSource,
-  onSelectLocation, onUseCurrentLocation,
+  onSelectLocation, onUseCurrentLocation, onOpenChange,
 }: Props) {
   const [open, setOpen]           = useState(false);
   const [query, setQuery]         = useState("");
@@ -39,26 +40,32 @@ export function InlineLocationSearch({
   const [locating, setLocating]   = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
-  const inputRef    = useRef<HTMLInputElement>(null);
+  const inputRef     = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const autoPickRef = useRef(false);
+  const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoPickRef  = useRef(false);
 
   const dotColor =
     locationMode === "precise"     ? "#22c55e" :
     locationMode === "cached"      ? "#f59e0b" :
     locationMode === "approximate" ? "#f59e0b" : "#d1d5db";
 
+  function setOpenState(value: boolean) {
+    setOpen(value);
+    onOpenChange?.(value);
+  }
+
   function openSearch() {
-    setOpen(true);
+    setOpenState(true);
     setQuery("");
     setResults([]);
     setError(null);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    // Delay focus so the grid reflow finishes first (one rAF)
+    requestAnimationFrame(() => { inputRef.current?.focus(); });
   }
 
   function closeSearch() {
-    setOpen(false);
+    setOpenState(false);
     setQuery("");
     setResults([]);
     setError(null);
@@ -77,7 +84,7 @@ export function InlineLocationSearch({
     }
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on Escape
   useEffect(() => {
@@ -85,7 +92,7 @@ export function InlineLocationSearch({
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") closeSearch(); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debounced Nominatim search
   useEffect(() => {
@@ -154,7 +161,7 @@ export function InlineLocationSearch({
     );
   }
 
-  const showDropdown = open && (locating || searching || results.length > 0 || error);
+  const showDropdown = open && (locating || searching || results.length > 0 || !!error);
 
   return (
     <div ref={containerRef} style={{ position: "relative", minWidth: 0, flex: 1 }}>
@@ -170,6 +177,7 @@ export function InlineLocationSearch({
             background: "none", border: "none", padding: 0,
             cursor: "pointer", minWidth: 0, overflow: "hidden",
             WebkitTapHighlightColor: "transparent",
+            touchAction: "manipulation",
           }}
         >
           <span style={{
@@ -197,9 +205,10 @@ export function InlineLocationSearch({
         </button>
       )}
 
-      {/* Expanded: search input */}
+      {/* Expanded: full-width search row */}
       {open && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
+
           {/* GPS button */}
           <button
             type="button"
@@ -207,20 +216,21 @@ export function InlineLocationSearch({
             disabled={locating}
             aria-label="Use current location"
             style={{
-              flexShrink: 0, width: 30, height: 30, borderRadius: 8,
-              background: "var(--c-brand-bg)", border: "1px solid var(--c-brand)",
+              flexShrink: 0, width: 36, height: 36, borderRadius: 10,
+              background: "var(--c-brand-bg)", border: "1.5px solid var(--c-brand)",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: locating ? "default" : "pointer", opacity: locating ? 0.6 : 1,
+              touchAction: "manipulation",
             }}
           >
             {locating ? (
-              <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round"
                 style={{ animation: "spin 0.9s linear infinite" }}>
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
               </svg>
             ) : (
-              <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="var(--c-brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
@@ -228,11 +238,16 @@ export function InlineLocationSearch({
             )}
           </button>
 
-          {/* Text input */}
+          {/* Text input — type=text + inputMode=search avoids iOS double-X button */}
           <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
             <input
               ref={inputRef}
-              type="search"
+              type="text"
+              inputMode="search"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -245,11 +260,12 @@ export function InlineLocationSearch({
               aria-label="Search location"
               style={{
                 width: "100%", boxSizing: "border-box",
-                padding: "6px 28px 6px 10px",
-                border: "1.5px solid var(--c-brand)", borderRadius: 8,
+                // 16px is the iOS minimum to prevent viewport zoom on focus
+                fontSize: 16,
+                padding: "8px 32px 8px 12px",
+                border: "1.5px solid var(--c-brand)", borderRadius: 10,
                 background: "var(--c-input)", color: "var(--c-text)",
-                fontSize: 13, fontWeight: 500,
-                outline: "none",
+                outline: "none", fontFamily: "inherit",
               }}
             />
             {query && (
@@ -258,14 +274,16 @@ export function InlineLocationSearch({
                 onClick={() => { setQuery(""); setResults([]); inputRef.current?.focus(); }}
                 aria-label="Clear"
                 style={{
-                  position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)",
-                  width: 20, height: 20, borderRadius: 999,
+                  position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
+                  // 44px minimum touch target
+                  width: 28, height: 28, borderRadius: 999,
                   background: "var(--c-muted)", border: "none",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", color: "var(--c-sub)",
+                  touchAction: "manipulation",
                 }}
               >
-                <svg aria-hidden="true" width="8" height="8" viewBox="0 0 24 24" fill="none"
+                <svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -278,9 +296,13 @@ export function InlineLocationSearch({
             type="button"
             onClick={closeSearch}
             style={{
-              flexShrink: 0, fontSize: 13, fontWeight: 600, color: "var(--c-sub)",
-              background: "none", border: "none", padding: "0 2px", cursor: "pointer",
-              WebkitTapHighlightColor: "transparent",
+              flexShrink: 0,
+              // 44px tall touch target
+              minHeight: 44, display: "flex", alignItems: "center",
+              fontSize: 15, fontWeight: 600, color: "var(--c-brand)",
+              background: "none", border: "none", padding: "0 4px",
+              cursor: "pointer", WebkitTapHighlightColor: "transparent",
+              touchAction: "manipulation",
             }}
           >
             Cancel
@@ -298,16 +320,18 @@ export function InlineLocationSearch({
           boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
           overflow: "hidden",
           zIndex: 300,
-          maxHeight: 280,
+          // Cap height on small screens; -webkit- for iOS momentum scroll
+          maxHeight: "min(280px, 50dvh)",
           overflowY: "auto",
+          WebkitOverflowScrolling: "touch" as never,
         }}>
           {(searching || locating) && (
-            <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--c-sub)" }}>
+            <div style={{ padding: "12px 16px", fontSize: 14, color: "var(--c-sub)" }}>
               {locating ? "Finding your location…" : "Searching…"}
             </div>
           )}
           {error && !searching && !locating && (
-            <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--c-sub)" }}>{error}</div>
+            <div style={{ padding: "12px 16px", fontSize: 14, color: "var(--c-sub)" }}>{error}</div>
           )}
           {!searching && !locating && results.map((r, i) => {
             const label = formatResult(r);
@@ -319,23 +343,25 @@ export function InlineLocationSearch({
                 onClick={() => pickResult(r)}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", gap: 12,
-                  padding: "11px 16px", textAlign: "left",
+                  // 48px tall for easy touch targets
+                  minHeight: 48, padding: "10px 16px", textAlign: "left",
                   background: "transparent", border: "none",
                   borderTop: i === 0 ? "none" : "1px solid var(--c-border)",
-                  cursor: "pointer",
+                  cursor: "pointer", touchAction: "manipulation",
+                  WebkitTapHighlightColor: "transparent",
                 }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--c-muted)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
               >
-                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="var(--c-sub)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                   style={{ flexShrink: 0 }}>
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                   <circle cx="12" cy="10" r="3"/>
                 </svg>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</div>
-                  {sub && <div style={{ fontSize: 12, color: "var(--c-sub)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub}</div>}
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</div>
+                  {sub && <div style={{ fontSize: 12, color: "var(--c-sub)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 2 }}>{sub}</div>}
                 </div>
               </button>
             );
