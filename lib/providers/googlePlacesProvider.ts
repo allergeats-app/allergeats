@@ -226,13 +226,16 @@ export class GooglePlacesLocationProvider implements LocationProvider {
         //   steakhouse    → Ruth's Chris, LongHorn, etc.
         //   cafe coffee   → coffee shops not in broad Nearby types
         if (!googleFailed && googlePlaces.length < MIN_GOOGLE_FOR_OVERPASS) {
-          const keywords = ["casual dining", "fine dining", "steakhouse", "cafe coffee"];
+          const keywords = ["casual dining", "fine dining", "steakhouse", "cafe coffee", "local restaurant", "pizza restaurant"];
+          // Expand search radius for keyword passes — sparse results mean the city
+          // is small, so cast wider (capped at 25 km) to surface nearby restaurants.
+          const keywordRadius = Math.min(Math.round(radiusMeters * 1.5), 25_000);
           const keywordResults = await Promise.allSettled(
             keywords.map((keyword) =>
               fetch("/api/places-nearby", {
                 method:  "POST",
                 headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify({ lat, lng, radiusMeters, keyword }),
+                body:    JSON.stringify({ lat, lng, radiusMeters: keywordRadius, keyword }),
                 signal:  AbortSignal.timeout(8_000),
               })
             )

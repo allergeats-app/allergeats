@@ -469,9 +469,15 @@ export class LiveLocationProvider implements LocationProvider {
   node["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
   node["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
   node["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
+  node["amenity"="bar"](around:${radiusMeters},${lat},${lng});
+  node["amenity"="pub"](around:${radiusMeters},${lat},${lng});
+  node["amenity"="food_court"](around:${radiusMeters},${lat},${lng});
   way["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
   way["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
   way["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
+  way["amenity"="bar"](around:${radiusMeters},${lat},${lng});
+  way["amenity"="pub"](around:${radiusMeters},${lat},${lng});
+  way["amenity"="food_court"](around:${radiusMeters},${lat},${lng});
 );
 out body center 100;`;
 

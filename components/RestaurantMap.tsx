@@ -215,8 +215,8 @@ export function RestaurantMap({ restaurants, userLat, userLng, centerLat, center
 
       if (cancelled || !containerRef.current) return;
 
-      const initLat = userLat ?? restaurants[0]?.lat ?? 37.7749;
-      const initLng = userLng ?? restaurants[0]?.lng ?? -122.4194;
+      const initLat = centerLat ?? userLat ?? restaurants[0]?.lat ?? 40.7128;
+      const initLng = centerLng ?? userLng ?? restaurants[0]?.lng ?? -74.0060;
       originRef.current = { lat: initLat, lng: initLng };
 
       maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");

@@ -153,15 +153,16 @@ export async function POST(req: Request) {
       // Nearby Search — broad restaurant discovery.
       // DISTANCE ranking: return the 20 *closest* places, not the 20 most globally
       // prominent. Without this, NYC returns mostly Starbucks (very high review counts).
-      // "cafe" excluded here — coffee shops are fetched via keyword search instead,
-      // so they don't crowd out food restaurants in the broad pass.
+      // includedTypes (not includedPrimaryTypes) so subtypes like pizza_restaurant,
+      // sandwich_shop, breakfast_restaurant still match — they all carry "restaurant"
+      // in their types array even when it isn't their primary type.
       url  = NEARBY_URL;
       body = {
-        includedPrimaryTypes: [
+        includedTypes: [
           "restaurant",
-          "fast_food_restaurant",
           "bar",
           "meal_takeaway",
+          "food_court",
         ],
         rankPreference: "DISTANCE",
         locationRestriction: {
